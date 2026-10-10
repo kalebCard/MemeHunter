@@ -1,4 +1,4 @@
-from freqtrade.strategy import IStrategy
+from freqtrade.strategy import IStrategy, IntParameter, DecimalParameter
 from pandas import DataFrame
 import pandas_ta as ta
 import json
@@ -11,13 +11,21 @@ class MemeHunterV1(IStrategy):
     
     # Configuración de riesgo y ROI
     minimal_roi = {
-        "0": 100.0  # Solo cerramos por señales o stop/trailing
+        "0": 100.0  # Solo cerramos por señales o stop/trailing (optimizaremos esto con Freqtrade nativamente)
     }
     stoploss = -0.99  # Desactivar el estático; se usa custom_stoploss basado en ATR
     trailing_stop = True
     trailing_stop_positive = 0.05
     trailing_stop_positive_offset = 0.10
     trailing_only_offset_is_reached = True
+
+    # Parámetros de Optimización (Hyperopt - PB-10)
+    # Rango del RSI para entrada
+    rsi_lower = IntParameter(40, 60, default=50, space="buy", optimize=True)
+    rsi_upper = IntParameter(60, 80, default=70, space="buy", optimize=True)
+    
+    # Multiplicador del ATR para el Stoploss dinámico
+    atr_sl_mult = DecimalParameter(1.0, 4.0, default=2.0, space="sell", optimize=True)
 
     # Definimos que necesitamos al menos 30 velas para calcular las medias y el MACD
     startup_candle_count = 30
@@ -106,8 +114,8 @@ class MemeHunterV1(IStrategy):
             (
                 (dataframe['macd'] > dataframe['macdsignal']) &    # Momentum alcista
                 (dataframe['atr'] > dataframe['atr_sma']) &        # Expansión de volatilidad
-                (dataframe['rsi'] > 50) &                          # Tendencia sana
-                (dataframe['rsi'] < 70) &                          # NO sobrecomprado
+                (dataframe['rsi'] > self.rsi_lower.value) &        # Tendencia sana (optimizada)
+                (dataframe['rsi'] < self.rsi_upper.value) &        # NO sobrecomprado (optimizada)
                 (dataframe['volume'] > 0) &
                 (dataframe['in_universe'] == True)                 # Filtro de sesgo
             ),
@@ -139,14 +147,9 @@ class MemeHunterV1(IStrategy):
             if not entry_candles.empty:
                 entry_atr = entry_candles.iloc[-1]['atr']
                 if entry_atr > 0 and trade.open_rate > 0:
-                    # Riesgo = 2 * ATR
-                    risk_ratio = (2 * entry_atr) / trade.open_rate
-                    # Freqtrade stoploss is relative to current_rate if current_profit > 0? No,
-                    # return relative percentage from current_rate that would hit stoploss, 
-                    # but it's simpler to just return a hard relative stop from entry rate initially.
-                    # El stop_loss devuelto aquí es % desde el current_rate hacia abajo.
-                    # Para mantenerlo atado a la entrada:
-                    stop_price = trade.open_rate - (2 * entry_atr)
+                    # Riesgo = mult * ATR
+                    stop_mult = self.atr_sl_mult.value
+                    stop_price = trade.open_rate - (stop_mult * entry_atr)
                     if current_rate > stop_price:
                         return (stop_price - current_rate) / current_rate
         
