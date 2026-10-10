@@ -1,0 +1,24 @@
+---
+# meme_hunter - Freqtrade (DAS v3.1)
+# Código y configuración: ./user_data (versionado en Git, dentro de OneDrive)
+# Datos de mercado:       C:/meme_hunter_data (fuera de OneDrive, NO versionado)
+services:
+  freqtrade:
+    image: freqtradeorg/freqtrade:stable
+    restart: "no"
+    container_name: meme_hunter
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+      - "C:/meme_hunter_data:/freqtrade/user_data/data"
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - path: .env
+        required: false
+    # La estrategia MemeHunterV1 se crea en PB-06 (Sprint 2)
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3.dryrun.sqlite
+      --config /freqtrade/user_data/config.json
+      --strategy MemeHunterV1

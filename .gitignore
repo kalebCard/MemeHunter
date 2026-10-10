@@ -1,0 +1,27 @@
+# Secretos
+.env
+user_data/config.private.json
+user_data/config-private.json
+
+# Datos de mercado (viven en C:/meme_hunter_data)
+user_data/data/
+
+# Estado y artefactos de ejecución
+user_data/*.sqlite
+user_data/*.sqlite-*
+user_data/logs/
+user_data/hyperopt_results/
+user_data/backtest_results/
+user_data/plot/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor / SO
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
