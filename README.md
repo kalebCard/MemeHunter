@@ -28,9 +28,29 @@ meme_hunter/
 
 ```powershell
 Copy-Item .env.example .env          # una sola vez
-docker compose pull                  # actualizar imagen
+docker compose build                 # imagen meme_hunter (Freqtrade 2026.9 fijado + pytest)
 docker compose run --rm freqtrade --version
-docker compose run --rm freqtrade list-exchanges
+```
+
+### Datos históricos (incluye pares deslistados) — `scripts/binance_vision.py`
+
+```powershell
+# Alias para no repetir
+function bv { docker compose run --rm --entrypoint python freqtrade scripts/binance_vision.py @args }
+
+bv symbols                                              # catálogo completo de símbolos Spot
+bv download --symbols BTCUSDT ETHUSDT --interval 1d 4h  # desde 2020-01 hasta el último mes completo
+bv download --all-symbols --interval 1d                 # todos los pares USDT (para el universo)
+```
+
+- Verifica el `sha256` de cada archivo mensual y guarda un manifest por símbolo.
+- Es incremental: solo descarga los meses que faltan (`--force` para rehacer).
+- Avisa de **huecos largos** (p. ej. `LUNAUSDT` mayo 2022: Terra → LUNA 2.0).
+
+### Tests
+
+```powershell
+docker compose run --rm --entrypoint python freqtrade -m pytest -c tests/pytest.ini tests
 ```
 
 ## Reglas del proyecto (resumen del DAS)

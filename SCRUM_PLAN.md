@@ -20,8 +20,8 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 
 | ID | Historia de Usuario / Tarea Técnica | Épica | Estimación (Puntos) |
 |---|---|---|---|
-| PB-01 | Inicializar proyecto Freqtrade y repositorio Git. | 1 | 2 |
-| PB-02 | Desarrollar script para descargar y formatear datos de `data.binance.vision`. | 1 | 5 |
+| PB-01 ✅ | Inicializar proyecto Freqtrade y repositorio Git. | 1 | 2 |
+| PB-02 ✅ | Desarrollar script para descargar y formatear datos de `data.binance.vision`. | 1 | 5 |
 | PB-03 | Desarrollar filtro de Universo Dinámico (Top N histórico sin sesgo). | 1 | 8 |
 | PB-04 | Descargar dataset completo (1m y 4h/1d) y auditar calidad. | 1 | 3 |
 | PB-05 | Redactar Hipótesis de Edge y umbrales numéricos de aceptación. | 2 | 2 |
@@ -48,6 +48,11 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 *   **PB-03:** Desarrollo del Universo Dinámico (Top N histórico).
 *   **PB-04:** Descarga masiva y auditoría de datos.
 *   **Entregable (Incremento):** Base de datos histórica validada y estructura de carpetas de Freqtrade lista.
+
+**Progreso y hallazgos del Sprint 1:**
+*   PB-01 y PB-02 terminados (decisiones: Docker con Freqtrade 2026.9 fijado, datos en `C:/meme_hunter_data`, histórico desde 2020-01, N=30).
+*   ⚠️ **Reutilización de tickers:** `LUNAUSDT` contiene Terra clásica y LUNA 2.0 separadas por un hueco de 18 días (ratio de precio x20.000). PB-04 debe segmentar estas series y tratar cada tramo como un activo distinto.
+*   ⚠️ **Riesgo para PB-03/PB-09:** Freqtrade descarta de la whitelist los pares que ya no existen en el exchange. Hay que validar cómo backtestear pares deslistados (posible solución: pairlist propia o catálogo de mercados offline).
 
 ### Sprint 2: Primera Estrategia y Validación Inicial
 **Objetivo del Sprint:** Programar la lógica base y correr los primeros backtests rigurosos.

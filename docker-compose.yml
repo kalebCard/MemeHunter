@@ -4,12 +4,17 @@
 # Datos de mercado:       C:/meme_hunter_data (fuera de OneDrive, NO versionado)
 services:
   freqtrade:
-    image: freqtradeorg/freqtrade:stable
+    image: meme_hunter:2026.9
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: "no"
     container_name: meme_hunter
     volumes:
       - "./user_data:/freqtrade/user_data"
       - "C:/meme_hunter_data:/freqtrade/user_data/data"
+      - "./scripts:/freqtrade/scripts"
+      - "./tests:/freqtrade/tests"
     ports:
       - "127.0.0.1:8080:8080"
     env_file:
