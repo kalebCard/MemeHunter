@@ -4,6 +4,8 @@ Bot de trading sobre [Freqtrade](https://www.freqtrade.io/) cuyo objetivo es **v
 
 - Arquitectura: [DAS.md](DAS.md)
 - Plan de trabajo: [SCRUM_PLAN.md](SCRUM_PLAN.md)
+- Hipótesis Teórica: [HYPOTHESIS.md](HYPOTHESIS.md)
+- Test Preliminar (2021): [PRELIMINARY_REPORT.md](PRELIMINARY_REPORT.md)
 
 ## Estructura
 
@@ -39,13 +41,23 @@ docker compose run --rm freqtrade --version
 function bv { docker compose run --rm --entrypoint python freqtrade scripts/binance_vision.py @args }
 
 bv symbols                                              # catálogo completo de símbolos Spot
-bv download --symbols BTCUSDT ETHUSDT --interval 1d 4h  # desde 2020-01 hasta el último mes completo
-bv download --all-symbols --interval 1d                 # todos los pares USDT (para el universo)
+bv download --all-symbols --interval 1d                 # 1. todos los pares USDT diarios (para calcular Universo)
 ```
 
 - Verifica el `sha256` de cada archivo mensual y guarda un manifest por símbolo.
 - Es incremental: solo descarga los meses que faltan (`--force` para rehacer).
-- Avisa de **huecos largos** (p. ej. `LUNAUSDT` mayo 2022: Terra → LUNA 2.0).
+
+### Construcción del Universo y Descarga Selectiva
+
+Para evitar descargar `1m` para pares ilíquidos y reducir tiempos:
+
+```powershell
+# 2. Construir el Top 30 histórico
+docker compose run --rm --entrypoint python freqtrade scripts/build_universe.py
+
+# 3. Descargar velas de alta resolución (4h, 1m) SOLO para el Top 30
+docker compose run --rm --entrypoint python freqtrade scripts/download_target.py
+```
 
 ### Tests
 

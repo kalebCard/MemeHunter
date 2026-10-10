@@ -52,15 +52,21 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 **Progreso y hallazgos del Sprint 1:**
 *   PB-01 y PB-02 terminados (decisiones: Docker con Freqtrade 2026.9 fijado, datos en `C:/meme_hunter_data`, histórico desde 2020-01, N=30).
 *   PB-03 terminado: script `build_universe.py` genera un mapa temporal (mes a mes) del Top 30 sin lookahead bias. La estrategia `MemeHunterV1` carga este mapa y anula las señales de los pares que no están en el universo válido para el mes en curso. Freqtrade procesa pares inactivos correctamente con `allow_inactive: true`.
-*   ⚠️ **Reutilización de tickers:** `LUNAUSDT` contiene Terra clásica y LUNA 2.0 separadas por un hueco de 18 días (ratio de precio x20.000). PB-04 debe segmentar estas series y tratar cada tramo como un activo distinto.
+*   PB-04 terminado: Se excluyó `LUNAUSDT` (y estables) mediante blacklist rígida para evitar anomalías. Se escribió el script `download_target.py` que descarga 1m y 4h selectivamente solo para el Top 30.
 
 ### Sprint 2: Primera Estrategia y Validación Inicial
 **Objetivo del Sprint:** Programar la lógica base y correr los primeros backtests rigurosos.
-*   **PB-05:** Definir Hipótesis de Edge explícita.
-*   **PB-06:** Programar estrategia en Python (`IStrategy`).
-*   **PB-07:** Configurar risk management y protecciones de cartera.
-*   **PB-08:** Pruebas anti-peeking (*lookahead-bias*).
-*   **Entregable (Incremento):** Estrategia ejecutable libre de errores y sin espionaje del futuro.
+*   **PB-05 ✅:** Redactar Hipótesis de Edge (`HYPOTHESIS.md`).
+*   **PB-06 ✅:** Programar `IStrategy` inicial (`MemeHunterV1.py`).
+*   **PB-07 ✅:** Configurar protecciones nativas (Cooldown, StoplossGuard, MaxDrawdown, LowProfitPairs).
+*   **PB-08 ✅:** Ejecutar `lookahead-analysis` y `recursive-analysis` de Freqtrade.
+*   **Entregable (Incremento):** Estrategia codificada, robusta contra trampas lógicas, lista para PB-09.
+
+**Progreso y hallazgos del Sprint 2:**
+*   PB-05 y PB-06: La hipótesis se basa en Momentum (MACD) + Expansión de Volatilidad (ATR) + Filtro de Agotamiento (RSI). El Stop Loss es dinámico (2x ATR de la entrada).
+*   PB-07: Freqtrade aceptó la configuración de protecciones.
+*   PB-08: El `lookahead-analysis` arrojó "No bias detected". Las matemáticas son válidas.
+*   *Test Preliminar:* Un dry-test en 2021 sobre BTC y LUNA confirmó que el pipeline funciona y el sistema genera ganancias marginales (Expectancy de 0.13), pero el Profit Factor (1.05) no alcanzó el objetivo. El siguiente paso en el Sprint 3 es ejecutar PB-09 con todos los datos y analizar si es necesaria la hiper-optimización (PB-10).
 
 ### Sprint 3: La Prueba de Fuego (Evaluación Estadística)
 **Objetivo del Sprint:** Saber estadísticamente si la estrategia sirve o se descarta.
