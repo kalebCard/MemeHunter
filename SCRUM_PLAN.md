@@ -23,7 +23,7 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 | PB-01 ✅ | Inicializar proyecto Freqtrade y repositorio Git. | 1 | 2 |
 | PB-02 ✅ | Desarrollar script para descargar y formatear datos de `data.binance.vision`. | 1 | 5 |
 | PB-03 ✅ | Desarrollar filtro de Universo Dinámico (Top N histórico sin sesgo). | 1 | 8 |
-| PB-04 | Descargar dataset completo (1m y 4h/1d) y auditar calidad. | 1 | 3 |
+| PB-04 ✅ | Descargar dataset completo (1m y 4h/1d) y auditar calidad. | 1 | 3 |
 | PB-05 ✅ | Redactar Hipótesis de Edge y umbrales numéricos de aceptación. | 2 | 2 |
 | PB-06 ✅ | Programar `IStrategy` inicial (MACD, RSI, ATR). | 2 | 5 |
 | PB-07 ✅ | Configurar protecciones nativas (Stoploss, MaxDrawdown, etc.). | 2 | 3 |

@@ -32,9 +32,13 @@ def build_universe(datadir: Path, top_n: int = 30) -> dict[str, list[str]]:
     
     for feather_path in klines_dir.glob("*.feather"):
         pair_raw = feather_path.stem
-        # Omitimos pares estables o con base fiat si lo preferimos,
-        # aunque la whitelist final del config también filtrará
-        if pair_raw.endswith("USDC") or pair_raw.endswith("FDUSD"):
+        # Omitimos pares estables, tokens apalancados y blacklist manual por anomalías
+        if (
+            pair_raw.endswith("USDC") or 
+            pair_raw.endswith("FDUSD") or 
+            pair_raw.endswith("BUSD") or
+            pair_raw == "LUNAUSDT"
+        ):
             continue
             
         try:
