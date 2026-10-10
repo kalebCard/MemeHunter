@@ -22,6 +22,41 @@ class MemeHunterV1(IStrategy):
     # Definimos que necesitamos al menos 30 velas para calcular las medias y el MACD
     startup_candle_count = 30
 
+    # Protecciones de Cartera (DAS §3.1)
+    protections = [
+        {
+            # Cooldown: Tras cerrar una operación, esperar 2 velas (8 horas) antes de volver a operar el mismo par.
+            "method": "CooldownPeriod",
+            "stop_duration_candles": 2
+        },
+        {
+            # StoplossGuard: Si saltan 4 stoplosses en 24 horas, detener toda la operativa durante 1 día.
+            # Nos protege de días catastróficos donde el mercado cambia de régimen bruscamente.
+            "method": "StoplossGuard",
+            "lookback_period_candles": 6,   # 6 velas de 4h = 24 horas
+            "trade_limit": 4,
+            "stop_duration_candles": 6,     # Pausar 24 horas
+            "only_per_pair": False          # Evalúa a nivel global (toda la cartera)
+        },
+        {
+            # MaxDrawdown: Si el saldo total baja un 20%, apagar el bot.
+            "method": "MaxDrawdown",
+            "lookback_period_candles": 120, # Mirar hacia atrás ~20 días
+            "trade_limit": 1,               # Limitar a 1 trade perdedor del tamaño del max_allowed_drawdown
+            "stop_duration_candles": 12,    # Detener por 2 días
+            "max_allowed_drawdown": 0.20
+        },
+        {
+            # LowProfitPairs: Si un par resulta ser un perdedor crónico (ej. -5% acumulado en las últimas 10 operaciones)
+            # se prohíbe operar ese par durante 2 semanas.
+            "method": "LowProfitPairs",
+            "lookback_period_candles": 60,  # Últimos 10 días
+            "trade_limit": 2,
+            "stop_duration_candles": 84,    # 84 velas de 4h = 14 días
+            "required_profit": 0.0
+        }
+    ]
+
     def __init__(self, config: dict) -> None:
         super().__init__(config)
         self._universe = {}
