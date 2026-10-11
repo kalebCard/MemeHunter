@@ -72,17 +72,6 @@ docker compose -f docker-compose.futures.yml logs -f
 * **Dashboard Web (FreqUI):** [http://localhost:8081](http://localhost:8081)
 * **Credenciales:** usuario y clave definidos por ti en `config_futures.json`
 
-### B. Motor Spot (Binance Spot Long-Only)
-```powershell
-# Iniciar en segundo plano
-docker compose -f docker-compose.live.yml up -d
-
-# Ver logs en tiempo real
-docker compose -f docker-compose.live.yml logs -f
-```
-* **Dashboard Web (FreqUI):** [http://localhost:8080](http://localhost:8080)
-* **Credenciales:** usuario y clave definidos por ti en `config_live.json`
-
 ---
 
 ## 📂 Estructura del Repositorio
@@ -90,7 +79,6 @@ docker compose -f docker-compose.live.yml logs -f
 ```
 meme_hunter/
 ├── docker-compose.futures.yml   # Despliegue de Futuros (Puerto 8081)
-├── docker-compose.live.yml      # Despliegue de Spot (Puerto 8080)
 ├── docker-compose.yml           # Base para comandos generales
 ├── .env.example                 # Plantilla de secretos (Binance / Telegram)
 ├── scripts/                     # Herramientas estadísticas y de stress testing
@@ -102,13 +90,10 @@ meme_hunter/
 │   └── telegram_healthcheck.py  # Diagnóstico y alertas en Telegram
 ├── user_data/
 │   ├── config_futures.example.json # Plantilla de Futuros (copiar a config_futures.json, no versionado)
-│   ├── config_live.example.json    # Plantilla de Spot (copiar a config_live.json, no versionado)
 │   ├── config_futures_backtest.json
 │   └── strategies/
-│       ├── MemeHunterFuturesV1.py # Estrategia Long/Short aislada 1x
-│       ├── MemeHunterV2.py        # Estrategia Spot blindada
-│       └── MemeHunterV1.py        # Estrategia histórica de investigación
-└── tests/                       # Suite pytest (binance_vision y MemeHunterV2)
+│       └── MemeHunterFuturesV1.py # Estrategia Long/Short aislada 1x con Kill-Switch
+└── tests/                       # Suite pytest (binance_vision, dryrun_monitor, MemeHunterFuturesV1)
 ```
 
 ### Ejecutar los tests
