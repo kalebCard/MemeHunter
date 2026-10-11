@@ -40,7 +40,8 @@ def test_futures_strategy_properties():
     assert s.timeframe == "4h"
     assert s.stoploss == -0.10
     assert s.trailing_stop is True
-    assert s.use_exit_signal is False
+    assert s.trailing_stop_positive == 0.040
+    assert s.use_exit_signal is True
 
 
 def test_leverage_is_always_1x():
@@ -100,13 +101,43 @@ def test_custom_stake_amount_asymmetric():
     long_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long")
     assert long_stake == pytest.approx(45.0)
 
-    # En pares con sangrado estructural bajista (SUI, TIA, SOL), se anulan los Longs (0.0x)
-    assert s.custom_stake_amount("SUI/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long") == 0.0
-    assert s.custom_stake_amount("TIA/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long") == 0.0
-    # Pero los Shorts en esos mismos pares sí se operan con 1.35x
-    assert s.custom_stake_amount("TIA/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "short", "short") == pytest.approx(135.0)
+    # PB-29: Si el par se detecta en régimen de sangrado secular dinámico, se anulan los Longs (0.0x)
+    s._secular_bear_pairs = {"PEPE/USDT:USDT"}
+    assert s.custom_stake_amount("PEPE/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long") == 0.0
+    # Pero los Shorts en ese mismo par operan con convicción a 1.35x
+    assert s.custom_stake_amount("PEPE/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "short", "short") == pytest.approx(135.0)
+
+    # Verificación con DataProvider mockeado (pendiente de EMA 200 negativa < -1.5%)
+    class MockDP:
+        def get_analyzed_dataframe(self, pair, timeframe):
+            df = pd.DataFrame({"ema_200_slope": [-0.020] * 15})
+            return df, None
+    s_dp = make_strategy()
+    s_dp.dp = MockDP()
+    assert s_dp.is_secular_bear_pair("WIF/USDT:USDT") is True
+    assert s_dp.custom_stake_amount("WIF/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long") == 0.0
 
     # Si el balance o propuesta es menor a $5, se ajusta al piso regulatorio de Binance ($5.00 USDT)
     clamped_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 3.0, None, 500.0, 1.0, "long", "long")
     assert clamped_stake == pytest.approx(5.0)
+
+
+def test_exit_long_conditions():
+    s = make_strategy()
+    # Salida Long si cae bajo EMA 200
+    df = s.populate_exit_trend(base_frame(close=95.0, ema_200=100.0), {"pair": "BTC/USDT:USDT"})
+    assert df["exit_long"].iloc[0] == 1
+    # Salida Long si cruce bajista MACD con RSI exhausto (< 45)
+    df2 = s.populate_exit_trend(base_frame(close=110.0, ema_200=100.0, macd=0.5, macdsignal=1.0, rsi=40.0), {"pair": "BTC/USDT:USDT"})
+    assert df2["exit_long"].iloc[0] == 1
+
+
+def test_exit_short_conditions():
+    s = make_strategy()
+    # Salida Short si rompe sobre EMA 200
+    df = s.populate_exit_trend(base_frame(close=105.0, ema_200=100.0), {"pair": "BTC/USDT:USDT"})
+    assert df["exit_short"].iloc[0] == 1
+    # Salida Short si cruce alcista MACD con RSI recuperando (> 55)
+    df2 = s.populate_exit_trend(base_frame(close=90.0, ema_200=100.0, macd=2.0, macdsignal=1.0, rsi=60.0), {"pair": "BTC/USDT:USDT"})
+    assert df2["exit_short"].iloc[0] == 1
 

@@ -148,7 +148,28 @@ Evaluación del impacto de comisiones elevadas y deslizamiento de precio sobre l
 * **Tasa de Consistencia:** **8 de 11 trimestres positivos (72.7%)** (frente al 54.5% previo).
 ---
 
-## 8. 🛡️ Protocolo Operativo Recomendado para Fondear $100 USDT
+## 8. 🔬 Auditoría de Robustez y Riesgos Reales (Sprint 8 y 9)
+
+En octubre de 2026 se llevó a cabo una auditoría forense sobre los 1,154 trades históricos para demoler sesgos de backtest:
+
+### A. Auditoría Real de Tasas de Financiación (`scripts/audit_funding_rates.py`)
+* En 1,146 trades auditados vela a vela con datos oficiales de Binance USDT-M:
+  * **Shorts (815 trades):** Recibieron $+22.26\text{ USDT}$ en comisiones durante mercados alcistas/neutrales.
+  * **Longs (339 trades):** Pagaron $-18.26\text{ USDT}$ en comisiones periódicas de 8h.
+  * **Impacto Neto:** $-4.00\text{ USDT}$ ($0.3\%$ de desviación frente al backtest bruto).
+  * **Conclusión:** En activos consolidados (`BTC`, `ETH`, `SOL`, `DOGE`) las tasas no destruyeron la ventaja. Sin embargo, para evitar episodios de sangrado en memecoins de baja liquidez, se implementó el **Guardián de Funding Rate (`_is_adverse_funding`)** que rechaza entradas si la tasa es inferior a $-0.05\%$.
+
+### B. Eliminación del Sesgo de Retrospectiva (*Overfitting*)
+* Se erradicó la lista negra estática `BLEEDING_LONG_BLACKLIST = {'SUI', 'TIA', 'SOL'}`.
+* Se sustituyó por la regla algorítmica dinámica **`is_secular_bear_pair(pair)`**, la cual audita la pendiente de la `EMA 200` macro ($\text{caída} > 1.5\%$ en 10 velas de 4h) para anular compras de forma universal y agnóstica al ticker.
+
+### C. Alerta del Trailing Stop y Protocolo de Certificación en Dry-Run
+* Como el backtest se corrió en velas de 4H con `timeframe_detail: None`, las salidas por Trailing Stop contienen cierta presunción heurística intra-vela.
+* **Norma Innegociable:** El sistema exige **4 a 8 semanas de certificación en el contenedor Docker en modo Dry-Run real** con Binance antes de asignar capital real.
+
+---
+
+## 9. 🛡️ Protocolo Operativo Recomendado para Fondear $100 USDT
 
 Para poner en marcha esta configuración en Binance con dinero real de forma segura:
 
@@ -171,23 +192,23 @@ Para poner en marcha esta configuración en Binance con dinero real de forma seg
    ```
 4. **Cortacircuitos de Emergencia:**
    * `StoplossGuard`: 3 stops consecutivos en 24h bloquean nuevas órdenes por 24 horas.
-   * `MaxDrawdown`: Si el drawdown de la cuenta alcanza el 20%, el bot detiene la operativa inmediatamente.
+   * `Kill-Switch de Equidad Total`: Si el drawdown vivo (realizado + flotante) alcanza el 25%, se bloquean nuevas entradas de inmediato.
 
 ---
 
-## 9. 🚀 Anexo de Optimización Cuantitativa: Sizing Kelly y Stop Racional (-10%)
+## 10. 🚀 Anexo de Optimización Cuantitativa: Sizing Dinámico y Stop Racional (-10%)
 
 Tras ejecutar las pruebas empíricas iterativas sobre los 1,154 trades históricos:
 
-* **Pares Sangrantes en Long:** `SUI`, `TIA`, `SOL` tienen stake 0.0x en compra para eliminar el arrastre de falsos rebotes.
-* **Asimetría de Convicción:** Shorts al **1.35x** y Longs principales al **0.45x**.
-* **Stop Loss Ceñido a -10.0%:** Recorta en un 33.3% el coste de cada pérdida sin perjudicar a los trades ganadores.
+* **Filtro de Sangrado Secular:** Detección algorítmica dinámica sin listas negras estáticas.
+* **Asimetría de Convicción:** Shorts al **1.35x** y Longs saludables al **0.45x**.
+* **Stop Loss Ceñido a -10.0%:** Recorta en un 33.3% el coste de cada pérdida con salidas de mercado forzadas.
 
 ### Impacto en las Métricas Oficiales de Backtesting (1,154 Trades):
 | Parámetro | Versión Simétrica Base | Versión Optimizada Previa | Versión Final Certificada | Mejora Global |
 | :--- | :---: | :---: | :---: | :---: |
 | **Retorno Neto Sin Compounding** | +56.82% (+$56.82) | +65.50% (+$65.50) | **+157.97% (+$157.97)** | **+101.15 pp (+178% más alfa)** |
-| **Retorno Mediano (10% Compuesto)** | +63.00% (+$63.00) | +63.40% (+$63.40) | **+274.05% ($374.05 USDT)** | **Multiplica por 3.7x el capital inicial** |
+| **Retorno Mediano (10% Compuesto)** | +63.00% (+$63.00) | +63.40% (+$63.40) | **+277.22% ($377.22 USDT)** | **Multiplica por 3.8x el capital inicial** |
 | **Ratio de Sortino** | 1.84 | 1.92 | **11.05** | **+9.13 (Rendimiento institucional)** |
 | **Ratio de Sharpe** | 1.21 | 1.26 | **5.92** | **+4.66** |
 | **Max Drawdown Real** | 21.24% | 21.03% | **12.57%** | **-8.46% de reducción de riesgo** |

@@ -40,6 +40,15 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
+## 🛡️ Protecciones Institucionales de Producción (Sprint 8 Hardening)
+
+1. **Kill-Switch de Equidad Total (PB-25):** Audita el balance realizado más el **PnL no realizado (*unrealized*)** de posiciones vivas concurrentes. Si el drawdown de capital vivo alcanza el 25%, se bloquean de inmediato nuevas entradas.
+2. **Guardián de Tasa de Financiación (*Funding Bleed Guard*) (PB-24):** Rechaza órdenes Short si la tasa de financiación proyectada es inferior a **-0.05% por 8h**, evitando el desangrado pasivo de margen pagando comisiones a los Longs.
+3. **Salidas Técnicas Dinámicas & Trailing Holgado (PB-23):** Salidas automáticas ante pérdida de la EMA 200 o cruce adverso de MACD/RSI, resolviendo el riesgo de operaciones *round-trip* (+11.5% cayendo a -10%). Trailing stop calibrado al 4.0% para absorber mechas intradía en velas de 4h.
+4. **Ejecución Protegida & Squeeze Guard (PB-26 / PB-27):** Salidas de stoploss y emergencia ejecutadas como órdenes de mercado (`market`) para garantizar llenado inmediato en memecoins delgadas, con reconocimiento explícito del riesgo de liquidación en rallies de +80% en Shorts.
+
+---
+
 ## 🛠️ Suite de Scripts Cuantitativos (`scripts/`)
 
 | Script | Propósito / Función | Comando de Ejecución |

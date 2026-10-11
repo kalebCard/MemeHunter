@@ -16,6 +16,8 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 * **Épica 5 (Novedosa): Microestructura & Captura de Ineficiencias (Funding Arbitrage & OFI).** Señales de desequilibrio en el libro de órdenes (Order Flow Imbalance) y arbitraje de tasas de financiación delta-neutral.
 * **Épica 6 (Novedosa): Régimen Adaptativo con FreqAI (Reinforcement Learning).** Modelos de aprendizaje automático para adaptar el tamaño de posición y régimen de mercado.
 * **Épica 7: Escalabilidad de Capital & Monetización Institucional.** Infraestructura en VPS cloud 24/7, integración a plataformas de Copy-Trading (Binance/Bybit) para multiplicar retornos mediante Profit Share.
+* **Épica 8: Hardening de Producción Real & Robustez ante Fricciones de Mercado (Completada ✅).** Mitigación de costos de financiación (funding bleed), ruido intra-vela en trailing stop, drawdown flotante no realizado y riesgo de short squeeze.
+* **Épica 9 (Crítica): Certificación de Alta Fidelidad & Desmitificación de Backtest.** Eliminación del sesgo intra-vela de trailing stop (`--timeframe-detail 1m`), modelado de *funding fees*, sustitución de blacklists sobreajustadas por clasificadores dinámicos y validación exclusiva en memecoins reales.
 
 ---
 
@@ -44,7 +46,17 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 | **PB-19** | **Clasificador Cuantitativo de Régimen de Mercado y Adaptación Dinámica de Riesgo.** | 6 | 13 | ✅ Completado |
 | **PB-20** | **Aprovisionamiento en VPS Ubuntu 24/7 con `deploy_vps.sh` y hardening de seguridad.** | 7 | 5 | 📋 Backlog |
 | **PB-21** | **Conexión a Copy-Trading (Binance / Bybit) para escala de capital vía Profit Share.** | 7 | 8 | 📋 Backlog |
-| **PB-22** | **Interés Compuesto Dinámico (Sizing Geométrico / Compounding en Futuros) para crecimiento exponencial.** | 8 | 5 | 📋 Priorizado (Siguiente Paso) |
+| **PB-22** | **Interés Compuesto Dinámico (Sizing Geométrico / Compounding en Futuros).** | 7 | 5 | 📋 Priorizado |
+| **PB-23** | **Blindaje de Salidas Técnicas & Trailing Dinámico (Solución Round-Trip & Ruido 4H).** | 8 | 8 | ✅ Completado |
+| **PB-24** | **Filtro Guardián de Tasa de Financiación (Funding Rate Bleed Guard en Shorts/Longs).** | 8 | 5 | ✅ Completado |
+| **PB-25** | **Kill-Switch Integral de Equidad Total (Drawdown Realizado + Flotante Unrealized).** | 8 | 5 | ✅ Completado |
+| **PB-26** | **Optimización de Ejecución y Slippage (Políticas de órdenes límite/market de emergencia).** | 8 | 5 | ✅ Completado |
+| **PB-27** | **Gestión de Riesgo Asimétrico y Squeeze Guard (Mitigación de Liquidación en Shorts).** | 8 | 5 | ✅ Completado |
+| **PB-28** | **Backtest de Alta Fidelidad con `--timeframe-detail 1m` (Eliminación de sesgo intra-vela en Trailing).** | 9 | 8 | 📋 Planificado (Siguiente Paso) |
+| **PB-29** | **Reemplazo de Blacklist Estático (`BLEEDING_LONG_BLACKLIST`) por Filtro de Régimen Dinámico.** | 9 | 5 | ✅ Completado |
+| **PB-30** | **Reconstrucción y Backtest sobre Universo Real de Memecoins (Top 30 Binance USDT-M).** | 9 | 8 | ✅ Completado |
+| **PB-31** | **Modelo de Descuento de Funding Fees Vela a Vela en Simulaciones Históricas de Futuros.** | 9 | 5 | ✅ Completado |
+| **PB-32** | **Protocolo Obligatorio de Certificación en Dry-Run Real (4-8 Semanas en Docker).** | 9 | 8 | 🔄 En Curso (Innegociable) |
 
 ---
 
@@ -86,10 +98,45 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 
 ---
 
-### Sprint 8: Crecimiento Exponencial, Despliegue Cloud y Multiplicador de Capital (En Curso / Priorizado 🚀)
-**Objetivo:** El camino real hacia el crecimiento financiero exponencial: interés compuesto y gestión de capital externo.
-* **PB-22 (Prioridad Inmediata):** Implementar **Interés Compuesto Dinámico (Sizing Geométrico)** en `config_futures.json` y estrategia, evaluando la reinversión de balance para transformar la curva de capital de lineal a exponencial.
-* **PB-20:** Despliegue en VPS (DigitalOcean / Hetzner / AWS) con el script `scripts/deploy_vps.sh`.
+### Sprint 8: Hardening de Producción Real & Robustez de Mercado (Completado ✅)
+**Objetivo:** Resolver las debilidades estructurales descubiertas en la operativa real antes del salto a capital institucional o apalancado.
+* **PB-23 (Salidas Técnicas & Trailing Adaptativo):**
+  * Resolver el riesgo de *round-trip* (+11.5% cayendo a -10% por falta de salidas técnicas).
+  * Adaptar el trailing stop a la volatilidad del activo (usando bandas ATR en vez de 2.2% fijo) para evitar ser barrido por mechas de ruido en velas de 4h.
+  * Habilitar `custom_exit` o señales técnicas de reversión (MACD/EMA) para tomar ganancias parciales o salir temprano si la tendencia se quiebra.
+* **PB-24 (Guardián de Funding Rate):**
+  * Bloquear apertura de Shorts si el funding rate proyectado es fuertemente negativo (ej. < -0.05% por 8h) para evitar sangrado de comisiones pasivas.
+  * Monitorear costo de financiación acumulado en posiciones vivas para forzar salida si la tasa deteriora la expectativa matemática.
+* **PB-25 (Kill-Switch de Equidad Total):**
+  * Refactorizar `_current_drawdown()` para auditar tanto trades cerrados como el **PnL flotante (*unrealized*)** de posiciones abiertas concurrentes, eliminando la ceguera ante caídas sistémicas.
+* **PB-26 (Políticas de Slippage y Órdenes):**
+  * Calibrar timeouts y forzar órdenes de mercado en salidas de emergencia o trailing stops para garantizar llenado inmediato en memecoins volátiles.
+* **PB-27 (Protección contra Squeezes en Shorts):**
+  * Eliminar la falsa asunción de "0 riesgo de liquidación en Shorts 1x" e implementar stoplosses dinámicos técnicos infranqueables ante movimientos parabólicos.
+
+---
+
+### Sprint 9: Certificación de Alta Fidelidad & Desmitificación de Backtests (En Curso / Prioridad Crítica 🔬)
+**Objetivo:** Demoler los sesgos optimistas identificados en la simulación histórica y certificar la estrategia bajo condiciones de mercado 100% realistas.
+* **PB-28 (Backtest con Datos de 1 Minuto):**
+  * Descargar datos OHLCV de 1m para todo el universo y re-ejecutar el backtest con `--timeframe-detail 1m`.
+  * Eliminar la presunción optimista de Freqtrade sobre el recorrido intra-vela del Trailing Stop.
+* **PB-29 (Eliminación de Sesgo de Retrospectiva):**
+  * Eliminar el cableado estático `BLEEDING_LONG_BLACKLIST = {'SUI', 'TIA', 'SOL'}` en `MemeHunterFuturesV1.py`.
+  * Sustituirlo por filtros cuantitativos dinámicos de régimen (e.g. pendiente negativa de EMA 200, ADX > 25 bajista, o el clasificador de `scripts/regime_classifier.py`).
+* **PB-30 (Universo Real de Memecoins):**
+  * Ejecutar el backtest sobre el Top 30 real de memecoins en Binance USDT-M (`PEPE`, `WIF`, `BONK`, `FLOKI`, `BOME`, `NEIRO`), en lugar de Layer-1s clásicos (`BTC`, `ETH`, `SOL`).
+* **PB-31 (Deducción de Tasas de Financiación):**
+  * Cuantificar e incorporar el impacto del *Funding Rate* negativo acumulado durante las 815 operaciones en Short del histórico.
+* **PB-32 (Protocolo Innegociable de Dry-Run en Vivo):**
+  * Certificar el rendimiento durante un mínimo de **4 a 8 semanas continuas en Docker** con `scripts/dryrun_monitor.py` antes de autorizar el paso a capital real.
+
+---
+
+### Sprint 10: Crecimiento Exponencial, Despliegue Cloud y Multiplicador de Capital (Planificado 🚀)
+**Objetivo:** Crecimiento financiero exponencial y gestión de capital externo mediante infraestructura probada y blindada.
+* **PB-22:** Implementar **Interés Compuesto Dinámico (Sizing Geométrico)** en `config_futures.json` y estrategia para reinversión óptima de beneficios.
+* **PB-20:** Despliegue en VPS (DigitalOcean / Hetzner / AWS) con el script `scripts/deploy_vps.sh` y firewall reforzado.
 * **PB-21:** Publicación de la estrategia en el programa de Lead Trader de Binance o Bybit:
   * Mantener un Drawdown < 15% y Sortino > 1.5 para posicionarse en el Top Ranking de Copy Trading.
   * Monetizar mediante **Profit Sharing** (10% - 15% de los beneficios generados a los seguidores).
@@ -98,5 +145,8 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 
 ## 4. Definición de Hecho (DoD)
 1. Código probado con tests unitarios (`pytest tests`).
-2. Sin riesgo de liquidación forzada (Apalancamiento estricto 1.0x o estrategias delta-neutrales).
-3. Todo cambio versionado y sincronizado en GitHub: [kalebCard/MemeHunter](https://github.com/kalebCard/MemeHunter).
+2. **Cero sesgo intra-vela:** Ningún backtest con Trailing Stop se considerará válido sin `--timeframe-detail 1m`.
+3. **Cero sesgo de retrospectiva:** Prohibición estricta de listas negras cableadas (*hardcoded blacklists*) específicas de símbolos.
+4. **Certificación en Vivo:** Mínimo de 4 a 8 semanas de operación ininterrumpida en Dry-Run evaluadas por `dryrun_monitor.py` antes de asignar capital real.
+5. Control estricto de margen, funding rate y distancia a liquidación en derivados.
+6. Todo cambio versionado y sincronizado en GitHub: [kalebCard/MemeHunter](https://github.com/kalebCard/MemeHunter).

@@ -28,9 +28,13 @@ El universo activo se compone de contratos perpetuos USDT-M en Binance filtrados
 
 ### 3.1 Motor Core (Freqtrade Framework)
 - **Enrutamiento y Estado**: El ciclo de vida de las órdenes, conexiones WebSocket/REST a Binance y la rehidratación del estado (vía SQLite) son manejados nativamente por Freqtrade.
-- **Risk Management Integral**: Configuración del *Stoploss* paramétrico y *Trailing Stop*. Se evaluará `stoploss_on_exchange` en Spot, delegando las órdenes limitadas al exchange cuando Freqtrade lo soporte de forma nativa, y documentando su comportamiento en el backtest (que no lo simula con fidelidad).
-- **Protecciones de Cartera**: Uso de las *Protections* nativas de Freqtrade: `StoplossGuard`, `MaxDrawdown`, `CooldownPeriod` y `LowProfitPairs`.
-- **Dimensionamiento de Posición**: Se fijan explícitamente `max_open_trades`, `stake_amount` y un límite de exposición total del capital. Ningún parámetro queda en valores por defecto sin justificación.
+- **Risk Management Integral**: Configuración del *Stoploss* al -10% y *Trailing Stop* adaptativo (+12% offset / 4.0% de holgura para absorber mechas de 4h en memecoins).
+- **Protecciones Institucionales de Producción (Sprint 8 Hardening)**:
+  - **Kill-Switch de Equidad Total (PB-25)**: Latch a nivel de archivo (`user_data/KILL_SWITCH`) cuando el drawdown del capital vivo (PnL realizado + PnL flotante *unrealized*) supera el 25%, evitando ceguera ante desplomes sistémicos correlacionados.
+  - **Guardián de Funding Rate (PB-24)**: Bloqueo de Shorts con funding rate $< -0.05\%$ por 8h para impedir el drenaje pasivo de capital pagando comisiones a los Longs.
+  - **Salidas Técnicas Dinámicas (PB-23)**: `use_exit_signal = True` para cerrar posiciones ante pérdida de la EMA 200 o quiebre adverso de MACD/RSI, eliminando el riesgo de operaciones *round-trip* (+11.5% cayendo a -10%).
+  - **Ejecución y Squeeze Guard (PB-26 / PB-27)**: Salidas críticas y stoploss forzados como órdenes `market` para garantizar llenado inmediato en memecoins, con control de liquidación en derivados.
+- **Dimensionamiento de Posición**: Sizing asimétrico cuantitativo (+1.35x en Shorts de alta convicción, 0.45x en Longs, anulación de compras en pares de sangrado secular).
 
 ### 3.2 Capa Estratégica (Nuestra Propiedad Intelectual)
 - **Módulo `IStrategy` (Python)**: Archivo dedicado que contiene los cálculos deterministas mediante `pandas-ta` (MACD, RSI, ATR). Aquí se programa la lógica de cruces y señales.

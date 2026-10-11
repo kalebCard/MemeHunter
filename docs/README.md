@@ -25,15 +25,15 @@ docs/
 ### 1. 🏛️ Arquitectura del Sistema
 * **[DAS.md](architecture/DAS.md) (Documento de Arquitectura de Software v4.0)**
   * **Propósito:** Especificación de la infraestructura en Freqtrade, microservicios satélite y conectividad CCXT.
-  * **Puntos clave:** Diseño de ejecución Maker al bid/ask, protecciones nativas de riesgo (Kill-Switch al 25% DD), aislamiento de margen 1.0x y filtros dinámicos de liquidez mínima ($1M USDT en 24h).
+  * **Puntos clave:** Diseño de ejecución Maker al bid/ask, protecciones de riesgo institucionales (Kill-Switch al 25% DD sobre equidad total viva, Guardián de Funding Rate, salidas técnicas dinámicas y órdenes market de emergencia), y filtros dinámicos de liquidez mínima ($1M USDT en 24h).
 
 ### 2. 🧠 Estrategia y Planificación
 * **[HYPOTHESIS.md](strategy/HYPOTHESIS.md) (Hipótesis del Edge Cuantitativo)**
   * **Propósito:** Fundamento matemático y financiero del porqué la estrategia genera alfa sobre memecoins.
   * **Puntos clave:** Asimetría de desinflado rápido en rallies agotados (Short Edge) y captura de momentum temprano con volumen inusual (RVOL).
 * **[SCRUM_PLAN.md](strategy/SCRUM_PLAN.md) (Plan de Trabajo y Backlog Scrum)**
-  * **Propósito:** Hoja de ruta del proyecto organizada por Épicas y Sprints de 1 a 8.
-  * **Puntos clave:** Seguimiento del progreso en tiempo real, historias de usuario completadas (`PB-01` a `PB-19`) y estado de despliegue en Dry-Run y VPS.
+  * **Propósito:** Hoja de ruta del proyecto organizada por Épicas y Sprints de 1 a 9.
+  * **Puntos clave:** Seguimiento del progreso en tiempo real, historias de usuario completadas (`PB-01` a `PB-27` incluyendo Hardening de Producción Real) y estado de despliegue en Dry-Run y VPS.
 
 ### 3. 📊 Reportes de Investigación y Rendimiento
 * **[PRELIMINARY_REPORT.md](reports/PRELIMINARY_REPORT.md) (Reporte de Backtesting Oficial)**

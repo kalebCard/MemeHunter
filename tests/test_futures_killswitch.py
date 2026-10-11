@@ -24,12 +24,18 @@ def closed_trades(profits):
             for i, p in enumerate(profits)]
 
 
-def set_trades(monkeypatch, profits):
-    monkeypatch.setattr(mod.Trade, "get_trades_proxy", staticmethod(lambda **kw: closed_trades(profits)))
+def set_trades(monkeypatch, profits, open_profits=None):
+    if open_profits is None:
+        open_profits = []
+    def proxy(is_open=False):
+        if is_open:
+            return [SimpleNamespace(current_profit_abs=p) for p in open_profits]
+        return closed_trades(profits)
+    monkeypatch.setattr(mod.Trade, "get_trades_proxy", staticmethod(proxy))
 
 
-def enter(s):
-    return s.confirm_trade_entry("BTC/USDT:USDT", "limit", 1, 1, "GTC", NOW, "tag", "long")
+def enter(s, side="long"):
+    return s.confirm_trade_entry("BTC/USDT:USDT", "limit", 1, 1, "GTC", NOW, "tag", side)
 
 
 def test_compute_drawdown():
@@ -39,6 +45,9 @@ def test_compute_drawdown():
     assert mod.compute_drawdown([100, -110, 100], 1000) == pytest.approx(10 / 1100)
     assert mod.compute_drawdown([50, 50], 1000) == 0.0
     assert mod.compute_drawdown([-500], 0) == 0.0  # sin capital base no divide por cero
+    # PB-25: Drawdown con equidad flotante
+    assert mod.compute_drawdown([], 1000, open_profit_abs=-260) == pytest.approx(0.26)
+    assert mod.compute_drawdown([200], 1000, open_profit_abs=-360) == pytest.approx(360 / 1200)
 
 
 def test_allows_entry_below_threshold(tmp_path, monkeypatch):
@@ -57,6 +66,25 @@ def test_blocks_and_latches_in_dry_run(tmp_path, monkeypatch):
     assert enter(s) is False
     (tmp_path / mod.KILL_SWITCH_FLAG).unlink()
     assert enter(s) is True
+
+
+def test_blocks_on_open_unrealized_drawdown(tmp_path, monkeypatch):
+    # PB-25: 0 pérdida cerrada, pero -270 en posiciones vivas flotantes (27% DD)
+    set_trades(monkeypatch, [], open_profits=[-150, -120])
+    s = make(tmp_path)
+    assert enter(s) is False
+
+
+def test_blocks_on_adverse_funding_rate(tmp_path, monkeypatch):
+    # PB-24: Guardián de Funding Rate
+    set_trades(monkeypatch, [])
+    s = make(tmp_path)
+    mock_exchange = SimpleNamespace(get_funding_rate=lambda pair: -0.0008)
+    s.exchange = mock_exchange
+    # Short debe ser bloqueado por funding sangrante (-0.08% < -0.05%)
+    assert enter(s, side="short") is False
+    # Long se permite normalmente
+    assert enter(s, side="long") is True
 
 
 def test_backtest_blocks_without_writing_flag(tmp_path, monkeypatch):

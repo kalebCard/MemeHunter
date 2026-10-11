@@ -14,7 +14,16 @@
     "fiat_display_currency": "USD",
 
     "timeframe": "4h",
-    "stoploss": -0.15,
+    "stoploss": -0.10,
+    "order_types": {
+        "entry": "limit",
+        "exit": "limit",
+        "emergency_exit": "market",
+        "force_entry": "market",
+        "force_exit": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false
+    },
     "cancel_open_orders_on_exit": true,
     "unfilledtimeout": {
         "entry": 10,
