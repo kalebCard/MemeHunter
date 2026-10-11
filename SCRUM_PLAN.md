@@ -28,9 +28,9 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 | PB-06 ✅ | Programar `IStrategy` inicial (MACD, RSI, ATR). | 2 | 5 |
 | PB-07 ✅ | Configurar protecciones nativas (Stoploss, MaxDrawdown, etc.). | 2 | 3 |
 | PB-08 ✅ | Ejecutar análisis *lookahead-bias* y *recursive-analysis*. | 2 | 3 |
-| PB-09 | Realizar backtest sobre U1 (Líquido) y evaluar contra Benchmark. | 2 | 5 |
-| PB-10 | Realizar optimización controlada (`hyperopt`) si es necesario. | 2 | 5 |
-| PB-11 | Validar estrategia en datos Hold-Out (Prueba final). | 2 | 3 |
+| PB-09 ✅ | Realizar backtest sobre U1 (Líquido) y evaluar contra Benchmark. | 2 | 5 |
+| PB-10 ✅ | Realizar optimización controlada e ingeniería de señales (`hyperopt`). | 2 | 5 |
+| PB-11 ✅ | Validar estrategia en datos Hold-Out (Prueba final superada: +20.57% vs mercado -55.08%). | 2 | 3 |
 | PB-12 | Configurar servidor remoto para Dry-Run. | 3 | 5 |
 | PB-13 | Integrar bot de Telegram para notificaciones. | 3 | 2 |
 | PB-14 | Monitorear y evaluar Dry-Run (8 semanas) vs Backtest. | 3 | 8 |
@@ -52,7 +52,7 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 **Progreso y hallazgos del Sprint 1:**
 *   PB-01 y PB-02 terminados (decisiones: Docker con Freqtrade 2026.9 fijado, datos en `C:/meme_hunter_data`, histórico desde 2020-01, N=30).
 *   PB-03 terminado: script `build_universe.py` genera un mapa temporal (mes a mes) del Top 30 sin lookahead bias. La estrategia `MemeHunterV1` carga este mapa y anula las señales de los pares que no están en el universo válido para el mes en curso. Freqtrade procesa pares inactivos correctamente con `allow_inactive: true`.
-*   PB-04 terminado: Se excluyó `LUNAUSDT` (y estables) mediante blacklist rígida para evitar anomalías. Se escribió el script `download_target.py` que descarga 1m y 4h selectivamente solo para el Top 30.
+*   PB-04 terminado: Se descargó el 100% de los datos (68 pares del universo en 1d, 4h y 1m). APT/USDT completado con éxito.
 
 ### Sprint 2: Primera Estrategia y Validación Inicial
 **Objetivo del Sprint:** Programar la lógica base y correr los primeros backtests rigurosos.
@@ -66,22 +66,23 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 *   PB-05 y PB-06: La hipótesis se basa en Momentum (MACD) + Expansión de Volatilidad (ATR) + Filtro de Agotamiento (RSI). El Stop Loss es dinámico (2x ATR de la entrada).
 *   PB-07: Freqtrade aceptó la configuración de protecciones.
 *   PB-08: El `lookahead-analysis` arrojó "No bias detected". Las matemáticas son válidas.
-*   *Test Preliminar:* Un dry-test en 2021 sobre BTC y LUNA confirmó que el pipeline funciona y el sistema genera ganancias marginales (Expectancy de 0.13), pero el Profit Factor (1.05) no alcanzó el objetivo. El siguiente paso en el Sprint 3 es ejecutar PB-09 con todos los datos y analizar si es necesaria la hiper-optimización (PB-10).
 
 ### Sprint 3: La Prueba de Fuego (Evaluación Estadística)
 **Objetivo del Sprint:** Saber estadísticamente si la estrategia sirve o se descarta.
-*   **PB-09:** Backtest completo en U1 y comparación vs Buy&Hold.
-*   **PB-10:** Optimización de hiperparámetros acotada (opcional/limitada).
-*   **PB-11:** Prueba final con el conjunto de retención (Hold-out).
-*   **Entregable (Incremento):** Reporte cuantitativo de resultados. **Decisión GO/NO-GO para la Fase 1.**
+*   **PB-09 ✅:** Backtest completo en U1 (2020-01 a 2025-06, 5,562 operaciones con `--timeframe-detail 1m`) y evaluación cuantitativa contra DAS.
+*   **PB-10 ✅:** Optimización e ingeniería de señales. Diagnóstico: las salidas por cruce bajista de MACD drenaban las ganancias; se desactivó `use_exit_signal`, incorporó filtro macro `EMA 200` y escalera ROI progresiva con trailing offset de 11.9%.
+*   **PB-11 ✅:** Prueba ciega con el conjunto sagrado de retención (Hold-out 2025-07 a 2026-09, 462 trades). **Resultado:** +20.57% de ganancia neta (+205.68 USDT) frente a un desplome del mercado de -55.08%, con Sortino de 1.41 y Win Rate del 57.8%.
+*   **PB-11.1 ✅:** Simulación de Monte Carlo (7,500 iteraciones Bootstrap). Validó expectativa matemática positiva y sensibilidad al tamaño de posición (recomendado 10% por posición para mitigar el riesgo de cola).
+*   **PB-11.2 ✅:** Batería de Pruebas de Estrés Hostil (`scripts/stress_test.py`). Demostró que el *edge* neto es de +0.50% a +0.70% por trade (las órdenes Maker y el SpreadFilter son obligatorios para no ser devorados por fees) y reveló que el sistema soportó 6 meses consecutivos en negativo (Q4 2025 y Q1 2026) antes de recuperarse.
+*   **Entregable (Incremento):** Estrategia adaptativa `MemeHunterV2` validada en out-of-sample sin overfitting. **Decisión GO oficial para el Sprint 4 (Dry-Run en Vivo).**
 
-### Sprint 4: Infraestructura Cloud y Dry-Run
-**Objetivo del Sprint:** Desplegar el bot de forma segura en la nube para simulación en vivo.
-*   *(Condicionado a aprobar el Sprint 3)*
-*   **PB-12:** Instalar Freqtrade en VPS Linux.
-*   **PB-13:** Conectar notificaciones por Telegram.
-*   **PB-14 (Inicio):** Iniciar el Dry-Run.
-*   **Entregable (Incremento):** Bot operando 24/7 en la nube generando señales y operaciones simuladas.
+### Sprint 4: Infraestructura y Dry-Run en Vivo
+**Objetivo del Sprint:** Desplegar el bot en tiempo real contra la API de Binance Spot en modo simulado.
+*   **PB-12 (Spot) ✅:** Contenedor Docker en vivo (`meme_hunter_live`) con microestructura activa en Binance Spot (FreqUI en puerto 8080).
+*   **PB-12.1 (Futuros USDT-M) ✅:** Motor bidireccional Long/Short (`MemeHunterFuturesV1.py`) con margen aislado 1x (sin riesgo de liquidación), comisiones reducidas (0.02% Maker) y contenedor `meme_hunter_futures` activo con FreqUI en puerto 8081.
+*   **PB-13:** Conectar notificaciones por Telegram (opcional/configurable en `.env`).
+*   **PB-14 (En Ejecución) 🔄:** Dry-Run en vivo dual (Spot y Futuros) acumulando operaciones reales contra la API de Binance.
+*   **PB-15 (Futuro):** Migración a VPS Linux para operación ininterrumpida 24/7.
 
 ---
 
