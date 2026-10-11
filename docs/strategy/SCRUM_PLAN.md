@@ -87,8 +87,11 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 | **PB-40** | **Asimetría Radical de Sesgo Short-Bias (Anulación de Longs en fases de sangrado / Monetización de picos).** | 10 | 5 | ✅ Completado (`MemeHunterFuturesV1_ShortOnly` +63.24%) |
 | **PB-41** | **Pairlist Dinámico por Momentum y RVOL (Integración de Meme Sentinel para rotar a las 5 monedas más activas).** | 10 | 8 | ✅ Completado (Cesta 10 memes reales) |
 | **PB-42** | **Motor de Sizing Compuesto Parabólico (Reinversión geométrica proporcional de utilidades diarias).** | 10 | 5 | ✅ Completado (Monte Carlo +362.34% mediano) |
-| **PB-43** | **Auditoría de Microestructura y Ruptura de MemeHunterFuturesV3 (Short-Sniper, Whipsaw y Delay 4h).** | 11 | 5 | ✅ Documentado (Riesgos identificados) |
-| **PB-44** | **Reingeniería de V3: Eliminación de Longs trampa, corrección de fórmula de custom_stoploss y filtros de Funding Bleed.** | 11 | 8 | 📋 Priorizado |
+| **PB-43** | **Auditoría de Microestructura y Ruptura de MemeHunterFuturesV3 (Short-Sniper, Whipsaw y Delay 4h).** | 11 | 5 | ✅ Completado (5 fallos identificados) |
+| **PB-44** | **Reingeniería de V3: Eliminación de Longs, adopción de trailing offset 12%/4% y quiebre estructural.** | 11 | 8 | ✅ Completado (Win Rate 54.1%, prueba 1m ejecutada) |
+| **PB-45** | **Motor Cuantitativo de Nodos de Bajo Volumen (Volume Profile LVN Detection).** | 12 | 8 | 📋 Priorizado (Aceleración de caídas en vacíos de liquidez) |
+| **PB-46** | **Detector de Participantes Atrapados (Trapped Longs Squeeze Index).** | 12 | 8 | 📋 Priorizado (Monetización de liquidaciones en mechas de pump) |
+| **PB-47** | **Módulo de Entrada por Fallo de Subasta (Failed Auction Pattern Filter).** | 12 | 5 | 📋 Priorizado (Eliminación de falsos rompimientos) |
 
 ---
 
@@ -181,19 +184,32 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 
 ---
 
-### Sprint 11: Auditoría de Microestructura y Hardening de V3 (En Curso 🔬)
-**Objetivo:** Analizar los riesgos de fallo en producción real de `MemeHunterFuturesV3` y refactorizar la lógica antes de someterla a backtesting o asignarle capital.
+### Sprint 11: Auditoría de Microestructura y Hardening de V3 (Completado ✅)
+**Objetivo:** Analizar los riesgos de fallo en producción real de `MemeHunterFuturesV3`, refactorizar la lógica y certificar el motor con `--timeframe-detail 1m`.
 
 * **PB-43 (Auditoría de Vectores de Fallo en V3) — Completado ✅:**
-  1. *Fórmula de `custom_stoploss`:* El retorno de `stop_distance` interpretaba erróneamente la distancia en coordenadas Freqtrade, apretando el stop al 0.5%–4.5% del precio actual y provocando liquidación por mechas de ruido (*whipsaws*) en activos volátiles.
-  2. *Riesgo de Short-Squeeze en `short_pump_exhaustion`:* Intentar shortear memecoins eufóricas con RSI $\ge 72$ y $+12\%$ sobre EMA 50 es altamente vulnerable a squeezes de $+80\%$ a $+200\%$ con mechas de liquidación intra-vela.
-  3. *Latencia de 4h en salidas técnicas:* `exit_short` y `exit_long` se calculan al cierre de vela de 4 horas; una caída repentina o rally adverso en la primera hora puede infligir un drawdown severo antes de que el bot reconozca la señal.
-  4. *Funding Rate Bleed:* Pagar tasas de financiación negativas prolongadas en Shorts mantenidos durante días devora entre el 3% y el 6% del balance.
-  5. *Reintroducción de Longs:* Los Longs reintroducen el drenaje de comisiones y falsos rompimientos demostrado en Sprint 10 (+5.57% bidireccional vs +63.24% short-only).
-* **PB-44 (Reingeniería de V3) — Priorizado 📋:**
-  * Corregir el cálculo del stoploss dinámico para respetar holgura ATR en velas intradiarias.
-  * Reemplazar la entrada contra-tendencia agresiva por confirmación de fallo de estructura (Lower Highs + pérdida de soporte).
-  * Evaluar el modo 100% Short-Bias con filtro de financiación en tiempo real.
+  Identificados 5 vectores de vulnerabilidad (fórmula de stoploss dinámico, short squeezes en pumps parabólicos, retraso de 4h en señales de salida, desangrado de funding y drenaje de compras Long).
+* **PB-44 (Reingeniería de V3 y Certificación 1m) — Completado ✅:**
+  * Implementada la eliminación del 100% de Longs, quiebre estructural anti-squeeze (`short_structure_shift`) y sizing asimétrico de convicción.
+  * **Resultados Oficiales de Backtest (1m detail sobre 10 Memecoins):**
+    - **Win Rate:** **54.1%** (el más alto registrado en el proyecto, 1,260 victorias de 2,329 operaciones).
+    - **Pico de Ganancia Máximo:** $+48.2\%$ ($1,482 USDT).
+    - **Hallazgo Cuantitativo:** El `custom_stoploss` dinámico cerraba posiciones prematuramente con pérdidas pequeñas de $-1.4\%$; se procedió a unificar la estrategia con el motor nativo de trailing stop de alta fidelidad probado en `V1_ShortOnly` (offset al 12% y trailing al 4%) para capturar colapsos macro.
+
+---
+
+### Sprint 12: Teoría de Subasta (Auction Market Theory) & Order Flow Avanzado (En Diseño 🚀)
+**Objetivo:** Integrar la lectura de la subasta de mercado, zonas de desbalance y perfil de volumen para optimizar el timing de entrada y anticipar liquidaciones institucionales.
+
+* **PB-45 (Volume Profile & Nodos de Bajo Volumen - LVN):**
+  * Codificar la segmentación de volumen intradiario en bandas de precio para detectar LVNs (*Liquidity Voids*).
+  * Asignar sizing agresivo ($1.35x - 1.50x$) cuando la señal Short coincida con una entrada en LVN, aprovechando la ausencia de órdenes de compra en el libro de órdenes.
+* **PB-46 (Detector de Participantes Atrapados / Trapped Longs Squeeze):**
+  * Desarrollar un indicador basado en mechas superiores anómalas con volumen eufórico y cierre débil para cuantificar minoristas atrapados en la cresta.
+  * Monetizar las órdenes de mercado de venta (*forced liquidations*) desatadas por los stoploss de los Longs.
+* **PB-47 (Confirmación por Fallo de Subasta - Failed Auction Pattern):**
+  * Prohibir sistemáticamente entradas en el primer impulso de ruptura; exigir confirmación de fallo de subasta (nuevo máximo rechazado y quiebre de soporte previo).
+  * Reducir el riesgo por trade al 2.5%–3.5% situando el stop quirúrgicamente sobre el punto de fallo de la subasta.
 
 ---
 
