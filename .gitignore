@@ -25,3 +25,7 @@ venv/
 .idea/
 Thumbs.db
 desktop.ini
+
+# Configs con credenciales de FreqUI/API (usar .env / ejemplos)
+user_data/config_live.json
+user_data/config_futures.json

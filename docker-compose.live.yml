@@ -1,0 +1,22 @@
+---
+# meme_hunter - Despliegue en Vivo / Dry-Run (DAS v3.1 Fase 1)
+services:
+  freqtrade_live:
+    image: meme_hunter:2026.9
+    restart: unless-stopped
+    container_name: meme_hunter_live
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+      - "C:/meme_hunter_data:/freqtrade/user_data/data"
+      - "./scripts:/freqtrade/scripts"
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - path: .env
+        required: false
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_live.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3.live.sqlite
+      --config /freqtrade/user_data/config_live.json
+      --strategy MemeHunterV2

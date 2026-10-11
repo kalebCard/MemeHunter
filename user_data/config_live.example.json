@@ -1,0 +1,121 @@
+{
+    "$schema": "https://schema.freqtrade.io/schema.json",
+    "bot_name": "meme_hunter_live",
+    "dry_run": true,
+    "dry_run_wallet": 1000,
+    "trading_mode": "spot",
+    "margin_mode": "",
+
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+    "max_open_trades": 10,
+    "tradable_balance_ratio": 0.99,
+    "fiat_display_currency": "USD",
+
+    "timeframe": "4h",
+    "stoploss": -0.15,
+    "cancel_open_orders_on_exit": true,
+    "unfilledtimeout": {
+        "entry": 10,
+        "exit": 10,
+        "exit_timeout_count": 0,
+        "unit": "minutes"
+    },
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1,
+        "price_last_balance": 0.0,
+        "check_depth_of_market": {
+            "enabled": true,
+            "bids_to_ask_delta": 1
+        }
+    },
+    "exit_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+
+    "exchange": {
+        "name": "binance",
+        "key": "",
+        "secret": "",
+        "ccxt_config": {},
+        "ccxt_async_config": {},
+        "pair_whitelist": [
+            ".*/USDT"
+        ],
+        "pair_blacklist": [
+            "(BTC|ETH|ADA|BNB|XRP|DOT|LINK|UNI|LTC|AAVE|1INCH|TRX|EOS|FIL|SUSHI)UP/.*",
+            ".*(DOWN|BEAR|BULL)/.*",
+            "(USDC|FDUSD|TUSD|BUSD|DAI|USDP|EUR|AEUR)/.*",
+            "(WBTC|WETH|WBETH|BTCST)/.*",
+            "LUNA/.*"
+        ]
+    },
+
+    "pairlists": [
+        {
+            "method": "VolumePairList",
+            "number_assets": 30,
+            "sort_key": "quoteVolume",
+            "min_value": 500000,
+            "refresh_period": 1800
+        },
+        {
+            "method": "AgeFilter",
+            "min_days_listed": 30
+        },
+        {
+            "method": "PrecisionFilter"
+        },
+        {
+            "method": "PriceFilter",
+            "low_price_ratio": 0.001,
+            "min_price": 0.000001
+        },
+        {
+            "method": "SpreadFilter",
+            "max_spread_ratio": 0.003
+        }
+    ],
+
+    "telegram": {
+        "enabled": false,
+        "token": "",
+        "chat_id": "",
+        "notification_settings": {
+            "status": "on",
+            "warning": "on",
+            "startup": "on",
+            "entry": "on",
+            "entry_cancel": "on",
+            "entry_fill": "on",
+            "exit": "on",
+            "exit_cancel": "on",
+            "exit_fill": "on",
+            "protection_trigger": "on"
+        }
+    },
+
+    "api_server": {
+        "enabled": true,
+        "listen_ip_address": "0.0.0.0",
+        "listen_port": 8080,
+        "verbosity": "info",
+        "enable_openapi": false,
+        "jwt_secret_key": "CAMBIAR_ME",
+        "CORS_origins": [],
+        "username": "admin",
+        "password": "CAMBIAR_ME"
+    },
+
+    "initial_state": "running",
+    "force_entry_enable": false,
+    "internals": {
+        "process_throttle_secs": 5
+    },
+    "dataformat_ohlcv": "feather",
+    "dataformat_trades": "feather"
+}
