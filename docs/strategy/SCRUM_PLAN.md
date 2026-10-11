@@ -44,6 +44,7 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 | **PB-19** | **Clasificador Cuantitativo de Régimen de Mercado y Adaptación Dinámica de Riesgo.** | 6 | 13 | ✅ Completado |
 | **PB-20** | **Aprovisionamiento en VPS Ubuntu 24/7 con `deploy_vps.sh` y hardening de seguridad.** | 7 | 5 | 📋 Backlog |
 | **PB-21** | **Conexión a Copy-Trading (Binance / Bybit) para escala de capital vía Profit Share.** | 7 | 8 | 📋 Backlog |
+| **PB-22** | **Interés Compuesto Dinámico (Sizing Geométrico / Compounding en Futuros) para crecimiento exponencial.** | 8 | 5 | 📋 Priorizado (Siguiente Paso) |
 
 ---
 
@@ -55,11 +56,12 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 * Simulación de Monte Carlo y blindaje contra ruina. Kill-Switch implementado y validado en tests unitarios.
 
 ### Sprint 4: Estabilización Operativa y Dry-Run Dual (Actual 🔄)
-**Objetivo:** Monitorear la microestructura real de Binance en modo simulado y mantener activo el bot.
-* **PB-12 ✅:** Contenedor `meme_hunter_futures` activo en Docker con FreqUI en puerto 8081.
-* **PB-13:** Configurar credenciales de Telegram en `.env` para monitoreo remoto.
-* **PB-14 🔄:** Auditoría continua con `scripts/dryrun_monitor.py`. (Semana 1 en curso).
-* **PB-15 (Kill-Switch) ✅:** Latch en `user_data/KILL_SWITCH` si el drawdown realizado supera el 25%.
+**Objetivo:** Monitorear la microestructura real de Binance en modo simulado y auditar la ejecución de órdenes.
+* **PB-12 ✅:** Contenedor `meme_hunter_futures` desplegado en Docker con interfaz FreqUI (puerto 8081).
+* **PB-13:** Configuración de credenciales de Telegram en `.env` para monitoreo remoto y alertas en tiempo real.
+* **PB-14 🔄:** Auditoría continua con `scripts/dryrun_monitor.py`.
+  * **Resultados en vivo registrados:** 1 trade cerrado en `MAGIC/USDT:USDT` con **+9.31% de beneficio** (+9.22 USDT) por trailing stop, 7 posiciones abiertas bajo gestión.
+* **Kill-Switch ✅:** Latch en `user_data/KILL_SWITCH` si el drawdown realizado acumulado supera el 25%.
 
 ---
 
@@ -84,12 +86,13 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 
 ---
 
-### Sprint 8: Despliegue Cloud y Multiplicador de Capital (Copy-Trading)
-**Objetivo:** El camino real hacia el crecimiento financiero exponencial: gestionar capital externo de forma automatizada.
+### Sprint 8: Crecimiento Exponencial, Despliegue Cloud y Multiplicador de Capital (En Curso / Priorizado 🚀)
+**Objetivo:** El camino real hacia el crecimiento financiero exponencial: interés compuesto y gestión de capital externo.
+* **PB-22 (Prioridad Inmediata):** Implementar **Interés Compuesto Dinámico (Sizing Geométrico)** en `config_futures.json` y estrategia, evaluando la reinversión de balance para transformar la curva de capital de lineal a exponencial.
 * **PB-20:** Despliegue en VPS (DigitalOcean / Hetzner / AWS) con el script `scripts/deploy_vps.sh`.
 * **PB-21:** Publicación de la estrategia en el programa de Lead Trader de Binance o Bybit:
-  - Mantener un Drawdown < 15% y Sortino > 1.5 para posicionarse en el Top Ranking de Copy Trading.
-  - Monetizar mediante **Profit Sharing** (10% - 15% de los beneficios generados a los seguidores).
+  * Mantener un Drawdown < 15% y Sortino > 1.5 para posicionarse en el Top Ranking de Copy Trading.
+  * Monetizar mediante **Profit Sharing** (10% - 15% de los beneficios generados a los seguidores).
 
 ---
 
