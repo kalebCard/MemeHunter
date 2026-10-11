@@ -15,6 +15,19 @@ import pandas_ta as ta
 
 LOG = logging.getLogger(__name__)
 
+KILL_SWITCH_DRAWDOWN = 0.25  # Bloquea nuevas entradas si el DD del equity realizado supera 25%
+KILL_SWITCH_FLAG = "KILL_SWITCH"  # Archivo latch en user_data (borrarlo para reanudar)
+LIVE_RUNMODES = ('live', 'dry_run', 'runmode.live', 'runmode.dry_run')
+
+
+def compute_drawdown(profits_abs, starting_balance: float) -> float:
+    """Drawdown maximo actual (fraccion) del equity realizado: (pico - actual) / pico."""
+    equity = peak = starting_balance
+    for p in profits_abs:
+        equity += p
+        peak = max(peak, equity)
+    return (peak - equity) / peak if peak > 0 else 0.0
+
 
 class MemeHunterFuturesV1(IStrategy):
     """
@@ -94,6 +107,51 @@ class MemeHunterFuturesV1(IStrategy):
         Elimina completamente el riesgo de liquidación en operaciones Short.
         """
         return 1.0
+
+    def _is_live_mode(self) -> bool:
+        runmode = self.config.get('runmode')
+        return bool(runmode) and str(runmode).lower() in LIVE_RUNMODES
+
+    def _kill_switch_path(self) -> Path:
+        return Path(self.config.get('user_data_dir', '/freqtrade/user_data')) / KILL_SWITCH_FLAG
+
+    def _current_drawdown(self) -> float:
+        closed = sorted(Trade.get_trades_proxy(is_open=False),
+                        key=lambda t: t.close_date_utc or datetime.min)
+        start = self.wallets.get_starting_balance() if getattr(self, 'wallets', None) \
+            else self.config.get('dry_run_wallet', 0)
+        return compute_drawdown([t.close_profit_abs or 0.0 for t in closed], start)
+
+    def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
+                            time_in_force: str, current_time: datetime, entry_tag: Optional[str],
+                            side: str, **kwargs) -> bool:
+        """
+        Kill-Switch (PB-15): si el drawdown del equity realizado supera KILL_SWITCH_DRAWDOWN,
+        no se abren nuevas posiciones. Las abiertas siguen gobernadas por sus stops.
+        En dry-run/live queda enclavado en un archivo (borrarlo para reanudar).
+        """
+        live = self._is_live_mode()
+        flag = self._kill_switch_path()
+        if live and flag.exists():
+            return False
+
+        dd = self._current_drawdown()
+        if dd < KILL_SWITCH_DRAWDOWN:
+            return True
+
+        LOG.error("KILL-SWITCH: drawdown %.2f%% >= %.0f%%. Entradas bloqueadas (%s %s).",
+                  dd * 100, KILL_SWITCH_DRAWDOWN * 100, side, pair)
+        if live:
+            try:
+                flag.write_text(f"Activado {current_time.isoformat()} con drawdown {dd:.2%}\n")
+            except OSError as exc:
+                LOG.error("No se pudo escribir el latch del kill-switch: %s", exc)
+            if getattr(self, 'dp', None):
+                try:
+                    self.dp.send_msg(f"KILL-SWITCH activado: drawdown {dd:.2%}. Entradas bloqueadas.")
+                except Exception:  # noqa: BLE001 - la notificacion no debe romper el bot
+                    pass
+        return False
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # MACD (12, 26, 9)
