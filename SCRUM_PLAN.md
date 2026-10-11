@@ -31,10 +31,10 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 | PB-09 ✅ | Realizar backtest sobre U1 (Líquido) y evaluar contra Benchmark. | 2 | 5 |
 | PB-10 ✅ | Realizar optimización controlada e ingeniería de señales (`hyperopt`). | 2 | 5 |
 | PB-11 ✅ | Validar estrategia en datos Hold-Out (Prueba final superada: +20.57% vs mercado -55.08%). | 2 | 3 |
-| PB-12 | Configurar servidor remoto para Dry-Run. | 3 | 5 |
+| PB-12 ✅ | Desplegar Dry-Run en contenedores Docker (Spot 8080 y Futuros USDT-M 8081). | 3 | 5 |
 | PB-13 | Integrar bot de Telegram para notificaciones. | 3 | 2 |
-| PB-14 | Monitorear y evaluar Dry-Run (8 semanas) vs Backtest. | 3 | 8 |
-| PB-15 | Implementar "Kill-Switch" y lógica de límite dinámico de riesgo. | 4 | 5 |
+| PB-14 🔄 | Monitorear y evaluar Dry-Run (8 semanas) vs Backtest. | 3 | 8 |
+| PB-15 | Migrar a VPS Linux 24/7 e implementar "Kill-Switch" y límite dinámico de riesgo. | 4 | 5 |
 | PB-16 | Configurar API Keys de producción y lanzar Fase 2. | 4 | 3 |
 
 ---
@@ -81,8 +81,10 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 *   **PB-12 (Spot) ✅:** Contenedor Docker en vivo (`meme_hunter_live`) con microestructura activa en Binance Spot (FreqUI en puerto 8080).
 *   **PB-12.1 (Futuros USDT-M) ✅:** Motor bidireccional Long/Short (`MemeHunterFuturesV1.py`) con margen aislado 1x (sin riesgo de liquidación), comisiones reducidas (0.02% Maker) y contenedor `meme_hunter_futures` activo con FreqUI en puerto 8081.
 *   **PB-13:** Conectar notificaciones por Telegram (opcional/configurable en `.env`).
-*   **PB-14 (En Ejecución) 🔄:** Dry-Run en vivo dual (Spot y Futuros) acumulando operaciones reales contra la API de Binance.
-*   **PB-15 (Futuro):** Migración a VPS Linux para operación ininterrumpida 24/7.
+*   **PB-14 (En Ejecución) 🔄:** Dry-Run en vivo dual (Spot y Futuros) acumulando operaciones reales contra la API de Binance. Inicio: 2026-10-11. Criterios de aceptación propuestos: win rate dentro de ±10 pp del backtest (57.8%), edge neto > 0.3% por trade y drawdown máximo < P95 de Monte Carlo. Revisión intermedia en semana 4 y decisión GO/NO-GO en semana 8.
+*   **PB-15 (Futuro):** Migración a VPS Linux (`scripts/deploy_vps.sh`) para operación 24/7, más Kill-Switch.
+*   **Nota de seguridad:** `config_live.json` y `config_futures.json` no se versionan (contienen credenciales de FreqUI); usar los `*.example.json`.
+*   **Hallazgo (día 1):** en futuros el filtro de profundidad de mercado rechaza la gran mayoría de entradas (1,074 rechazos vs 9 aceptadas); se reevaluará con más muestra.
 
 ---
 
