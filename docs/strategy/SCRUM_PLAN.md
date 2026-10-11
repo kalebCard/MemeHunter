@@ -17,10 +17,11 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 | H3 | PB-28 sin detalle de 1m en trailing stops. | 🔴 Crítica | ✅ **Resuelto (PB-28):** Simulado oficialmente con `--timeframe-detail 1m` sobre 14 millones de velas intradiarias. |
 | H4 | PB-25: `_current_drawdown()` dependía de atributo no estándar en Trade. | 🟠 Alta | ✅ **Resuelto (PB-33):** Cálculo dinámico con `trade.calc_profit(rate)` usando último precio de ticker/dataframe. |
 | H5 | PB-24: `_is_adverse_funding()` fallaba silenciosamente en llamada a exchange. | 🟠 Alta | ✅ **Resuelto (PB-34):** Consulta nativa a `exchange.fetch_funding_rate()` con logs visibles y advertencias. |
-| H6 | Dry-Run detenido: no hay contenedores Docker en ejecución. | 🟠 Alta | ⏳ **Pendiente (PB-32):** Listo para iniciar tras verificación de configuración. |
+| H6 | Dry-Run detenido: no hay contenedores Docker en ejecución. | 🟠 Alta | 🟢 **Activo:** Contenedor Docker en ejecución procesando validación intensiva con `--timeframe-detail 1m`. Kill-Switch 25% auditado en tiempo real. |
 | H7 | Telegram sin configurar (`.env` completamente comentado). | 🟡 Media | ⏳ **Pendiente (PB-13):** Credenciales pendientes de introducir por el usuario. |
 | H8 | Cifras contradictorias entre commits y documentos. | 🟡 Media | ✅ **Resuelto (PB-38):** Sincronizado `INFORME_FUTUROS_100_USDT.md` con las métricas oficiales (+5.57% neto / +10.38% Shorts). |
 | H9 | Tests de estrategia requerían entorno Freqtrade. | 🟡 Media | ✅ **Resuelto (PB-38):** Verificados los 59 tests pasando al 100% dentro del contenedor Docker. |
+| H10 | Riesgos estructurales en MemeHunterFuturesV3 (Short-Sniper contra pump, fórmula errónea de stop dinámico y reintroducción de Longs). | 🔴 Crítica | ⚠️ **Auditoría Documentada (PB-43):** Identificados 5 vectores de fallo en producción real antes de arriesgar capital. |
 
 ---
 
@@ -82,11 +83,12 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 | **PB-35** | **Retirar backtest sintético `realistic_v3` y restaurar `.last_result.json` a un backtest real de Freqtrade.** | 9 | 2 | ✅ Completado (`21-24-28.zip`) |
 | **PB-36** | **Descargar datos futuros (4h, 1d, 1m, funding, mark) del universo de memecoins.** | 9 | 3 | ✅ Completado (10 pares / 14M velas) |
 | **PB-37** | **Re-ejecutar Monte Carlo, stress test y daily performance sobre el backtest real certificado (PB-28 + PB-30).** | 9 | 3 | ✅ Completado |
-| **PB-38** | **Unificar métricas oficiales en docs/README, corregir contradicciones y sincronizar informe.** | 9 | 2 | ✅ Completado |
-| **PB-39** | **Motor Intradiario de Alta Frecuencia (Migración a timeframe 1h/15m para capturar volatilidad diaria).** | 10 | 8 | 🚀 En Diseño |
-| **PB-40** | **Asimetría Radical de Sesgo Short-Bias (Anulación de Longs en fases de sangrado / Monetización de picos).** | 10 | 5 | 🚀 En Diseño |
-| **PB-41** | **Pairlist Dinámico por Momentum y RVOL (Integración de Meme Sentinel para rotar a las 5 monedas más activas).** | 10 | 8 | 📋 Backlog |
-| **PB-42** | **Motor de Sizing Compuesto Parabólico (Reinversión geométrica proporcional de utilidades diarias).** | 10 | 5 | 📋 Backlog |
+| **PB-39** | **Motor Intradiario de Alta Frecuencia (Migración a timeframe 1h/15m para capturar volatilidad diaria).** | 10 | 8 | ❌ Refutado (-75.46% en fees) |
+| **PB-40** | **Asimetría Radical de Sesgo Short-Bias (Anulación de Longs en fases de sangrado / Monetización de picos).** | 10 | 5 | ✅ Completado (`MemeHunterFuturesV1_ShortOnly` +63.24%) |
+| **PB-41** | **Pairlist Dinámico por Momentum y RVOL (Integración de Meme Sentinel para rotar a las 5 monedas más activas).** | 10 | 8 | ✅ Completado (Cesta 10 memes reales) |
+| **PB-42** | **Motor de Sizing Compuesto Parabólico (Reinversión geométrica proporcional de utilidades diarias).** | 10 | 5 | ✅ Completado (Monte Carlo +362.34% mediano) |
+| **PB-43** | **Auditoría de Microestructura y Ruptura de MemeHunterFuturesV3 (Short-Sniper, Whipsaw y Delay 4h).** | 11 | 5 | ✅ Documentado (Riesgos identificados) |
+| **PB-44** | **Reingeniería de V3: Eliminación de Longs trampa, corrección de fórmula de custom_stoploss y filtros de Funding Bleed.** | 11 | 8 | 📋 Priorizado |
 
 ---
 
@@ -176,6 +178,22 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
     - Cero probabilidad de ruina (peor caso simulado nunca tocó $0).
 * **PB-32 (Simulación Continua y Dry-Run 24/7) — Siguiente Paso ⏳:**
   * Desplegar `MemeHunterFuturesV1_ShortOnly` en el contenedor Docker para acumular métricas oficiales en tiempo real.
+
+---
+
+### Sprint 11: Auditoría de Microestructura y Hardening de V3 (En Curso 🔬)
+**Objetivo:** Analizar los riesgos de fallo en producción real de `MemeHunterFuturesV3` y refactorizar la lógica antes de someterla a backtesting o asignarle capital.
+
+* **PB-43 (Auditoría de Vectores de Fallo en V3) — Completado ✅:**
+  1. *Fórmula de `custom_stoploss`:* El retorno de `stop_distance` interpretaba erróneamente la distancia en coordenadas Freqtrade, apretando el stop al 0.5%–4.5% del precio actual y provocando liquidación por mechas de ruido (*whipsaws*) en activos volátiles.
+  2. *Riesgo de Short-Squeeze en `short_pump_exhaustion`:* Intentar shortear memecoins eufóricas con RSI $\ge 72$ y $+12\%$ sobre EMA 50 es altamente vulnerable a squeezes de $+80\%$ a $+200\%$ con mechas de liquidación intra-vela.
+  3. *Latencia de 4h en salidas técnicas:* `exit_short` y `exit_long` se calculan al cierre de vela de 4 horas; una caída repentina o rally adverso en la primera hora puede infligir un drawdown severo antes de que el bot reconozca la señal.
+  4. *Funding Rate Bleed:* Pagar tasas de financiación negativas prolongadas en Shorts mantenidos durante días devora entre el 3% y el 6% del balance.
+  5. *Reintroducción de Longs:* Los Longs reintroducen el drenaje de comisiones y falsos rompimientos demostrado en Sprint 10 (+5.57% bidireccional vs +63.24% short-only).
+* **PB-44 (Reingeniería de V3) — Priorizado 📋:**
+  * Corregir el cálculo del stoploss dinámico para respetar holgura ATR en velas intradiarias.
+  * Reemplazar la entrada contra-tendencia agresiva por confirmación de fallo de estructura (Lower Highs + pérdida de soporte).
+  * Evaluar el modo 100% Short-Bias con filtro de financiación en tiempo real.
 
 ---
 

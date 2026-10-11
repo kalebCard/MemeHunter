@@ -109,15 +109,19 @@ class MemeHunterFuturesV3(IStrategy):
                             leverage: float, entry_tag: Optional[str], side: str,
                             **kwargs) -> float:
         """
-        Sizing Asimétrico de Alta Convicción:
-        - Shorts (Motor principal de beneficio en memecoins): Asignación 1.35x.
-        - Longs (Filtro estricto): Asignación 0.50x.
+        Sizing Asimétrico de Máxima Convicción Cuantitativa:
+        - Longs: 0.0 (Elimina por completo el drenaje de comisiones y falsos rompimientos).
+        - Shorts de Quiebre Estructural ('short_structure_shift'): 1.30x (Alta convicción tras pump exhaustion).
+        - Shorts Macro Breakdown ('short_macro_breakdown'): 1.0x (Tendencia estándar).
         """
+        if side == "long":
+            return 0.0
+
         base_stake = proposed_stake
-        if side == "short":
-            stake = base_stake * 1.35
+        if entry_tag == "short_structure_shift":
+            stake = base_stake * 1.30
         else:
-            stake = base_stake * 0.50
+            stake = base_stake * 1.0
 
         if min_stake is not None:
             stake = max(stake, min_stake)
@@ -128,24 +132,34 @@ class MemeHunterFuturesV3(IStrategy):
                         current_rate: float, current_profit: float, after_fill: bool,
                         **kwargs) -> Optional[float]:
         """
-        INNOVACIÓN: Gestor de Break-Even y Bloqueo Dinámico de Ganancias (Tiered Profit Locking).
-        Protege las ganancias acumuladas y elimina el riesgo de round-trip.
+        GESTOR DINÁMICO DE STOPLOSS Y PROTECCIÓN DE CAPITAL:
+        Evita whipsaws intradiarios en velas de 4h garantizando un margen mínimo
+        de holgura del 3.5% respecto al precio actual.
+        - current_profit >= +20%: Trailing ajustado al 4.0% desde el precio pico actual.
+        - current_profit >= +10%: Asegura al menos +4.5% de ganancia neta.
+        - current_profit >= +5.0%: Break-even protegiendo comisiones (+0.8% asegurado).
+        - Por defecto: Stoploss de emergencia inicial (-9.0%).
         """
-        # Tier 3: Ganancia explosiva (> 20%) -> Asegurar trailing ajustado a 4.0%
+        # Tier 3: Ganancia explosiva (> 20%) -> Trailing stop del 4.0% desde el precio actual
         if current_profit >= 0.20:
             return -0.040
 
-        # Tier 2: Ganancia sustancial (> 10%) -> Asegurar al menos +5.0% de beneficio cerrado
+        # Tier 2: Ganancia sustancial (> 10%) -> Asegurar al menos +4.5% de ganancia neta
         if current_profit >= 0.10:
-            # Distancia desde current_profit hasta +5.0%
-            profit_to_protect = 0.05
-            stop_distance = (current_profit - profit_to_protect) / (1 + current_profit)
+            # En Freqtrade, el stoploss relativo al precio actual para asegurar un profit 'p_target'
+            # se expresa como: -(current_profit - p_target) / (1 + current_profit)
+            profit_to_protect = 0.045
+            stop_distance = (current_profit - profit_to_protect) / (1.0 + current_profit)
+            # Garantizar que nunca sea menor al 3.5% para no ser barrido por una mecha
+            stop_distance = max(stop_distance, 0.035)
             return -stop_distance
 
-        # Tier 1: Break-Even Temprano (> 5%) -> Mover Stoploss a +0.5% (Cero Riesgo de Pérdida)
+        # Tier 1: Break-Even (+5.0%) -> Asegurar +0.8% para absorber comisiones completas Maker/Taker
         if current_profit >= 0.05:
-            profit_to_protect = 0.005
-            stop_distance = (current_profit - profit_to_protect) / (1 + current_profit)
+            profit_to_protect = 0.008
+            stop_distance = (current_profit - profit_to_protect) / (1.0 + current_profit)
+            # Holgura de seguridad de al menos 3.5%
+            stop_distance = max(stop_distance, 0.035)
             return -stop_distance
 
         # Por defecto, mantener el stoploss duro inicial (-9%)
@@ -191,6 +205,9 @@ class MemeHunterFuturesV3(IStrategy):
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
                             time_in_force: str, current_time: datetime, entry_tag: Optional[str],
                             side: str, **kwargs) -> bool:
+        if side == "long":
+            return False
+
         live = self._is_live_mode()
         flag = self._kill_switch_path()
         if live and flag.exists():
@@ -199,11 +216,20 @@ class MemeHunterFuturesV3(IStrategy):
         if self._is_adverse_funding(pair, side):
             return False
 
-        if not live:
-            return True
-
-        # En live/dry_run se evalúa el latch de KillSwitch
         return True
+
+    def custom_exit(self, pair: str, trade: Trade, current_time: datetime, current_rate: float,
+                    current_profit: float, **kwargs) -> Optional[str]:
+        """
+        Salida por Decaimiento Temporal / Funding Exhaustion:
+        Si la posición lleva abierta más de 72 horas (4320 min) y se encuentra estancada
+        con ganancia menor al +1.5%, cerramos para liberar margen y no sangrar funding fees.
+        """
+        trade_duration = (current_time - trade.open_date_utc).total_seconds() / 60.0
+        if trade_duration >= 4320 and current_profit < 0.015:
+            return "time_decay_exit"
+
+        return None
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # MACD (12, 26, 9)
@@ -246,26 +272,10 @@ class MemeHunterFuturesV3(IStrategy):
         dataframe.loc[:, 'enter_tag'] = ''
 
         # -------------------------------------------------------------
-        # 1. SEÑALES LONG (Breakout Blindado de Alta Liquidez)
+        # 1. SEÑALES LONG = 0 (Desactivadas por Evidencia Cuantitativa Oficial)
+        # Las memecoins sufren un 95% de decaimiento post-pump; eliminar longs
+        # protege el capital de trampas de liquidez y falsos rompimientos.
         # -------------------------------------------------------------
-        # Solo abrimos Long si:
-        # - Precio sobre EMA 200 (Tendencia macro)
-        # - MACD alcista
-        # - RVOL >= 2.0 (Volumen institucional anómalo comprobado)
-        # - ADX >= 22 (Tendencia direccional fuerte, evita rangos y trampas)
-        # - RSI saludable (55 <= RSI <= 75)
-        long_conditions = (
-            (dataframe['close'] > dataframe['ema_200']) &
-            (dataframe['macd'] > dataframe['macdsignal']) &
-            (dataframe['macd'] > 0) &
-            (dataframe['rvol'] >= 2.0) &
-            (dataframe['adx'] >= 22.0) &
-            (dataframe['rsi'] >= 55) &
-            (dataframe['rsi'] <= 75) &
-            (dataframe['volume'] > 0)
-        )
-        dataframe.loc[long_conditions, 'enter_long'] = 1
-        dataframe.loc[long_conditions, 'enter_tag'] = 'long_institutional_breakout'
 
         # -------------------------------------------------------------
         # 2. SEÑALES SHORT A: "Trend Breakdown" (Colapso Macro bajo EMA 200)
@@ -282,22 +292,24 @@ class MemeHunterFuturesV3(IStrategy):
         dataframe.loc[short_macro_conditions, 'enter_tag'] = 'short_macro_breakdown'
 
         # -------------------------------------------------------------
-        # 3. SEÑALES SHORT B: "Pump Exhaustion / Sniper" (Agotamiento de Euforia)
+        # 3. SEÑALES SHORT B: "Pump Breakdown / Structure Shift" (Fin de Euforia Confirmado)
         # -------------------------------------------------------------
-        # Detecta el techo de un pump violento:
-        # - Precio extendido > 12% por encima de EMA 50
-        # - RSI >= 72 (Sobrecompra extrema)
-        # - MACD histograma decreciendo (pérdida de inercia compradora)
-        # - Cierre por debajo de la apertura o rechazo superior
-        short_sniper_conditions = (
-            (dataframe['dist_ema_50'] >= 0.12) &
-            (dataframe['rsi'] >= 72) &
+        # Blindaje anti-squeeze: No shorteamos el cuchillo alcista.
+        # Exigimos confirmación de quiebre estructural:
+        # - El precio venía sobreextendido (> 12% sobre EMA 50 en últimas 3 velas)
+        # - Pierde el mínimo de la vela previa (close < low.shift(1))
+        # - RSI abandona la sobrecompra (cruza a la baja bajo 68 tras haber tocado >= 70)
+        # - Histograma MACD en contracción o negativo
+        short_structure_shift = (
+            (dataframe['dist_ema_50'].rolling(window=3).max() >= 0.12) &
+            (dataframe['close'] < dataframe['low'].shift(1)) &
+            (dataframe['rsi'] < 68) &
+            (dataframe['rsi'].shift(1) >= 65) &
             (dataframe['macdhist'] < dataframe['macdhist'].shift(1)) &
-            (dataframe['close'] < dataframe['open']) &  # Vela de rechazo bajista
             (dataframe['volume'] > 0)
         )
-        dataframe.loc[short_sniper_conditions, 'enter_short'] = 1
-        dataframe.loc[short_sniper_conditions, 'enter_tag'] = 'short_pump_exhaustion'
+        dataframe.loc[short_structure_shift, 'enter_short'] = 1
+        dataframe.loc[short_structure_shift, 'enter_tag'] = 'short_structure_shift'
 
         return dataframe
 
