@@ -13,11 +13,13 @@ class MemeHunterV1(IStrategy):
     minimal_roi = {
         "0": 100.0  # Solo cerramos por señales o stop/trailing (optimizaremos esto con Freqtrade nativamente)
     }
-    stoploss = -0.99  # Desactivar el estático; se usa custom_stoploss basado en ATR
+    stoploss = -0.15  # Techo máximo de seguridad hard-stop (15%)
     trailing_stop = True
     trailing_stop_positive = 0.05
     trailing_stop_positive_offset = 0.10
     trailing_only_offset_is_reached = True
+
+    use_exit_signal = False
 
     # Parámetros de Optimización (Hyperopt - PB-10)
     # Rango del RSI para entrada
@@ -27,8 +29,8 @@ class MemeHunterV1(IStrategy):
     # Multiplicador del ATR para el Stoploss dinámico
     atr_sl_mult = DecimalParameter(1.0, 4.0, default=2.0, space="sell", optimize=True)
 
-    # Definimos que necesitamos al menos 30 velas para calcular las medias y el MACD
-    startup_candle_count = 30
+    # Necesitamos al menos 200 velas para calcular la EMA de régimen macro
+    startup_candle_count = 200
 
     # Protecciones de Cartera (DAS §3.1)
     protections = [
@@ -68,7 +70,11 @@ class MemeHunterV1(IStrategy):
     def __init__(self, config: dict) -> None:
         super().__init__(config)
         self._universe = {}
-        universe_path = Path(config['datadir']) / "binance_vision" / "universe.json"
+        datadir = Path(config['datadir'])
+        universe_path = datadir / "binance_vision" / "universe.json"
+        if not universe_path.exists():
+            universe_path = datadir.parent / "binance_vision" / "universe.json"
+
         if universe_path.exists():
             self._universe = json.loads(universe_path.read_text())
         else:
@@ -100,6 +106,10 @@ class MemeHunterV1(IStrategy):
             dataframe['macd'] = 0
             dataframe['macdsignal'] = 0
 
+        # Indicadores: EMA 200 como filtro macro de régimen
+        ema200 = ta.ema(dataframe['close'], length=200)
+        dataframe['ema_200'] = ema200 if ema200 is not None else 0
+
         # Indicadores: ATR para volatilidad
         dataframe['atr'] = ta.atr(dataframe['high'], dataframe['low'], dataframe['close'], length=14)
         dataframe['atr_sma'] = ta.sma(dataframe['atr'], length=14)
@@ -112,6 +122,7 @@ class MemeHunterV1(IStrategy):
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe.loc[
             (
+                (dataframe['close'] > dataframe['ema_200']) &      # Filtro de régimen macro alcista
                 (dataframe['macd'] > dataframe['macdsignal']) &    # Momentum alcista
                 (dataframe['atr'] > dataframe['atr_sma']) &        # Expansión de volatilidad
                 (dataframe['rsi'] > self.rsi_lower.value) &        # Tendencia sana (optimizada)
@@ -134,24 +145,20 @@ class MemeHunterV1(IStrategy):
     def custom_stoploss(self, pair: str, trade: 'Trade', current_time: 'datetime',
                         current_rate: float, current_profit: float, **kwargs) -> float:
         """
-        Stoploss dinámico: 2x ATR del momento de la entrada.
-        Si la vela de entrada no tiene ATR, fallback al 10%.
+        Stoploss dinámico: mult * ATR del momento de la entrada.
+        Si el precio cae por debajo del stop_price, retorna 1 para ejecutar la venta inmediata.
         """
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-        last_candle = dataframe.iloc[-1].squeeze()
-
-        # Si el trade acaba de abrirse, miramos el ATR en ese momento
         if trade.open_date_utc:
-            # Buscar la vela de entrada (o la anterior)
             entry_candles = dataframe[dataframe['date'] <= trade.open_date_utc]
             if not entry_candles.empty:
                 entry_atr = entry_candles.iloc[-1]['atr']
                 if entry_atr > 0 and trade.open_rate > 0:
-                    # Riesgo = mult * ATR
                     stop_mult = self.atr_sl_mult.value
                     stop_price = trade.open_rate - (stop_mult * entry_atr)
-                    if current_rate > stop_price:
-                        return (stop_price - current_rate) / current_rate
+                    if current_rate <= stop_price:
+                        return 1  # Salida inmediata si el precio perforó el stop
+                    return (stop_price - current_rate) / current_rate
         
-        # Fallback
+        # Fallback de seguridad
         return -0.10

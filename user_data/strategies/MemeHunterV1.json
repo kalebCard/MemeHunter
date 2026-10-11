@@ -1,0 +1,32 @@
+{
+  "strategy_name": "MemeHunterV1",
+  "params": {
+    "stoploss": {
+      "stoploss": -0.15
+    },
+    "max_open_trades": {
+      "max_open_trades": 5
+    },
+    "sell": {
+      "atr_sl_mult": 2.0
+    },
+    "buy": {
+      "rsi_lower": 56,
+      "rsi_upper": 76
+    },
+    "roi": {
+      "0": 0.602,
+      "1704": 0.141,
+      "2255": 0.047,
+      "7483": 0
+    },
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.022,
+      "trailing_stop_positive_offset": 0.119,
+      "trailing_only_offset_is_reached": true
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2026-10-11 14:47:22.196723+00:00"
+}
