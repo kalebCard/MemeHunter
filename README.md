@@ -19,11 +19,11 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ## 📊 Síntesis Cuantitativa del Motor de Futuros
 
-| Motor / Estrategia | Mercado | Operaciones | Win Rate | Retorno Neto | Sortino | Max Drawdown | Estado / Dictamen |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **MemeHunterFuturesV1** | **Futuros USDT-M (2024–2026)** | **1,439** | **66.6%** | **+65.50%** | **1.92** | **21.03%** | 🏆 **Motor Primario (Optimizado con Sizing Asimétrico)** |
+| Motor / Estrategia | Mercado | Operaciones | Win Rate | Retorno Neto (Sin Compounding) | Retorno Mediano (10% Compuesto) | Sortino | Max Drawdown Real | Estado / Dictamen |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **MemeHunterFuturesV1** | **Futuros USDT-M (2024–2026)** | **1,154** | **61.6%** | **+157.97%** | **+274.05% ($374 USDT)** | **11.05** | **12.57%** | 🏆 **Motor Primario (Compounding & Kelly Asimétrico)** |
 
-> **El Gran Descubrimiento:** En Futuros, las operaciones **Short (+61.68%)** amortizaron por completo el sangrado lateral de los Longs (-4.86%), monetizando los desplomes de mercado con margen aislado 1.0x (cero riesgo de liquidación).
+> **El Salto Cuantitativo:** Al anular las compras en altcoins con sangrado estructural (`SUI`, `TIA`, `SOL`), elevar la convicción Short a **1.35x** y ceñir el Stop Loss al **-10.0%**, el retorno acumulado sin reinversión sube a **+157.97%** (y a **+274.05%** con interés compuesto mediano en Monte Carlo), mientras el **Drawdown real se contrae a sólo 12.57%**.
 
 ---
 
