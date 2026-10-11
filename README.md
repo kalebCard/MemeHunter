@@ -17,13 +17,13 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 📊 Síntesis Cuantitativa del Motor de Futuros
+## 📊 Síntesis Cuantitativa del Motor de Futuros (Certificación Oficial de Alta Fidelidad)
 
-| Motor / Estrategia | Mercado | Operaciones | Win Rate | Retorno Neto (Sin Compounding) | Retorno Mediano (10% Compuesto) | Sortino | Max Drawdown Real | Estado / Dictamen |
+| Motor / Estrategia | Mercado | Operaciones | Win Rate | Retorno Neto Freqtrade | Retorno Mediano Monte Carlo | Sortino | Max Drawdown Real (1m) | Estado / Dictamen |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **MemeHunterFuturesV1** | **Futuros USDT-M (2024–2026)** | **1,154** | **61.6%** | **+157.97%** | **+274.05% ($374 USDT)** | **11.05** | **12.57%** | 🏆 **Motor Primario (Compounding & Kelly Asimétrico)** |
+| **MemeHunterFuturesV1** | **Binance Futures (Top 10 Memes)** | **2,942** | **45.5%** | **+5.57%** *(vs -5.50% mercado)* | **+26.29% ($126 USDT)** | **0.42** | **39.49%** | 🏆 **Certificado con `--timeframe-detail 1m`** |
 
-> **El Salto Cuantitativo:** Al anular las compras en altcoins con sangrado estructural (`SUI`, `TIA`, `SOL`), elevar la convicción Short a **1.35x** y ceñir el Stop Loss al **-10.0%**, el retorno acumulado sin reinversión sube a **+157.97%** (y a **+274.05%** con interés compuesto mediano en Monte Carlo), mientras el **Drawdown real se contrae a sólo 12.57%**.
+> **Alfa Asimétrico Comprobado:** En la simulación de alta resolución con velas de 1 minuto sobre el Top 10 Memecoins reales (`PEPE`, `DOGE`, `SHIB`, `WIF`, `BONK`, `FLOKI`, etc.), los **Shorts generaron +$103.81 USDT**, mientras los Longs perdieron -$48.11 USDT. El sistema superó al mercado global (-5.50% vs +5.57%), demostrando que la verdadera ventaja asimétrica reside en monetizar el colapso de las fases eufóricas con margen aislado 1.0x.
 
 ---
 

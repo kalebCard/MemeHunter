@@ -180,6 +180,26 @@ class MemeHunterFuturesV1(IStrategy):
     def _kill_switch_path(self) -> Path:
         return Path(self.config.get('user_data_dir', '/freqtrade/user_data')) / KILL_SWITCH_FLAG
 
+    def _get_current_rate_for_trade(self, trade) -> Optional[float]:
+        """Obtiene el último precio conocido para una posición abierta."""
+        dp = getattr(self, 'dp', None)
+        if dp:
+            try:
+                # 1. Intentar ticker en vivo
+                ticker = dp.ticker(trade.pair)
+                if ticker and ticker.get('last') is not None:
+                    return float(ticker['last'])
+            except Exception:
+                pass
+            try:
+                # 2. Intentar último cierre analizado
+                df, _ = dp.get_analyzed_dataframe(trade.pair, self.timeframe)
+                if df is not None and len(df) > 0 and 'close' in df:
+                    return float(df['close'].iloc[-1])
+            except Exception:
+                pass
+        return getattr(trade, 'open_rate', None)
+
     def _current_drawdown(self) -> float:
         closed = sorted(Trade.get_trades_proxy(is_open=False),
                         key=lambda t: t.close_date_utc or datetime.min)
@@ -187,14 +207,23 @@ class MemeHunterFuturesV1(IStrategy):
         open_pnl = 0.0
         if open_trades:
             for t in open_trades:
-                open_pnl += (getattr(t, 'current_profit_abs', 0.0) or 0.0)
+                # Si el mock o proxy ya expone current_profit_abs, usarlo directamente
+                if hasattr(t, 'current_profit_abs') and t.current_profit_abs is not None:
+                    open_pnl += float(t.current_profit_abs)
+                elif hasattr(t, 'calc_profit'):
+                    curr_rate = self._get_current_rate_for_trade(t)
+                    if curr_rate:
+                        try:
+                            open_pnl += float(t.calc_profit(rate=curr_rate))
+                        except Exception as exc:
+                            LOG.debug("Error calculando profit flotante para %s: %s", t.pair, exc)
         start = self.wallets.get_starting_balance() if getattr(self, 'wallets', None) \
             else self.config.get('dry_run_wallet', 0)
         return compute_drawdown([t.close_profit_abs or 0.0 for t in closed], start, open_profit_abs=open_pnl)
 
     def _is_adverse_funding(self, pair: str, side: str) -> bool:
         """
-        PB-24: Guardián de Tasa de Financiación en Futuros.
+        PB-24 / PB-34: Guardián de Tasa de Financiación en Futuros.
         Evita abrir Shorts si el funding es negativo severo (< -0.05% cada 8h),
         lo que drena el capital pagando comisiones periódicas a los Longs.
         """
@@ -206,22 +235,29 @@ class MemeHunterFuturesV1(IStrategy):
 
         try:
             funding_rate = None
-            if hasattr(exchange, 'get_funding_rate'):
+            if hasattr(exchange, 'fetch_funding_rate'):
+                fr_data = exchange.fetch_funding_rate(pair)
+                if isinstance(fr_data, dict):
+                    funding_rate = fr_data.get('fundingRate') or fr_data.get('funding_rate')
+                elif isinstance(fr_data, (float, int)):
+                    funding_rate = float(fr_data)
+            elif hasattr(exchange, 'get_funding_rate'):
                 funding_rate = exchange.get_funding_rate(pair)
             elif hasattr(exchange, '_funding_rates') and pair in exchange._funding_rates:
                 funding_rate = exchange._funding_rates[pair]
 
             if funding_rate is not None:
+                funding_rate = float(funding_rate)
                 if side == "short" and funding_rate < self.MAX_ADVERSE_FUNDING:
-                    LOG.warning("PB-24: Rechazando SHORT en %s: Funding rate sangrante (%.4f%%).",
+                    LOG.warning("PB-24/34: Rechazando SHORT en %s: Funding rate sangrante (%.4f%%).",
                                 pair, funding_rate * 100)
                     return True
                 if side == "long" and funding_rate > self.MAX_EUPHORIC_FUNDING:
-                    LOG.warning("PB-24: Rechazando LONG en %s: Funding rate euforico excesivo (%.4f%%).",
+                    LOG.warning("PB-24/34: Rechazando LONG en %s: Funding rate euforico excesivo (%.4f%%).",
                                 pair, funding_rate * 100)
                     return True
         except Exception as exc:
-            LOG.debug("No se pudo auditar funding rate para %s: %s", pair, exc)
+            LOG.warning("PB-34: No se pudo verificar funding rate para %s: %s", pair, exc)
         return False
 
     def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
@@ -239,6 +275,11 @@ class MemeHunterFuturesV1(IStrategy):
 
         if self._is_adverse_funding(pair, side):
             return False
+
+        # En backtest Freqtrade gestiona las protecciones nativas (MaxDrawdown, StoplossGuard).
+        # El Kill-Switch de archivo/latch opera en modo live/dry_run continuo.
+        if not live:
+            return True
 
         dd = self._current_drawdown()
         if dd < KILL_SWITCH_DRAWDOWN:
