@@ -34,7 +34,7 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 | PB-12 ✅ | Desplegar Dry-Run en contenedores Docker (Spot 8080 y Futuros USDT-M 8081). | 3 | 5 |
 | PB-13 | Integrar bot de Telegram para notificaciones. | 3 | 2 |
 | PB-14 🔄 | Monitorear y evaluar Dry-Run (8 semanas) vs Backtest. | 3 | 8 |
-| PB-15 | Migrar a VPS Linux 24/7 e implementar "Kill-Switch" y límite dinámico de riesgo. | 4 | 5 |
+| PB-15 🔄 | Migrar a VPS Linux 24/7 e implementar "Kill-Switch" y límite dinámico de riesgo. (Kill-switch en futuros ✅; falta VPS, spot y límite dinámico) | 4 | 5 |
 | PB-16 | Configurar API Keys de producción y lanzar Fase 2. | 4 | 3 |
 
 ---
@@ -82,7 +82,9 @@ Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado
 *   **PB-12.1 (Futuros USDT-M) ✅:** Motor bidireccional Long/Short (`MemeHunterFuturesV1.py`) con margen aislado 1x (sin riesgo de liquidación), comisiones reducidas (0.02% Maker) y contenedor `meme_hunter_futures` activo con FreqUI en puerto 8081.
 *   **PB-13:** Conectar notificaciones por Telegram (opcional/configurable en `.env`).
 *   **PB-14 (En Ejecución) 🔄:** Dry-Run en vivo dual (Spot y Futuros) acumulando operaciones reales contra la API de Binance. Inicio: 2026-10-11. Criterios de aceptación propuestos: win rate dentro de ±10 pp del backtest (57.8%), edge neto > 0.3% por trade y drawdown máximo < P95 de Monte Carlo. Revisión intermedia en semana 4 y decisión GO/NO-GO en semana 8.
-*   **PB-15 (Futuro):** Migración a VPS Linux (`scripts/deploy_vps.sh`) para operación 24/7, más Kill-Switch.
+*   **PB-15 (Parcial) 🔄:** Kill-switch implementado en `MemeHunterFuturesV1` (bloquea nuevas entradas si el drawdown del equity realizado llega a 25%; latch en `user_data/KILL_SWITCH`, borrar para reanudar; no cierra posiciones abiertas). Pendiente: migración a VPS (`scripts/deploy_vps.sh`), kill-switch en spot y límite dinámico.
+*   **Monitoreo:** `scripts/dryrun_monitor.py` compara el dry-run contra los criterios de PB-14 (límite de drawdown por defecto: P95 de Monte Carlo, 43.36%).
+*   **Hallazgo de riesgo (futuros):** el Monte Carlo (bootstrap) da DD P95 de 43.5% con 10 posiciones al 10% y 71% con 5 al 20%, frente a la norma DAS de ≤ 20%. El DD histórico real del backtest es 21.85%. **Decisión abierta:** bajar sizing o relajar la norma DAS. Nota: se corrió un bug en `monte_carlo.py` que no escalaba `profit_abs` al capital simulado (mostraba +568% / DD 62.96% en el bloque "backtest original"; el bootstrap no estaba afectado).
 *   **Nota de seguridad:** `config_live.json` y `config_futures.json` no se versionan (contienen credenciales de FreqUI); usar los `*.example.json`.
 *   **Hallazgo (día 1):** en futuros el filtro de profundidad de mercado rechaza la gran mayoría de entradas (1,074 rechazos vs 9 aceptadas); se reevaluará con más muestra.
 
