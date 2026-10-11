@@ -14,12 +14,10 @@ Sistema de trading algorítmico sobre [Freqtrade](https://www.freqtrade.io/) y [
 
 ---
 
-## 📊 Síntesis Cuantitativa: Evolución del Sistema
+## 📊 Síntesis Cuantitativa del Motor de Futuros
 
 | Motor / Estrategia | Mercado | Operaciones | Win Rate | Retorno Neto | Sortino | Max Drawdown | Estado / Dictamen |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **MemeHunterV1** | Spot (2020–2025) | 5,562 | 39.5% | **-48.62%** | -0.68 | 77.17% | ❌ **Descartado (Salidas prematuras MACD)** |
-| **MemeHunterV2** | Spot Hold-Out (2025–2026) | 462 | 57.8% | **+20.57%** | 1.41 | 26.20% | ✅ **Validado (+75.6% vs mercado -55%)** |
 | **MemeHunterFuturesV1** | **Futuros USDT-M (2024–2026)** | **1,439** | **66.6%** | **+56.82%** | **1.76** | **21.85%** | 🏆 **Motor Primario (Monetiza el invierno)** |
 
 > **El Gran Descubrimiento:** En Futuros, las operaciones **Short (+61.68%)** amortizaron por completo el sangrado lateral de los Longs (-4.86%), monetizando los desplomes de mercado con margen aislado 1.0x (cero riesgo de liquidación).
