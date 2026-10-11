@@ -4,13 +4,16 @@ Sistema de trading algorítmico sobre [Freqtrade](https://www.freqtrade.io/) y [
 
 ---
 
-## 🏛️ Documentación Central
+## 🏛️ Centro de Documentación (`docs/`)
 
-* **Arquitectura de Software:** [DAS.md](DAS.md)
-* **Plan de Trabajo y Sprints:** [SCRUM_PLAN.md](SCRUM_PLAN.md)
-* **Hipótesis Teórica del Edge:** [HYPOTHESIS.md](HYPOTHESIS.md)
-* **Reporte Oficial de Backtesting y Stress-Test:** [PRELIMINARY_REPORT.md](PRELIMINARY_REPORT.md)
-* **Informe de Futuros con 100 USDT:** [INFORME_FUTUROS_100_USDT.md](INFORME_FUTUROS_100_USDT.md)
+La documentación del proyecto se encuentra estructurada en el directorio [`docs/`](docs/README.md):
+
+* **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
+* **Arquitectura de Software (v4.0):** [docs/architecture/DAS.md](docs/architecture/DAS.md)
+* **Plan de Trabajo y Sprints Scrum:** [docs/strategy/SCRUM_PLAN.md](docs/strategy/SCRUM_PLAN.md)
+* **Hipótesis Teórica del Edge:** [docs/strategy/HYPOTHESIS.md](docs/strategy/HYPOTHESIS.md)
+* **Reporte Oficial de Backtesting:** [docs/reports/PRELIMINARY_REPORT.md](docs/reports/PRELIMINARY_REPORT.md)
+* **Informe de Viabilidad con 100 USDT:** [docs/reports/INFORME_FUTUROS_100_USDT.md](docs/reports/INFORME_FUTUROS_100_USDT.md)
 
 ---
 
@@ -83,6 +86,11 @@ docker compose -f docker-compose.futures.yml logs -f
 
 ```
 meme_hunter/
+├── docs/                        # Centro integral de documentación
+│   ├── README.md                # Índice y guía de lectura
+│   ├── architecture/DAS.md      # Arquitectura de software (v4.0)
+│   ├── strategy/                # Hipótesis cuantitativa y Scrum plan
+│   └── reports/                 # Informes de backtest y capital de 100 USDT
 ├── docker-compose.futures.yml   # Despliegue de Futuros (Puerto 8081)
 ├── docker-compose.yml           # Base para comandos generales
 ├── .env.example                 # Plantilla de secretos (Binance / Telegram)
