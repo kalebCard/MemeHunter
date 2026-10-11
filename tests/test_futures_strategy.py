@@ -38,7 +38,7 @@ def test_futures_strategy_properties():
     s = make_strategy()
     assert s.can_short is True
     assert s.timeframe == "4h"
-    assert s.stoploss == -0.15
+    assert s.stoploss == -0.10
     assert s.trailing_stop is True
     assert s.use_exit_signal is False
 

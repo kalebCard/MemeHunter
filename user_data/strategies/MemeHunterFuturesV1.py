@@ -55,7 +55,7 @@ class MemeHunterFuturesV1(IStrategy):
         "2255": 0.047,
         "7483": 0
     }
-    stoploss = -0.15  # Techo de seguridad máximo absoluto (15%)
+    stoploss = -0.10  # Techo de seguridad optimizado (10% en lugar de 15% para proteger equity)
     trailing_stop = True
     trailing_stop_positive = 0.022
     trailing_stop_positive_offset = 0.119
