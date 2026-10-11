@@ -32,6 +32,7 @@ DEFAULT_DBS = {
 BACKTEST_WIN_RATE = 0.578
 WIN_RATE_TOLERANCE = 0.10
 MIN_EDGE = 0.003
+DEFAULT_DD_LIMIT = 0.4336  # P95 Monte Carlo, escenario 10 posiciones al 10% (= config del dry-run)
 MIN_TRADES_FOR_VERDICT = 30
 
 
@@ -113,9 +114,10 @@ def main():
     ap = argparse.ArgumentParser(description="Monitor del dry-run vs criterios de aceptacion")
     ap.add_argument("--db", type=Path, help="Una sola base SQLite (por defecto: futuros y spot)")
     ap.add_argument("--wallet", type=float, default=1000.0, help="dry_run_wallet inicial (USDT)")
-    ap.add_argument("--dd-limit", type=float, default=0.262,
-                    help="Limite de drawdown (fraccion). Por defecto 26.2%% (max DD del hold-out); "
-                         "sustituir por el P95 de monte_carlo.py")
+    ap.add_argument("--dd-limit", type=float, default=DEFAULT_DD_LIMIT,
+                    help="Limite de drawdown (fraccion). Por defecto el P95 de monte_carlo.py "
+                         "(43.36%%, escenario de 10 posiciones al 10%%). OJO: la norma DAS v3.1 "
+                         "exige <= 20%%.")
     args = ap.parse_args()
 
     dbs = {args.db.stem: args.db} if args.db else DEFAULT_DBS
