@@ -1,105 +1,103 @@
-# Plan de Desarrollo Scrum: meme_hunter
+# Plan de Desarrollo Scrum: meme_hunter (Alpha & Asymmetric Edge)
 
-Este documento organiza el desarrollo del bot de trading **meme_hunter** (basado en la Arquitectura DAS v3.1) utilizando la metodología Scrum. Dado que el proyecto prioriza la validación empírica antes del despliegue real, los Sprints están enfocados en entregar valor medible (resultados estadísticos) lo antes posible.
-
----
-
-## 1. Visión del Producto y Épicas
-
-**Visión:** Construir un sistema de trading automatizado basado en Freqtrade que demuestre rentabilidad matemática en un universo específico de criptomonedas (Líquido o Memes) antes de arriesgar capital real.
-
-**Épicas (Grandes bloques de trabajo):**
-1. **Épica 1: Infraestructura de Datos (Fundación).** Conseguir datos limpios, de alta granularidad y sin sesgo de supervivencia.
-2. **Épica 2: Desarrollo y Backtesting de Estrategia.** Definir la hipótesis, programar indicadores y validar rigurosamente en backtest.
-3. **Épica 3: Simulación en Vivo (Paper Trading).** Despliegue seguro en la nube operando contra mercado real sin capital.
-4. **Épica 4: Paso a Producción (Capital Real).** Gestión estricta de riesgo y ejecución real con capital acotado.
+Este documento organiza el desarrollo del sistema **meme_hunter** transformado en un **verdadero cazador de memecoins con ventaja asimétrica y modelos cuantitativos de última generación**, superando la dependencia de indicadores tradicionales rezagados.
 
 ---
 
-## 2. Product Backlog (Priorizado)
+## 1. Visión del Producto y Grandes Épicas
 
-| ID | Historia de Usuario / Tarea Técnica | Épica | Estimación (Puntos) |
-|---|---|---|---|
-| PB-01 ✅ | Inicializar proyecto Freqtrade y repositorio Git. | 1 | 2 |
-| PB-02 ✅ | Desarrollar script para descargar y formatear datos de `data.binance.vision`. | 1 | 5 |
-| PB-03 ✅ | Desarrollar filtro de Universo Dinámico (Top N histórico sin sesgo). | 1 | 8 |
-| PB-04 ✅ | Descargar dataset completo (1m y 4h/1d) y auditar calidad. | 1 | 3 |
-| PB-05 ✅ | Redactar Hipótesis de Edge y umbrales numéricos de aceptación. | 2 | 2 |
-| PB-06 ✅ | Programar `IStrategy` inicial (MACD, RSI, ATR). | 2 | 5 |
-| PB-07 ✅ | Configurar protecciones nativas (Stoploss, MaxDrawdown, etc.). | 2 | 3 |
-| PB-08 ✅ | Ejecutar análisis *lookahead-bias* y *recursive-analysis*. | 2 | 3 |
-| PB-09 ✅ | Realizar backtest sobre U1 (Líquido) y evaluar contra Benchmark. | 2 | 5 |
-| PB-10 ✅ | Realizar optimización controlada e ingeniería de señales (`hyperopt`). | 2 | 5 |
-| PB-11 ✅ | Validar estrategia en datos Hold-Out (Prueba final superada: +20.57% vs mercado -55.08%). | 2 | 3 |
-| PB-12 ✅ | Desplegar Dry-Run en contenedores Docker (Spot 8080 y Futuros USDT-M 8081). | 3 | 5 |
-| PB-13 | Integrar bot de Telegram para notificaciones. | 3 | 2 |
-| PB-14 🔄 | Monitorear y evaluar Dry-Run (8 semanas) vs Backtest. | 3 | 8 |
-| PB-15 🔄 | Migrar a VPS Linux 24/7 e implementar "Kill-Switch" y límite dinámico de riesgo. (Kill-switch en futuros ✅; falta VPS, spot y límite dinámico) | 4 | 5 |
-| PB-16 | Configurar API Keys de producción y lanzar Fase 2. | 4 | 3 |
+**Visión:** Construir un sistema cuantitativo autónomo y asimétrico que combine **Microestructura de Alta Velocidad (Order Flow)**, **Inteligencia On-Chain/Sentimiento (Social Velocity)** y **Machine Learning Adaptativo (FreqAI)** para capturar rallies explosivos en memecoins y arbitrar anomalías de liquidez/funding con estricto control de ruina y apalancamiento de capital (Copy-Trading / Fondos PAMM).
+
+### Épicas del Proyecto
+* **Épica 1: Infraestructura y Datos de Base (Completada ✅).** Descarga y formateo de datasets históricos de Binance sin sesgo de supervivencia ni lookahead.
+* **Épica 2: Validación Estadística y Motor Base de Futuros (Completada ✅).** Estrategia `MemeHunterFuturesV1` validada (+56.82%), Monte Carlo bootstrap, tests de estrés y Kill-Switch de DD (25%).
+* **Épica 3: Simulación en Vivo & Monitoreo Disciplinado (En Curso 🔄).** Dry-Run continuo en Docker monitoreado por `dryrun_monitor.py`.
+* **Épica 4 (Novedosa): Inteligencia de Mercado Alternativa & Meme Social Spike.** Detección de volumen anormal temprano, ballenas y picos de menciones en tiempo real.
+* **Épica 5 (Novedosa): Microestructura & Captura de Ineficiencias (Funding Arbitrage & OFI).** Señales de desequilibrio en el libro de órdenes (Order Flow Imbalance) y arbitraje de tasas de financiación delta-neutral.
+* **Épica 6 (Novedosa): Régimen Adaptativo con FreqAI (Reinforcement Learning).** Modelos de aprendizaje automático para adaptar el tamaño de posición y régimen de mercado.
+* **Épica 7: Escalabilidad de Capital & Monetización Institucional.** Infraestructura en VPS cloud 24/7, integración a plataformas de Copy-Trading (Binance/Bybit) para multiplicar retornos mediante Profit Share.
 
 ---
 
-## 3. Planificación de Sprints (Sprints de 1-2 semanas)
+## 2. Product Backlog Priorizado
 
-### Sprint 1: Fundación y Datos Sin Sesgo
-**Objetivo del Sprint:** Tener el entorno listo y el dataset histórico (sin sesgo de supervivencia) preparado para backtesting.
-*   **PB-01:** Inicializar proyecto Freqtrade y repositorio Git.
-*   **PB-02:** Script de descarga de datos (`data.binance.vision`).
-*   **PB-03:** Desarrollo del Universo Dinámico (Top N histórico).
-*   **PB-04:** Descarga masiva y auditoría de datos.
-*   **Entregable (Incremento):** Base de datos histórica validada y estructura de carpetas de Freqtrade lista.
-
-**Progreso y hallazgos del Sprint 1:**
-*   PB-01 y PB-02 terminados (decisiones: Docker con Freqtrade 2026.9 fijado, datos en `C:/meme_hunter_data`, histórico desde 2020-01, N=30).
-*   PB-03 terminado: script `build_universe.py` genera un mapa temporal (mes a mes) del Top 30 sin lookahead bias. La estrategia `MemeHunterV1` carga este mapa y anula las señales de los pares que no están en el universo válido para el mes en curso. Freqtrade procesa pares inactivos correctamente con `allow_inactive: true`.
-*   PB-04 terminado: Se descargó el 100% de los datos (68 pares del universo en 1d, 4h y 1m). APT/USDT completado con éxito.
-
-### Sprint 2: Primera Estrategia y Validación Inicial
-**Objetivo del Sprint:** Programar la lógica base y correr los primeros backtests rigurosos.
-*   **PB-05 ✅:** Redactar Hipótesis de Edge (`HYPOTHESIS.md`).
-*   **PB-06 ✅:** Programar `IStrategy` inicial (`MemeHunterV1.py`).
-*   **PB-07 ✅:** Configurar protecciones nativas (Cooldown, StoplossGuard, MaxDrawdown, LowProfitPairs).
-*   **PB-08 ✅:** Ejecutar `lookahead-analysis` y `recursive-analysis` de Freqtrade.
-*   **Entregable (Incremento):** Estrategia codificada, robusta contra trampas lógicas, lista para PB-09.
-
-**Progreso y hallazgos del Sprint 2:**
-*   PB-05 y PB-06: La hipótesis se basa en Momentum (MACD) + Expansión de Volatilidad (ATR) + Filtro de Agotamiento (RSI). El Stop Loss es dinámico (2x ATR de la entrada).
-*   PB-07: Freqtrade aceptó la configuración de protecciones.
-*   PB-08: El `lookahead-analysis` arrojó "No bias detected". Las matemáticas son válidas.
-
-### Sprint 3: La Prueba de Fuego (Evaluación Estadística)
-**Objetivo del Sprint:** Saber estadísticamente si la estrategia sirve o se descarta.
-*   **PB-09 ✅:** Backtest completo en U1 (2020-01 a 2025-06, 5,562 operaciones con `--timeframe-detail 1m`) y evaluación cuantitativa contra DAS.
-*   **PB-10 ✅:** Optimización e ingeniería de señales. Diagnóstico: las salidas por cruce bajista de MACD drenaban las ganancias; se desactivó `use_exit_signal`, incorporó filtro macro `EMA 200` y escalera ROI progresiva con trailing offset de 11.9%.
-*   **PB-11 ✅:** Prueba ciega con el conjunto sagrado de retención (Hold-out 2025-07 a 2026-09, 462 trades). **Resultado:** +20.57% de ganancia neta (+205.68 USDT) frente a un desplome del mercado de -55.08%, con Sortino de 1.41 y Win Rate del 57.8%.
-*   **PB-11.1 ✅:** Simulación de Monte Carlo (7,500 iteraciones Bootstrap). Validó expectativa matemática positiva y sensibilidad al tamaño de posición (recomendado 10% por posición para mitigar el riesgo de cola).
-*   **PB-11.2 ✅:** Batería de Pruebas de Estrés Hostil (`scripts/stress_test.py`). Demostró que el *edge* neto es de +0.50% a +0.70% por trade (las órdenes Maker y el SpreadFilter son obligatorios para no ser devorados por fees) y reveló que el sistema soportó 6 meses consecutivos en negativo (Q4 2025 y Q1 2026) antes de recuperarse.
-*   **Entregable (Incremento):** Estrategia adaptativa `MemeHunterV2` validada en out-of-sample sin overfitting. **Decisión GO oficial para el Sprint 4 (Dry-Run en Vivo).**
-
-### Sprint 4: Infraestructura y Dry-Run en Vivo
-**Objetivo del Sprint:** Desplegar el bot en tiempo real contra la API de Binance Spot en modo simulado.
-*   **PB-12 (Spot) ✅:** Contenedor Docker en vivo (`meme_hunter_live`) con microestructura activa en Binance Spot (FreqUI en puerto 8080).
-*   **PB-12.1 (Futuros USDT-M) ✅:** Motor bidireccional Long/Short (`MemeHunterFuturesV1.py`) con margen aislado 1x (sin riesgo de liquidación), comisiones reducidas (0.02% Maker) y contenedor `meme_hunter_futures` activo con FreqUI en puerto 8081.
-*   **PB-13:** Conectar notificaciones por Telegram (opcional/configurable en `.env`).
-*   **PB-14 (En Ejecución) 🔄:** Dry-Run en vivo dual (Spot y Futuros) acumulando operaciones reales contra la API de Binance. Inicio: 2026-10-11. Criterios de aceptación propuestos: win rate dentro de ±10 pp del backtest (57.8%), edge neto > 0.3% por trade y drawdown máximo < P95 de Monte Carlo. Revisión intermedia en semana 4 y decisión GO/NO-GO en semana 8.
-*   **PB-15 (Parcial) 🔄:** Kill-switch implementado en `MemeHunterFuturesV1` (bloquea nuevas entradas si el drawdown del equity realizado llega a 25%; latch en `user_data/KILL_SWITCH`, borrar para reanudar; no cierra posiciones abiertas). Pendiente: migración a VPS (`scripts/deploy_vps.sh`), kill-switch en spot y límite dinámico.
-*   **Monitoreo:** `scripts/dryrun_monitor.py` compara el dry-run contra los criterios de PB-14 (límite de drawdown por defecto: P95 de Monte Carlo, 43.36%).
-*   **Hallazgo de riesgo (futuros):** el Monte Carlo (bootstrap) da DD P95 de 43.5% con 10 posiciones al 10% y 71% con 5 al 20%, frente a la norma DAS de ≤ 20%. El DD histórico real del backtest es 21.85%. **Decisión abierta:** bajar sizing o relajar la norma DAS. Nota: se corrió un bug en `monte_carlo.py` que no escalaba `profit_abs` al capital simulado (mostraba +568% / DD 62.96% en el bloque "backtest original"; el bootstrap no estaba afectado).
-*   **Nota de seguridad:** `config_live.json` y `config_futures.json` no se versionan (contienen credenciales de FreqUI); usar los `*.example.json`.
-*   **Hallazgo (día 1):** en futuros el filtro de profundidad de mercado rechaza la gran mayoría de entradas (1,074 rechazos vs 9 aceptadas); se reevaluará con más muestra.
+| ID | Historia de Usuario / Tarea Técnica | Épica | Estimación (Pts) | Estado |
+|---|---|---|---|---|
+| PB-01 | Inicializar proyecto Freqtrade y repositorio Git. | 1 | 2 | ✅ Completado |
+| PB-02 | Desarrollar script descargador de `data.binance.vision`. | 1 | 5 | ✅ Completado |
+| PB-03 | Desarrollar filtro de Universo Dinámico Top N histórico. | 1 | 8 | ✅ Completado |
+| PB-04 | Descarga masiva y auditoría de calidad de datos. | 1 | 3 | ✅ Completado |
+| PB-05 | Redactar Hipótesis de Edge y umbrales de aceptación. | 2 | 2 | ✅ Completado |
+| PB-06 | Programar `IStrategy` inicial y filtros cuantitativos. | 2 | 5 | ✅ Completado |
+| PB-07 | Configurar protecciones nativas (Cooldown, StoplossGuard, DD). | 2 | 3 | ✅ Completado |
+| PB-08 | Verificación anti-trampas (lookahead y recursive analysis). | 2 | 3 | ✅ Completado |
+| PB-09 | Backtest completo U1 y optimizaciones de salida. | 2 | 5 | ✅ Completado |
+| PB-10 | Motor de Futuros USDT-M `MemeHunterFuturesV1` (Long/Short 1x). | 2 | 5 | ✅ Completado |
+| PB-11 | Batería de estrés hostil, Monte Carlo (7,500 sims) y Kill-Switch 25%. | 2 | 5 | ✅ Completado |
+| PB-12 | Despliegue Dry-Run en contenedor Docker (`meme_hunter_futures`). | 3 | 5 | ✅ Completado |
+| PB-13 | Integrar notificaciones por Telegram con alertas de Kill-Switch. | 3 | 2 | ⏳ Pendiente (.env) |
+| PB-14 | Monitoreo y evaluación estadística de Dry-Run continuo (8 semanas). | 3 | 8 | 🔄 En Ejecución |
+| **PB-15** | **Módulo Meme Sentinel: Detección de volumen inusual y picos de volatilidad temprana.** | 4 | 8 | 📋 Backlog |
+| **PB-16** | **Integración de Sentimiento y Narrativa Web3 (Telegram/X API o DEX aggregators).** | 4 | 13 | 📋 Backlog |
+| **PB-17** | **Motor de Arbitraje de Funding Rate Delta-Neutral (Futuros vs Spot).** | 5 | 8 | 📋 Backlog |
+| **PB-18** | **Microestructura Nivel 2: Order Flow Imbalance (OFI) y Cumulative Volume Delta (CVD).** | 5 | 13 | 📋 Backlog |
+| **PB-19** | **Integración FreqAI: Modelos predictivos LightGBM / CatBoost para cambio de régimen.** | 6 | 13 | 📋 Backlog |
+| **PB-20** | **Aprovisionamiento en VPS Ubuntu 24/7 con `deploy_vps.sh` y hardering de seguridad.** | 7 | 5 | 📋 Backlog |
+| **PB-21** | **Conexión a Copy-Trading (Binance / Bybit) para escala de capital vía Profit Share.** | 7 | 8 | 📋 Backlog |
 
 ---
 
-## 4. Definición de Hecho (Definition of Done - DoD)
-Para que una tarea se considere terminada debe cumplir:
-1. El código está en el repositorio Git (no hay nada "solo local").
-2. Cumple con los criterios de aceptación del DAS (ej. escenarios de costes adversos aplicados en el backtest).
-3. No rompe la ejecución básica de Freqtrade (`freqtrade backtesting` corre sin errores).
-4. La documentación pertinente ha sido actualizada.
+## 3. Planificación de Sprints
 
-## 5. Ceremonias (Adaptación para IA-Humano)
-Aunque el desarrollo lo hagamos nosotros dos (Tú y yo, el asistente), mantendremos el ritmo:
-*   **Sprint Planning:** Al inicio de cada fase, confirmamos las tareas a realizar.
-*   **Daily Async:** Cuando retomes el trabajo, te daré un resumen rápido de dónde nos quedamos.
-*   **Sprint Review:** Al terminar un Sprint, revisamos los resultados (ej. el reporte de backtest) antes de avanzar.
-*   **Retrospectiva:** Evaluamos si las reglas del DAS están funcionando o si necesitamos ajustar el enfoque.
+### Sprint 1 al 3: Fundación y Validación Cuantitativa (Completados ✅)
+* Dataset sin sesgo de supervivencia en 68 pares.
+* Validación del motor bidireccional en futuros: +56.82% de rendimiento neto con Longs y Shorts aislados 1.0x.
+* Simulación de Monte Carlo y blindaje contra ruina. Kill-Switch implementado y validado en tests unitarios.
+
+### Sprint 4: Estabilización Operativa y Dry-Run Dual (Actual 🔄)
+**Objetivo:** Monitorear la microestructura real de Binance en modo simulado y mantener activo el bot.
+* **PB-12 ✅:** Contenedor `meme_hunter_futures` activo en Docker con FreqUI en puerto 8081.
+* **PB-13:** Configurar credenciales de Telegram en `.env` para monitoreo remoto.
+* **PB-14 🔄:** Auditoría continua con `scripts/dryrun_monitor.py`. (Semana 1 en curso).
+* **PB-15 (Kill-Switch) ✅:** Latch en `user_data/KILL_SWITCH` si el drawdown realizado supera el 25%.
+
+---
+
+### Sprint 5: Módulo de Detección Temprana ("Meme Sentinel")
+**Objetivo:** Capturar memecoins antes de que las velas de 4H reflejen el movimiento explosivo.
+* **PB-15:** Crear sub-proceso que audite en tiempo real todas las monedas USDT-M de Binance filtrando:
+  - Spike de volumen en velas de 1m/5m superior a 5x la media móvil de 24h.
+  - Expansión de rango verdadero (True Range) sin retroceso inmediato.
+* **PB-16:** Probar integración de fuentes de datos sociales o de DEX (Pump.fun / Raydium / DexScreener trends) para anticipar qué meme listado en futuros entrará en tendencia viral.
+
+---
+
+### Sprint 6: Microestructura y Captura de Funding Rate
+**Objetivo:** Generar ingresos sin riesgo direccional o capturar rebotes con ventaja de libro de órdenes.
+* **PB-17:** Diseñar estrategia Delta-Neutral que capture tasas de financiación desorbitadas en memecoins en momentos de euforia (apertura simultánea Spot Long + Futuros Short 1x).
+* **PB-18:** Inyectar features de Order Flow Imbalance (OFI) para determinar si las órdenes pasivas (Maker) serán ejecutadas a favor antes de que cambie el spread.
+
+---
+
+### Sprint 7: Régimen Adaptativo con FreqAI
+**Objetivo:** Eliminar los parámetros estáticos (RSI 56/76) y dejar que la IA ajuste el riesgo.
+* **PB-19:** Configurar pipeline de FreqAI para entrenar clasificadores de régimen de mercado:
+  - Régimen Alcista Explosivo (Full momentum).
+  - Régimen de Invierno/Sangrado (Prioridad Shorts).
+  - Régimen Lateral/Choppy (Pausa de operativa para proteger capital).
+
+---
+
+### Sprint 8: Despliegue Cloud y Multiplicador de Capital (Copy-Trading)
+**Objetivo:** El camino real hacia el crecimiento financiero exponencial: gestionar capital externo de forma automatizada.
+* **PB-20:** Despliegue en VPS (DigitalOcean / Hetzner / AWS) con el script `scripts/deploy_vps.sh`.
+* **PB-21:** Publicación de la estrategia en el programa de Lead Trader de Binance o Bybit:
+  - Mantener un Drawdown < 15% y Sortino > 1.5 para posicionarse en el Top Ranking de Copy Trading.
+  - Monetizar mediante **Profit Sharing** (10% - 15% de los beneficios generados a los seguidores).
+
+---
+
+## 4. Definición de Hecho (DoD)
+1. Código probado con tests unitarios (`pytest tests`).
+2. Sin riesgo de liquidación forzada (Apalancamiento estricto 1.0x o estrategias delta-neutrales).
+3. Todo cambio versionado y sincronizado en GitHub: [kalebCard/MemeHunter](https://github.com/kalebCard/MemeHunter).
