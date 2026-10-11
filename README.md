@@ -45,6 +45,7 @@ Sistema de trading algorítmico sobre [Freqtrade](https://www.freqtrade.io/) y [
 | `monte_carlo.py` | Simulación Bootstrap (7,500 caminos) para estimar riesgo de ruina y VaR | `python scripts/monte_carlo.py` |
 | `dryrun_monitor.py` | Compara el dry-run en vivo (SQLite) contra los criterios de aceptación de PB-14 | `python scripts/dryrun_monitor.py` |
 | `meme_sentinel.py` | Detector temprano de anomalías de volumen (RVOL) y explosiones en memecoins (PB-15) | `python scripts/meme_sentinel.py --top 10` |
+| `dex_viral_radar.py` | Radar on-chain DEX (DexScreener API) para tracción y presión compradora viral (PB-16) | `python scripts/dex_viral_radar.py --top 10` |
 | `funding_arbitrage.py` | Escáner y calculador de arbitraje Delta-Neutral de Funding Rates (PB-17) | `python scripts/funding_arbitrage.py --min-apr 20.0` |
 | `order_flow_imbalance.py` | Análisis de microestructura N2, desequilibrio de libro (OFI) y presión de precio (PB-18) | `python scripts/order_flow_imbalance.py --symbol DOGE/USDT:USDT` |
 | `regime_classifier.py` | Clasificador cuantitativo de régimen de mercado y adaptación dinámica de riesgo (PB-19) | `python scripts/regime_classifier.py --symbol BTC/USDT:USDT` |
