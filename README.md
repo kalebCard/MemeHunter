@@ -10,7 +10,7 @@ Sistema de trading algorítmico sobre [Freqtrade](https://www.freqtrade.io/) y [
 * **Plan de Trabajo y Sprints:** [SCRUM_PLAN.md](SCRUM_PLAN.md)
 * **Hipótesis Teórica del Edge:** [HYPOTHESIS.md](HYPOTHESIS.md)
 * **Reporte Oficial de Backtesting y Stress-Test:** [PRELIMINARY_REPORT.md](PRELIMINARY_REPORT.md)
-* **Plan de Transición a Producción (VPS & Cloud):** [plan_implementacion_produccion.md](file:///C:/Users/kaleb/.gemini/antigravity-ide/brain/8aa12c5e-3d22-44b4-9bd4-070fcfb13712/plan_implementacion_produccion.md)
+* **Informe de Futuros con 100 USDT:** [INFORME_FUTUROS_100_USDT.md](INFORME_FUTUROS_100_USDT.md)
 
 ---
 
@@ -54,6 +54,14 @@ Sistema de trading algorítmico sobre [Freqtrade](https://www.freqtrade.io/) y [
 
 ## 🚀 Despliegue Rápido en Vivo (Modo Dry-Run en Docker)
 
+### 0. Preparar configuración (una sola vez)
+Los configs con credenciales de FreqUI no se versionan. Crea los tuyos desde las plantillas y cambia `CAMBIAR_ME` en `jwt_secret_key` y `password`:
+```powershell
+Copy-Item user_data/config_futures.example.json user_data/config_futures.json
+Copy-Item user_data/config_live.example.json user_data/config_live.json
+Copy-Item .env.example .env   # y completa Binance / Telegram
+```
+
 ### A. Motor de Futuros (Recomendado - Bidireccional Long/Short)
 ```powershell
 # Iniciar en segundo plano
@@ -63,7 +71,7 @@ docker compose -f docker-compose.futures.yml up -d
 docker compose -f docker-compose.futures.yml logs -f
 ```
 * **Dashboard Web (FreqUI):** [http://localhost:8081](http://localhost:8081)
-* **Credenciales:** Usuario `admin` | Clave `MemeHunter2026!`
+* **Credenciales:** usuario y clave definidos por ti en `config_futures.json`
 
 ### B. Motor Spot (Binance Spot Long-Only)
 ```powershell
@@ -74,7 +82,7 @@ docker compose -f docker-compose.live.yml up -d
 docker compose -f docker-compose.live.yml logs -f
 ```
 * **Dashboard Web (FreqUI):** [http://localhost:8080](http://localhost:8080)
-* **Credenciales:** Usuario `admin` | Clave `MemeHunter2026!`
+* **Credenciales:** usuario y clave definidos por ti en `config_live.json`
 
 ---
 
@@ -94,14 +102,19 @@ meme_hunter/
 │   ├── deploy_vps.sh            # Script de aprovisionamiento en VPS Ubuntu
 │   └── telegram_healthcheck.py  # Diagnóstico y alertas en Telegram
 ├── user_data/
-│   ├── config_futures.json      # Configuración de Futuros (Live / Dry-Run)
-│   ├── config_live.json         # Configuración de Spot (Live / Dry-Run)
+│   ├── config_futures.example.json # Plantilla de Futuros (copiar a config_futures.json, no versionado)
+│   ├── config_live.example.json    # Plantilla de Spot (copiar a config_live.json, no versionado)
 │   ├── config_futures_backtest.json
 │   └── strategies/
 │       ├── MemeHunterFuturesV1.py # Estrategia Long/Short aislada 1x
 │       ├── MemeHunterV2.py        # Estrategia Spot blindada
 │       └── MemeHunterV1.py        # Estrategia histórica de investigación
-└── tests/                       # Suite de pruebas unitarias pytest
+└── tests/                       # Suite pytest (binance_vision y MemeHunterV2)
+```
+
+### Ejecutar los tests
+```powershell
+docker run --rm -v "${PWD}:/freqtrade/proj" -w /freqtrade/proj --entrypoint python meme_hunter:2026.9 -m pytest -q tests
 ```
 
 ---

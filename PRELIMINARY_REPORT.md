@@ -113,8 +113,7 @@ Para descartar la suerte secuencial (*path dependency*) y medir el riesgo de rui
   - Ejecución pasiva (`Maker`) en bid del libro de órdenes.
 - **Panel Visual FreqUI:**
   - URL local: `http://localhost:8080` (o `http://127.0.0.1:8080/ui/`).
-  - Usuario: `admin`
-  - Clave: `MemeHunter2026!`
+  - Credenciales: las definidas en `config_live.json` (no versionado).
 - **Primer Trade en Vivo Registrado:** Posición ejecutada en `MAGIC/USDT` a `$0.1276 USDT` con protección de Stoploss dinámico y trailing stop activados.
 
 ---
