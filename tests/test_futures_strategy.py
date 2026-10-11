@@ -99,3 +99,8 @@ def test_custom_stake_amount_asymmetric():
     # Para longs aplica mitigación prudente de 0.70x
     long_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long")
     assert long_stake == pytest.approx(70.0)
+
+    # Si el balance o propuesta es menor a $5, se ajusta al piso regulatorio de Binance ($5.00 USDT)
+    clamped_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 3.0, None, 500.0, 1.0, "long", "long")
+    assert clamped_stake == pytest.approx(5.0)
+

@@ -125,6 +125,8 @@ class MemeHunterFuturesV1(IStrategy):
 
         if min_stake is not None:
             stake = max(stake, min_stake)
+        # Salvaguarda Binance Min Notional ($5.00 USDT)
+        stake = max(stake, 5.0)
         return min(stake, max_stake)
 
 
