@@ -108,20 +108,31 @@ class MemeHunterFuturesV1(IStrategy):
         """
         return 1.0
 
+    # Pares de alta volatilidad con sangrado estructural en compras (solo operables en Short)
+    BLEEDING_LONG_BLACKLIST = {
+        'SUI/USDT:USDT', 'TIA/USDT:USDT', 'SOL/USDT:USDT'
+    }
+
     def custom_stake_amount(self, pair: str, current_time: datetime, current_rate: float,
                             proposed_stake: float, min_stake: Optional[float], max_stake: float,
                             leverage: float, entry_tag: Optional[str], side: str,
                             **kwargs) -> float:
         """
-        Sizing Asimétrico y Reinversión Compuesta (Quarter-Kelly):
-        - Shorts demostraron Win Rate > 66% y PnL de +61.68%: Asignación estándar óptima.
-        - Longs tuvieron desempeño lateral (-4.86%): Reducción prudente de riesgo al 70% del stake.
+        Sizing Asimétrico Cuantitativo de Frontera Eficiente:
+        - Shorts (+61.68% Alfa probado): Impulso de alta convicción a 1.35x.
+        - Longs (Mitigación de volatilidad en altcoins):
+          * Si el par tiene deriva bajista secular (SUI, TIA, SOL), se cancela la exposición en compra (0.0x).
+          * En pares principales (BTC, ETH, DOGE, WLD), asignación moderada de 0.45x.
+        - Salvaguarda inviolable: Min notional de Binance de $5.00 USDT.
         """
+        if side == "long" and pair in self.BLEEDING_LONG_BLACKLIST:
+            return 0.0
+
         base_stake = proposed_stake
         if side == "short":
-            stake = base_stake * 1.15  # Impulso moderado en el lado más rentable
+            stake = base_stake * 1.35
         else:
-            stake = base_stake * 0.70  # Mitigación del lastre histórico en Longs
+            stake = base_stake * 0.45
 
         if min_stake is not None:
             stake = max(stake, min_stake)

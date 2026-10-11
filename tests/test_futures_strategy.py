@@ -92,13 +92,19 @@ def test_long_entry_filters(override):
 def test_custom_stake_amount_asymmetric():
     s = make_strategy()
     now = datetime(2026, 10, 11, tzinfo=timezone.utc)
-    # Para shorts aplica impulso de 1.15x
+    # Para shorts aplica impulso de 1.35x
     short_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "short", "short")
-    assert short_stake == pytest.approx(115.0)
+    assert short_stake == pytest.approx(135.0)
 
-    # Para longs aplica mitigación prudente de 0.70x
+    # Para longs en pares principales aplica mitigación prudente de 0.45x
     long_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long")
-    assert long_stake == pytest.approx(70.0)
+    assert long_stake == pytest.approx(45.0)
+
+    # En pares con sangrado estructural bajista (SUI, TIA, SOL), se anulan los Longs (0.0x)
+    assert s.custom_stake_amount("SUI/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long") == 0.0
+    assert s.custom_stake_amount("TIA/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long") == 0.0
+    # Pero los Shorts en esos mismos pares sí se operan con 1.35x
+    assert s.custom_stake_amount("TIA/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "short", "short") == pytest.approx(135.0)
 
     # Si el balance o propuesta es menor a $5, se ajusta al piso regulatorio de Binance ($5.00 USDT)
     clamped_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 3.0, None, 500.0, 1.0, "long", "long")
