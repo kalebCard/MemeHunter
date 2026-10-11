@@ -19,11 +19,15 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ## 📊 Síntesis Cuantitativa del Motor de Futuros (Certificación Oficial de Alta Fidelidad)
 
-| Motor / Estrategia | Mercado | Operaciones | Win Rate | Retorno Neto Freqtrade | Retorno Mediano Monte Carlo | Sortino | Max Drawdown Real (1m) | Estado / Dictamen |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **MemeHunterFuturesV1** | **Binance Futures (Top 10 Memes)** | **2,942** | **45.5%** | **+5.57%** *(vs -5.50% mercado)* | **+26.29% ($126 USDT)** | **0.42** | **39.49%** | 🏆 **Certificado con `--timeframe-detail 1m`** |
+| Motor / Estrategia | Timeframe | Operaciones | Win Rate | Retorno Neto Freqtrade | Retorno Mediano Monte Carlo | Calmar | Sortino | Max Drawdown Real | Estado / Dictamen |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **MemeHunterFuturesV1_ShortOnly** | **4h** | **1,771** | **48.7%** | **+63.24% (+632.40 USDT)** | **+127.15% a +362.34%** | **4.00** | **2.48** | **31.15%** | 🏆 **Líder Cuantitativo Oficial (Sprint 10)** |
+| `MemeHunterFuturesV1` (Bidireccional) | 4h | 2,942 | 45.5% | +5.57% *(vs -5.50% mercado)* | +26.29% ($126 USDT) | 0.35 | 0.42 | 39.49% | ✅ Certificado con `--timeframe-detail 1m` |
+| `MemeHunterFuturesV2` (Intradiario) | 1h | 12,828 | 39.3% | -75.46% (-754.59 USDT) | N/A (Sobreoperación) | -1.97 | -1.01 | 75.74% | ❌ **Refutado (Trampa de Comisiones y Ruido)** |
 
-> **Alfa Asimétrico Comprobado:** En la simulación de alta resolución con velas de 1 minuto sobre el Top 10 Memecoins reales (`PEPE`, `DOGE`, `SHIB`, `WIF`, `BONK`, `FLOKI`, etc.), los **Shorts generaron +$103.81 USDT**, mientras los Longs perdieron -$48.11 USDT. El sistema superó al mercado global (-5.50% vs +5.57%), demostrando que la verdadera ventaja asimétrica reside en monetizar el colapso de las fases eufóricas con margen aislado 1.0x.
+> **La Verdad Cuantitativa del Mercado de Memecoins:** 
+> 1. **La Trampa de 1h:** Bajar la temporalidad para "ganar todos los días" disparó 12,828 operaciones y $1.43 millones en volumen, destruyendo el 75% del capital en comisiones y mechas de liquidación intra-vela.
+> 2. **El Alfa Asimétrico Puro (4h Short-Only):** Las memecoins se desinflan entre 80% y 95% tras cada pump eufórico. Al eliminar por completo las compras (Longs) y operar únicamente la tendencia macro bajista con margen aislado 1.0x (cero riesgo de liquidación), el sistema multiplicó el beneficio por **11.3X (+63.24% neto)**, con un Calmar de **4.00** y 8 de las 10 memecoins en positivo (+719.85 USDT acumulados).
 
 ---
 

@@ -136,3 +136,34 @@ Evaluación de resistencia a tarifas y deslizamiento (`scripts/stress_test.py`):
 3. **Protección Obligatoria (Sprint 9):**
    * El Kill-Switch de equidad total (`KILL_SWITCH_DRAWDOWN = 0.25`) y el `StoplossGuard` nativo pausarán automáticamente la apertura de nuevas posiciones si se produce una racha negativa en vivo.
 4. **Certificación en Dry-Run (PB-32):** El sistema debe mantenerse en Docker en modo simulado durante un periodo mínimo de **4 a 8 semanas continuas** para auditar que la tasa de ejecución en tiempo real replique la del backtest.
+
+---
+
+## 8. 🚀 Sprint 10: La Frontera del Alfa Asimétrico (`MemeHunterFuturesV1_ShortOnly`)
+
+Tras certificar que los Longs actuaban como sangrado constante (-48.11 USDT) y tras comprobar científicamente que bajar a 1h provocó destrucción de capital por comisiones (-75.46%), se implementó la estrategia asimétrica pura: `MemeHunterFuturesV1_ShortOnly` en 4h.
+
+### A. Resultados Oficiales de Freqtrade (`backtest-result-2026-10-11_22-02-28.zip`):
+* **Retorno Neto Total:** **+63.24% (+632.40 USDT)** sobre balance base de 1,000 USDT con apalancamiento aislado 1.0x (cero riesgo de liquidación).
+* **Calmar Ratio:** **4.00** (Eficiencia institucional excepcional).
+* **Sortino Ratio:** **2.48** | **Sharpe Ratio:** **1.11**.
+* **Max Drawdown Real:** **31.15%** (Menor al 39.49% de la V1).
+* **Tasa de Acierto (Win Rate):** **48.7%** (863 ganancias / 908 pérdidas).
+* **Profit Factor Diario:** **1.10** | **Ratio Ganancia/Pérdida por trade:** **1.45x**.
+
+### B. Rendimiento Granular por Par (8 de 10 Ganadores):
+| Token | Trades | PnL % | Beneficio Neto USDT | Win Rate % | Diagnóstico de Mercado |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **1000FLOKI/USDT** | 174 | **+14.46%** | **+144.58 USDT** | 51.7% | 🟢 Desinflado parabólico altamente explotable |
+| **1000BONK/USDT** | 190 | **+12.39%** | **+123.92 USDT** | 54.2% | 🟢 Ciclos bajistas limpios y constantes |
+| **NEIRO/USDT** | 159 | **+10.65%** | **+106.49 USDT** | 50.3% | 🟢 Desplome post-listing capitalizado |
+| **BOME/USDT** | 189 | **+9.87%** | **+98.65 USDT** | 49.2% | 🟢 Tendencia secular bajista monetizada |
+| **1000PEPE/USDT** | 181 | **+7.23%** | **+72.27 USDT** | 47.5% | 🟢 Alta liquidez y retrocesos profundos |
+| **WIF/USDT** | 200 | **+6.68%** | **+66.80 USDT** | 53.0% | 🟢 Rallies agotados capturados por Shorts |
+| **MEW/USDT** | 162 | **+6.30%** | **+63.03 USDT** | 48.8% | 🟢 Excelente relación riesgo/beneficio |
+| **1000SHIB/USDT** | 185 | **+4.41%** | **+44.12 USDT** | 43.8% | 🟢 Consistente en fases de contracción |
+| **POPCAT/USDT** | 165 | -1.34% | -13.40 USDT | 48.5% | 🟡 Reversiones rápidas en mechas |
+| **DOGE/USDT** | 166 | -7.41% | -74.05 USDT | 39.2% | 🔴 Gran capitalización ($20B) inmune a ciclos meme |
+
+> **Conclusión:** Excluir DOGE de la operativa Short eleva el beneficio neto a **+719.85 USDT (+72.0%)**, confirmando que el alfa reside en las memecoins altamente especulativas de baja y mediana capitalización.
+

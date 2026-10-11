@@ -32,16 +32,15 @@ docs/
   * **Propósito:** Fundamento matemático y financiero del porqué la estrategia genera alfa sobre memecoins.
   * **Puntos clave:** Asimetría de desinflado rápido en rallies agotados (Short Edge) y captura de momentum temprano con volumen inusual (RVOL).
 * **[SCRUM_PLAN.md](strategy/SCRUM_PLAN.md) (Plan de Trabajo y Backlog Scrum)**
-  * **Propósito:** Hoja de ruta del proyecto organizada por Épicas y Sprints de 1 a 9.
-  * **Puntos clave:** Seguimiento del progreso en tiempo real, historias de usuario completadas (`PB-01` a `PB-27` incluyendo Hardening de Producción Real) y estado de despliegue en Dry-Run y VPS.
+  * **Propósito:** Hoja de ruta del proyecto organizada por Épicas y Sprints de 1 a 10.
+  * **Puntos clave:** Seguimiento del progreso en tiempo real, certificación de alta fidelidad con `--timeframe-detail 1m` (Sprint 9) y salto al **alfa asimétrico puro Short-Only (+63.24% de retorno, Calmar 4.00, Sortino 2.48)** en Sprint 10.
 
 ### 3. 📊 Reportes de Investigación y Rendimiento
-* **[PRELIMINARY_REPORT.md](reports/PRELIMINARY_REPORT.md) (Reporte de Backtesting Oficial)**
-  * **Propósito:** Análisis exhaustivo de 1,439 trades sobre datos históricos sin sesgo de supervivencia.
-  * **Puntos clave:** Resultados iniciales del motor simétrico, desglose mes a mes y análisis de distribución de retornos.
-* **[INFORME_FUTUROS_100_USDT.md](reports/INFORME_FUTUROS_100_USDT.md) (Estudio de Viabilidad con 100 USDT)**
-  * **Propósito:** Evaluación empírica de 4 baterías de pruebas con capital real mínimo de 100 USDT.
-  * **Puntos clave:** Simulación Monte Carlo (7,500 caminos), límites de orden mínima de Binance ($5 USD), y validación de la optimización con **dimensionamiento asimétrico (+65.50% de retorno neto, Sortino 1.92, Max DD 21.03%)**.
+* **[PRELIMINARY_REPORT.md](reports/PRELIMINARY_REPORT.md) (Reporte de Backtesting Oficial Inicial)**
+  * **Propósito:** Análisis exhaustivo inicial sobre Universo Spot histórico y diagnóstico de salidas por MACD.
+* **[INFORME_FUTUROS_100_USDT.md](reports/INFORME_FUTUROS_100_USDT.md) (Estudio Integral de Futuros en Memecoins)**
+  * **Propósito:** Evaluación empírica de 4 baterías de pruebas en el Top 10 memecoins de Binance Futures.
+  * **Puntos clave:** Certificación de 1m, simulación Monte Carlo (2,500 caminos), límites de orden mínima de Binance ($5 USD), y validación de la estrategia **MemeHunterFuturesV1_ShortOnly (+63.24% de beneficio, 8 de 10 monedas ganadoras con +719 USDT)**.
 
 ---
 

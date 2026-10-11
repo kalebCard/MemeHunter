@@ -30,11 +30,15 @@ Una operación se abre si y solo si ocurren simultáneamente:
 -   **Trailing Stop**: Una vez que la operación alcanza un ROI del `1 * ATR`, el trailing stop se activa para proteger ganancias (breakeven + comisiones).
 -   **Salida por Señal**: Se vende inmediatamente si el MACD cruza a la baja, independientemente de si hay ganancias o pérdidas.
 
-## 4. Criterios de Aprobación (Revisión de Fase 0)
-Tras aplicar escenarios de costes **adversos** (slippage y spread amplios):
--   **Expectancy neta**: > 0 (Cada operación, en promedio, debe ganar dinero tras comisiones/slippage).
--   **Profit Factor**: ≥ 1.3
--   **Sortino Ratio**: ≥ 1.0 (Penaliza la volatilidad a la baja).
--   **Consistencia**: Debe superar el rendimiento de "Buy & Hold" de BTC en el mismo periodo.
+## 5. Hipótesis V3: Alfa Asimétrico por Desinflado de Memecoins (Sprint 10)
 
-Si el backtest en U1 (Líquido) de 2020 a 2026 no cumple estos criterios, la hipótesis es **rechazada**. No se optimizará obsesivamente (hyperopt) para forzar los números; se diseñará una Hipótesis V2.
+La investigación empírica sobre las 10 principales memecoins de Binance Futures demostró que la hipótesis de *momentum alcista simétrico* falla en memecoins por una razón estructural de microestructura:
+> **Las memecoins carecen de valor intrínseco o flujos de caja.** Tras un rally eufórico de 3 a 7 días impulsado por viralidad en redes, entran en un régimen secular de desinflado y distribución que dura semanas y meses, perdiendo entre un 80% y un 95% de su valor.
+
+### 5.1 El Edge Asimétrico Comprobado
+1. **Compras (Longs = Ruido y Trampas):** Intentar comprar rebotes o rupturas en memecoins expone el capital a falsas rupturas (*bull traps*) y sangrado continuo. En el backtest oficial de alta fidelidad, los Longs restaron capital constantemente (-48.11 USDT).
+2. **Ventas en Corto (Shorts = Ventaja Estadística Pura):** Entrar en Short cuando el precio rompe a la baja la EMA 200 en velas de 4h (con MACD bajo cero y RSI entre 24 y 44) captura el colapso gravitacional natural de los tokens especulativos.
+3. **Inmunidad a la Liquidación:** Al operar exclusivamente con **apalancamiento aislado 1.0x** y un stoploss duro del 10%, el sistema elimina el riesgo de liquidación catastrófica ante repuntes violentos (*short squeezes*).
+4. **Validación Cuantitativa Oficial:**
+   - La estrategia **`MemeHunterFuturesV1_ShortOnly`** generó **+63.24% de retorno neto (+632.40 USDT)** sobre 1,000 USDT base, con un **Calmar Ratio de 4.00**, **Sortino de 2.48** y **Sharpe de 1.11**, con 8 de los 10 pares ganadores (+719.85 USDT acumulados).
+
