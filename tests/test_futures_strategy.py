@@ -87,3 +87,15 @@ def test_long_entry_filters(override):
     s = make_strategy()
     df = s.populate_entry_trend(base_frame(**override), {"pair": "BTC/USDT:USDT"})
     assert df["enter_long"].iloc[0] == 0
+
+
+def test_custom_stake_amount_asymmetric():
+    s = make_strategy()
+    now = datetime(2026, 10, 11, tzinfo=timezone.utc)
+    # Para shorts aplica impulso de 1.15x
+    short_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "short", "short")
+    assert short_stake == pytest.approx(115.0)
+
+    # Para longs aplica mitigación prudente de 0.70x
+    long_stake = s.custom_stake_amount("BTC/USDT:USDT", now, 100.0, 100.0, 10.0, 500.0, 1.0, "long", "long")
+    assert long_stake == pytest.approx(70.0)
