@@ -36,7 +36,8 @@ def main():
         "--symbols"
     ] + symbols + [
         "--interval", "4h", "1m",
-        "--start", "2020-01"
+        "--start", "2020-01",
+        "--workers", "2"
     ]
     
     LOG.info("Ejecutando descarga para intervalos 4h y 1m...")

@@ -255,9 +255,13 @@ class Store:
         path = self.full_file(interval, symbol)
         if not path.exists():
             return None
-        df = pd.read_feather(path)
-        df["date"] = pd.to_datetime(df["date"], utc=True)
-        return df
+        try:
+            df = pd.read_feather(path)
+            df["date"] = pd.to_datetime(df["date"], utc=True)
+            return df
+        except Exception as exc:
+            LOG.warning("No se pudo leer %s (%s). Reconstruyendo...", path, exc)
+            return None
 
     def save_full(self, interval: str, symbol: str, df: pd.DataFrame) -> None:
         path = self.full_file(interval, symbol)
