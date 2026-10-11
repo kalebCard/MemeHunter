@@ -92,6 +92,9 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 | **PB-45** | **Motor Cuantitativo de Nodos de Bajo Volumen (Volume Profile LVN Detection).** | 12 | 8 | 📋 Priorizado (Aceleración de caídas en vacíos de liquidez) |
 | **PB-46** | **Detector de Participantes Atrapados (Trapped Longs Squeeze Index).** | 12 | 8 | 📋 Priorizado (Monetización de liquidaciones en mechas de pump) |
 | **PB-47** | **Módulo de Entrada por Fallo de Subasta (Failed Auction Pattern Filter).** | 12 | 5 | 📋 Priorizado (Eliminación de falsos rompimientos) |
+| **PB-48** | **Módulo de Estacionalidad Diaria y Aperturas de Sesión (London/NY Reversal vs Asian Pumps).** | 13 | 5 | 📋 Priorizado (Filtrado de reversión intradía) |
+| **PB-49** | **Ciclo Semanal y Efecto Fin de Semana (Weekend Low-Liquidity Pump Exhaustion & Monday Bleed).** | 13 | 5 | 📋 Priorizado (Monetización del colapso de domingo/lunes) |
+| **PB-50** | **Ciclos de Liquidez Quincenal, Fin de Mes y Vencimientos de Futuros (Payday & Expiry Drift).** | 13 | 8 | 📋 Priorizado (Sizing aumentado en sangrado de fin de mes) |
 
 ---
 
@@ -210,6 +213,21 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 * **PB-47 (Confirmación por Fallo de Subasta - Failed Auction Pattern):**
   * Prohibir sistemáticamente entradas en el primer impulso de ruptura; exigir confirmación de fallo de subasta (nuevo máximo rechazado y quiebre de soporte previo).
   * Reducir el riesgo por trade al 2.5%–3.5% situando el stop quirúrgicamente sobre el punto de fallo de la subasta.
+
+---
+
+### Sprint 13: Estacionalidad Humana & Ciclos de Liquidez Macro (En Diseño ⏳)
+**Objetivo:** Explotar la predictibilidad del comportamiento humano (horarios laborales, efectos de fin de semana, calendarios salariales y vencimientos de derivados) para maximizar la asimetría de rentabilidad.
+
+* **PB-48 (Estacionalidad Horaria y Ciclos de Sesión Diaria):**
+  * Cuantificar la tasa de éxito de los Shorts al inicio de las sesiones de Londres (08:00 UTC) y Nueva York (13:00 UTC), cuando los Market Makers institucionales deshacen los pumps artificiales de la sesión asiática (00:00–04:00 UTC).
+  * Priorizar entradas Short cuando la señal coincida con la apertura de sesiones de alta liquidez.
+* **PB-49 (Efecto Fin de Semana / Weekend Liquidity Void & Monday Breakdown):**
+  * Modelar la ausencia de liquidez bancaria fiat durante sábados y domingos.
+  * Diseñar un gatillo de alta convicción para shortear los pumps eufóricos de fin de semana en el umbral del domingo 20:00 UTC a lunes 04:00 UTC (Weekly Open reversal).
+* **PB-50 (Ciclos Quincenales, Salarios y Vencimientos de Derivados):**
+  * Analizar el patrón de inyección de liquidez minorista (*Payday Effect*, días 1–4 y 15–18 del mes) versus las fases de agotamiento de capital (días 21–28).
+  * Modular el dimensionamiento de posición (*Adaptive Calendar Sizing*): incrementar el stake a $1.30x$ en la última semana del mes coincidiendo con el sangrado de liquidez y el *Monthly Futures & Options Expiry* (último viernes del mes).
 
 ---
 
