@@ -49,7 +49,7 @@ def load_latest_backtest(backtest_dir: Path):
         
     return data, zip_path.name
 
-def run_monte_carlo(trades: list, starting_balance: float = 1000.0, max_open_trades: int = 5, num_simulations: int = 2500, stake_mode: str = "compounding"):
+def run_monte_carlo(trades: list, starting_balance: float = 1000.0, max_open_trades: int = 5, num_simulations: int = 2500, stake_mode: str = "compounding", backtest_balance: float = None):
     """
     Runs bootstrap simulation with reshuffling and replacement.
     Supports 'compounding' (stake = equity / max_open_trades) and 'fixed' (stake = starting_balance / max_open_trades).
@@ -59,7 +59,9 @@ def run_monte_carlo(trades: list, starting_balance: float = 1000.0, max_open_tra
         raise ValueError("No trades found in backtest.")
     
     profit_ratios = [t["profit_ratio"] for t in trades]
-    actual_profits_abs = [t["profit_abs"] for t in trades]
+    # Las ganancias absolutas vienen del wallet del backtest; se escalan al capital simulado.
+    abs_scale = (starting_balance / backtest_balance) if backtest_balance else 1.0
+    actual_profits_abs = [t["profit_abs"] * abs_scale for t in trades]
     
     actual_final_balance = starting_balance + sum(actual_profits_abs)
     
@@ -249,20 +251,21 @@ def main():
     strat_data = strat_dict.get(strat_name, {})
     trades = strat_data.get("trades", [])
     starting_balance = args.capital
+    backtest_balance = strat_data.get("starting_balance")
     
     print(f"[*] Analizando {len(trades)} trades de {zip_name} [{strat_name}] con capital inicial ${starting_balance:.2f} USDT...")
     
     print(f"\n>>> ESCENARIO 1: CONFIGURACIÓN 5 TRADES (20% del capital por posición, compuesto)")
-    res_5 = run_monte_carlo(trades, starting_balance, max_open_trades=5, num_simulations=args.sims, stake_mode="compounding")
+    res_5 = run_monte_carlo(trades, starting_balance, max_open_trades=5, num_simulations=args.sims, stake_mode="compounding", backtest_balance=backtest_balance)
     print_report(res_5, f"{zip_name} [5 Trades - 20% Compuesto | ${starting_balance:.0f} USDT]")
     
     print(f"\n>>> ESCENARIO 2: SIZING CONSERVADOR 10 TRADES (10% del capital por posición, compuesto)")
-    res_10 = run_monte_carlo(trades, starting_balance, max_open_trades=10, num_simulations=args.sims, stake_mode="compounding")
+    res_10 = run_monte_carlo(trades, starting_balance, max_open_trades=10, num_simulations=args.sims, stake_mode="compounding", backtest_balance=backtest_balance)
     print_report(res_10, f"{zip_name} [10 Trades - 10% Compuesto | ${starting_balance:.0f} USDT]")
     
     fixed_stake = max(5.0, starting_balance / 10.0)
     print(f"\n>>> ESCENARIO 3: STAKE FIJO (${fixed_stake:.2f} USDT por operación)")
-    res_fixed = run_monte_carlo(trades, starting_balance, max_open_trades=10, num_simulations=args.sims, stake_mode="fixed")
+    res_fixed = run_monte_carlo(trades, starting_balance, max_open_trades=10, num_simulations=args.sims, stake_mode="fixed", backtest_balance=backtest_balance)
     print_report(res_fixed, f"{zip_name} [Fixed ${fixed_stake:.0f} Stake | ${starting_balance:.0f} USDT]")
     
     all_results = {
