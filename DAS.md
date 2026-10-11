@@ -1,23 +1,18 @@
 # Documento de Arquitectura de Software (DAS)
-**Proyecto**: meme_hunter
-**Versión**: 3.1 (Arquitectura Basada en Freqtrade para Validación Empírica)
+**Proyecto**: meme_hunter  
+**Versión**: 4.0 (Arquitectura Cuantitativa de Futuros USDT-M, Microestructura y Edge Asimétrico)
 
 ## 1. Introducción
 ### 1.1 Propósito
-Este documento describe la arquitectura del sistema **meme_hunter**. Tras una rigurosa revisión técnica, se determinó que la construcción de infraestructura nativa personalizada (Rust, Redis, PyQt6) representaba un riesgo de sobre-ingeniería inaceptable antes de probar la rentabilidad real de la estrategia. Por tanto, la prioridad absoluta es validar la **ventaja matemática (edge)** del bot frente a los retos del universo operado (slippage, spread, deslistados). La arquitectura adopta un enfoque pragmático delegando la infraestructura de bajo nivel al framework maduro **Freqtrade**.
+Este documento describe la arquitectura del sistema **meme_hunter**. Tras validar que el mercado Spot sufría severo desgaste por sesgo unidireccional y comisiones, la arquitectura evolucionó hacia un **sistema cuantitativo bidireccional (Long/Short) sobre Futuros USDT-M (Binance)** con margen aislado 1.0x (cero riesgo de liquidación forzada), complementado con una suite de microestructura (Order Flow Imbalance, Funding Arbitrage y Clasificación de Régimen).
 
 ### 1.2 Alcance
-El sistema descansa sobre Freqtrade y la librería de conectividad CCXT. Nuestro esfuerzo de desarrollo se concentra exclusivamente en la capa de **Ciencia de Datos y Lógica de Negocio** (la estrategia en Python). Toda optimización de latencia de red, HFT o colocalización geográfica se aplaza indefinidamente hasta que el backtesting demuestre que la estrategia de 4H/1D sobrevive a las métricas de riesgo estrictas.
+El sistema descansa sobre el framework de ejecución **Freqtrade** y la librería **CCXT**, complementado por módulos satélite especializados en Python. La estrategia central (`MemeHunterFuturesV1`) ejecuta señales técnicas con dimensionamiento asimétrico (1.15x en Shorts, 0.70x en Longs) y protecciones nativas (Kill-Switch al 25% de Drawdown, StoplossGuard).
 
-### 1.3 Universo Operado (Decisión Pendiente de Confirmación)
-El nombre del proyecto alude a *meme coins*, pero la lógica descrita (Top N por volumen, 4H/1D) corresponde a un universo líquido genérico. Se definen dos universos **evaluados por separado**, nunca mezclados en una misma métrica:
-
-| Universo | Descripción | Riesgos específicos |
-|---|---|---|
-| **U1 – Líquido** | Top N de Binance Spot por volumen (p. ej. N=30) en cada época | Sesgo de supervivencia, régimen de mercado |
-| **U2 – Memes** | Subconjunto de meme coins listadas en Binance Spot | Liquidez baja, spreads amplios, deslistados, *pump & dump* |
-
-**Regla**: la Fase 0 se ejecuta primero sobre U1 (datos más fiables). U2 solo se evalúa si U1 produce resultados válidos, usando umbrales de coste más adversos.
+### 1.3 Universo Operado
+El universo activo se compone de contratos perpetuos USDT-M en Binance filtrados dinámicamente:
+* **Filtro de Liquidez Estricto:** Mínimo $1,000,000 USDT de volumen en 24h para excluir trampas de liquidez y tokens manipulados de baja capitalización.
+* **Margen Aislado 1.0x:** Operación desapalancada real que elimina por diseño matemático la liquidación forzada.
 
 ---
 
@@ -47,6 +42,14 @@ El nombre del proyecto alude a *meme coins*, pero la lógica descrita (Top N por
 ### 3.3 Interfaz de Usuario y Notificaciones
 - **FreqUI**: Dashboard web incluido de forma nativa en Freqtrade para monitoreo visual, registro de logs y evaluación del rendimiento de la estrategia en tiempo real.
 - **Telegram Bot nativo**: Freqtrade enviará notificaciones instantáneas sobre operaciones, cierres por trailing stop y permitirá envío de comandos básicos (`/status`, `/forcesell`).
+
+### 3.4 Módulos Satélite Cuantitativos y de Microestructura (`scripts/`)
+- **Meme Sentinel (`scripts/meme_sentinel.py`)**: Monitorea el universo USDT-M calculando volumen relativo (RVOL) para detectar anomalías y rupturas de volatilidad tempranas antes del cierre de velas de 4H.
+- **Radar Viral On-Chain (`scripts/dex_viral_radar.py`)**: Conexión a la API pública de DexScreener para capturar tracción en Solana/Base/Ethereum y cuantificar presión compradora.
+- **Funding Arbitrage (`scripts/funding_arbitrage.py`)**: Escáner de oportunidades Cash & Carry Delta-Neutral (Short Futuros 1x + Spot Long) para extraer rendimiento pasivo de Funding Rates extremos (50%–150% APR) con $0 riesgo direccional.
+- **Order Flow Imbalance (`scripts/order_flow_imbalance.py`)**: Análisis de microestructura N2, cálculo de OFI y Micro-Price para optimizar la colocación de órdenes límite pasivas (Maker).
+- **Clasificador de Régimen (`scripts/regime_classifier.py`)**: Clasificación dinámica de mercado (`BULL_MOMENTUM`, `BEAR_BLEED`, `CHOPPY_RANGE`) con adaptación de riesgo y pausa en regímenes adversos.
+- **Auditor de Dry-Run (`scripts/dryrun_monitor.py`)**: Evaluación continua de los trades simulados almacenados en SQLite contra los criterios de aceptación estadística.
 
 ---
 

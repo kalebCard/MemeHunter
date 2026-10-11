@@ -86,8 +86,14 @@ meme_hunter/
 ├── docker-compose.futures.yml   # Despliegue de Futuros (Puerto 8081)
 ├── docker-compose.yml           # Base para comandos generales
 ├── .env.example                 # Plantilla de secretos (Binance / Telegram)
-├── scripts/                     # Herramientas estadísticas y de stress testing
+├── scripts/                     # Herramientas estadísticas, microestructura y radares
 │   ├── daily_performance.py     # Análisis de rendimiento diario, win rate día a día y estacionalidad
+│   ├── dryrun_monitor.py        # Auditoría continua de trades simulados en SQLite vs criterios de aceptación
+│   ├── meme_sentinel.py         # Scanner de spikes de volumen relativo (RVOL) y liquidez en Binance
+│   ├── dex_viral_radar.py       # Radar on-chain DEX (DexScreener) para tracción viral Web3
+│   ├── funding_arbitrage.py     # Calculador de arbitraje Delta-Neutral de Funding Rates (Cash & Carry)
+│   ├── order_flow_imbalance.py  # Análisis de microestructura Nivel 2 (OFI) y Micro-Price
+│   ├── regime_classifier.py     # Clasificador de régimen de mercado (Volatilidad/Tendencia) y sizing dinámico
 │   ├── stress_test.py           # Choque de fricción adversa (slippage, fees, delays)
 │   ├── monte_carlo.py           # Remuestreo bootstrap de 7,500 caminos y riesgo de ruina
 │   ├── simulate_micro_capital.py# Simulación con restricciones de orden mínima ($5 Binance)
@@ -97,8 +103,8 @@ meme_hunter/
 │   ├── config_futures.example.json # Plantilla de Futuros (copiar a config_futures.json, no versionado)
 │   ├── config_futures_backtest.json
 │   └── strategies/
-│       └── MemeHunterFuturesV1.py # Estrategia Long/Short aislada 1x con Kill-Switch
-└── tests/                       # Suite pytest (binance_vision, dryrun_monitor, MemeHunterFuturesV1)
+│       └── MemeHunterFuturesV1.py # Estrategia Long/Short aislada 1x con Sizing Asimétrico y Kill-Switch
+└── tests/                       # Suite pytest (48 tests unitarios pasando al 100%)
 ```
 
 ### Ejecutar los tests

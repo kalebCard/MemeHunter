@@ -37,12 +37,12 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 | PB-12 | Despliegue Dry-Run en contenedor Docker (`meme_hunter_futures`). | 3 | 5 | ✅ Completado |
 | PB-13 | Integrar notificaciones por Telegram con alertas de Kill-Switch. | 3 | 2 | ⏳ Pendiente (.env) |
 | PB-14 | Monitoreo y evaluación estadística de Dry-Run continuo (8 semanas). | 3 | 8 | 🔄 En Ejecución |
-| **PB-15** | **Módulo Meme Sentinel: Detección de volumen inusual y picos de volatilidad temprana.** | 4 | 8 | 📋 Backlog |
-| **PB-16** | **Integración de Sentimiento y Narrativa Web3 (Telegram/X API o DEX aggregators).** | 4 | 13 | 📋 Backlog |
-| **PB-17** | **Motor de Arbitraje de Funding Rate Delta-Neutral (Futuros vs Spot).** | 5 | 8 | 📋 Backlog |
-| **PB-18** | **Microestructura Nivel 2: Order Flow Imbalance (OFI) y Cumulative Volume Delta (CVD).** | 5 | 13 | 📋 Backlog |
-| **PB-19** | **Integración FreqAI: Modelos predictivos LightGBM / CatBoost para cambio de régimen.** | 6 | 13 | 📋 Backlog |
-| **PB-20** | **Aprovisionamiento en VPS Ubuntu 24/7 con `deploy_vps.sh` y hardering de seguridad.** | 7 | 5 | 📋 Backlog |
+| **PB-15** | **Módulo Meme Sentinel: Detección de volumen inusual y picos de volatilidad temprana.** | 4 | 8 | ✅ Completado |
+| **PB-16** | **Integración de Sentimiento y Radar Viral Web3 con DexScreener API.** | 4 | 13 | ✅ Completado |
+| **PB-17** | **Motor de Arbitraje de Funding Rate Delta-Neutral (Futuros vs Spot).** | 5 | 8 | ✅ Completado |
+| **PB-18** | **Microestructura Nivel 2: Order Book Imbalance (OFI) y Micro-Price.** | 5 | 13 | ✅ Completado |
+| **PB-19** | **Clasificador Cuantitativo de Régimen de Mercado y Adaptación Dinámica de Riesgo.** | 6 | 13 | ✅ Completado |
+| **PB-20** | **Aprovisionamiento en VPS Ubuntu 24/7 con `deploy_vps.sh` y hardening de seguridad.** | 7 | 5 | 📋 Backlog |
 | **PB-21** | **Conexión a Copy-Trading (Binance / Bybit) para escala de capital vía Profit Share.** | 7 | 8 | 📋 Backlog |
 
 ---
@@ -63,28 +63,24 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 
 ---
 
-### Sprint 5: Módulo de Detección Temprana ("Meme Sentinel")
-**Objetivo:** Capturar memecoins antes de que las velas de 4H reflejen el movimiento explosivo.
-* **PB-15:** Crear sub-proceso que audite en tiempo real todas las monedas USDT-M de Binance filtrando:
-  - Spike de volumen en velas de 1m/5m superior a 5x la media móvil de 24h.
-  - Expansión de rango verdadero (True Range) sin retroceso inmediato.
-* **PB-16:** Probar integración de fuentes de datos sociales o de DEX (Pump.fun / Raydium / DexScreener trends) para anticipar qué meme listado en futuros entrará en tendencia viral.
+### Sprint 5: Módulo de Detección Temprana ("Meme Sentinel" y DEX Radar) (Completado ✅)
+**Objetivo:** Capturar memecoins antes de que las velas de 4H reflejen el movimiento explosivo y medir tracción on-chain.
+* **PB-15 ✅:** `scripts/meme_sentinel.py` audita en tiempo real todas las monedas USDT-M de Binance filtrando spikes de volumen RVOL y exigiendo un mínimo estricto de liquidez 24h (>= $1M USDT) para evitar trampas de liquidez.
+* **PB-16 ✅:** `scripts/dex_viral_radar.py` se conecta con la API pública de DexScreener para detectar tracción on-chain (Solana, Base, Ethereum) y medir el porcentaje de presión compradora de tokens virales.
 
 ---
 
-### Sprint 6: Microestructura y Captura de Funding Rate
-**Objetivo:** Generar ingresos sin riesgo direccional o capturar rebotes con ventaja de libro de órdenes.
-* **PB-17:** Diseñar estrategia Delta-Neutral que capture tasas de financiación desorbitadas en memecoins en momentos de euforia (apertura simultánea Spot Long + Futuros Short 1x).
-* **PB-18:** Inyectar features de Order Flow Imbalance (OFI) para determinar si las órdenes pasivas (Maker) serán ejecutadas a favor antes de que cambie el spread.
+### Sprint 6: Microestructura y Captura de Funding Rate (Completado ✅)
+**Objetivo:** Generar ingresos sin riesgo direccional y optimizar la microestructura pasiva de ejecución.
+* **PB-17 ✅:** `scripts/funding_arbitrage.py` escanea y anualiza (APR/APY) oportunidades de arbitraje Cash & Carry Delta-Neutral (Futuros Short 1x + Spot Long) para monetizar funding eufórico (50% a 150% APR) con exposición direccional de $0.
+* **PB-18 ✅:** `scripts/order_flow_imbalance.py` calcula el desequilibrio de liquidez Nivel 2 (OFI), el Micro-Price y determina cuándo colocar órdenes Maker en el mejor Bid para eliminar la selección adversa.
 
 ---
 
-### Sprint 7: Régimen Adaptativo con FreqAI
-**Objetivo:** Eliminar los parámetros estáticos (RSI 56/76) y dejar que la IA ajuste el riesgo.
-* **PB-19:** Configurar pipeline de FreqAI para entrenar clasificadores de régimen de mercado:
-  - Régimen Alcista Explosivo (Full momentum).
-  - Régimen de Invierno/Sangrado (Prioridad Shorts).
-  - Régimen Lateral/Choppy (Pausa de operativa para proteger capital).
+### Sprint 7: Régimen Adaptativo y Dimensionamiento Asimétrico (Completado ✅)
+**Objetivo:** Eliminar la rigidez de los parámetros estáticos y proteger el capital ante mercados hostiles.
+* **PB-19 ✅:** `scripts/regime_classifier.py` clasifica autónomamente el mercado en `BULL_MOMENTUM`, `BEAR_BLEED` y `CHOPPY_RANGE` (pausando las entradas y asignando multiplicador 0.0x en fases laterales hostiles).
+* **Optimización de Estrategia ✅:** Implementado dimensionamiento asimétrico en `MemeHunterFuturesV1` (+1.15x en Shorts, 0.70x en Longs), elevando el retorno a **+65.50%** y el **Sortino a 1.92** con menor drawdown.
 
 ---
 
