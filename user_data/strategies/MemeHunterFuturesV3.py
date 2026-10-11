@@ -53,20 +53,26 @@ class MemeHunterFuturesV3(IStrategy):
     timeframe = '4h'
     can_short = True
 
-    # ROI escalonado
+    # ROI calibrado para capturar la desinflación macro de memecoins
     minimal_roi = {
-        "0": 0.45,       # Take profit agresivo ante pump/dump extremo
-        "720": 0.20,     # A las 48h asegurar al menos 20%
-        "1440": 0.10,    # A los 4 días asegurar 10%
-        "2880": 0.04     # A los 8 días asegurar 4%
+        "0": 0.602,
+        "1704": 0.141,
+        "2255": 0.047,
+        "7483": 0
     }
 
-    # Stoploss de seguridad duro inicial
-    stoploss = -0.09  # 9% de riesgo máximo inicial
+    # Stoploss duro inicial (-10%)
+    stoploss = -0.10
 
-    # Custom stoploss dinámico activo
-    use_custom_stoploss = True
-    trailing_stop = False  # Gestionado con precisión quirúrgica en custom_stoploss
+    # Trailing Stop Nativo de Alta Rentabilidad (Probado en V1_ShortOnly):
+    # Solo se activa cuando la ganancia alcanza al menos +12.0% (offset).
+    # Una vez alcanzado, persigue el precio con una distancia de 4.0%
+    # permitiendo que las mechas intradiarias respiren y los colapsos corran.
+    trailing_stop = True
+    trailing_stop_positive = 0.040
+    trailing_stop_positive_offset = 0.120
+    trailing_only_offset_is_reached = True
+    use_custom_stoploss = False
 
     use_exit_signal = True
 
@@ -127,43 +133,6 @@ class MemeHunterFuturesV3(IStrategy):
             stake = max(stake, min_stake)
         stake = max(stake, 5.0)  # Binance Min Notional
         return min(stake, max_stake)
-
-    def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
-                        current_rate: float, current_profit: float, after_fill: bool,
-                        **kwargs) -> Optional[float]:
-        """
-        GESTOR DINÁMICO DE STOPLOSS Y PROTECCIÓN DE CAPITAL:
-        Evita whipsaws intradiarios en velas de 4h garantizando un margen mínimo
-        de holgura del 3.5% respecto al precio actual.
-        - current_profit >= +20%: Trailing ajustado al 4.0% desde el precio pico actual.
-        - current_profit >= +10%: Asegura al menos +4.5% de ganancia neta.
-        - current_profit >= +5.0%: Break-even protegiendo comisiones (+0.8% asegurado).
-        - Por defecto: Stoploss de emergencia inicial (-9.0%).
-        """
-        # Tier 3: Ganancia explosiva (> 20%) -> Trailing stop del 4.0% desde el precio actual
-        if current_profit >= 0.20:
-            return -0.040
-
-        # Tier 2: Ganancia sustancial (> 10%) -> Asegurar al menos +4.5% de ganancia neta
-        if current_profit >= 0.10:
-            # En Freqtrade, el stoploss relativo al precio actual para asegurar un profit 'p_target'
-            # se expresa como: -(current_profit - p_target) / (1 + current_profit)
-            profit_to_protect = 0.045
-            stop_distance = (current_profit - profit_to_protect) / (1.0 + current_profit)
-            # Garantizar que nunca sea menor al 3.5% para no ser barrido por una mecha
-            stop_distance = max(stop_distance, 0.035)
-            return -stop_distance
-
-        # Tier 1: Break-Even (+5.0%) -> Asegurar +0.8% para absorber comisiones completas Maker/Taker
-        if current_profit >= 0.05:
-            profit_to_protect = 0.008
-            stop_distance = (current_profit - profit_to_protect) / (1.0 + current_profit)
-            # Holgura de seguridad de al menos 3.5%
-            stop_distance = max(stop_distance, 0.035)
-            return -stop_distance
-
-        # Por defecto, mantener el stoploss duro inicial (-9%)
-        return -0.09
 
     def _is_live_mode(self) -> bool:
         runmode = self.config.get('runmode')
