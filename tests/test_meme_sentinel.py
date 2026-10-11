@@ -19,6 +19,7 @@ def test_analyze_symbol_calculates_rvol_and_score():
     rows.append([base_ts + 20 * 300000, 10.0, 11.2, 9.8, 11.0, 500.0])
 
     mock_exchange = MagicMock()
+    mock_exchange.fetch_ticker.return_value = {"quoteVolume": 5000000.0}  # $5M de volumen 24h
     mock_exchange.fetch_ohlcv.return_value = rows
 
     res = ms.analyze_symbol(mock_exchange, "DOGE/USDT:USDT", timeframe="5m")
@@ -30,8 +31,16 @@ def test_analyze_symbol_calculates_rvol_and_score():
     assert res["score"] == pytest.approx(50.0)
 
 
+def test_analyze_symbol_filters_low_24h_liquidity():
+    mock_exchange = MagicMock()
+    # Token trampa con solo $100k de volumen
+    mock_exchange.fetch_ticker.return_value = {"quoteVolume": 100000.0}
+    assert ms.analyze_symbol(mock_exchange, "SCAM/USDT:USDT", min_24h_volume_usdt=1000000.0) is None
+
+
 def test_analyze_symbol_ignores_insufficient_data():
     mock_exchange = MagicMock()
+    mock_exchange.fetch_ticker.return_value = {"quoteVolume": 5000000.0}
     mock_exchange.fetch_ohlcv.return_value = [[1, 1, 1, 1, 1, 1]] * 5  # Menos de 15 velas
     assert ms.analyze_symbol(mock_exchange, "PEPE/USDT:USDT") is None
 

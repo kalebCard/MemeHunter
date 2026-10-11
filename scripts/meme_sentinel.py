@@ -42,9 +42,15 @@ def get_usdt_futures_markets(exchange: ccxt.binance) -> List[str]:
     return symbols
 
 
-def analyze_symbol(exchange: ccxt.binance, symbol: str, timeframe: str = "5m", limit: int = 30) -> Dict:
-    """Calcula RVOL y expansión de rango para un símbolo."""
+def analyze_symbol(exchange: ccxt.binance, symbol: str, timeframe: str = "5m", limit: int = 30, min_24h_volume_usdt: float = 1000000.0) -> Dict:
+    """Calcula RVOL y expansión de rango descartando tokens con volumen 24h insuficiente."""
     try:
+        # 1. Filtro de liquidez 24h: evitar trampas ilíquidas donde no se puede salir
+        ticker = exchange.fetch_ticker(symbol)
+        quote_vol_24h = ticker.get("quoteVolume", 0.0) or 0.0
+        if quote_vol_24h < min_24h_volume_usdt:
+            return None
+
         ohlcv = exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
         if len(ohlcv) < 15:
             return None
@@ -75,14 +81,15 @@ def analyze_symbol(exchange: ccxt.binance, symbol: str, timeframe: str = "5m", l
             "price_change_pct": round(price_change_pct, 2),
             "range_pct": round(candle_range_pct, 2),
             "close": current_candle["close"],
-            "volume_usdt": round(current_candle["volume"] * current_candle["close"], 2),
+            "volume_candle_usdt": round(current_candle["volume"] * current_candle["close"], 2),
+            "volume_24h_usdt": round(quote_vol_24h, 2),
             "score": round(score, 2)
         }
     except Exception:
         return None
 
 
-def scan_markets(min_spike: float = 2.5, timeframe: str = "5m", max_pairs: int = 40) -> List[Dict]:
+def scan_markets(min_spike: float = 2.5, timeframe: str = "5m", max_pairs: int = 40, min_24h_vol: float = 1000000.0) -> List[Dict]:
     exchange = ccxt.binance({"options": {"defaultType": "future"}, "enableRateLimit": True})
     symbols = get_usdt_futures_markets(exchange)
     
@@ -92,11 +99,11 @@ def scan_markets(min_spike: float = 2.5, timeframe: str = "5m", max_pairs: int =
     other_symbols = [s for s in symbols if s not in priority_symbols]
     target_symbols = (priority_symbols + other_symbols)[:max_pairs]
     
-    print(f"[*] Analizando {len(target_symbols)} mercados en Futuros ({timeframe})...")
+    print(f"[*] Analizando {len(target_symbols)} mercados en Futuros ({timeframe}) | Filtro Vol 24h: >= ${min_24h_vol:,.0f}...")
     alerts = []
     
     for s in target_symbols:
-        res = analyze_symbol(exchange, s, timeframe=timeframe)
+        res = analyze_symbol(exchange, s, timeframe=timeframe, min_24h_volume_usdt=min_24h_vol)
         if res and res["rvol"] >= min_spike:
             alerts.append(res)
         time.sleep(exchange.rateLimit / 1000.0)  # Respetar rate limits
@@ -108,27 +115,28 @@ def scan_markets(min_spike: float = 2.5, timeframe: str = "5m", max_pairs: int =
 def main():
     parser = argparse.ArgumentParser(description="Meme Sentinel - Detector Temprano de Anomalías")
     parser.add_argument("--min-volume-spike", type=float, default=2.0, help="Multiplicador de volumen mínimo (RVOL)")
+    parser.add_argument("--min-volume-24h", type=float, default=1000000.0, help="Volumen mínimo de 24h en USDT para evitar trampas")
     parser.add_argument("--timeframe", type=str, default="5m", help="Timeframe de detección rápida (1m, 5m, 15m)")
     parser.add_argument("--top", type=int, default=10, help="Número de alertas a mostrar")
     args = parser.parse_args()
 
-    print("=" * 65)
+    print("=" * 75)
     print(f"🐕 MEME SENTINEL: ESCÁNER DE VOLUMEN Y EXPLOSIONES TEMPRANAS")
-    print(f"Timeframe: {args.timeframe} | Filtro RVOL: >= {args.min_volume_spike}x")
-    print("=" * 65)
+    print(f"Timeframe: {args.timeframe} | Filtro RVOL: >= {args.min_volume_spike}x | Vol 24h >= ${args.min_volume_24h:,.0f}")
+    print("=" * 75)
 
-    alerts = scan_markets(min_spike=args.min_volume_spike, timeframe=args.timeframe)
+    alerts = scan_markets(min_spike=args.min_volume_spike, timeframe=args.timeframe, min_24h_vol=args.min_volume_24h)
 
     if not alerts:
         print("\n[i] No se detectaron anomalías por encima del umbral en este ciclo.")
         return
 
-    print(f"\n🔥 TOP {min(args.top, len(alerts))} MEMECOINS CON ACTIVIDAD INUSUAL:")
-    print(f"{'Símbolo':<18} {'RVOL':<8} {'Var %':<8} {'Rango %':<9} {'Vol USDT':<12} {'Score'}")
-    print("-" * 65)
+    print(f"\n🔥 TOP {min(args.top, len(alerts))} MEMECOINS CON ACTIVIDAD INUSUAL Y ALTA LIQUIDEZ:")
+    print(f"{'Símbolo':<18} {'RVOL':<8} {'Var %':<8} {'Rango %':<9} {'Vol 24h USDT':<15} {'Score'}")
+    print("-" * 75)
     for a in alerts[:args.top]:
         sign = "+" if a["price_change_pct"] > 0 else ""
-        print(f"{a['symbol']:<18} {a['rvol']:<7}x {sign}{a['price_change_pct']:<7}% {a['range_pct']:<8}% ${a['volume_usdt']:<11} {a['score']}")
+        print(f"{a['symbol']:<18} {a['rvol']:<7}x {sign}{a['price_change_pct']:<7}% {a['range_pct']:<8}% ${a['volume_24h_usdt']:<14,.0f} {a['score']}")
 
 
 if __name__ == "__main__":
