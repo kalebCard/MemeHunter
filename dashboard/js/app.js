@@ -499,6 +499,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
   });
 
+  const btnTriggerTab = document.getElementById('btn-trigger-cycle-tab');
+  if (btnTriggerTab) {
+    btnTriggerTab.addEventListener('click', () => {
+      if (btnTrigger) btnTrigger.click();
+    });
+  }
+
   const btnSynth = document.getElementById('btn-synthesize-ai');
   btnSynth.addEventListener('click', async () => {
     btnSynth.classList.add('loading');

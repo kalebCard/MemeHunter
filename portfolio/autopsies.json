@@ -118,5 +118,35 @@
       "MINE_VOLUME_MICROSTRUCTURE"
     ],
     "timestamp": "2026-10-12T05:20:35.337324+00:00"
+  },
+  {
+    "factor_id": "STUDIO_1000PEPE_1791827708",
+    "formula": "ts_decay_linear(returns, 5) * ts_rank(volume, 10)",
+    "health_status": "WARNING_DECAY",
+    "diagnosis": "ALPHA_DECAY_VOLATILITY_COMPRESSION",
+    "root_cause": "El factor perdi\u00f3 poder predictivo debido a un cambio abrupto de volatilidad y saturaci\u00f3n de microestructura en memecoins.",
+    "recommendation": "Excluir factores basados en momentum de cierre simple y priorizar desbalances de volumen acumulado (volume imbalance / rvol).",
+    "confidence_score": 0.88,
+    "suggested_actions": [
+      "ISOLATE_FACTOR",
+      "REDUCE_WEIGHT_TO_ZERO",
+      "MINE_VOLUME_MICROSTRUCTURE"
+    ],
+    "timestamp": "2026-10-12T21:27:59.571532+00:00"
+  },
+  {
+    "factor_id": "STUDIO_1000PEPE_1791827708",
+    "formula": "ts_decay_linear(returns, 5) * ts_rank(volume, 10)",
+    "health_status": "WARNING_DECAY",
+    "diagnosis": "ALPHA_DECAY_VOLATILITY_COMPRESSION",
+    "root_cause": "El factor perdi\u00f3 poder predictivo debido a un cambio abrupto de volatilidad y saturaci\u00f3n de microestructura en memecoins.",
+    "recommendation": "Excluir factores basados en momentum de cierre simple y priorizar desbalances de volumen acumulado (volume imbalance / rvol).",
+    "confidence_score": 0.88,
+    "suggested_actions": [
+      "ISOLATE_FACTOR",
+      "REDUCE_WEIGHT_TO_ZERO",
+      "MINE_VOLUME_MICROSTRUCTURE"
+    ],
+    "timestamp": "2026-10-12T21:32:51.767653+00:00"
   }
 ]

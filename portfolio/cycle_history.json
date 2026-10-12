@@ -1,5 +1,63 @@
 [
   {
+    "timestamp": "2026-10-12T21:32:52.469488+00:00",
+    "actions": [
+      "Promoci\u00f3n de LLM_LLM_ALPHA_01 de SANDBOX a LIVE por IC s\u00f3lido (0.959)",
+      "Promoci\u00f3n de LLM_LLM_ALPHA_03 de SANDBOX a LIVE por IC s\u00f3lido (0.959)",
+      "Degradaci\u00f3n de STUDIO_1000PEPE_1791827708 a ALPHA_DECAY: Decaimiento de Alpha detectado: IC=0.1820 (m\u00ednimo=0.03) o p-val=0.4426.",
+      "Autopsia IA completada para STUDIO_1000PEPE_1791827708: ALPHA_DECAY_VOLATILITY_COMPRESSION -> El factor perdi\u00f3 poder predictivo debido a un cambio abrupto...",
+      "Factor sintetizado por IA 'LLM_LLM_ALPHA_01' inyectado a SANDBOX (ts_rank((volume / (vwap + 1e-6)), 14))",
+      "Factor sintetizado por IA 'LLM_LLM_ALPHA_03' inyectado a SANDBOX (ts_decay_linear(returns, 5) * ts_rank(volume, 10))",
+      "Disparo de miner\u00eda reactiva completado. Raz\u00f3n: Decay detectado en STUDIO_1000PEPE_1791827708 (WARNING_DECAY)",
+      "Rebalanceo HRP ejecutado. Estrategias activas ponderadas: ['ALPHA_004', 'ALPHA_001', 'ALPHA_002']"
+    ],
+    "quarantined": [
+      "STUDIO_1000PEPE_1791827708"
+    ],
+    "promoted": [
+      "LLM_LLM_ALPHA_01",
+      "LLM_LLM_ALPHA_03"
+    ],
+    "new_weights": {
+      "ALPHA_004": 0.5000000012456809,
+      "ALPHA_001": 0.25,
+      "ALPHA_002": 0.2499999987543191
+    },
+    "goal_reached": false,
+    "estimated_cycle_cost_usd": 0.00108,
+    "accumulated_cost_usd": 0.00108,
+    "active_strategies": 3
+  },
+  {
+    "timestamp": "2026-10-12T21:27:59.979750+00:00",
+    "actions": [
+      "Promoci\u00f3n de LLM_LLM_ALPHA_01 de SANDBOX a LIVE por IC s\u00f3lido (0.956)",
+      "Promoci\u00f3n de LLM_LLM_ALPHA_03 de SANDBOX a LIVE por IC s\u00f3lido (0.956)",
+      "Degradaci\u00f3n de STUDIO_1000PEPE_1791827708 a ALPHA_DECAY: Decaimiento de Alpha detectado: IC=0.0917 (m\u00ednimo=0.03) o p-val=0.7005.",
+      "Autopsia IA completada para STUDIO_1000PEPE_1791827708: ALPHA_DECAY_VOLATILITY_COMPRESSION -> El factor perdi\u00f3 poder predictivo debido a un cambio abrupto...",
+      "Factor sintetizado por IA 'LLM_LLM_ALPHA_01' inyectado a SANDBOX (ts_rank((volume / (vwap + 1e-6)), 14))",
+      "Factor sintetizado por IA 'LLM_LLM_ALPHA_03' inyectado a SANDBOX (ts_decay_linear(returns, 5) * ts_rank(volume, 10))",
+      "Disparo de miner\u00eda reactiva completado. Raz\u00f3n: Decay detectado en STUDIO_1000PEPE_1791827708 (WARNING_DECAY)",
+      "Rebalanceo HRP ejecutado. Estrategias activas ponderadas: ['ALPHA_004', 'ALPHA_001', 'ALPHA_002']"
+    ],
+    "quarantined": [
+      "STUDIO_1000PEPE_1791827708"
+    ],
+    "promoted": [
+      "LLM_LLM_ALPHA_01",
+      "LLM_LLM_ALPHA_03"
+    ],
+    "new_weights": {
+      "ALPHA_004": 0.500000001214831,
+      "ALPHA_001": 0.25,
+      "ALPHA_002": 0.249999998785169
+    },
+    "goal_reached": false,
+    "estimated_cycle_cost_usd": 0.00108,
+    "accumulated_cost_usd": 0.00108,
+    "active_strategies": 3
+  },
+  {
     "timestamp": "2026-10-12T05:20:36.174757+00:00",
     "actions": [
       "Promoci\u00f3n de LLM_LLM_ALPHA_01 de SANDBOX a LIVE por IC s\u00f3lido (0.958)",
