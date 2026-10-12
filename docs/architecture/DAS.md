@@ -1,18 +1,18 @@
 # Documento de Arquitectura de Software (DAS)
 **Proyecto**: meme_hunter  
-**Versión**: 4.0 (Arquitectura Cuantitativa de Futuros USDT-M, Microestructura y Edge Asimétrico)
+**Versión**: 5.0 (Arquitectura Cuantitativa de Futuros USDT-M, Apalancamiento Dinámico 1.5x-2.0x y Anti-Freeze Compounding)
 
 ## 1. Introducción
 ### 1.1 Propósito
-Este documento describe la arquitectura del sistema **meme_hunter**. Tras validar que el mercado Spot sufría severo desgaste por sesgo unidireccional y comisiones, la arquitectura evolucionó hacia un **sistema cuantitativo bidireccional (Long/Short) sobre Futuros USDT-M (Binance)** con margen aislado 1.0x (cero riesgo de liquidación forzada), complementado con una suite de microestructura (Order Flow Imbalance, Funding Arbitrage y Clasificación de Régimen).
+Este documento describe la arquitectura del sistema **meme_hunter**. Tras validar que el mercado Spot y la sobreoperación intradiaria de 1h destruían capital en comisiones, la arquitectura evolucionó hacia un **sistema cuantitativo asimétrico sobre Futuros USDT-M (Binance)**. El motor oficial campeona (`MemeHunterFuturesV5_Leverage`) combina **Apalancamiento Dinámico Asimétrico (1.5x - 2.0x)**, **Máscara de Estacionalidad Humana (operación exclusiva Jueves a Domingo)**, **Teoría de Subasta (Trapped Longs)** y **Anti-Freeze Dynamic Sizing en micro-capital (100 USDT)**, casi duplicando el capital (+96.20% neto) con un Calmar récord de 21.03.
 
 ### 1.2 Alcance
-El sistema descansa sobre el framework de ejecución **Freqtrade** y la librería **CCXT**, complementado por módulos satélite especializados en Python. La estrategia central (`MemeHunterFuturesV1`) ejecuta señales técnicas con dimensionamiento asimétrico (1.15x en Shorts, 0.70x en Longs) y protecciones nativas (Kill-Switch al 25% de Drawdown, StoplossGuard).
+El sistema descansa sobre el framework de ejecución **Freqtrade** y la librería **CCXT**, complementado por módulos satélite especializados en Python. La estrategia central ejecuta señales de futuros con apalancamiento condicionado al nivel de convicción (2.0x en absorción de techos, 1.75x en quiebre de estructura y 1.5x en continuación macro), gestionada bajo margen aislado con protecciones nativas (Kill-Switch al 25% de Drawdown, Guardián de Funding Rate y Trailing Stop de Alta Fidelidad al 12%/4%).
 
 ### 1.3 Universo Operado
 El universo activo se compone de contratos perpetuos USDT-M en Binance filtrados dinámicamente:
 * **Filtro de Liquidez Estricto:** Mínimo $1,000,000 USDT de volumen en 24h para excluir trampas de liquidez y tokens manipulados de baja capitalización.
-* **Margen Aislado 1.0x:** Operación desapalancada real que elimina por diseño matemático la liquidación forzada.
+* **Margen Aislado con Stoploss Holgado:** A 2.0x de apalancamiento, el precio de liquidación se encuentra a un +50% del precio de entrada; dado que el stoploss duro se sitúa al -10%, la distancia a liquidación forzada es superior a 4X el riesgo por trade, eliminando por diseño la quiebra forzada por exchange.
 
 ---
 

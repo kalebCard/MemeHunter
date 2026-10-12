@@ -19,28 +19,32 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ## 📊 Síntesis Cuantitativa del Motor de Futuros (Certificación Oficial de Alta Fidelidad)
 
-| Motor / Estrategia | Timeframe | Operaciones | Win Rate | Retorno Neto Freqtrade | Retorno Mediano Monte Carlo | Calmar | Sortino | Max Drawdown Real | Estado / Dictamen |
+| Motor / Estrategia | Timeframe | Operaciones | Win Rate | Retorno Neto Freqtrade | Retorno Anual (CAGR) | Calmar | Sortino | Max Drawdown Real | Estado / Dictamen |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **MemeHunterFuturesV1_ShortOnly** | **4h** | **1,771** | **48.7%** | **+63.24% (+632.40 USDT)** | **+127.15% a +362.34%** | **4.00** | **2.48** | **31.15%** | 🏆 **Líder Cuantitativo Oficial (Sprint 10)** |
-| `MemeHunterFuturesV1` (Bidireccional) | 4h | 2,942 | 45.5% | +5.57% *(vs -5.50% mercado)* | +26.29% ($126 USDT) | 0.35 | 0.42 | 39.49% | ✅ Certificado con `--timeframe-detail 1m` |
-| `MemeHunterFuturesV2` (Intradiario) | 1h | 12,828 | 39.3% | -75.46% (-754.59 USDT) | N/A (Sobreoperación) | -1.97 | -1.01 | 75.74% | ❌ **Refutado (Trampa de Comisiones y Ruido)** |
+| **MemeHunterFuturesV5_Leverage (100 USDT)** | **4h** | **215** | **61.4%** | **+96.20% (Pico $211.48)** | **+110.27%** | **21.03** | **3.12** | **26.41%** (Piso $88.24) | 🏆 **Líder Cuantitativo Oficial (Sprint 15/16)** |
+| `MemeHunterFuturesV4` (100 USDT Base) | 4h | 223 | 53.4% | +58.93% (+58.93 USDT) | +66.68% | 16.62 | 2.32 | 20.47% (Piso $92.52) | ✅ Certificado con Estacionalidad & Subasta |
+| `MemeHunterFuturesV1_ShortOnly` (1,000 USDT) | 4h | 1,771 | 48.7% | +63.24% (+632.40 USDT) | +63.24% | 4.00 | 2.48 | 31.15% | ✅ Benchmark Previo Short-Only |
+| `MemeHunterFuturesV6_Apex` (Sin exit_signal) | 4h | 241 | 67.2% | +27.01% (+27.01 USDT) | +30.17% | 3.48 | 1.04 | 45.74% | 🔬 Experimental (Airbag técnico ratificado en V5) |
+| `MemeHunterFuturesV2` (Intradiario) | 1h | 12,828 | 39.3% | -75.46% (-754.59 USDT) | N/A | -1.97 | -1.01 | 75.74% | ❌ Refutado (Trampa de Comisiones y Ruido) |
 
-> **La Verdad Cuantitativa del Mercado de Memecoins:** 
-> 1. **La Trampa de 1h:** Bajar la temporalidad para "ganar todos los días" disparó 12,828 operaciones y $1.43 millones en volumen, destruyendo el 75% del capital en comisiones y mechas de liquidación intra-vela.
-> 2. **El Alfa Asimétrico Puro (4h Short-Only):** Las memecoins se desinflan entre 80% y 95% tras cada pump eufórico. Al eliminar por completo las compras (Longs) y operar únicamente la tendencia macro bajista con margen aislado 1.0x (cero riesgo de liquidación), el sistema multiplicó el beneficio por **11.3X (+63.24% neto)**, con un Calmar de **4.00** y 8 de las 10 memecoins en positivo (+719.85 USDT acumulados).
+> **La Verdad Cuantitativa del Mercado de Memecoins & Micro-Capital:** 
+> 1. **La Asimetría de Estacionalidad Humana (Sprint 13/15):** Los Viernes y Domingos concentran más del **88% de las ganancias anuales (+94.21 USDT netos con >71% Win Rate)**. Operar Lunes/Martes destruía capital (-756 USDT en V3); la máscara de calendario protegió el 100% de la liquidez.
+> 2. **Apalancamiento Dinámico Asimétrico (1.5x - 2.0x):** Asignar 2.0x exclusivamente en techos confirmados por rechazo de subasta (*Trapped Longs*) y 1.5x en continuación macro elevó el Win Rate al **61.4%**, casi duplicando la cuenta de 100 USDT (**+96.20% neto / pico de $211.48 USDT**) con un **Calmar récord de 21.03**.
+> 3. **El Modelo Anti-Freeze de Micro-Capital (PB-51):** Concentrar los 100 USDT en **4 slots dinámicos ($25 USDT base)** elimina el riesgo de congelamiento ante el límite de $5.00 USDT de Binance Futures; el stake promedio operado fue de **$31.10 USDT**, creciendo a $42.80 en los picos.
 
 ---
 
 ## 🧠 Lecciones Críticas del Mundo Real
 
-1. **La Ventaja Real es Estrecha (+0.50% a +0.70% por trade):**
+1. **La Ventaja Real es Estrecha (+0.50% a +1.50% por trade):**
    * El *Stress-Test* demostró que operar como *Taker* o permitir spreads $> 0.3\%$ devora el 100% de las ganancias en comisiones.
    * La ejecución pasiva **Maker al Bid** y el filtro de spread son obligatorios para no quebrar.
-2. **El Rendimiento No es Lineal (Paciencia Psicológica):**
-   * El sistema experimentó **6 meses consecutivos en negativo** (octubre 2025 a marzo 2026, perdiendo 271 USDT) antes de recuperarse. La disciplina de no apagar el bot en drawdowns es vital.
-3. **El Presupuesto Mínimo Viable es 100 USDT (No 10 USDT):**
-   * Con **10 USDT**, la orden mínima de Binance ($5 USD) fuerza a arriesgar el 50% o 100% de la cuenta por trade, con una **probabilidad de congelamiento/ruina de hasta el 92%**.
-   * Con **100 USDT**, se pueden abrir 10 posiciones de $10 USD (10% por trade) con **riesgo de congelamiento del 0.0%**.
+2. **El "Efecto Airbag" de las Salidas Técnicas (`exit_signal`):**
+   * La prueba experimental de V6 demostró que eliminar `exit_signal` elevó el Win Rate (67.2%) pero triplicó las pérdidas por stoploss duro (-295 USDT en 73 stops).
+   * Salir con pérdida moderada (-2% a -6%) cuando la estructura técnica se invalida es un salvavidas que preserva el capital.
+3. **El Presupuesto Micro-Capital Viable (100 USDT):**
+   * Con **10 USDT**, la orden mínima de Binance ($5 USD) fuerza a arriesgar el 50% o 100% de la cuenta por trade, con una probabilidad de congelamiento/ruina de hasta el 92%.
+   * Con **100 USDT** y 4 slots concentrados, la cuenta opera con margen de seguridad 6x sobre el mínimo de Binance y **0.0% probabilidad de ruina**.
 
 ---
 
