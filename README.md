@@ -1,6 +1,6 @@
-# 🏹 Meme Hunter - Sistema Cuantitativo y de Microestructura
+# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit IA (v7.0)
 
-Sistema de trading algorítmico sobre [Freqtrade](https://www.freqtrade.io/) y [CCXT](https://ccxt.trade/) diseñado para **validar empíricamente una ventaja estadística real (*edge*)** frente a los retos del mercado cripto (comisiones, deslizamiento, deslistados y cambios de régimen) antes de arriesgar capital.
+Plataforma cuantitativa institucional que combina **minería genética de factores (NSGA-II)**, **ingesta continua de Dollar Bars en tiempo real desde Binance**, **bucle cerrado de auto-sanación con detección CUSUM e IC Decay**, **cerebro cognitivo de autopsias y síntesis semántica vía OpenRouter**, y un **Cockpit Visual interactivo** para monitoreo y control en vivo.
 
 ---
 
@@ -9,13 +9,30 @@ Sistema de trading algorítmico sobre [Freqtrade](https://www.freqtrade.io/) y [
 La documentación del proyecto se encuentra estructurada en el directorio [`docs/`](docs/README.md):
 
 * **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
-* **Arquitectura de Software (v4.0):** [docs/architecture/DAS.md](docs/architecture/DAS.md)
-* **Plan de Trabajo y Sprints Scrum:** [docs/strategy/SCRUM_PLAN.md](docs/strategy/SCRUM_PLAN.md)
+* **Arquitectura de Software Auto-Evolutiva (v7.0):** [docs/architecture/DAS_AUTONOMOUS_ENGINE.md](docs/architecture/DAS_AUTONOMOUS_ENGINE.md)
+* **Arquitectura Tradicional (v4.0 - v6.0):** [docs/architecture/DAS.md](docs/architecture/DAS.md)
+* **Sprint 1 (Motor Auto-Evolutivo & Self-Healing):** [docs/sprints/SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md](docs/sprints/SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md)
+* **Sprint 2 (Cognición IA con OpenRouter):** [docs/sprints/SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md](docs/sprints/SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md)
+* **Plan de Trabajo y Sprints Históricos:** [docs/strategy/SCRUM_PLAN.md](docs/strategy/SCRUM_PLAN.md)
 * **Hipótesis Teórica del Edge:** [docs/strategy/HYPOTHESIS.md](docs/strategy/HYPOTHESIS.md)
-* **Reporte Oficial de Backtesting:** [docs/reports/PRELIMINARY_REPORT.md](docs/reports/PRELIMINARY_REPORT.md)
-* **Informe de Viabilidad con 100 USDT:** [docs/reports/INFORME_FUTUROS_100_USDT.md](docs/reports/INFORME_FUTUROS_100_USDT.md)
-* **Auditoría Forense de Riesgos y Overfitting:** [docs/reports/INFORME_AUDITORIA_FORENSE_RIESGOS.md](docs/reports/INFORME_AUDITORIA_FORENSE_RIESGOS.md)
 * **Certificación Institucional (PSR, DSR, CPCV y PBO):** [docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md](docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md)
+
+---
+
+## 🚀 Innovaciones Clave de la Versión 7.0
+
+1. **Bucle Cerrado Auto-Evolutivo (Closed-Loop Engine):**
+   * **Monitoreo Continuo:** `AlphaHealthMonitor` calcula Information Coefficient (IC) rodante y detecta rupturas estructurales con CUSUM (Page-Hinkley) y *data drift* con Kolmogorov-Smirnov.
+   * **Incubadora Autónoma:** Transición mecánica sin intervención humana entre `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED`.
+   * **Asignación HRP:** Reponderación dinámica de capital vía Paridad Jerárquica de Riesgo aislando factores fatigados.
+2. **Cerebro Cognitivo de IA (OpenRouter):**
+   * **Autopsias Forenses (`AlphaAutopsyAgent`):** Modelos de razonamiento profundo (DeepSeek-R1 / Claude 3.5 Sonnet) identifican la causa raíz de la degradación y emiten recomendaciones de búsqueda.
+   * **Síntesis Semántica (`LLMAlphaSynthesizer`):** Formulación de factores basados en hipótesis de microestructura (desbalances de volumen, Amihud ratio, compresión en Dollar Bars).
+   * **Compilador Seguro (`FormulaASTParser`):** Sanitizador AST *Zero Eval* que garantiza aislamiento y validez formal de toda expresión matemática.
+3. **Cockpit Visual de Monitoreo (Dashboard Web):**
+   * Interfaz interactiva en tiempo real accesible en `http://localhost:8080` con gráficos Chart.js, KPI cards, tabla de estados de la incubadora, autopsias IA y consola de auditoría.
+4. **Streaming en Vivo desde Binance (`LiveMarketFeed`):**
+   * Ingesta de velas y trades de memecoins (`DOGE`, `PEPE`, `SHIB`) convertidas al vuelo en **Dollar Bars** para alimentar las señales de los alphas.
 
 ---
 
@@ -65,6 +82,10 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 | Script | Propósito / Función | Comando de Ejecución |
 | :--- | :--- | :--- |
+| `start_dashboard.py` | 🌟 **Lanzador del Cockpit Visual en tiempo real (Puerto 8080)** | `python scripts/start_dashboard.py 8080` |
+| `run_live_alpha_loop.py` | ⚡ **Bucle E2E continuo conectado a Binance en tiempo real** | `python scripts/run_live_alpha_loop.py` |
+| `run_autonomous_engine_demo.py` | 🤖 Demostración E2E del bucle cerrado: decay, autopsia IA y HRP | `python scripts/run_autonomous_engine_demo.py` |
+| `run_alpha_factory_pipeline.py` | 🏭 Pipeline industrial completo de minería NSGA-II, CPCV y PBO | `python scripts/run_alpha_factory_pipeline.py` |
 | `advanced_metrics.py` | Métricas avanzadas de Marcos López de Prado: PSR, Deflated Sharpe (DSR), CPCV y PBO | `python scripts/advanced_metrics.py` |
 | `audit_advanced_backtests.py` | Auditoría de backtests ZIP reales con cálculo de PBO y DSR | `python scripts/audit_advanced_backtests.py` |
 | `fractional_diff.py` | Diferenciación fraccionaria FFD con preservación de memoria y grid search ADF | `python scripts/fractional_diff.py` |
@@ -82,26 +103,24 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🚀 Despliegue Rápido en Vivo (Modo Dry-Run en Docker)
+## 🚀 Despliegue Rápido de la Plataforma v7.0
 
-### 0. Preparar configuración (una sola vez)
-Los configs con credenciales de FreqUI no se versionan. Crea los tuyos desde las plantillas y cambia `CAMBIAR_ME` en `jwt_secret_key` y `password`:
+### 1. Iniciar Cockpit Visual de Monitoreo
 ```powershell
-Copy-Item user_data/config_futures.example.json user_data/config_futures.json
-Copy-Item user_data/config_live.example.json user_data/config_live.json
-Copy-Item .env.example .env   # y completa Binance / Telegram
+python scripts/start_dashboard.py 8080
+```
+Acceder al panel interactivo: **[http://localhost:8080](http://localhost:8080)**
+
+### 2. Iniciar el Bucle Autónomo en Tiempo Real (Binance)
+```powershell
+python scripts/run_live_alpha_loop.py
 ```
 
-### A. Motor de Futuros (Recomendado - Bidireccional Long/Short)
+### 3. Motor Tradicional de Futuros (Freqtrade en Docker)
 ```powershell
-# Iniciar en segundo plano
 docker compose -f docker-compose.futures.yml up -d
-
-# Ver logs en tiempo real
-docker compose -f docker-compose.futures.yml logs -f
 ```
 * **Dashboard Web (FreqUI):** [http://localhost:8081](http://localhost:8081)
-* **Credenciales:** usuario y clave definidos por ti en `config_futures.json`
 
 ---
 
@@ -109,38 +128,43 @@ docker compose -f docker-compose.futures.yml logs -f
 
 ```
 meme_hunter/
-├── docs/                        # Centro integral de documentación
-│   ├── README.md                # Índice y guía de lectura
-│   ├── architecture/DAS.md      # Arquitectura de software (v4.0)
-│   ├── strategy/                # Hipótesis cuantitativa y Scrum plan
-│   └── reports/                 # Informes de backtest y capital de 100 USDT
-├── docker-compose.futures.yml   # Despliegue de Futuros (Puerto 8081)
-├── docker-compose.yml           # Base para comandos generales
-├── .env.example                 # Plantilla de secretos (Binance / Telegram)
-├── scripts/                     # Herramientas estadísticas, microestructura y radares
-│   ├── daily_performance.py     # Análisis de rendimiento diario, win rate día a día y estacionalidad
-│   ├── dryrun_monitor.py        # Auditoría continua de trades simulados en SQLite vs criterios de aceptación
-│   ├── meme_sentinel.py         # Scanner de spikes de volumen relativo (RVOL) y liquidez en Binance
-│   ├── dex_viral_radar.py       # Radar on-chain DEX (DexScreener) para tracción viral Web3
-│   ├── funding_arbitrage.py     # Calculador de arbitraje Delta-Neutral de Funding Rates (Cash & Carry)
-│   ├── order_flow_imbalance.py  # Análisis de microestructura Nivel 2 (OFI) y Micro-Price
-│   ├── regime_classifier.py     # Clasificador de régimen de mercado (Volatilidad/Tendencia) y sizing dinámico
-│   ├── stress_test.py           # Choque de fricción adversa (slippage, fees, delays)
-│   ├── monte_carlo.py           # Remuestreo bootstrap de 7,500 caminos y riesgo de ruina
-│   ├── simulate_micro_capital.py# Simulación con restricciones de orden mínima ($5 Binance)
-│   ├── deploy_vps.sh            # Script de aprovisionamiento en VPS Ubuntu
-│   └── telegram_healthcheck.py  # Diagnóstico y alertas en Telegram
-├── user_data/
-│   ├── config_futures.example.json # Plantilla de Futuros (copiar a config_futures.json, no versionado)
-│   ├── config_futures_backtest.json
-│   └── strategies/
-│       └── MemeHunterFuturesV1.py # Estrategia Long/Short aislada 1x con Sizing Asimétrico y Kill-Switch
-└── tests/                       # Suite pytest (48 tests unitarios pasando al 100%)
+├── dashboard/                   # 🖥️ Cockpit Visual Web & API REST
+│   ├── index.html               # Interfaz Glassmorphism con Chart.js
+│   ├── css/style.css            # Sistema de diseño moderno en Vanilla CSS
+│   ├── js/app.js                # Lógica reactiva y gráficos en tiempo real
+│   └── server.py                # Servidor HTTP y API REST integrado
+├── data_engine/                 # 📡 Ingesta y Microestructura
+│   ├── dollar_bars.py           # Generador de Information-Driven Bars
+│   ├── live_market_feed.py      # Streaming en vivo con Binance Spot/Futures
+│   └── slippage_engine.py       # Modelo de impacto Almgren-Chriss
+├── mining/                      # 🧬 Fábrica Genética y Síntesis IA
+│   ├── alpha_grammar.py         # Gramática formal y árbol AST
+│   ├── formula_parser.py        # Compilador seguro AST (Zero-Eval)
+│   ├── genetic_search.py        # Minería evolutiva NSGA-II
+│   ├── alpha_daemon.py          # Demonio 24/7 y Archivo MAP-Elites
+│   ├── llm_client.py            # Cliente OpenRouter con fallback
+│   └── llm_alpha_generator.py   # Síntesis de alphas guiada por IA
+├── portfolio/                   # ⚖️ Incubadora, Salud y Asignación HRP
+│   ├── alpha_health_monitor.py  # Rolling IC, detector CUSUM y KS drift
+│   ├── alpha_autopsy.py         # Agente forense de autopsias de IA
+│   ├── strategy_incubator.py    # Máquina de estados (SANDBOX/LIVE/DECAY)
+│   ├── autonomous_orchestrator.py # Orquestador central del bucle cerrado
+│   └── hrp_allocator.py         # Hierarchical Risk Parity
+├── validation/                  # 🛡️ Validación Institucional Anti-Overfitting
+│   ├── cpcv_engine.py           # Combinatorial Purged Cross-Validation
+│   └── multiple_testing.py      # Control FDR (Benjamini-Hochberg) y PBO
+├── docs/                        # 📚 Centro integral de documentación
+│   ├── architecture/            # DAS v7.0 y registros ADR
+│   ├── sprints/                 # Sprints de ingeniería ágil
+│   ├── strategy/                # Hipótesis y modelos de escalado
+│   └── reports/                 # Informes de auditoría forense
+├── scripts/                     # 🛠️ Suite de herramientas ejecutables
+└── tests/                       # 🧪 Pruebas unitarias e integrales (100% pass)
 ```
 
-### Ejecutar los tests
+### Ejecutar las Pruebas Automatizadas
 ```powershell
-docker run --rm -v "${PWD}:/freqtrade/proj" -w /freqtrade/proj --entrypoint python meme_hunter:2026.9 -m pytest -q tests
+python -m pytest tests
 ```
 
 ---

@@ -27,27 +27,29 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 docs/
 ├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v6.0
 ├── architecture/
-│   ├── DAS.md                       # Documento de Arquitectura de Software (v6.0)
+│   ├── DAS_AUTONOMOUS_ENGINE.md     # 🌌 Arquitectura v7.0: Motor Auto-Evolutivo & Cockpit IA
+│   ├── DAS.md                       # Documento de Arquitectura de Software base (v6.0)
 │   └── decisions/                   # Architecture Decision Records (ADRs)
 │       ├── ADR-001_asymmetric_short_only_bias.md
 │       ├── ADR-002_hybrid_barbell_cash_and_carry.md
 │       ├── ADR-003_fractional_diff_and_continuous_bet_sizing.md
 │       └── ADR-004_airbag_technical_exit_market_orders.md
+├── sprints/
+│   ├── SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md # 🚀 Sprint 1: Bucle Cerrado & Self-Healing
+│   └── SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md  # 🧠 Sprint 2: Cognición IA con OpenRouter
 ├── strategy/
 │   ├── ESTRATEGIA_MAESTRA_UNIFICADA.md # 🌟 Compendio Maestro de Estrategia (STRAT-MASTER-001)
-│   ├── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # 🚀 Plan Scrum: Minería de Alphas y Backtesting Industrial (Sprints 21-24)
+│   ├── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # 🚀 Plan Scrum: Minería de Alphas (Sprints 21-24)
 │   ├── HYPOTHESIS.md                # Hipótesis Causal del Edge y Desinflación (STRAT-001)
-│   ├── SCRUM_PLAN.md                # Roadmap Maestro de Sprints (1 a 20) y Backlog (STRAT-ROADMAP-001)
+│   ├── SCRUM_PLAN.md                # Roadmap Maestro de Sprints (1 a 20)
 │   ├── PLAN_ESCALADO_100_A_1000_USDT.md # Modelo de Crecimiento de Micro-Capital (STRAT-002)
 │   ├── PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md # Especificación del binomio Barbell (STRAT-003)
-│   ├── PLAN_DESMITIFICACION_RIESGOS.md # Protocolo de Pruebas de Estrés Anti-Overfitting (STRAT-004)
-│   └── PLAN_IMPLEMENTACION_V6_APEX.md  # Experimento Histórico Refutado V6 (STRAT-EXP-001)
+│   └── PLAN_DESMITIFICACION_RIESGOS.md # Protocolo de Pruebas de Estrés Anti-Overfitting (STRAT-004)
 ├── reports/
 │   ├── INFORME_METRICAS_AVANZADAS_DSR_PBO.md # Certificación Oficial DSR 100% y PBO 6.67%
 │   ├── INFORME_AUDITORIA_FORENSE_RIESGOS.md  # Auditoría de los 7 Riesgos Críticos
 │   ├── INFORME_FUTUROS_100_USDT.md  # Estudio de Micro-Capital 100 USDT Anti-Freeze
-│   ├── PRELIMINARY_REPORT.md        # Auditoría Inicial Spot y Descarte de 1H
-│   └── REPORTE_EJECUTIVO_MEME_HUNTER_V4.md # Resumen Ejecutivo para Inversores
+│   └── PRELIMINARY_REPORT.md        # Auditoría Inicial Spot y Descarte de 1H
 └── operations/
     └── OPERATIONAL_RUNBOOK.md       # Guía de Despliegue Docker, VPS, Kill-Switch y Bóveda
 ```
