@@ -1,0 +1,61 @@
+{
+    "$schema": "https://schema.freqtrade.io/schema.json",
+    "bot_name": "meme_hunter_oos_cross_asset",
+    "dry_run": true,
+    "dry_run_wallet": 1000,
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+    "max_open_trades": 10,
+    "tradable_balance_ratio": 0.99,
+    "amend_last_stake_amount": true,
+    "fiat_display_currency": "USD",
+
+    "timeframe": "4h",
+    "stoploss": -0.10,
+    "order_types": {
+        "entry": "limit",
+        "exit": "limit",
+        "emergency_exit": "market",
+        "force_entry": "market",
+        "force_exit": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false
+    },
+    "cancel_open_orders_on_exit": true,
+
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "exit_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+
+    "exchange": {
+        "name": "binance",
+        "key": "",
+        "secret": "",
+        "pair_whitelist": [
+            "SOL/USDT:USDT",
+            "SUI/USDT:USDT",
+            "TIA/USDT:USDT",
+            "WLD/USDT:USDT"
+        ],
+        "pair_blacklist": []
+    },
+
+    "pairlists": [
+        {
+            "method": "StaticPairList"
+        }
+    ],
+
+    "dataformat_ohlcv": "feather",
+    "dataformat_trades": "feather"
+}

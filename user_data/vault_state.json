@@ -1,0 +1,31 @@
+{
+    "total_capital": 5000.0,
+    "positions": {
+        "PEPE/USDT:USDT": {
+            "allocated_capital": 1666.67,
+            "spot_long_usdt": 833.33,
+            "futures_short_usdt": 833.33,
+            "expected_apr": 32.5,
+            "rate_8h": 0.00029600000000000004,
+            "projected_daily_yield": 0.74
+        },
+        "WIF/USDT:USDT": {
+            "allocated_capital": 1666.67,
+            "spot_long_usdt": 833.33,
+            "futures_short_usdt": 833.33,
+            "expected_apr": 24.8,
+            "rate_8h": 0.000226,
+            "projected_daily_yield": 0.565
+        },
+        "DOGE/USDT:USDT": {
+            "allocated_capital": 1666.67,
+            "spot_long_usdt": 833.33,
+            "futures_short_usdt": 833.33,
+            "expected_apr": 16.2,
+            "rate_8h": 0.00014800000000000002,
+            "projected_daily_yield": 0.37
+        }
+    },
+    "total_income_collected": 0.0,
+    "updated_at": "2026-10-12T01:43:36.477859"
+}

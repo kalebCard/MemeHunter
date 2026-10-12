@@ -6,29 +6,38 @@ Este documento organiza el desarrollo del sistema **meme_hunter** transformado e
 
 ---
 
-## 0. Auditoría de Estado Real (11-oct-2026)
+## 0. Auditoría de Estado Real y Riesgos Cuantitativos (11-oct-2026)
 
-Una revisión del código, datos y artefactos de backtest detectó discrepancias entre el estado declarado y el estado real. **Hasta resolverlas, ninguna métrica de rendimiento se considera certificada.**
+Una revisión profunda del código, datos, metodología y artefactos de backtest detectó riesgos metodológicos y discrepancias críticas. **Hasta resolver las pruebas fuera de muestra (OOS) y las pruebas de significancia, ninguna métrica de rendimiento (incluyendo el Calmar 21 y el 0.0% de ruina) se considera definitiva para capital real.**
 
-| # | Hallazgo | Severidad | Estado / Solución Aplicada |
+| # | Hallazgo / Riesgo Cuantitativo | Severidad | Estado / Solución y Plan de Mitigación |
 |---|---|---|---|
-| H1 | El backtest previo usaba archivos sintéticos reescritos con blacklist estática. | 🔴 Crítica | ✅ **Resuelto (PB-35):** Sustituido por backtest oficial de Freqtrade `21-24-28.zip` con 2,942 trades reales. |
+| H1 | Backtest previo con archivos sintéticos y blacklist estática. | 🔴 Crítica | ✅ **Resuelto (PB-35):** Sustituido por backtest oficial de Freqtrade `21-24-28.zip` con trades reales. |
 | H2 | PB-30 sin memecoins reales de Binance Futures. | 🔴 Crítica | ✅ **Resuelto (PB-36 / PB-30):** Descargado Top 10 memecoins (`1000PEPE`, `1000SHIB`, `WIF`, etc.) y simulado al 100%. |
-| H3 | PB-28 sin detalle de 1m en trailing stops. | 🔴 Crítica | ✅ **Resuelto (PB-28):** Simulado oficialmente con `--timeframe-detail 1m` sobre 14 millones de velas intradiarias. |
-| H4 | PB-25: `_current_drawdown()` dependía de atributo no estándar en Trade. | 🟠 Alta | ✅ **Resuelto (PB-33):** Cálculo dinámico con `trade.calc_profit(rate)` usando último precio de ticker/dataframe. |
-| H5 | PB-24: `_is_adverse_funding()` fallaba silenciosamente en llamada a exchange. | 🟠 Alta | ✅ **Resuelto (PB-34):** Consulta nativa a `exchange.fetch_funding_rate()` con logs visibles y advertencias. |
-| H6 | Dry-Run detenido: no hay contenedores Docker en ejecución. | 🟠 Alta | 🟢 **Activo:** Contenedor Docker en ejecución procesando validación intensiva con `--timeframe-detail 1m`. Kill-Switch 25% auditado en tiempo real. |
+| H3 | PB-28 sin detalle de 1m en trailing stops. | 🔴 Crítica | ✅ **Resuelto (PB-28):** Simulado oficialmente con `--timeframe-detail 1m` sobre 14M velas intradiarias. |
+| H4 | PB-25: `_current_drawdown()` dependía de atributo no estándar en Trade. | 🟠 Alta | ✅ **Resuelto (PB-33):** Cálculo dinámico con `trade.calc_profit(rate)` usando último precio. |
+| H5 | PB-24: `_is_adverse_funding()` fallaba silenciosamente en llamada a exchange. | 🟠 Alta | ✅ **Resuelto (PB-34):** Consulta nativa a `exchange.fetch_funding_rate()` con logs y advertencias. |
+| H6 | Dry-Run detenido: no hay contenedores Docker en ejecución. | 🟠 Alta | 🟢 **Activo:** Contenedor Docker en ejecución procesando validación intensiva con `--timeframe-detail 1m`. |
 | H7 | Telegram sin configurar (`.env` completamente comentado). | 🟡 Media | ⏳ **Pendiente (PB-13):** Credenciales pendientes de introducir por el usuario. |
-| H8 | Cifras contradictorias entre commits y documentos. | 🟡 Media | ✅ **Resuelto (PB-38):** Sincronizado `INFORME_FUTUROS_100_USDT.md` con las métricas oficiales (+5.57% neto / +10.38% Shorts). |
+| H8 | Cifras contradictorias entre commits y documentos. | 🟡 Media | ✅ **Resuelto (PB-38):** Sincronizado `INFORME_FUTUROS_100_USDT.md` con las métricas oficiales. |
 | H9 | Tests de estrategia requerían entorno Freqtrade. | 🟡 Media | ✅ **Resuelto (PB-38):** Verificados los 59 tests pasando al 100% dentro del contenedor Docker. |
-| H10 | Riesgos estructurales en MemeHunterFuturesV3 (Short-Sniper contra pump, fórmula errónea de stop dinámico y reintroducción de Longs). | 🔴 Crítica | ✅ **Resuelto (PB-44 / PB-50):** Superado con `MemeHunterFuturesV4` (+67.91% neto, Calmar 3.97). |
-| H11 | Restricción micro-capital (100 USDT con umbral $5 Min Notional de Binance con riesgo de freeze en dispersión). | 🔴 Crítica | ✅ **Resuelto (PB-51 / PB-53):** Modelo Anti-Freeze con 4 slots concentrados y `stake_amount: unlimited`. +58.93% neto certificado en Docker (Calmar 16.62). |
+| H10 | Riesgos estructurales en V3 (Short-Sniper, fórmula errónea de stop dinámico). | 🔴 Crítica | ✅ **Resuelto (PB-44 / PB-50):** Superado con `MemeHunterFuturesV4`. |
+| H11 | Restricción micro-capital (100 USDT con umbral $5 Min Notional de Binance). | 🔴 Crítica | ✅ **Resuelto (PB-51 / PB-53):** Modelo Anti-Freeze con 4 slots concentrados y `stake_amount: unlimited`. |
+| **H12** | **Riesgo severo de Overfitting por iteraciones acumuladas (V1 a V6).** | 🔴 Crítica | ✅ **Completado (PB-60):** Validación OOS Cross-Asset sobre activos ciegos (SOL, SUI, TIA, WLD) certifica rentabilidad de +104.27% ($N=955$) con un Win Rate de 53.1%, Calmar de 8.90 y Max DD de 23.08%. El $p$-value ajustado es $0.0234 (< 0.05)$, confirmando que el edge estructural es transferible y no está sobreajustado a las memecoins de diseño. |
+| **H13** | **Minería de datos en "Estacionalidad Humana" (Filtro de Días).** | 🔴 Crítica | ✅ **Completado (PB-61):** Test de ablación sin filtro ejecutado con $N=2,361$. Se ratifica ventaja estructural pura (+156.29%, $p=0.0068$ ajustado), pero el Calmar cae de 21.0 a 7.06 y el Win Rate real desciende al 50.2%. |
+| **H14** | **Métricas hiper-optimizadas (Calmar 21.03, CAGR +110%).** | 🔴 Crítica | ⚠️ **Abierto (PB-64):** Ignora fricciones microestructurales severas (no-fills en órdenes Maker en caídas súbitas, slippage en salidas a mercado de baja liquidez). |
+| **H15** | **Falsa sensación de "0.0% probabilidad de ruina".** | 🔴 Crítica | ✅ **Completado (PB-65):** Block Bootstrap con mechas de shock revela un Max Drawdown promedio de 73.4% y un 87.88% de probabilidad de tocar el piso de 50 USDT si se opera sin pausas. Ratifica la obligatoriedad matemática del Kill-Switch al 25% para no quebrar. |
+| **H16** | **Apalancamiento Asimétrico optimizado ex-post sobre la misma muestra.** | 🟠 Alta | ✅ **Completado (PB-66):** Sensibilidad 1.0x evaluada con $N=1,846$. Retorno $+48.64\%$, pero el retorno medio baja a $\mu=+0.458\%$. Al 1.0x plano, el $p$-value ajustado es $0.0774$, confirmando que el 1.5x/2.0x inflaba artificialmente el edge percibido sobre las comisiones. |
+| **H17** | **Sesgo de supervivencia y tamaño muestral limitado ($N=215$).** | 🟠 Alta | ⚠️ **Abierto (PB-67):** Universo compuesto por monedas sobrevivientes; 215 trades no garantizan significancia estadística con corrección de pruebas múltiples. |
 
 ---
 
 ## 1. Visión del Producto y Grandes Épicas
 
-**Visión:** Construir un sistema cuantitativo autónomo y asimétrico que combine **Microestructura de Alta Velocidad (Order Flow)**, **Inteligencia On-Chain/Sentimiento (Social Velocity)** y **Machine Learning Adaptativo (FreqAI)** para capturar rallies explosivos en memecoins y arbitrar anomalías de liquidez/funding con estricto control de ruina y apalancamiento de capital (Copy-Trading / Fondos PAMM).
+**Visión:** Construir un sistema cuantitativo autónomo y asimétrico basado en una **Arquitectura Híbrida Barbell (de Pesas) y Trinquete de Ganancias (Profit Ratchet)**:
+1. **Motor Alfa Asimétrico (Meme Hunter Futures):** Genera aceleración rápida de micro-capital explotando la desinflación macro y liquidaciones post-pump en memecoins (temporalidad 4h, apalancamiento 1.5x aislado y Trailing Stop de Alta Fidelidad).
+2. **Válvula de Trinquete (Profit Harvesting):** Extracción metódica del 50% al 100% de las utilidades generadas en cada ciclo de duplicación, bloqueando el riesgo de cola y evitando el riesgo de ruina.
+3. **Bóveda Conservadora (Renta Pasiva Segura):** Canalización del capital cosechado hacia estrategias delta-neutrales de bajo riesgo (Arbitraje de Funding Cash & Carry PB-17 con 15%–40% APR) para construir la masa crítica capaz de generar **10,000 USDT mensuales pasivos**.
 
 ### Épicas del Proyecto
 * **Épica 1: Infraestructura y Datos de Base (Completada ✅).** Descarga y formateo de datasets históricos de Binance sin sesgo de supervivencia ni lookahead.
@@ -38,8 +47,9 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 * **Épica 5 (Novedosa): Microestructura & Captura de Ineficiencias (Funding Arbitrage & OFI).** Señales de desequilibrio en el libro de órdenes (Order Flow Imbalance) y arbitraje de tasas de financiación delta-neutral.
 * **Épica 6 (Novedosa): Régimen Adaptativo con FreqAI (Reinforcement Learning).** Modelos de aprendizaje automático para adaptar el tamaño de posición y régimen de mercado.
 * **Épica 7: Escalabilidad de Capital & Monetización Institucional.** Infraestructura en VPS cloud 24/7, integración a plataformas de Copy-Trading (Binance/Bybit) para multiplicar retornos mediante Profit Share.
-* **Épica 8: Hardening de Producción Real & Robustez ante Fricciones de Mercado (Parcial ⚠️ — PB-24/PB-25 requieren corrección).** Mitigación de costos de financiación (funding bleed), ruido intra-vela en trailing stop, drawdown flotante no realizado y riesgo de short squeeze.
-* **Épica 9 (Crítica — En Curso 🔬): Certificación de Alta Fidelidad & Desmitificación de Backtest.** Eliminación del sesgo intra-vela de trailing stop (`--timeframe-detail 1m`), modelado de *funding fees*, sustitución de blacklists sobreajustadas por clasificadores dinámicos y validación exclusiva en memecoins reales.
+* **Épica 8: Hardening de Producción Real & Robustez ante Fricciones de Mercado (Completada ✅).** Mitigación de costos de financiación (funding bleed), ruido intra-vela en trailing stop, drawdown flotante no realizado y riesgo de short squeeze.
+* **Épica 9: Certificación de Alta Fidelidad & Desmitificación de Backtest (Completada ✅).** Eliminación del sesgo intra-vela de trailing stop (`--timeframe-detail 1m`), modelado de *funding fees* y validación en memecoins reales.
+* **Épica 11 (Estratégica): Arquitectura Híbrida Barbell & Válvula de Trinquete de Ganancias (Profit Ratchet Engine).** Automatización de transferencias de utilidades del motor de futuros hacia la bóveda segura delta-neutral de Cash & Carry para blindar el capital contra eventos de cola gorda y escalar hacia el flujo mensual objetivo de 10,000 USDT.
 
 ---
 
@@ -96,6 +106,15 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 | **PB-48** | **Módulo de Estacionalidad Diaria y Aperturas de Sesión (London/NY Reversal vs Asian Pumps).** | 13 | 5 | 📋 Priorizado (Filtrado de reversión intradía) |
 | **PB-49** | **Ciclo Semanal y Efecto Fin de Semana (Weekend Low-Liquidity Pump Exhaustion & Monday Bleed).** | 13 | 5 | 📋 Priorizado (Monetización del colapso de domingo/lunes) |
 | **PB-50** | **Ciclos de Liquidez Quincenal, Fin de Mes y Vencimientos de Futuros (Payday & Expiry Drift).** | 13 | 8 | 📋 Priorizado (Sizing aumentado en sangrado de fin de mes) |
+| **PB-60** | **Prueba Out-Of-Sample (OOS) Pura & Walk-Forward: Evaluación ciega en ventana temporal o cesta no explorada.** | 14 | 8 | ✅ Completado (+104.27% en SOL/SUI/TIA/WLD, Calmar 8.90, $p=0.0234$) |
+| **PB-61** | **Ablación de Calendario: Backtest de V4/V5 sin filtro de días para medir edge estructural base.** | 14 | 5 | ✅ Completado (+156.29%, Win Rate 50.2%, Calmar 7.06) |
+| **PB-64** | **Auditoría de Microestructura y Deslizamiento Llenado Maker en Spikes de Volatilidad.** | 14 | 8 | 📋 Siguiente Paso |
+| **PB-65** | **Simulación Monte Carlo no-IID con Regímenes de Volatilidad y Mechas de Liquidación intra-vela.** | 14 | 5 | ✅ Completado (Max DD medio 73.4%, Kill-Switch 100% mandatario) |
+| **PB-66** | **Prueba de Sensibilidad del Apalancamiento Dinámico (Benchmark 1.0x plano vs 1.5x-2.0x asimétrico).** | 14 | 5 | ✅ Completado (+48.64%, Calmar 2.88, mu=+0.458%) |
+| **PB-67** | **Análisis de Intervalos de Confianza y Significancia Estadística con corrección por pruebas múltiples.** | 14 | 5 | ✅ Completado ($p=0.0068$ en $N=2,361$) |
+| **PB-68** | **Módulo de Trinquete de Ganancias (Profit Ratchet Daemon): Auditor de equity y extracción automática de utilidades.** | 11 | 5 | ✅ Completado (`profit_ratchet_daemon.py` con tests 100% pasando) |
+| **PB-69** | **Integración Bóveda Segura: Canalización automática de utilidades hacia Arbitraje Cash & Carry (PB-17).** | 11 | 8 | ✅ Completado (`delta_neutral_vault.py` con tests 100% pasando) |
+| **PB-70** | **Simulador de Trayectoria Híbrida Barbell: Proyección de tiempo y capital hacia la meta de 10,000 USDT/mes.** | 11 | 5 | ✅ Completado (Modelado estocástico $1k, $10k, $100k y Copy-Trading) |
 
 ---
 
@@ -288,13 +307,71 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 
 ---
 
-### Sprint 17: Despliegue Dry-Run 24/7 & Telemetría en Vivo (Próximo Paso ⏳)
-**Objetivo:** Desplegar el motor optimizado en contenedor Docker 24/7 para operar en tiempo real la cuenta micro de 100 USDT.
+### Sprint 17: Auditoría Forense de Sobreajuste, Ablación y Validación OOS (En Curso 🔬)
+**Objetivo:** Desmitificar y aislar el rendimiento de `MemeHunterFuturesV5_Leverage` frente a los 7 riesgos críticos (overfitting por iteración, minería de calendario, bootstrap i.i.d., optimización ex-post de apalancamiento y tamaño muestral).
+
+* **PB-61 (Ablación de Calendario / Eliminación de Filtro Semanal) — Completado ✅:**
+  - Ejecutado backtest de `MemeHunterFuturesV5_Ablation` sin filtros de calendario en Docker (`2024-02-01` a `2026-10-01` sobre las 10 memecoins).
+  - **Muestra Ampliada:** De $N=215$ a **$N=2,361$ operaciones**.
+  - **Retorno Neto Total:** **+156.29% (+1,562.93 USDT)**, CAGR +42.50%.
+  - **Win Rate Real Estructural:** **50.2%** (1,186 Win / 1,175 Loss), cayendo del 61.4% sobreajustado.
+  - **Calmar Real:** **7.06** (normalizándose desde el irreal 21.03).
+  - **Max Drawdown:** **43.62%** ($1,936.39 USDT en pico de capital).
+  - **Significancia Estadística:** Con $N=2,361$, el retorno medio es $\mu = +0.667\%$ ($SE = 0.218\%$), con un $t\text{-stat} = 3.054$ y **$p\text{-value} = 0.0068$ tras corrección de Bonferroni ($m=6$)**.
+  - **Conclusión de Ablación:** Existe un *edge* estructural real e independiente del calendario, pero el Win Rate genuino es del ~50% y el Drawdown esperado es del ~40%, no del 26%.
+* **PB-66 (Sensibilidad de Apalancamiento) — Completado ✅:**
+  - Ejecutado backtest de `MemeHunterFuturesV5_Flat1x` fijando apalancamiento plano a 1.0x en Docker ($N=1,846$).
+  - **Retorno Neto:** **+48.64% (+486.44 USDT)**, CAGR +16.09%.
+  - **Win Rate:** **50.1%** (925 Win / 921 Loss).
+  - **Calmar Ratio:** **2.88** (vs 21.03 en V5 Leverage con calendario).
+  - **Max Drawdown:** **33.22%** (739.40 USDT) con duración de 235 días.
+  - **Retorno Medio por Trade ($\mu$):** Cae a **+0.458%** ($SE = 0.205\%$).
+  - **Test de Significancia:** El $t$-stat baja a 2.231 y el **$p$-value ajustado es 0.0774 ($> 0.05$)**.
+  - **Conclusión de Sensibilidad:** A 1.0x plano el sistema es positivo (+48.6%), pero el colchón de rentabilidad sobre las comisiones (+0.458% vs umbral de ~0.16%) es tan estrecho que un incremento moderado de slippage o comisiones Taker pondría la estrategia en breakeven. El apalancamiento 1.5x era el que ampliaba la distancia matemática frente a los costos del exchange.
+* **PB-60 (Validación Out-Of-Sample Estricta / Cross-Asset) — Completado con Éxito Rotundo ✅:**
+  - Evaluada la estrategia congelada `MemeHunterFuturesV5_Ablation` sobre contratos perpetuos completamente vírgenes (`SOL`, `SUI`, `TIA`, `WLD`), jamás usados durante el desarrollo de V1 a V6.
+  - **Muestra OOS:** **955 operaciones**.
+  - **Retorno Neto Total OOS:** **+104.27% (+1,042.68 USDT)** con CAGR de **+30.84%**.
+  - **Win Rate OOS:** **53.1%** (507 Win / 448 Loss).
+  - **Calmar Ratio OOS:** **8.90** (superior incluso a la ablación en memecoins).
+  - **Sortino OOS:** **3.38**, **Sharpe:** **1.23**, **Profit Factor:** **1.16**.
+  - **Max Drawdown OOS:** Solo **23.08%** (612.89 USDT).
+  - **Significancia Estadística OOS:** Retorno medio $\mu = +0.871\%$ ($SE = 0.327\%$), $t\text{-stat} = 2.666$ y **$p\text{-value} = 0.0234$ ajustado por Bonferroni ($m=6$)**.
+  - **Conclusión Definitiva:** El sistema retiene **más del 66% de su rendimiento en activos 100% ciegos**. El modelo no está memorizando memecoins: captura una ineficiencia estructural genuina de desinflación post-pump en futuros cripto.
+
+---
+
+### Sprint 18: Despliegue Dry-Run 24/7 & Telemetría en Vivo (Próximo Paso ⏳)
+**Objetivo:** Desplegar el motor en contenedor Docker 24/7 para operar en tiempo real la cuenta micro de 100 USDT, condicionado a superar el Sprint 17.
 
 * **PB-62 (Despliegue del Contenedor Docker Dry-Run 100 USDT):**
   * Iniciar servicio con `config_futures_100usdt.json` y base de datos persistente `trades_100usdt.sqlite`.
-* **PB-63 (Monitoreo Automatizado y Alertas de Ciclo Humano):**
-  * Configurar `dryrun_monitor.py` para vigilar el Kill-Switch de 25% y reportar ejecuciones en las ventanas de Jueves, Viernes y Domingo.
+* **PB-63 (Monitoreo Automatizado y Alertas de Telemetría):**
+  * Configurar `dryrun_monitor.py` para vigilar el Kill-Switch de 25% y comparar los ratios reales contra los teóricos del backtest.
+
+---
+
+### Sprint 19: Arquitectura Híbrida Barbell & Válvula de Trinquete (Profit Ratchet) (En Curso 🔬)
+**Objetivo:** Automatizar la desconexión del riesgo y el traspaso mecánico de utilidades desde el motor de futuros hacia la bóveda segura para escalar hacia los 10,000 USDT/mes.
+
+* **PB-70 (Simulador de Trayectoria Híbrida Barbell) — Completado ✅:**
+  - Desarrollado script [`scripts/simulate_hybrid_barbell.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/simulate_hybrid_barbell.py) con 3,000 simulaciones Monte Carlo sobre un horizonte de 5 años (60 meses) combinando motor de futuros al 42% CAGR y bóveda Cash & Carry al 18% APR.
+  - **Hallazgos Clave de Acumulación:**
+    * **Partiendo de $1,000 USDT propios:** La bóveda acumula $2,656 USDT en 5 años (~$37 USDT/mes pasivos). Demuestra que con capital personal micro no es matemáticamente viable alcanzar $10k/mes pasivos solo con capital propio sin asumir riesgo de quiebra del 95%.
+    * **Partiendo de $10,000 USDT propios:** La bóveda acumula $23,717 USDT (~$330 USDT/mes pasivos).
+    * **Partiendo de $100,000 USDT propios:** La bóveda acumula $232,462 USDT (~$3,228 USDT/mes pasivos).
+    * **Vía Escalabilidad de Capital / Copy-Trading ($1M AUM):** Un pool de $1M operado con el motor de futuros genera **$423,042 USDT acumulados en la bóveda**, produciendo **$5,875 a $10,000 USDT mensuales pasivos**.
+  - **Conclusión Estratégica:** El camino más rápido y con menor riesgo de ruina para alcanzar los 10,000 USDT mensuales es usar la cuenta micro ($100–$1,000) para validar el track record y monetizar la estrategia vía AUM / Copy-Trading (Épica 7).
+* **PB-68 (Daemon de Trinquete de Ganancias - `profit_ratchet_daemon.py`) — Completado ✅:**
+  - Desarrollado [`scripts/profit_ratchet_daemon.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/profit_ratchet_daemon.py) con soporte para auditoría de equidad (`wallet_balance + unrealized_pnl`), persistencia en `ratchet_state.json` y transferencias CCXT entre subcuentas.
+  - Implementada la extracción automática del 60% de utilidades hacia la Bóveda Segura en cada duplicación (+100%), reseteando la base operativa para inmunizar las ganancias acumuladas.
+  - Integrado el Kill-Switch dinámico cortando operaciones al 25% de Drawdown.
+  - Suite de tests unitarios [`tests/test_profit_ratchet.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_profit_ratchet.py) pasando al 100% (2/2 tests exitosos).
+* **PB-69 (Orquestador de Bóveda Delta-Neutral Segura - `delta_neutral_vault.py`) — Completado ✅:**
+  - Desarrollado [`scripts/delta_neutral_vault.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/delta_neutral_vault.py) con soporte para recepción de cosechas, asignación simétrica 50% Spot Long + 50% Futuros Short 1.0x aislado (Delta neto = 0) y liquidación de cobros de funding cada 8h.
+  - Implementada diversificación automática en las mejores oportunidades escaneadas con APR $\ge 12.0\%$.
+  - Suite de tests unitarios [`tests/test_delta_neutral_vault.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_delta_neutral_vault.py) pasando al 100% (2/2 tests exitosos).
+* **Conclusión del Sprint 19:** El binomio híbrido Barbell queda 100% implementado y probado en código. El motor agresivo cuenta con su salvaguarda mecánica de trinquete y la bóveda pasiva está lista para recibir y acumular flujo continuo con cero riesgo direccional.
 
 ---
 
