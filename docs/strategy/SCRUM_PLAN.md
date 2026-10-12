@@ -115,6 +115,9 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 | **PB-68** | **Módulo de Trinquete de Ganancias (Profit Ratchet Daemon): Auditor de equity y extracción automática de utilidades.** | 11 | 5 | ✅ Completado (`profit_ratchet_daemon.py` con tests 100% pasando) |
 | **PB-69** | **Integración Bóveda Segura: Canalización automática de utilidades hacia Arbitraje Cash & Carry (PB-17).** | 11 | 8 | ✅ Completado (`delta_neutral_vault.py` con tests 100% pasando) |
 | **PB-70** | **Simulador de Trayectoria Híbrida Barbell: Proyección de tiempo y capital hacia la meta de 10,000 USDT/mes.** | 11 | 5 | ✅ Completado (Modelado estocástico $1k, $10k, $100k y Copy-Trading) |
+| **PB-71** | **Módulo de Diferenciación Fraccionaria (FFD) con preservación de memoria y test ADF.** | 15 | 8 | ✅ Completado (`scripts/fractional_diff.py` con tests 100% pasando) |
+| **PB-72** | **Suite de Métricas Anti-Data Snooping: PSR, Deflated Sharpe Ratio (DSR), CPCV y PBO.** | 15 | 8 | ✅ Completado (`scripts/advanced_metrics.py` con tests 100% pasando) |
+| **PB-73** | **Generador de Triple Barrera, Meta-Etiquetado y Bet Sizing Continuo (Fórmula López de Prado).** | 15 | 8 | ✅ Completado (`scripts/triple_barrier_metalabeling.py` con tests 100% pasando) |
 
 ---
 
@@ -372,6 +375,30 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
   - Implementada diversificación automática en las mejores oportunidades escaneadas con APR $\ge 12.0\%$.
   - Suite de tests unitarios [`tests/test_delta_neutral_vault.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_delta_neutral_vault.py) pasando al 100% (2/2 tests exitosos).
 * **Conclusión del Sprint 19:** El binomio híbrido Barbell queda 100% implementado y probado en código. El motor agresivo cuenta con su salvaguarda mecánica de trinquete y la bóveda pasiva está lista para recibir y acumular flujo continuo con cero riesgo direccional.
+
+---
+
+### Sprint 20: Institucionalización Cuantitativa & Machine Learning Asimétrico (Completado ✅)
+**Objetivo:** Elevar el proyecto a la frontera institucional de las finanzas cuantitativas implementando ingeniería de características no estacionarias, prevención matemática de falsos descubrimientos (*data snooping*) y dimensionamiento continuo de apuestas desvinculado de la dirección.
+
+* **PB-71 (Diferenciación Fraccionaria de Ventana Fija - `fractional_diff.py`) — Completado ✅:**
+  - Desarrollado [`scripts/fractional_diff.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/fractional_diff.py) con expansión binomial de Hosking y ventana fija (FFD) para preservar memoria a largo plazo.
+  - Implementado algoritmo de búsqueda automática (*Grid Search*) del exponente mínimo $d \in (0, 1)$ que rechaza la hipótesis nula de raíz unitaria mediante el test Aumentado de Dickey-Fuller (ADF) manteniendo $> 90\%$ de correlación con la serie de precios original.
+  - Suite de tests unitarios [`tests/test_fractional_diff.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_fractional_diff.py) pasando al 100% (3/3 tests exitosos).
+* **PB-72 (Métricas Avanzadas Anti-Overfitting - `advanced_metrics.py`) — Completado ✅:**
+  - Desarrollado [`scripts/advanced_metrics.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/advanced_metrics.py) con soporte para:
+    * **Ratio de Sharpe Probabilístico (PSR):** Corrección estricta de asimetría ($\gamma_3$) y curtosis pesada ($\gamma_4$) típica de colas en derivados cripto.
+    * **Ratio de Sharpe Deflactado (DSR):** Formulación de Marcos López de Prado que penaliza el sesgo de selección derivado de ensayar múltiples variantes ($N$ versiones probadas) con el término de Euler-Mascheroni ($\gamma \approx 0.5772$).
+    * **Combinatorial Purged Cross-Validation (CPCV) & PBO:** Particionado temporal combinatorio con purga (*purging*) de solapamiento de trades y cuarentena de autocorrelación (*embargo*), calculando la Probabilidad de Sobreajuste en el Backtest (PBO).
+  - Suite de tests unitarios [`tests/test_advanced_metrics.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_advanced_metrics.py) pasando al 100% (5/5 tests exitosos).
+* **PB-73 (Triple Barrera, Meta-Etiquetado & Bet Sizing Continuo - `triple_barrier_metalabeling.py`) — Completado ✅:**
+  - Desarrollado [`scripts/triple_barrier_metalabeling.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/triple_barrier_metalabeling.py) con fronteras dinámicas basadas en volatilidad exponencial continua (EWMA): barrera de toma de ganancias (PT), barrera de stop-loss (SL) y barrera temporal vertical.
+  - Formulado el desacoplamiento institucional entre la predicción direccional (Modelo Primario de tendencia en 4H) y el pronóstico de convicción (Meta-Modelo binario).
+  - Implementado el dimensionamiento continuo de apuestas (*Bet Sizing*) derivado de Kelly y la función acumulada normal:
+    $$m = 2 Z\left[\frac{p - 0.5}{\sqrt{p(1-p)}}\right] - 1$$
+    eliminando el apalancamiento discreto subjetivo y parametrizando de 1.0x a 2.0x según la probabilidad de éxito matemática.
+  - Suite de tests unitarios [`tests/test_triple_barrier_metalabeling.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_triple_barrier_metalabeling.py) pasando al 100% (3/3 tests exitosos).
+* **Conclusión del Sprint 20:** La infraestructura del proyecto cuenta con el arsenal cuantitativo más riguroso de la literatura contemporánea, erradicando la trampa de los micro-patrones y blindando la toma de decisiones contra el sesgo de minería de datos.
 
 ---
 
