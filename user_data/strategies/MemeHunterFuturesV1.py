@@ -276,27 +276,20 @@ class MemeHunterFuturesV1(IStrategy):
         if self._is_adverse_funding(pair, side):
             return False
 
-        # En backtest Freqtrade gestiona las protecciones nativas (MaxDrawdown, StoplossGuard).
-        # El Kill-Switch de archivo/latch opera en modo live/dry_run continuo.
-        if not live:
-            return True
-
         dd = self._current_drawdown()
-        if dd < KILL_SWITCH_DRAWDOWN:
-            return True
-
-        LOG.error("KILL-SWITCH: drawdown %.2f%% >= %.0f%%. Entradas bloqueadas (%s %s).",
-                  dd * 100, KILL_SWITCH_DRAWDOWN * 100, side, pair)
-        if live:
-            try:
-                flag.write_text(f"Activado {current_time.isoformat()} con drawdown {dd:.2%}\n")
-            except OSError as exc:
-                LOG.error("No se pudo escribir el latch del kill-switch: %s", exc)
-            if getattr(self, 'dp', None):
+        if dd >= KILL_SWITCH_DRAWDOWN:
+            LOG.error("KILL-SWITCH: drawdown %.2f%% >= %.0f%%. Entradas bloqueadas (%s %s).",
+                      dd * 100, KILL_SWITCH_DRAWDOWN * 100, side, pair)
+            if live:
                 try:
-                    self.dp.send_msg(f"KILL-SWITCH activado: drawdown {dd:.2%}. Entradas bloqueadas.")
-                except Exception:  # noqa: BLE001 - la notificacion no debe romper el bot
-                    pass
+                    flag.write_text(f"Activado {current_time.isoformat()} con drawdown {dd:.2%}\n")
+                except OSError as exc:
+                    LOG.error("No se pudo escribir el latch del kill-switch: %s", exc)
+                if getattr(self, 'dp', None):
+                    self.dp.send_msg(f"🚨 KILL-SWITCH: Drawdown {dd:.2%} >= {KILL_SWITCH_DRAWDOWN:.0%}. Bot bloqueado.")
+            return False
+
+        return True
         return False
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
