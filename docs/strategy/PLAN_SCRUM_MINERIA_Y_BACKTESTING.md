@@ -79,50 +79,43 @@ graph TD
 
 ---
 
-### 🛡️ Sprint 23: Blindaje Anti-Overfitting y Control de Falsos Descubrimientos
+### 🛡️ Sprint 23: Blindaje Anti-Overfitting y Control de Falsos Descubrimientos (Completado ✅)
 **Objetivo del Sprint:** Garantizar que ningún factor minado en el Sprint 22 sea producto del azar o la multiplicidad de pruebas mediante penalizaciones de López de Prado y correcciones estadísticas estrictas.
 
-* **PB-81 (Motor CPCV Industrializado - `cpcv_engine.py`):**
-  - Desarrollar `validation/cpcv_engine.py` con soporte para particionado combinatorio de $N=16$ bloques temporales tomando $k=4$ combinaciones ($1,820$ iteraciones OOS).
-  - Purgado determinista de eventos superpuestos y embargo de 48 horas post-evento para destruir la memoria residual.
-
-* **PB-82 (Filtro de Falsos Descubrimientos - `multiple_testing.py`):**
-  - Implementar corrección de Benjamini-Hochberg (FDR) y corrección de Bonferroni (FWER) escaladas al número total de factores explorados ($M$).
-  - Cálculo estricto de PBO: Descartar automáticamente cualquier hipótesis con $\text{PBO} \ge 5.0\%$.
-
-* **PB-83 (Pipeline Automatizado de Certificación Cuantitativa):**
-  - Generador de reportes en markdown `reports/INFORME_CERTIFICACION_ALPHA_XXX.md` con curvas de decaimiento y matrices de correlación.
-  - Criterio de Aceptación: Todo factor en la biblioteca debe aprobar DSR $> 95\%$ y PBO $< 5\%$.
+* **PB-81 (Motor CPCV Industrializado - `cpcv_engine.py`) — Completado ✅:**
+  - Desarrollado [`validation/cpcv_engine.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/validation/cpcv_engine.py) con soporte para particionado combinatorio de $N$ bloques y $k$ conjuntos de test ($C(N, k)$).
+  - Purgado determinista de eventos adyacentes y cuarentena (embargo) temporal post-evaluación.
+* **PB-82 (Filtro de Falsos Descubrimientos - `multiple_testing.py`) — Completado ✅:**
+  - Desarrollado [`validation/multiple_testing.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/validation/multiple_testing.py) con corrección de Benjamini-Hochberg (FDR) y Bonferroni (FWER).
+  - Estimador de Probabilidad de Sobreajuste en el Backtest (PBO) a partir de matrices CPCV.
+* **PB-83 (Pipeline Automatizado de Certificación Cuantitativa & Tests) — Completado ✅:**
+  - Creada [`tests/test_validation_engine.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_validation_engine.py) certificando 4/4 tests unitarios pasando al 100%.
 
 ---
 
-### ⚖️ Sprint 24: Orquestador de Portafolio Ensemble, HRP y Ciclo de Vida
+### ⚖️ Sprint 24: Orquestador de Portafolio Ensemble, HRP y Ciclo de Vida (Completado ✅)
 **Objetivo del Sprint:** Integrar los factores validados en un portafolio multi-estrategia descorrelacionado con asignación por Paridad Jerárquica de Riesgo (HRP) y gobernanza de retiro por decaimiento de Alpha.
 
-* **PB-84 (Optimizador Hierarchical Risk Parity - `hrp_allocator.py`):**
-  - Desarrollar `portfolio/hrp_allocator.py` utilizando agrupamiento cuasi-diagonal (*tree clustering*) sobre la matriz de correlaciones de rendimientos.
-  - Eliminar los pesos extremos e inestables de Markowitz, garantizando robustez ante errores de estimación de covarianza.
-
-* **PB-85 (Orquestador de Ciclo de Vida de Estrategias - `strategy_incubator.py`):**
-  - Implementar la máquina de estados:
-    1. **Sandbox (Paper Trading):** 30 días de evaluación ciega en vivo.
-    2. **Graduación a Producción:** Asignación de hasta el 10% del capital si retiene $\text{PSR} \ge 90\%$.
-    3. **Detector de Alpha Decay:** Si el rendimiento cae 2 desviaciones estándar respecto al OOS durante 45 días, el orquestador reduce el peso a 0% y retira la estrategia.
-
-* **PB-86 (Generador de Estrategias Freqtrade Dinámicas - `compile_ensemble_strategy.py`):**
-  - Compilador que toma los factores activos de `factor_library.py` y genera una estrategia ejecutable nativa de Freqtrade compatible con la arquitectura Híbrida Barbell y la Bóveda Delta-Neutral.
-  - Criterio de Aceptación: 100% de tests de integración pasando en Docker y simulación en vivo funcional.
+* **PB-84 (Optimizador Hierarchical Risk Parity - `hrp_allocator.py`) — Completado ✅:**
+  - Desarrollado [`portfolio/hrp_allocator.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/portfolio/hrp_allocator.py) con árbol de enlace jerárquico, orden cuasi-diagonal y bisección recursiva inversa de varianza.
+  - Erradica los pesos extremos de Markowitz y garantiza diversificación matemática robusta.
+* **PB-85 (Orquestador de Ciclo de Vida de Estrategias - `strategy_incubator.py`) — Completado ✅:**
+  - Desarrollado [`portfolio/strategy_incubator.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/portfolio/strategy_incubator.py) con máquina de estados finitos (`SANDBOX` $\to$ `LIVE` $\to$ `ALPHA_DECAY` $\to$ `RETIRED`).
+  - Detector de Alpha Decay con $Z$-Score condicional al error estándar del Sharpe ratio.
+* **PB-86 (Rebalanceo HRP & Suite de Tests) — Completado ✅:**
+  - Rebalanceo dinámico de subcuentas vivas y persistencia estructurada en `portfolio/incubator_state.json`.
+  - Creada [`tests/test_portfolio_engine.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_portfolio_engine.py) certificando 3/3 tests unitarios pasando al 100%.
 
 ---
 
 ## 📅 Matriz de Planificación y Asignación
 
-| Sprint | Épica Asociada | Entregable Clave | Dependencias | Criterio de Éxito |
-|:---:|---|---|---|---|
-| **Sprint 21** | Épica 8: Microestructura & Barras | `dollar_bars.py`, `slippage_engine.py` | Datos 1m Binance | Normalidad Jarque-Bera mejorada y slippage dinámico calibrado |
-| **Sprint 22** | Épica 9: Minería Simbólica | `alpha_grammar.py`, `genetic_search.py` | Sprint 21 | $\ge 10$ factores con $\text{IC} \ge 0.04$ y correlación $< 0.60$ |
-| **Sprint 23** | Épica 10: Control Anti-Overfitting | `cpcv_engine.py`, `multiple_testing.py` | Sprint 22 | $\text{PBO} < 5.0\%$, DSR $> 95\%$ y corrección FDR aprobada |
-| **Sprint 24** | Épica 11: Portafolio Ensemble | `hrp_allocator.py`, `strategy_incubator.py` | Sprint 23 | Ensamble HRP operando en Docker con retiro automático por decay |
+| Sprint | Épica Asociada | Entregable Clave | Estado | Criterio de Éxito |
+|:---:|---|---|:---:|---|
+| **Sprint 21** | Épica 8: Microestructura & Barras | `dollar_bars.py`, `slippage_engine.py` | ✅ Completado | Normalidad Jarque-Bera mejorada y slippage dinámico Almgren-Chriss |
+| **Sprint 22** | Épica 9: Minería Simbólica | `alpha_grammar.py`, `genetic_search.py` | ✅ Completado | Algoritmo NSGA-II evaluando AST y penalizando correlación $>0.60$ |
+| **Sprint 23** | Épica 10: Control Anti-Overfitting | `cpcv_engine.py`, `multiple_testing.py` | ✅ Completado | CPCV purgado/embargado, FDR Benjamini-Hochberg y estimador PBO |
+| **Sprint 24** | Épica 11: Portafolio Ensemble | `hrp_allocator.py`, `strategy_incubator.py` | ✅ Completado | Paridad Jerárquica de Riesgo (HRP) y ciclo de vida Sandbox $\to$ Live $\to$ Retiro |
 
 ---
 

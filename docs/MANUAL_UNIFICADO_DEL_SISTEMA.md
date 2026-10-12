@@ -134,6 +134,14 @@ Los resultados de los backtests oficiales fueron sometidos a la suite estadísti
 | [`delta_neutral_vault.py`](../scripts/delta_neutral_vault.py) | Bóveda Cash & Carry con escaneo en vivo de Binance | `python scripts/delta_neutral_vault.py --scan` |
 | [`profit_ratchet_daemon.py`](../scripts/profit_ratchet_daemon.py) | Válvula de extracción del 60% de utilidades en duplicaciones | `python scripts/profit_ratchet_daemon.py` |
 | [`simulate_hybrid_barbell.py`](../scripts/simulate_hybrid_barbell.py) | Modelado Monte Carlo hacia $10,000 USDT/mes pasivos | `python scripts/simulate_hybrid_barbell.py` |
+| [`dollar_bars.py`](../data_engine/dollar_bars.py) | Generador de Dollar, Volume y Tick Imbalance Bars (TIB) | `python -m data_engine.dollar_bars` |
+| [`slippage_engine.py`](../data_engine/slippage_engine.py) | Simulador de microestructura L2 y slippage Almgren-Chriss | `python -m data_engine.slippage_engine` |
+| [`alpha_grammar.py`](../mining/alpha_grammar.py) | Árbol sintáctico AST y operadores de factores WorldQuant | `python -m mining.alpha_grammar` |
+| [`genetic_search.py`](../mining/genetic_search.py) | Algoritmo genético NSGA-II y minería de factores | `python -m mining.genetic_search` |
+| [`cpcv_engine.py`](../validation/cpcv_engine.py) | Combinatorial Purged Cross-Validation purgado y embargado | `python -m validation.cpcv_engine` |
+| [`multiple_testing.py`](../validation/multiple_testing.py) | Control de falsos descubrimientos FDR, Bonferroni y PBO | `python -m validation.multiple_testing` |
+| [`hrp_allocator.py`](../portfolio/hrp_allocator.py) | Asignación de capital por Paridad Jerárquica de Riesgo (HRP) | `python -m portfolio.hrp_allocator` |
+| [`strategy_incubator.py`](../portfolio/strategy_incubator.py) | Orquestador de ciclo de vida (Sandbox -> Live -> Retiro) | `python -m portfolio.strategy_incubator` |
 | [`regime_classifier.py`](../scripts/regime_classifier.py) | Clasificador dinámico de régimen (Bull/Bear/Chop) | `python scripts/regime_classifier.py --symbol BTC/USDT:USDT` |
 | [`order_flow_imbalance.py`](../scripts/order_flow_imbalance.py) | Microestructura Nivel 2 y desequilibrio de órdenes (OFI) | `python scripts/order_flow_imbalance.py --symbol DOGE/USDT:USDT` |
 | [`meme_sentinel.py`](../scripts/meme_sentinel.py) | Detección temprana de volumen relativo anormal (RVOL) | `python scripts/meme_sentinel.py --top 10` |

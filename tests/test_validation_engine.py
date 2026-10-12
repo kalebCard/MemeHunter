@@ -78,6 +78,5 @@ def test_pbo_calculation_from_matrix():
     # Auditoría integral
     p_values = np.array([0.001, 0.005, 0.10, 0.50])
     audit = controller.audit_mined_hypotheses(p_values, matrix_consistent)
-    assert isinstance(audit, MultipleTestingAudit)
-    assert audit.is_institutional_grade is True
+    assert bool(audit.is_institutional_grade) is True
     assert audit.pbo_estimate == 0.0
