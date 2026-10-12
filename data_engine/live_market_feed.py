@@ -61,7 +61,7 @@ class LiveMarketFeed:
         self._raw_candles: Dict[str, pd.DataFrame] = {s: pd.DataFrame() for s in self.symbols}
         self._dollar_bars: Dict[str, pd.DataFrame] = {s: pd.DataFrame() for s in self.symbols}
         
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._running = False
         self._thread: Optional[threading.Thread] = None
         self._bar_closed_callbacks: List[Callable[[str, pd.Series], None]] = []
@@ -87,6 +87,8 @@ class LiveMarketFeed:
         """Integra las nuevas velas y actualiza las Dollar Bars."""
         if new_candles_df.empty:
             return
+
+        new_bar_event: Optional[Tuple[str, pd.Series]] = None
 
         with self._lock:
             # Concatenar y eliminar duplicados
@@ -117,15 +119,20 @@ class LiveMarketFeed:
                 self._dollar_bars[symbol] = bars.tail(self.max_buffer_bars)
                 curr_len = len(self._dollar_bars[symbol])
 
-                # Si se cerró al menos una nueva barra, notificar a los suscriptores
+                # Si se cerró al menos una nueva barra, preparar evento
                 if curr_len > prev_len:
-                    newest_bar = bars.iloc[-1]
+                    newest_bar = bars.iloc[-1].copy()
                     logger.info(f"[{symbol}] Nueva Dollar Bar cerrada a ${newest_bar['close']:.6f} (Total: {curr_len})")
-                    for cb in self._bar_closed_callbacks:
-                        try:
-                            cb(symbol, newest_bar)
-                        except Exception as e:
-                            logger.error(f"Error en callback de Dollar Bar: {e}")
+                    new_bar_event = (symbol, newest_bar)
+
+        # Notificar a los suscriptores FUERA del lock para evitar cualquier deadlock
+        if new_bar_event is not None:
+            sym, bar = new_bar_event
+            for cb in self._bar_closed_callbacks:
+                try:
+                    cb(sym, bar)
+                except Exception as e:
+                    logger.error(f"Error en callback de Dollar Bar: {e}")
 
     def get_latest_dollar_bars(self, symbol: str) -> pd.DataFrame:
         """Retorna una copia segura del buffer actual de Dollar Bars para un símbolo."""

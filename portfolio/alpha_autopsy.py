@@ -12,7 +12,8 @@ Implementa:
 import os
 import json
 import logging
-from dataclasses import dataclass, asdict
+from datetime import datetime, timezone
+from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Any
 
 from mining.llm_client import OpenRouterClient, OpenRouterModel
@@ -32,7 +33,7 @@ class AutopsyVerdict:
     recommendation: str
     confidence_score: float
     suggested_actions: List[str]
-    timestamp: str = "2026-10-11T22:42:00Z"
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class AlphaAutopsyAgent:

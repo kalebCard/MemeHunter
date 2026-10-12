@@ -12,6 +12,7 @@ Implementa el bucle cerrado cognitivo:
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 import numpy as np
 import pandas as pd
@@ -164,7 +165,7 @@ class AutonomousPortfolioOrchestrator:
         actions.append(f"Rebalanceo HRP ejecutado. Estrategias activas ponderadas: {list(new_weights.keys())}")
 
         return SelfHealingCycleReport(
-            cycle_timestamp="2026-10-11T22:42:00Z",
+            cycle_timestamp=datetime.now(timezone.utc).isoformat(),
             actions_taken=actions,
             health_reports=health_reports,
             quarantined_strategies=quarantined,

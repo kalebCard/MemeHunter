@@ -13,5 +13,5 @@ sys.path.insert(0, BASE_DIR)
 from dashboard.server import run_server
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
     run_server(port)

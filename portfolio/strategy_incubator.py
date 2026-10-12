@@ -12,6 +12,7 @@ Implementa la máquina de estados institucional:
 from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import Dict, List, Optional, Any
+from datetime import datetime, timezone
 import json
 import os
 import numpy as np
@@ -75,7 +76,7 @@ class StrategyLifecycleIncubator:
             live_sharpe=0.0,
             days_in_stage=0,
             decay_zscore=0.0,
-            last_audit_date="2026-10-11"
+            last_audit_date=datetime.now(timezone.utc).strftime("%Y-%m-%d")
         )
         self.strategies[strategy_id] = rec
         return rec
@@ -94,7 +95,11 @@ class StrategyLifecycleIncubator:
             raise KeyError(f"Estrategia {strategy_id} no registrada en la incubadora.")
 
         rec = self.strategies[strategy_id]
-        rec.days_in_stage = days_active
+        if days_active is not None and days_active > 0:
+            rec.days_in_stage = days_active
+        else:
+            rec.days_in_stage += 1
+        rec.last_audit_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         clean_ret = live_returns[np.isfinite(live_returns)]
 
         if len(clean_ret) >= 5:
@@ -115,12 +120,14 @@ class StrategyLifecycleIncubator:
             # Graduación si cumple días mínimos y retiene Sharpe positivo consistente
             if rec.days_in_stage >= self.min_sandbox_days and rec.live_sharpe >= 0.8:
                 rec.status = StrategyLifecycleStatus.LIVE
+                rec.days_in_stage = 0
         elif rec.status == StrategyLifecycleStatus.LIVE:
             # Alerta de desgaste si cae más de decay_threshold desviaciones estándar
             if decay_z <= self.decay_threshold:
                 rec.status = StrategyLifecycleStatus.ALPHA_DECAY
+                rec.days_in_stage = 0
         elif rec.status == StrategyLifecycleStatus.ALPHA_DECAY:
-            # Si el decaimiento persiste más de 10 días adicionales sin recuperarse, retiro definitivo
+            # Si el decaimiento persiste más de 10 días adicionales en esta etapa, retiro definitivo
             if rec.days_in_stage >= 10:
                 rec.status = StrategyLifecycleStatus.RETIRED
                 rec.target_capital_weight = 0.0

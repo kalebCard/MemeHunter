@@ -15,6 +15,11 @@ services:
       - "C:/meme_hunter_data:/freqtrade/user_data/data"
       - "./scripts:/freqtrade/scripts"
       - "./tests:/freqtrade/tests"
+      - "./mining:/freqtrade/mining"
+      - "./portfolio:/freqtrade/portfolio"
+      - "./data_engine:/freqtrade/data_engine"
+      - "./dashboard:/freqtrade/dashboard"
+      - "./validation:/freqtrade/validation"
     ports:
       - "127.0.0.1:8080:8080"
     env_file:

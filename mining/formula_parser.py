@@ -69,10 +69,6 @@ class FormulaASTParser:
                 return ConstantNode(float(node.value))
             raise ValueError(f"Tipo de constante no numérico: '{type(node.value)}'")
 
-        # Compatibilidad con Python < 3.8
-        elif isinstance(node, ast.Num):
-            return ConstantNode(float(node.n))
-
         # 3. Operadores Binarios Estándar (+, -, *, /)
         elif isinstance(node, ast.BinOp):
             left = cls._visit_node(node.left)
@@ -116,8 +112,6 @@ class FormulaASTParser:
                 window_node = node.args[1]
                 if isinstance(window_node, ast.Constant) and isinstance(window_node.value, (int, float)):
                     window = int(window_node.value)
-                elif isinstance(window_node, ast.Num):
-                    window = int(window_node.n)
                 else:
                     raise ValueError(f"El argumento de ventana para '{func_name}' debe ser un entero constante.")
                 return TimeSeriesOpNode(func_name, child, window)

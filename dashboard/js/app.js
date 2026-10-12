@@ -261,11 +261,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const API_AUTH_TOKEN = localStorage.getItem('cockpit_token') || 'meme_hunter_dev_token_2026';
+
   // 7. Acciones de los Botones
   document.getElementById('btn-trigger-cycle').addEventListener('click', async () => {
     addLog('info', 'Ejecutando ciclo de auto-diagnóstico y auto-sanación...');
     try {
-      const res = await fetch('/api/trigger-loop', { method: 'POST' });
+      const res = await fetch('/api/trigger-loop', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         addLog('ai', `Ciclo completado. Acciones ejecutadas: ${data.actions ? data.actions.length : 1}`);
@@ -294,7 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-synthesize-ai').addEventListener('click', async () => {
     addLog('ai', 'Conectando con OpenRouter (DeepSeek-V3 / Qwen-2.5-Coder)...');
     try {
-      const res = await fetch('/api/synthesize-alpha', { method: 'POST' });
+      const res = await fetch('/api/synthesize-alpha', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         addLog('ai', `OpenRouter sintetizó ${data.count || 3} nuevos alphas validados con AST.`);

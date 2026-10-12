@@ -51,12 +51,15 @@ class HierarchicalRiskParityAllocator:
 
     @classmethod
     def get_cluster_variance(cls, cov_matrix: np.ndarray, cluster_indices: List[int]) -> float:
-        """Calcula la varianza del clúster con ponderación de paridad de riesgo inversa simple."""
+        """Calcula la varianza del clúster con ponderación de paridad de riesgo inversa robusta."""
         sub_cov = cov_matrix[np.ix_(cluster_indices, cluster_indices)]
-        inv_diag = 1.0 / np.diag(sub_cov).clip(1e-8)
+        variances = np.diag(sub_cov)
+        # Evitar división por cero o varianzas espurias: filtrar activos degenerados
+        variances = np.where(variances < 1e-8, 1e-4, variances)
+        inv_diag = 1.0 / variances
         w = inv_diag / np.sum(inv_diag)
         cluster_var = float(np.dot(w.T, np.dot(sub_cov, w)))
-        return cluster_var
+        return max(cluster_var, 1e-8)
 
     @classmethod
     def recursive_bisection(

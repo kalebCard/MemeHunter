@@ -12,7 +12,7 @@ import os
 import sys
 import json
 import logging
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from typing import Dict, Any
 
 # Asegurar path raíz del proyecto
@@ -31,13 +31,24 @@ logger = logging.getLogger("CockpitServer")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 DASHBOARD_DIR = os.path.dirname(os.path.abspath(__file__))
+API_SECRET_TOKEN = os.getenv("DASHBOARD_API_TOKEN", "meme_hunter_dev_token_2026")
 
 
 class CockpitAPIHandler(SimpleHTTPRequestHandler):
-    """Manejador HTTP que combina servidor estático y endpoints API REST."""
+    """Manejador HTTP concurrente que combina servidor estático y endpoints API REST protegidos."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
+
+    def _check_auth(self) -> bool:
+        """Verifica el token de autorización Bearer para llamadas de mutación/control."""
+        auth_header = self.headers.get("Authorization", "")
+        expected = f"Bearer {API_SECRET_TOKEN}"
+        if auth_header == expected:
+            return True
+        # Rechazo explícito con 401
+        self._send_json({"error": "No autorizado. Token Bearer requerido o inválido."}, status_code=401)
+        return False
 
     def do_GET(self):
         if self.path == "/" or self.path == "/index.html":
@@ -49,6 +60,10 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             return super().do_GET()
 
     def do_POST(self):
+        # Exigir autenticación para endpoints que ejecutan lógica o consumen cuotas
+        if not self._check_auth():
+            return
+
         if self.path == "/api/trigger-loop":
             self._handle_trigger_loop()
         elif self.path == "/api/synthesize-alpha":
@@ -61,9 +76,26 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
+        # Restricción de CORS para evitar explotación cross-origin indiscriminada
+        client_origin = self.headers.get("Origin", "")
+        allowed_origins = {"http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8088", "http://127.0.0.1:8088"}
+        if client_origin in allowed_origins:
+            self.send_header("Access-Control-Allow-Origin", client_origin)
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
         self.wfile.write(body)
+
+    def do_OPTIONS(self):
+        """Manejo de pre-flight CORS para navegadores."""
+        self.send_response(204)
+        client_origin = self.headers.get("Origin", "")
+        allowed_origins = {"http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8088", "http://127.0.0.1:8088"}
+        if client_origin in allowed_origins:
+            self.send_header("Access-Control-Allow-Origin", client_origin)
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.end_headers()
 
     def _handle_api_status(self):
         """Retorna el estado actual de la incubadora y autopsias."""
@@ -188,12 +220,13 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             self._send_json({"success": False, "error": str(e)}, status_code=500)
 
 
-def run_server(port: int = 8080):
+def run_server(port: int = 8088):
     server_address = ("127.0.0.1", port)
-    httpd = HTTPServer(server_address, CockpitAPIHandler)
+    httpd = ThreadingHTTPServer(server_address, CockpitAPIHandler)
     print("=" * 80)
-    print(f" [MEMEHUNTER QUANT COCKPIT] Servidor Visual Iniciado con Éxito")
+    print(f" [MEMEHUNTER QUANT COCKPIT] Servidor Visual Seguro Multihilo Iniciado")
     print(f"  -> Acceso Local: http://localhost:{port}")
+    print(f"  -> Token Autenticación API: {API_SECRET_TOKEN}")
     print("  -> Presiona Ctrl+C para detener el servidor.")
     print("=" * 80)
     try:
@@ -204,5 +237,5 @@ def run_server(port: int = 8080):
 
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
     run_server(port)
