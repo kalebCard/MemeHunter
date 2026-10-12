@@ -1,6 +1,21 @@
-# 🏗️ Plan de Implementación: Arquitectura Híbrida Barbell & Motor de Trinquete (Profit Ratchet)
+---
+id: STRAT-003
+title: Arquitectura Híbrida Barbell y Motor de Trinquete (Profit Ratchet)
+category: strategy
+version: 6.0
+status: ACTIVE
+last_updated: 2026-10-11
+author: Quantitative Engineering & Research Core
+references:
+  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/architecture/decisions/ADR-002_hybrid_barbell_cash_and_carry.md
+  - scripts/delta_neutral_vault.py
+---
 
-**Documento:** PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md  
+# 🏗️ Plan de Implementación: Arquitectura Híbrida Barbell & Motor de Trinquete (STRAT-003)
+
+> **Documento Consolidado:** Este plan y su operativa están integrados en la sección §5 del [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md) y respaldados por el [ADR-002](../architecture/decisions/ADR-002_hybrid_barbell_cash_and_carry.md).
+
 **Objetivo Estratégico:** Construir el puente automatizado entre la generación rápida de capital en Futuros y la acumulación en la Bóveda Segura Delta-Neutral para alcanzar **10,000 USDT mensuales pasivos**.
 
 ---

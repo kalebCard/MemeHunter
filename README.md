@@ -14,23 +14,27 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 * **Hipótesis Teórica del Edge:** [docs/strategy/HYPOTHESIS.md](docs/strategy/HYPOTHESIS.md)
 * **Reporte Oficial de Backtesting:** [docs/reports/PRELIMINARY_REPORT.md](docs/reports/PRELIMINARY_REPORT.md)
 * **Informe de Viabilidad con 100 USDT:** [docs/reports/INFORME_FUTUROS_100_USDT.md](docs/reports/INFORME_FUTUROS_100_USDT.md)
+* **Auditoría Forense de Riesgos y Overfitting:** [docs/reports/INFORME_AUDITORIA_FORENSE_RIESGOS.md](docs/reports/INFORME_AUDITORIA_FORENSE_RIESGOS.md)
+* **Certificación Institucional (PSR, DSR, CPCV y PBO):** [docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md](docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md)
 
 ---
 
-## 📊 Síntesis Cuantitativa del Motor de Futuros (Certificación Oficial de Alta Fidelidad)
+## 📊 Síntesis Cuantitativa del Motor de Futuros (Certificación Oficial y OOS)
 
-| Motor / Estrategia | Timeframe | Operaciones | Win Rate | Retorno Neto Freqtrade | Retorno Anual (CAGR) | Calmar | Sortino | Max Drawdown Real | Estado / Dictamen |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **MemeHunterFuturesV5_Leverage (100 USDT)** | **4h** | **215** | **61.4%** | **+96.20% (Pico $211.48)** | **+110.27%** | **21.03** | **3.12** | **26.41%** (Piso $88.24) | 🏆 **Líder Cuantitativo Oficial (Sprint 15/16)** |
-| `MemeHunterFuturesV4` (100 USDT Base) | 4h | 223 | 53.4% | +58.93% (+58.93 USDT) | +66.68% | 16.62 | 2.32 | 20.47% (Piso $92.52) | ✅ Certificado con Estacionalidad & Subasta |
-| `MemeHunterFuturesV1_ShortOnly` (1,000 USDT) | 4h | 1,771 | 48.7% | +63.24% (+632.40 USDT) | +63.24% | 4.00 | 2.48 | 31.15% | ✅ Benchmark Previo Short-Only |
-| `MemeHunterFuturesV6_Apex` (Sin exit_signal) | 4h | 241 | 67.2% | +27.01% (+27.01 USDT) | +30.17% | 3.48 | 1.04 | 45.74% | 🔬 Experimental (Airbag técnico ratificado en V5) |
-| `MemeHunterFuturesV2` (Intradiario) | 1h | 12,828 | 39.3% | -75.46% (-754.59 USDT) | N/A | -1.97 | -1.01 | 75.74% | ❌ Refutado (Trampa de Comisiones y Ruido) |
+| Motor / Estrategia | Timeframe | Operaciones | Win Rate | Retorno Neto | Sharpe Anualizado | PSR (>0.0) | DSR Deflactado | Estado / Dictamen |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`MemeHunterFuturesV7_Quantum`** | **4h** | **—** | **—** | **—** | **—** | **—** | **—** | 🌌 **Canónica de Producción (FFD + Bet Sizing Continuo + Salidas Market)** |
+| **`V5_OOS_CrossAsset` (Activos Ciegos)** | **4h** | **955** | **53.1%** | **+104.27%** | **4.04** | **100.0%** | **100.0%** | 🏆 **Certificación Fuera de Muestra Pura (SOL, SUI, TIA, WLD)** |
+| `MemeHunterFuturesV5_Ablation` (Sin Calendario) | 4h | 2,361 | 50.2% | +156.29% | 2.94 | 100.0% | 0.0% | ℹ️ Edge Estructural Puro ($p=0.0068$ en muestra masiva) |
+| `MemeHunterFuturesV5_Leverage` (100 USDT) | 4h | 215 | 61.4% | +96.20% | 7.48 | 100.0% | 100.0% | ✅ Modelo de Micro-Capital Anti-Freeze duplicando cuenta |
+| `MemeHunterFuturesV5_Flat1x` (Sensibilidad 1.0x) | 4h | 1,846 | 50.1% | +48.64% | 2.43 | 100.0% | 0.0% | ⚠️ Margen estrecho contra comisiones; 1.5x ratificado |
+| `MemeHunterFuturesV1_ShortOnly` (Benchmark 1,000 USDT) | 4h | 1,771 | 48.7% | +63.24% | 1.11 | 99.8% | — | ✅ Benchmark previo Short-Only sin estacionalidad |
+| `MemeHunterFuturesV2` (Intradiario) | 1h | 12,828 | 39.3% | -75.46% | Negativo | 0.0% | — | ❌ Refutado (Destrucción por comisiones y mechas intra-vela) |
 
-> **La Verdad Cuantitativa del Mercado de Memecoins & Micro-Capital:** 
-> 1. **La Asimetría de Estacionalidad Humana (Sprint 13/15):** Los Viernes y Domingos concentran más del **88% de las ganancias anuales (+94.21 USDT netos con >71% Win Rate)**. Operar Lunes/Martes destruía capital (-756 USDT en V3); la máscara de calendario protegió el 100% de la liquidez.
-> 2. **Apalancamiento Dinámico Asimétrico (1.5x - 2.0x):** Asignar 2.0x exclusivamente en techos confirmados por rechazo de subasta (*Trapped Longs*) y 1.5x en continuación macro elevó el Win Rate al **61.4%**, casi duplicando la cuenta de 100 USDT (**+96.20% neto / pico de $211.48 USDT**) con un **Calmar récord de 21.03**.
-> 3. **El Modelo Anti-Freeze de Micro-Capital (PB-51):** Concentrar los 100 USDT en **4 slots dinámicos ($25 USDT base)** elimina el riesgo de congelamiento ante el límite de $5.00 USDT de Binance Futures; el stake promedio operado fue de **$31.10 USDT**, creciendo a $42.80 en los picos.
+> **La Verdad Cuantitativa del Mercado y Microestructura (Sprint 17-20):** 
+> 1. **Probabilidad de Sobreajuste (PBO = 6.67%):** La validación combinatoria purgada (CPCV) certifica que el sistema tiene solo un 6.67% de probabilidad de sobreajuste, situándose en el rango institucional óptimo (<25%).
+> 2. **DSR al 100.0% en Activos Ciegos:** Tras penalizar por el sesgo de múltiples ensayos previos ($N \ge 6$), el sistema retiene expectativa matemática positiva en activos nunca vistos durante el diseño.
+> 3. **Arquitectura Híbrida Barbell & Trinquete de Ganancias:** Acelerar micro-capital en el extremo agresivo (Futuros Short 1.5x) y cosechar el 60% de utilidades hacia la Bóveda Delta-Neutral de Cash & Carry ([`delta_neutral_vault.py`](scripts/delta_neutral_vault.py)) para blindar el patrimonio de colapsos sistémicos.
 
 ---
 
@@ -38,7 +42,7 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 1. **La Ventaja Real es Estrecha (+0.50% a +1.50% por trade):**
    * El *Stress-Test* demostró que operar como *Taker* o permitir spreads $> 0.3\%$ devora el 100% de las ganancias en comisiones.
-   * La ejecución pasiva **Maker al Bid** y el filtro de spread son obligatorios para no quebrar.
+   * La ejecución pasiva **Maker al Bid** en entradas y órdenes **Market forzadas en salidas** son obligatorias para no sufrir no-fills ni selección adversa.
 2. **El "Efecto Airbag" de las Salidas Técnicas (`exit_signal`):**
    * La prueba experimental de V6 demostró que eliminar `exit_signal` elevó el Win Rate (67.2%) pero triplicó las pérdidas por stoploss duro (-295 USDT en 73 stops).
    * Salir con pérdida moderada (-2% a -6%) cuando la estructura técnica se invalida es un salvavidas que preserva el capital.
@@ -48,12 +52,12 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🛡️ Protecciones Institucionales de Producción (Sprint 8 Hardening)
+## 🛡️ Protecciones Institucionales de Producción
 
 1. **Kill-Switch de Equidad Total (PB-25):** Audita el balance realizado más el **PnL no realizado (*unrealized*)** de posiciones vivas concurrentes. Si el drawdown de capital vivo alcanza el 25%, se bloquean de inmediato nuevas entradas.
 2. **Guardián de Tasa de Financiación (*Funding Bleed Guard*) (PB-24):** Rechaza órdenes Short si la tasa de financiación proyectada es inferior a **-0.05% por 8h**, evitando el desangrado pasivo de margen pagando comisiones a los Longs.
 3. **Salidas Técnicas Dinámicas & Trailing Holgado (PB-23):** Salidas automáticas ante pérdida de la EMA 200 o cruce adverso de MACD/RSI, resolviendo el riesgo de operaciones *round-trip* (+11.5% cayendo a -10%). Trailing stop calibrado al 4.0% para absorber mechas intradía en velas de 4h.
-4. **Ejecución Protegida & Squeeze Guard (PB-26 / PB-27):** Salidas de stoploss y emergencia ejecutadas como órdenes de mercado (`market`) para garantizar llenado inmediato en memecoins delgadas, con reconocimiento explícito del riesgo de liquidación en rallies de +80% en Shorts.
+4. **Válvula de Trinquete & Bóveda Delta-Neutral (PB-68 / PB-69):** Traspaso mecánico de utilidades hacia Cash & Carry delta-neutral (12%–30% APR) para blindar el capital contra eventos de cola gorda.
 
 ---
 
@@ -61,18 +65,20 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 | Script | Propósito / Función | Comando de Ejecución |
 | :--- | :--- | :--- |
+| `advanced_metrics.py` | Métricas avanzadas de Marcos López de Prado: PSR, Deflated Sharpe (DSR), CPCV y PBO | `python scripts/advanced_metrics.py` |
+| `audit_advanced_backtests.py` | Auditoría de backtests ZIP reales con cálculo de PBO y DSR | `python scripts/audit_advanced_backtests.py` |
+| `fractional_diff.py` | Diferenciación fraccionaria FFD con preservación de memoria y grid search ADF | `python scripts/fractional_diff.py` |
+| `triple_barrier_metalabeling.py` | Generador de Triple Barrera, Meta-Etiquetado y Bet Sizing continuo | `python scripts/triple_barrier_metalabeling.py` |
+| `train_meta_model.py` | Pipeline integrado de ML financiero: FFD + Triple Barrera + Bet Sizing L2 | `python scripts/train_meta_model.py` |
+| `delta_neutral_vault.py` | Orquestador de la Bóveda Segura Cash & Carry con escaneo en vivo de Binance | `python scripts/delta_neutral_vault.py --scan` |
+| `profit_ratchet_daemon.py` | Daemon de trinquete de ganancias: extrae el 60% de beneficios al duplicar cuenta | `python scripts/profit_ratchet_daemon.py` |
+| `simulate_hybrid_barbell.py` | Simulación Monte Carlo de trayectoria hacia $10,000 USDT/mes pasivos | `python scripts/simulate_hybrid_barbell.py` |
 | `stress_test.py` | Somete los trades a choques de comisiones, deslizamiento hostil y mide rachas | `python scripts/stress_test.py` |
 | `monte_carlo.py` | Simulación Bootstrap (7,500 caminos) para estimar riesgo de ruina y VaR | `python scripts/monte_carlo.py` |
-| `dryrun_monitor.py` | Compara el dry-run en vivo (SQLite) contra los criterios de aceptación de PB-14 | `python scripts/dryrun_monitor.py` |
-| `meme_sentinel.py` | Detector temprano de anomalías de volumen (RVOL) y explosiones en memecoins (PB-15) | `python scripts/meme_sentinel.py --top 10` |
-| `dex_viral_radar.py` | Radar on-chain DEX (DexScreener API) para tracción y presión compradora viral (PB-16) | `python scripts/dex_viral_radar.py --top 10` |
-| `funding_arbitrage.py` | Escáner y calculador de arbitraje Delta-Neutral de Funding Rates (PB-17) | `python scripts/funding_arbitrage.py --min-apr 20.0` |
-| `order_flow_imbalance.py` | Análisis de microestructura N2, desequilibrio de libro (OFI) y presión de precio (PB-18) | `python scripts/order_flow_imbalance.py --symbol DOGE/USDT:USDT` |
-| `regime_classifier.py` | Clasificador cuantitativo de régimen de mercado y adaptación dinámica de riesgo (PB-19) | `python scripts/regime_classifier.py --symbol BTC/USDT:USDT` |
-| `simulate_micro_capital.py` | Evalúa la viabilidad de 10 USDT vs 100 USDT bajo límites reales de Binance | `python scripts/simulate_micro_capital.py` |
-| `test_binance_connection.py` | Prueba latencia de red, sincronización horaria y libros de órdenes de Binance | `docker compose run --rm freqtrade scripts/test_binance_connection.py` |
-| `telegram_healthcheck.py` | Valida credenciales del bot de Telegram y envía ping de prueba | `python scripts/telegram_healthcheck.py` |
-| `deploy_vps.sh` | Aprovisiona un servidor cloud Ubuntu con Docker, UFW y Fail2ban en 1 paso | `bash scripts/deploy_vps.sh` |
+| `regime_classifier.py` | Clasificador cuantitativo de régimen de mercado y adaptación dinámica de riesgo | `python scripts/regime_classifier.py --symbol BTC/USDT:USDT` |
+| `order_flow_imbalance.py` | Análisis de microestructura N2, desequilibrio de libro (OFI) y presión de precio | `python scripts/order_flow_imbalance.py --symbol DOGE/USDT:USDT` |
+| `meme_sentinel.py` | Detector temprano de anomalías de volumen (RVOL) y explosiones en memecoins | `python scripts/meme_sentinel.py --top 10` |
+| `dex_viral_radar.py` | Radar on-chain DEX (DexScreener API) para tracción y presión compradora viral | `python scripts/dex_viral_radar.py --top 10` |
 
 ---
 

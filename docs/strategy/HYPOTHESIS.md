@@ -1,4 +1,19 @@
-# Hipótesis de Edge: Estrategia MemeHunterV1
+---
+id: STRAT-001
+title: Hipótesis de Edge Cuantitativo y Desinflación Asimétrica de Memecoins
+category: strategy
+version: 6.0
+status: ACTIVE
+last_updated: 2026-10-11
+author: Quantitative Engineering & Research Core
+references:
+  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/architecture/decisions/ADR-001_asymmetric_short_only_bias.md
+---
+
+# 🎯 Hipótesis de Edge: Meme Hunter (STRAT-001)
+
+> **Documento Consolidado:** Para la visión integral y matemática unificada del sistema, consultar el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 Este documento formaliza la hipótesis detrás de la estrategia base, cumpliendo el requisito del DAS (§3.2) de evitar el *data snooping* (ajustar indicadores hasta ver qué funciona en el pasado).
 

@@ -1,4 +1,19 @@
-# Plan de Escalado Exponencial: De 100 USDT a 1,000 USDT (Multiplicador 10X)
+---
+id: STRAT-002
+title: Plan de Escalado Exponencial de Micro-Capital (100 USDT a 1,000 USDT)
+category: strategy
+version: 6.0
+status: COMPLETED
+last_updated: 2026-10-11
+author: Quantitative Engineering & Research Core
+references:
+  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/reports/INFORME_FUTUROS_100_USDT.md
+---
+
+# 📈 Plan de Escalado Exponencial: De 100 USDT a 1,000 USDT (STRAT-002)
+
+> **Documento Consolidado:** Este plan ha sido integrado formalmente en la sección §4 del [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 Este plan define la hoja de ruta cuantitativa para convertir los **100 USDT iniciales en 1,000+ USDT** en Binance Futures utilizando **Apalancamiento Dinámico Asimétrico**, **Criterio de Kelly Fraccional** y la explotación de los **Ciclos de Subasta y Estacionalidad Humana**.
 

@@ -1,4 +1,20 @@
-# 📋 Plan de Acción Cuantitativo: Desmitificación de Backtests y Blindaje Anti-Overfitting (Sprint 17)
+---
+id: STRAT-004
+title: Plan de Acción Cuantitativo: Desmitificación de Backtests y Blindaje Anti-Overfitting
+category: strategy
+version: 6.0
+status: COMPLETED
+last_updated: 2026-10-11
+author: Quantitative Engineering & Research Core
+references:
+  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md
+  - docs/reports/INFORME_AUDITORIA_FORENSE_RIESGOS.md
+---
+
+# 📋 Plan de Acción Cuantitativo: Desmitificación de Backtests y Blindaje Anti-Overfitting (STRAT-004)
+
+> **Certificación Oficial:** Las pruebas de este plan han concluido exitosamente y están certificadas en el [Informe de Métricas Avanzadas DSR & PBO](../reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) y consolidadas en el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 ## 🎯 Objetivo General
 Someter el motor `MemeHunterFuturesV5_Leverage` y sus predecesores a pruebas rigurosas de estrés estadístico, ablación paramétrica y validación fuera de muestra (OOS) para **determinar si existe una ventaja matemática genuina (*edge*)** o si los resultados históricos (+110% CAGR, Calmar 21, 0% ruina) son fruto de minería de datos y ajuste retrospectivo.

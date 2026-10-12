@@ -1,8 +1,24 @@
-# Plan de Desarrollo Scrum: meme_hunter (Alpha & Asymmetric Edge)
+---
+id: STRAT-ROADMAP-001
+title: Plan de Desarrollo Scrum y Backlog de Sprints (Meme Hunter v6.0)
+category: strategy
+version: 6.0
+status: ACTIVE
+last_updated: 2026-10-11
+author: Quantitative Engineering & Research Core
+references:
+  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/MANUAL_UNIFICADO_DEL_SISTEMA.md
+  - docs/operations/OPERATIONAL_RUNBOOK.md
+---
+
+# 📋 Plan de Desarrollo Scrum: meme_hunter (STRAT-ROADMAP-001)
+
+> **Documento Consolidado:** Para la visión estratégica y matemática unificada del sistema, consultar el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 Este documento organiza el desarrollo del sistema **meme_hunter** transformado en un **verdadero cazador de memecoins con ventaja asimétrica y modelos cuantitativos de última generación**, superando la dependencia de indicadores tradicionales rezagados.
 
-> **Última actualización:** 11 de octubre de 2026 — Auditoría de estado real (ver §0).
+> **Última actualización:** 11 de octubre de 2026 — Auditoría de estado real y consolidación v6.0 (ver §0).
 
 ---
 
@@ -406,8 +422,16 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
     * Salidas y stoploss forzados como órdenes `market` para erradicar el riesgo de no-fills en caídas violentas.
   - Suite de tests unitarios [`tests/test_futures_v7_quantum.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_futures_v7_quantum.py) pasando al 100% (2/2 tests exitosos).
 * **Conclusión del Sprint 20:** La infraestructura del proyecto cuenta con el arsenal cuantitativo más riguroso de la literatura contemporánea, erradicando la trampa de los micro-patrones y blindando la toma de decisiones contra el sesgo de minería de datos.
-
 ---
+
+### Fase Siguiente: Minería de Alphas, Microestructura L2 y Portafolio Ensemble (Sprints 21 a 24)
+Para llevar el sistema a una fábrica cuantitativa industrial autónoma, se ha formalizado el plan detallado en:
+> 👉 **[Plan Scrum: Minería de Alphas y Backtesting Industrial (Sprints 21 a 24)](PLAN_SCRUM_MINERIA_Y_BACKTESTING.md)** (`STRAT-PLAN-MINING-001`)
+
+* **Sprint 21:** Ingesta de Barras de Información (Dollar & Volume Bars) y Simulación de Microestructura L2 (Slippage Almgren-Chriss) (PB-75 a PB-77).
+* **Sprint 22:** Motor Simbólico de Minería de Alphas con Algoritmos Genéticos NSGA-II y Árboles Sintácticos (PB-78 a PB-80).
+* **Sprint 23:** Blindaje Anti-Overfitting con CPCV Industrializado, DSR $> 95\%$ y Control de Falsos Descubrimientos FDR/FWER (PB-81 a PB-83).
+* **Sprint 24:** Ensamble de Portafolio Dinámico con Paridad Jerárquica de Riesgo (HRP) y Gobernanza de Incubación (PB-84 a PB-86).
 
 ---
 

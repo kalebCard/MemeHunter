@@ -1,18 +1,21 @@
 # Documento de Arquitectura de Software (DAS)
 **Proyecto**: meme_hunter  
-**Versión**: 5.0 (Arquitectura Cuantitativa de Futuros USDT-M, Apalancamiento Dinámico 1.5x-2.0x y Anti-Freeze Compounding)
+**Versión**: 6.0 (Arquitectura Híbrida Barbell, Meta-Modelado Asimétrico, Bet Sizing Continuo y Bóveda Segura Delta-Neutral)
 
 ## 1. Introducción
 ### 1.1 Propósito
-Este documento describe la arquitectura del sistema **meme_hunter**. Tras validar que el mercado Spot y la sobreoperación intradiaria de 1h destruían capital en comisiones, la arquitectura evolucionó hacia un **sistema cuantitativo asimétrico sobre Futuros USDT-M (Binance)**. El motor oficial campeona (`MemeHunterFuturesV5_Leverage`) combina **Apalancamiento Dinámico Asimétrico (1.5x - 2.0x)**, **Máscara de Estacionalidad Humana (operación exclusiva Jueves a Domingo)**, **Teoría de Subasta (Trapped Longs)** y **Anti-Freeze Dynamic Sizing en micro-capital (100 USDT)**, casi duplicando el capital (+96.20% neto) con un Calmar récord de 21.03.
+Este documento describe la arquitectura de grado institucional del sistema **meme_hunter**. Tras superar las fases de validación empírica y certificación fuera de muestra (OOS Cross-Asset +104.27% y PBO de solo 6.67%), la arquitectura se consolidó bajo el paradigma **Híbrido Barbell (de Pesas)**:
+1. **Extremo Agresivo (Alpha Engine):** Estrategia `MemeHunterFuturesV7_Quantum` operando Futuros USDT-M en 4H con **Diferenciación Fraccionaria (FFD d=0.40)**, desinflación macro y **Dimensionamiento Continuo de Apuestas (Bet Sizing)** derivado de Marcos López de Prado / Kelly Sigmoidal en el hook `leverage()` [1.0x - 2.0x].
+2. **Válvula de Trinquete (Profit Ratchet Daemon):** Mecanismo autónomo (`scripts/profit_ratchet_daemon.py`) que audita la equidad viva y transfiere mecánicamente el 60% de las utilidades en cada duplicación (+100%), reseteando la base operativa para inmunizar ganancias.
+3. **Extremo Conservador (Delta-Neutral Vault):** Bóveda pasiva (`scripts/delta_neutral_vault.py`) que despliega el capital cosechado en posiciones de arbitraje Cash & Carry (Spot Long + Short Futuros 1.0x) para generar flujos pasivos continuos (12%–30% APR) con cero riesgo direccional de mercado.
 
 ### 1.2 Alcance
-El sistema descansa sobre el framework de ejecución **Freqtrade** y la librería **CCXT**, complementado por módulos satélite especializados en Python. La estrategia central ejecuta señales de futuros con apalancamiento condicionado al nivel de convicción (2.0x en absorción de techos, 1.75x en quiebre de estructura y 1.5x en continuación macro), gestionada bajo margen aislado con protecciones nativas (Kill-Switch al 25% de Drawdown, Guardián de Funding Rate y Trailing Stop de Alta Fidelidad al 12%/4%).
+El sistema descansa sobre el framework de ejecución **Freqtrade**, la librería **CCXT** y una suite especializada de algoritmos de Machine Learning financiero y métricas de falsos descubrimientos (PSR, DSR de López de Prado y CPCV con *purging* y *embargo*).
 
 ### 1.3 Universo Operado
 El universo activo se compone de contratos perpetuos USDT-M en Binance filtrados dinámicamente:
 * **Filtro de Liquidez Estricto:** Mínimo $1,000,000 USDT de volumen en 24h para excluir trampas de liquidez y tokens manipulados de baja capitalización.
-* **Margen Aislado con Stoploss Holgado:** A 2.0x de apalancamiento, el precio de liquidación se encuentra a un +50% del precio de entrada; dado que el stoploss duro se sitúa al -10%, la distancia a liquidación forzada es superior a 4X el riesgo por trade, eliminando por diseño la quiebra forzada por exchange.
+* **Margen Aislado con Stoploss Holgado:** A 1.5x - 2.0x de apalancamiento, el precio de liquidación se encuentra a más de un +50% del precio de entrada; dado que el stoploss duro se sitúa al -10%, la distancia a liquidación forzada es superior a 4X el riesgo por trade, eliminando por diseño la quiebra forzada por exchange.
 
 ---
 
@@ -48,11 +51,17 @@ El universo activo se compone de contratos perpetuos USDT-M en Binance filtrados
 - **Telegram Bot nativo**: Freqtrade enviará notificaciones instantáneas sobre operaciones, cierres por trailing stop y permitirá envío de comandos básicos (`/status`, `/forcesell`).
 
 ### 3.4 Módulos Satélite Cuantitativos y de Microestructura (`scripts/`)
-- **Meme Sentinel (`scripts/meme_sentinel.py`)**: Monitorea el universo USDT-M calculando volumen relativo (RVOL) para detectar anomalías y rupturas de volatilidad tempranas antes del cierre de velas de 4H.
-- **Radar Viral On-Chain (`scripts/dex_viral_radar.py`)**: Conexión a la API pública de DexScreener para capturar tracción en Solana/Base/Ethereum y cuantificar presión compradora.
-- **Funding Arbitrage (`scripts/funding_arbitrage.py`)**: Escáner de oportunidades Cash & Carry Delta-Neutral (Short Futuros 1x + Spot Long) para extraer rendimiento pasivo de Funding Rates extremos (50%–150% APR) con $0 riesgo direccional.
-- **Order Flow Imbalance (`scripts/order_flow_imbalance.py`)**: Análisis de microestructura N2, cálculo de OFI y Micro-Price para optimizar la colocación de órdenes límite pasivas (Maker).
+- **Suite de Métricas Anti-Data Snooping (`scripts/advanced_metrics.py`)**: Cálculo del Probabilistic Sharpe Ratio (PSR), Deflated Sharpe Ratio (DSR de López de Prado) y Combinatorial Purged Cross-Validation (CPCV) con cálculo de PBO.
+- **Diferenciación Fraccionaria (`scripts/fractional_diff.py`)**: Expansión binomial FFD con búsqueda automática de $d$ óptimo para series estacionarias con máxima memoria histórica.
+- **Generador de Triple Barrera y Bet Sizing Continuo (`scripts/triple_barrier_metalabeling.py`)**: Etiquetado dinámico por volatilidad EWMA y dimensionamiento continuo de apuestas vía función sigmoidal normal.
+- **Auditor Forense de Backtests (`scripts/audit_advanced_backtests.py`)**: Ingesta de archivos ZIP oficiales de Freqtrade para certificación de PBO y DSR.
+- **Pipeline de Entrenamiento de Meta-Modelos (`scripts/train_meta_model.py`)**: Flujo completo de ML financiero con regularización L2 y compuertas de admisión DSR.
+- **Bóveda Segura Delta-Neutral (`scripts/delta_neutral_vault.py`)**: Orquestador de posiciones Cash & Carry (Spot Long + Short 1.0x) con escaneo en vivo de Binance vía CCXT.
+- **Daemon de Trinquete de Ganancias (`scripts/profit_ratchet_daemon.py`)**: Auditor de equidad total y traspaso automático del 60% de utilidades en duplicaciones de capital (+100%).
 - **Clasificador de Régimen (`scripts/regime_classifier.py`)**: Clasificación dinámica de mercado (`BULL_MOMENTUM`, `BEAR_BLEED`, `CHOPPY_RANGE`) con adaptación de riesgo y pausa en regímenes adversos.
+- **Order Flow Imbalance (`scripts/order_flow_imbalance.py`)**: Análisis de microestructura N2, cálculo de OFI y Micro-Price para optimizar la colocación de órdenes límite pasivas (Maker).
+- **Meme Sentinel (`scripts/meme_sentinel.py`)**: Monitorea el universo USDT-M calculando volumen relativo (RVOL) para detectar anomalías tempranas.
+- **Radar Viral On-Chain (`scripts/dex_viral_radar.py`)**: Conexión a la API pública de DexScreener para capturar tracción en Solana/Base/Ethereum y cuantificar presión compradora.
 - **Auditor de Dry-Run (`scripts/dryrun_monitor.py`)**: Evaluación continua de los trades simulados almacenados en SQLite contra los criterios de aceptación estadística.
 
 ---

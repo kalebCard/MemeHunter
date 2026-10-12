@@ -1,4 +1,24 @@
-# Plan de Implementación: MemeHunterFuturesV6 (Forensic Leak Elimination & Apex Compounding)
+---
+id: STRAT-EXP-001
+title: Plan Experimental V6 Apex (Forensic Leak Elimination)
+category: strategy
+version: 6.0
+status: SUPERSEDED
+last_updated: 2026-10-11
+author: Quantitative Engineering & Research Core
+superseded_by:
+  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - user_data/strategies/MemeHunterFuturesV7_Quantum.py
+  - docs/architecture/decisions/ADR-004_airbag_technical_exit_market_orders.md
+---
+
+# ⚠️ Plan Experimental: MemeHunterFuturesV6 Apex (STRAT-EXP-001)
+
+> [!CAUTION]
+> ### DOCUMENTO HISTÓRICO / SUPERSEDED
+> Este plan representó una iteración experimental (Sprint 16) cuya hipótesis principal —eliminar las salidas técnicas por señal (`use_exit_signal = False`) para no interrumpir caídas profundas— **fue refutada empíricamente en la auditoría cuantitativa**. La supresión de salidas técnicas provocó que rebotes de corta duración terminaran impactando el Stop Loss duro del 10%, aumentando las pérdidas por trade y deteriorando el Profit Factor.
+> 
+> **Decisión Arquitectónica:** Ver [ADR-004: Airbag Técnico de Salida Inmediata a Mercado](../architecture/decisions/ADR-004_airbag_technical_exit_market_orders.md) y la estrategia canónica definitiva en el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 Este plan define los pasos exactos de código, validación y certificación para resolver las fugas cuantificadas en la auditoría forense y llevar el retorno de la cuenta de 100 USDT de **+96.2% a más de +160% anual**.
 
