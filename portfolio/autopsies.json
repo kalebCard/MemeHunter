@@ -43,5 +43,20 @@
       "MINE_VOLUME_MICROSTRUCTURE"
     ],
     "timestamp": "2026-10-11T22:42:00Z"
+  },
+  {
+    "factor_id": "ALPHA_VOL_DECAY",
+    "formula": "ts_delay(close, 10)",
+    "health_status": "WARNING_DECAY",
+    "diagnosis": "ALPHA_DECAY_VOLATILITY_COMPRESSION",
+    "root_cause": "El factor perdi\u00f3 poder predictivo debido a un cambio abrupto de volatilidad y saturaci\u00f3n de microestructura en memecoins.",
+    "recommendation": "Excluir factores basados en momentum de cierre simple y priorizar desbalances de volumen acumulado (volume imbalance / rvol).",
+    "confidence_score": 0.88,
+    "suggested_actions": [
+      "ISOLATE_FACTOR",
+      "REDUCE_WEIGHT_TO_ZERO",
+      "MINE_VOLUME_MICROSTRUCTURE"
+    ],
+    "timestamp": "2026-10-12T04:55:26.458025+00:00"
   }
 ]
