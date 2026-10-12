@@ -1,0 +1,46 @@
+[
+  {
+    "factor_id": "ALPHA_001",
+    "formula": "(open + sign(-1.00))",
+    "ic_mean": -0.21863627380512074,
+    "ic_std": 0.23252823069974532,
+    "ic_ir": -0.9402579019132876,
+    "sharpe_proxy": -3.349155061553372,
+    "turnover": 0.11357014058196023,
+    "depth": 3,
+    "correlation_with_existing": 0.0
+  },
+  {
+    "factor_id": "ALPHA_002",
+    "formula": "abs((2.00 - high))",
+    "ic_mean": 0.2005033787458142,
+    "ic_std": 0.24767305529503117,
+    "ic_ir": 0.8095476144303106,
+    "sharpe_proxy": 1.6578432740490234,
+    "turnover": 0.11693734080006596,
+    "depth": 3,
+    "correlation_with_existing": 0.0
+  },
+  {
+    "factor_id": "ALPHA_004",
+    "formula": "abs(ts_decay_linear(vwap, 10))",
+    "ic_mean": -0.15052254963668008,
+    "ic_std": 0.27248747579501675,
+    "ic_ir": -0.5524027175377013,
+    "sharpe_proxy": -5.729484467950397,
+    "turnover": 0.0444053911973584,
+    "depth": 3,
+    "correlation_with_existing": 0.09758053952184911
+  },
+  {
+    "factor_id": "ALPHA_003",
+    "formula": "(close + neg(high))",
+    "ic_mean": 0.127186182356199,
+    "ic_std": 0.23291682258813057,
+    "ic_ir": 0.5460573780206539,
+    "sharpe_proxy": 9.196783727860907,
+    "turnover": 0.6663733387975992,
+    "depth": 3,
+    "correlation_with_existing": 0.0
+  }
+]

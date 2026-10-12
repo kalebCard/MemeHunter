@@ -1,0 +1,46 @@
+{
+  "ALPHA_001": {
+    "strategy_id": "ALPHA_001",
+    "name": "Mined_ALPHA_001",
+    "status": "SANDBOX",
+    "target_capital_weight": 0.0,
+    "backtest_sharpe": -3.349155061553372,
+    "live_sharpe": 0.0,
+    "days_in_stage": 0,
+    "decay_zscore": 0.0,
+    "last_audit_date": "2026-10-11"
+  },
+  "ALPHA_002": {
+    "strategy_id": "ALPHA_002",
+    "name": "Mined_ALPHA_002",
+    "status": "LIVE",
+    "target_capital_weight": 0.26655593196329874,
+    "backtest_sharpe": 1.6578432740490234,
+    "live_sharpe": 0.0,
+    "days_in_stage": 0,
+    "decay_zscore": 0.0,
+    "last_audit_date": "2026-10-11"
+  },
+  "ALPHA_004": {
+    "strategy_id": "ALPHA_004",
+    "name": "Mined_ALPHA_004",
+    "status": "SANDBOX",
+    "target_capital_weight": 0.0,
+    "backtest_sharpe": -5.729484467950397,
+    "live_sharpe": 0.0,
+    "days_in_stage": 0,
+    "decay_zscore": 0.0,
+    "last_audit_date": "2026-10-11"
+  },
+  "ALPHA_003": {
+    "strategy_id": "ALPHA_003",
+    "name": "Mined_ALPHA_003",
+    "status": "LIVE",
+    "target_capital_weight": 0.2343554548070061,
+    "backtest_sharpe": 9.196783727860907,
+    "live_sharpe": 0.0,
+    "days_in_stage": 0,
+    "decay_zscore": 0.0,
+    "last_audit_date": "2026-10-11"
+  }
+}
