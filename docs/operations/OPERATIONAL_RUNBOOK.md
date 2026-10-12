@@ -33,15 +33,25 @@ TELEGRAM_TOKEN=tu_token_bot
 TELEGRAM_CHAT_ID=tu_chat_id
 ```
 
-### 1.2 Inicio del Motor de Futuros (Modo Dry-Run)
-```powershell
-# Levantar contenedor en segundo plano
-docker compose -f docker-compose.futures.yml up -d
+### 1.2 Inicio del Motor de Futuros y Diagnóstico (Vía CLI Unificado)
+El método estándar recomendado para operar el sistema es a través del CLI:
 
-# Ver logs en tiempo real
-docker compose -f docker-compose.futures.yml logs -f meme_hunter_futures
+```powershell
+# 1. Verificar salud del sistema (2 segundos)
+python scripts/meme_cli.py health
+
+# 2. Levantar el motor de futuros en Docker
+python scripts/meme_cli.py futures start
+
+# 3. Ver logs en tiempo real
+python scripts/meme_cli.py futures logs
+
+# 4. Iniciar o verificar el Cockpit Visual
+python scripts/meme_cli.py cockpit
 ```
-* **Dashboard Web (FreqUI):** [http://localhost:8081](http://localhost:8081)
+
+* **Cockpit Visual Unificado:** [http://localhost:8088](http://localhost:8088)
+* **Dashboard FreqUI Directo:** [http://localhost:8081](http://localhost:8081)
 * **Credenciales por defecto:** configuradas en `user_data/config_futures.json`.
 
 ---

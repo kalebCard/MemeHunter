@@ -189,7 +189,13 @@ def get_live_trades_from_db(db_path: str = "user_data/tradesv3.futures.sqlite") 
         return out
 
     try:
-        conn = sqlite3.connect(db_path)
+        # Conexión estrictamente read-only con timeout para no bloquear Freqtrade
+        abs_db = os.path.abspath(db_path).replace("\\", "/")
+        uri = f"file:{abs_db}?mode=ro"
+        try:
+            conn = sqlite3.connect(uri, uri=True, timeout=5.0)
+        except Exception:
+            conn = sqlite3.connect(db_path, timeout=5.0)
         cur = conn.cursor()
 
         # 1. Posiciones abiertas

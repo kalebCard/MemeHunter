@@ -113,30 +113,33 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🚀 Despliegue Rápido de la Plataforma v7.0 & v7.1
+## 🕹️ Control Operativo con el CLI Unificado (`scripts/meme_cli.py`)
 
-### 1. Iniciar Cockpit Visual Seguro de Monitoreo
-```powershell
-python scripts/start_dashboard.py
-```
-Acceder al panel interactivo: **[http://localhost:8088](http://localhost:8088)** *(Autenticación con Bearer token en mutaciones)*
+Para eliminar la dispersión de comandos y operar el sistema desde un único punto de entrada:
 
-### 2. Iniciar el Bucle Autónomo en Tiempo Real (Binance)
 ```powershell
-python scripts/run_live_alpha_loop.py
+# 1. Auditoría de Salud Operativa en 2 segundos (Docker, DB SQLite, Cockpit API, .env)
+python scripts/meme_cli.py health
+
+# 2. Consultar o Iniciar el Cockpit Visual (Puerto 8088)
+python scripts/meme_cli.py cockpit
+
+# 3. Gestionar el Motor Canónico de Futuros (Freqtrade en Docker)
+python scripts/meme_cli.py futures status     # Ver estado del contenedor
+python scripts/meme_cli.py futures start      # Iniciar en background
+python scripts/meme_cli.py futures logs       # Ver logs en vivo
+python scripts/meme_cli.py futures stop       # Detener con seguridad
+
+# 4. Ejecutar la Suite Completa de Tests (117 Tests Certificados al 100%)
+python scripts/meme_cli.py test
+
+# 5. Ejecutar Herramientas de Investigación (I+D)
+python scripts/meme_cli.py research stress    # Stress-Test de fricciones
+python scripts/meme_cli.py research vault     # Escáner Cash & Carry Delta-Neutral
 ```
 
-### 3. Motor Tradicional de Futuros (Freqtrade en Docker)
-```powershell
-docker compose -f docker-compose.futures.yml up -d
-```
-* **Dashboard Web (FreqUI):** [http://localhost:8081](http://localhost:8081)
-* **Cockpit Visual Seguro:** [http://localhost:8088](http://localhost:8088) *(No colisiona con FreqUI)*
-
-### 4. Ejecutar la Suite Completa de Tests (117 Tests Certificados)
-```powershell
-docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
-```
+* **Cockpit Visual Seguro:** [http://localhost:8088](http://localhost:8088)
+* **FreqUI en Vivo:** [http://localhost:8081](http://localhost:8081)
 * **Certificación:** **117/117 tests pasando al 100% (0 errores)** en contenedor hermético.
 
 ---
