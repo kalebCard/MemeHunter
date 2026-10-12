@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemeHunter | Cockpit Cuantitativo Auto-Evolutivo & Monitor IA</title>
+  <meta name="description" content="Dashboard interactivo de monitoreo en tiempo real del motor cuantitativo MemeHunter, incubadora de alphas y bucle de auto-sanación con IA.">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <!-- Navbar Header -->
+    <header class="top-navbar" id="top-navbar">
+      <div class="brand-wrapper">
+        <div class="brand-logo" id="brand-logo" aria-label="Logo de MemeHunter">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>MEMEHUNTER QUANT COCKPIT</h1>
+          <p>AUTONOMOUS ALPHA FACTORY & AI AUTOPSY ENGINE</p>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div class="pulse-badge" id="system-health-badge">
+          <span class="pulse-dot"></span>
+          <span id="system-health-text">SISTEMA ACTIVO (24/7)</span>
+        </div>
+
+        <button class="btn-action" id="btn-trigger-cycle">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+          </svg>
+          Ejecutar Ciclo Autónomo
+        </button>
+
+        <button class="btn-action" id="btn-synthesize-ai" style="background: linear-gradient(135deg, rgba(157, 78, 221, 0.3), rgba(0, 242, 254, 0.3)); border-color: rgba(157, 78, 221, 0.6);">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M9.5 2.672a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 0 1H10v.5a.5.5 0 0 1-1 0v-.5h-.5a.5.5 0 0 1 0-1H9v-.5a.5.5 0 0 1 .5-.5zM14 6.672a.5.5 0 0 1 .5.5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 .5-.5zM3.5 0a.5.5 0 0 1 .5.5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 .5-.5zM8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+          Sintetizar con OpenRouter
+        </button>
+      </div>
+    </header>
+
+    <!-- KPI Grid Banner -->
+    <section class="kpi-grid" id="kpi-metrics-grid">
+      <div class="kpi-card" id="kpi-sharpe">
+        <div class="kpi-label">Sharpe Ratio Cartera</div>
+        <div class="kpi-value" id="val-sharpe">2.14 <span style="font-size: 0.9rem; color: var(--accent-emerald);">+12%</span></div>
+        <div class="kpi-subtext">Out-of-Sample Combinatorio</div>
+      </div>
+
+      <div class="kpi-card" id="kpi-alphas-live">
+        <div class="kpi-label">Alphas en Producción (LIVE)</div>
+        <div class="kpi-value" id="val-alphas-live">4 <span style="font-size: 0.9rem; color: var(--accent-cyan);">/ 12 total</span></div>
+        <div class="kpi-subtext">Ponderados dinámicamente por HRP</div>
+      </div>
+
+      <div class="kpi-card" id="kpi-avg-ic">
+        <div class="kpi-label">Mean Information Coeff (IC)</div>
+        <div class="kpi-value" id="val-avg-ic">0.078 <span style="font-size: 0.9rem; color: var(--accent-emerald);">p < 0.01</span></div>
+        <div class="kpi-subtext">Ventana móvil de 60 barras</div>
+      </div>
+
+      <div class="kpi-card" id="kpi-decay-rate">
+        <div class="kpi-label">Alphas en Cuarentena</div>
+        <div class="kpi-value" id="val-decay-count" style="color: var(--accent-amber);">1 <span style="font-size: 0.9rem; color: var(--accent-muted);">Alpha Decay</span></div>
+        <div class="kpi-subtext">Auto-sustitución activada</div>
+      </div>
+
+      <div class="kpi-card" id="kpi-diversity-bank">
+        <div class="kpi-label">Banco de Reserva Ortogonal</div>
+        <div class="kpi-value" id="val-diversity-count" style="color: var(--accent-purple);">6 <span style="font-size: 0.9rem; color: var(--accent-purple);">MAP-Elites</span></div>
+        <div class="kpi-subtext">Factores listos para relevo</div>
+      </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <main class="main-dashboard-grid">
+      <!-- Columna Izquierda: Gráficos y Tabla de Incubadora -->
+      <section class="left-column">
+        <!-- Panel 1: Gráfico de Equity de Portafolio -->
+        <article class="glass-panel" id="panel-equity-chart">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16">
+                <path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.707l-4.146 4.147a.5.5 0 0 1-.708 0L7 6.707l-4.646 4.647a.5.5 0 0 1-.708-.708l5-5a.5.5 0 0 1 .708 0L9.5 7.793 13.293 4H10.5a.5.5 0 0 1-.5-.5z"/>
+              </svg>
+              Curva de Equity de Portafolio & Auto-Recuperación
+            </h2>
+            <span class="panel-tag">ONLINE HRP ALLOCATION</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="equityChart"></canvas>
+          </div>
+        </article>
+
+        <!-- Panel 2: Gráfico de Information Coefficient (IC) Rodante -->
+        <article class="glass-panel" id="panel-ic-chart">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16">
+                <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2z"/>
+              </svg>
+              Monitoreo de Predictibilidad: Rolling IC & Detección de Decay
+            </h2>
+            <span class="panel-tag">SPEARMAN RANK CORRELATION</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="icChart"></canvas>
+          </div>
+        </article>
+
+        <!-- Panel 3: Tabla de la Incubadora de Estrategias -->
+        <article class="glass-panel" id="panel-incubator-table">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-purple)" viewBox="0 0 16 16">
+                <path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11z"/>
+              </svg>
+              Estado de la Incubadora & Asignación de Capital
+            </h2>
+            <span class="panel-tag">LIFECYCLE STATE MACHINE</span>
+          </div>
+          <div class="table-responsive">
+            <table class="quant-table" id="incubatorTable">
+              <thead>
+                <tr>
+                  <th>Estrategia ID</th>
+                  <th>Fórmula Simbólica</th>
+                  <th>Estado</th>
+                  <th>Peso Asignado</th>
+                  <th>Backtest Sharpe</th>
+                  <th>IC Actual</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="incubatorTableBody">
+                <!-- Inyectado dinámicamente por JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- Columna Derecha: Autopsias IA, Banco de Diversidad y Log Terminal -->
+      <aside class="right-column">
+        <!-- Panel 4: Autopsia Forense de Alphas (IA) -->
+        <article class="glass-panel" id="panel-ai-autopsies">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-purple)" viewBox="0 0 16 16">
+                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H9v2.5a.5.5 0 0 1-1 0V8.5H5.5a.5.5 0 0 1 0-1H8V5a.5.5 0 0 1 1 0v2.5h2.5z"/>
+              </svg>
+              Autopsias Forenses IA (OpenRouter)
+            </h2>
+            <span class="panel-tag" id="tag-autopsy-count">DEEPSEEK-R1 / CLAUDE</span>
+          </div>
+          <div id="autopsyListContainer">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </article>
+
+        <!-- Panel 5: Banco de Diversidad (Quality-Diversity Archive) -->
+        <article class="glass-panel" id="panel-diversity-archive">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16">
+                <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/>
+              </svg>
+              Archivo de Diversidad (MAP-Elites)
+            </h2>
+            <span class="panel-tag">DESCORRELACION < 0.50</span>
+          </div>
+          <div id="diversityNichesContainer">
+            <!-- Nichos renderizados aquí -->
+          </div>
+        </article>
+
+        <!-- Panel 6: Terminal Log en Tiempo Real -->
+        <article class="glass-panel" id="panel-terminal-logs">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16">
+                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2z"/>
+                <path d="M5.854 4.146a.5.5 0 0 1 0 .708L3.707 7l2.147 2.146a.5.5 0 0 1-.708.708l-2.5-2.5a.5.5 0 0 1 0-.708l2.5-2.5a.5.5 0 0 1 .708 0zM7 10.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+              </svg>
+              Consola de Auditoría Autónoma
+            </h2>
+            <span class="panel-tag">LIVE AUDIT LOG</span>
+          </div>
+          <div class="terminal-console" id="terminalLogConsole">
+            <!-- Líneas de log reactivas -->
+          </div>
+        </article>
+      </aside>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
