@@ -270,13 +270,31 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 
 ---
 
-### Sprint 16: Despliegue Dry-Run 24/7 & Telemetría en Vivo (Próximo Paso ⏳)
-**Objetivo:** Desplegar `MemeHunterFuturesV5_Leverage` en contenedor Docker 24/7 para operar en tiempo real la cuenta micro de 100 USDT.
+### Sprint 16: Optimización Forense de Salidas y Eliminación de Fugas de Capital (En Curso 🔬)
+**Objetivo:** Erradicar las pérdidas causadas por salidas prematuras en rebotes falsos (`exit_signal`), filtrar el ruido de baja liquidez de los Sábados y expandir la captura de techos institucionales (*Trapped Longs*).
 
-* **PB-57 (Despliegue del Contenedor Docker Dry-Run):**
-  * Iniciar servicio con `config_futures_100usdt.json` y base de datos persistente `trades_v5_100usdt.sqlite`.
-* **PB-58 (Vigilancia de Kill-Switch 25% y Auditoría Semanal):**
-  * Automatizar `dryrun_monitor.py` para alertar ejecuciones en las ventanas activas de Jueves a Domingo.
+* **PB-57 (Auditoría Forense de Razones de Salida - `extract_pnl_breakdown.py`) — Completado ✅:**
+  - Descubierta fuga crítica: `exit_signal` causó **57 operaciones consecutivas con 0% Win Rate y destruyó -$116.16 USDT** al cerrar prematuramente en falsos rebotes técnicos contra la EMA 200/RSI.
+  - En contraste, las salidas por `roi` y `trailing_stop_loss` acumularon **+$333.42 USDT netos con 100% Win Rate** (131 operaciones ganadoras).
+* **PB-58 (Desactivación de `exit_signal` o Restricción a `exit_profit_only`):**
+  - Confiar la salida exclusivamente a la estructura de trailing stop (12% offset / 4% trail) y ROI macro, evitando que las fluctuaciones menores corten los colapsos. Impacto proyectado: recuperar entre +$60 y +$80 USDT netos.
+* **PB-59 (Filtro Anti-Chop de Fin de Semana - Bloqueo de Sábados):**
+  - Auditoría demostró que el Viernes genera **+$76.29 USDT (71.9% WR)** y el Domingo **+$17.92 USDT (71.0% WR)**, mientras que el Sábado destruye **-$10.55 USDT (44% WR)** por falta de liquidez fiat y manipulaciones minoristas.
+  - Implementar bloqueo estricto de nuevas entradas los Sábados (manteniendo vivas únicamente las posiciones ganadoras del Viernes).
+* **PB-60 (Recalibración de Sensibilidad en Trapped Longs Score):**
+  - Ajustar umbrales de absorción en techos (relajar mecha superior de 1.8x a 1.3x del cuerpo y volumen a 1.2x SMA) para elevar las capturas de 2 a 30-40 trades anuales bajo apalancamiento 2.0x.
+* **PB-61 (Filtro Macro de Bitcoin Trend & Regime):**
+  - Prohibir la apertura de cortos en altcoins cuando Bitcoin esté marcando nuevos máximos históricos en 4h con RSI > 70 (*BTC Discovery Mode*).
+
+---
+
+### Sprint 17: Despliegue Dry-Run 24/7 & Telemetría en Vivo (Próximo Paso ⏳)
+**Objetivo:** Desplegar el motor optimizado en contenedor Docker 24/7 para operar en tiempo real la cuenta micro de 100 USDT.
+
+* **PB-62 (Despliegue del Contenedor Docker Dry-Run 100 USDT):**
+  * Iniciar servicio con `config_futures_100usdt.json` y base de datos persistente `trades_100usdt.sqlite`.
+* **PB-63 (Monitoreo Automatizado y Alertas de Ciclo Humano):**
+  * Configurar `dryrun_monitor.py` para vigilar el Kill-Switch de 25% y reportar ejecuciones en las ventanas de Jueves, Viernes y Domingo.
 
 ---
 
