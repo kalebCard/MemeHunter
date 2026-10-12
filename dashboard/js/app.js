@@ -277,6 +277,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res.ok) {
         const data = await res.json();
         addLog('ai', `Ciclo completado. Acciones ejecutadas: ${data.actions ? data.actions.length : 1}`);
+        if (data.estimated_cycle_cost_usd !== undefined) {
+          addLog('info', `Coste del ciclo: ~$${data.estimated_cycle_cost_usd.toFixed(5)} USD | Acumulado: $${data.accumulated_cost_usd.toFixed(4)} USD`);
+        }
+        if (data.goal_reached) {
+          addLog('ai', `🎯 META CUANTITATIVA LOGRADA: Portafolio superó el Sharpe objetivo.`);
+        }
         fetchBackendStatus();
         return;
       }

@@ -2,15 +2,15 @@
 id: DOC-MASTER-001
 title: Manual Maestro Unificado del Sistema Meme Hunter
 category: master
-version: 6.0
+version: 7.1
 status: CERTIFIED
 last_updated: 2026-10-11
 author: Quantitative Engineering & Research Core
 ---
 
-# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 6.0)
+# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.1)
 
-Este documento consolida la totalidad del conocimiento teórico, arquitectónico, cuantitativo y operativo del proyecto **meme_hunter**, unificando los planes estratégicos, informes forenses y especificaciones técnicas dispersas en una única referencia canónica.
+Este documento consolida la totalidad del conocimiento teórico, arquitectónico, cuantitativo y operativo del proyecto **meme_hunter**, unificando los planes estratégicos, informes forenses, especificaciones técnicas del motor autónomo auto-evolutivo y gobernanza de costes en una única referencia canónica.
 
 ---
 
@@ -21,9 +21,11 @@ Este documento consolida la totalidad del conocimiento teórico, arquitectónico
 3. [Evolución de Estrategias y el Motor Canónico V7 Quantum](#3-evolución-de-estrategias-y-el-motor-canónico-v7-quantum)
 4. [Auditoría Forense y Certificación Cuantitativa de Grado Institucional](#4-auditoría-forense-y-certificación-cuantitativa-de-grado-institucional)
 5. [Microestructura de Mercado y Control de Fricciones](#5-microestructura-de-mercado-y-control-de-fricciones)
-6. [Catálogo Integral de Scripts y Módulos Satélite](#6-catálogo-integral-de-scripts-y-módulos-satélite)
-7. [Protocolos Operativos y Runbook de Producción](#7-protocolos-operativos-y-runbook-de-producción)
-8. [Registro de Decisiones Arquitectónicas (ADRs)](#8-registro-de-decisiones-arquitectónicas-adrs)
+6. [Motor Cuantitativo Auto-Evolutivo, Cognición IA y Modelo Económico](#6-motor-cuantitativo-auto-evolutivo-cognición-ia-y-modelo-económico)
+7. [Catálogo Integral de Scripts y Módulos Satélite](#7-catálogo-integral-de-scripts-y-módulos-satélite)
+8. [Protocolos Operativos y Runbook de Producción](#8-protocolos-operativos-y-runbook-de-producción)
+9. [Registro de Decisiones Arquitectónicas (ADRs)](#9-registro-de-decisiones-arquitectónicas-adrs)
+10. [Compendio de Estrategia y Hoja de Ruta Cuantitativa](#10-compendio-de-estrategia-y-hoja-de-ruta-cuantitativa)
 
 ---
 
@@ -122,10 +124,46 @@ Los resultados de los backtests oficiales fueron sometidos a la suite estadísti
 
 ---
 
-## 6. Catálogo Integral de Scripts y Módulos Satélite
+## 6. Motor Cuantitativo Auto-Evolutivo, Cognición IA y Modelo Económico
+
+A partir de la versión 7.0, el sistema incorpora un bucle cerrado continuo de auto-sanación y optimización cognitiva:
+
+```mermaid
+graph LR
+    A[Mercado en Vivo Binance] --> B[AlphaHealthMonitor]
+    B -->|Decay / CUSUM Break| C[AlphaAutopsyAgent DeepSeek-R1]
+    C -->|Diagnóstico Causal| D[LLMAlphaSynthesizer DeepSeek-V3]
+    D -->|Fórmulas Validadas AST| E[QualityDiversityArchive MAP-Elites]
+    E --> F[StrategyLifecycleIncubator]
+    F --> G[HRP Risk Parity Allocator]
+    G --> H[Cockpit Visual Puerto 8088]
+```
+
+### 6.1 Diagnóstico Forense y Bucle Closed-Loop
+1. **Detección Temprana de Degradación:** `AlphaHealthMonitor` evalúa correlación móvil de Spearman ($IC$), ratio de información ($IC\_IR$), quiebres estructurales CUSUM ($h = 4.0\sigma$) y desplazamiento de datos con Kolmogorov-Smirnov.
+2. **Ciclo de Vida Formal:** Transición atómica y persistida (`os.replace`) entre `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED` con 10 días de gracia.
+3. **Asignación HRP:** Reponderación de capital inmune a singularidades de varianza cero.
+
+### 6.2 Modelo Económico, Costes y Meta de Convergencia
+* **Coste por Ciclo:** **~$0.00125 USD** (~2,700 tokens combinados entre DeepSeek-R1 y DeepSeek-V3; modo fallback offline automático a **$0.00 USD**).
+* **Meta Programada de Parada (*Target Goal*):** **Sharpe Ponderado $\ge 2.50$** (`AUTONOMOUS_TARGET_SHARPE=2.50`). Al alcanzarse, el sistema marca `goal_reached = True`, congela la generación y preserva la estabilidad del portafolio.
+* **Salvaguardas de Gasto:** Límite presupuestario estricto de **$1.00 USD** (`AUTONOMOUS_MAX_BUDGET_USD=1.00`), tope de **10 ciclos** (`AUTONOMOUS_MAX_CYCLES=10`) y límite diario de 150,000 tokens.
+
+---
+
+## 7. Catálogo Integral de Scripts y Módulos Satélite
 
 | Módulo / Script | Propósito Cuantitativo | Comando de Ejecución |
 |---|---|---|
+| [`start_dashboard.py`](../scripts/start_dashboard.py) | Cockpit Visual Web multihilo con Chart.js (Puerto 8088) | `python scripts/start_dashboard.py` |
+| [`run_live_alpha_loop.py`](../scripts/run_live_alpha_loop.py) | Bucle cerrado continuo E2E conectado a Binance | `python scripts/run_live_alpha_loop.py` |
+| [`run_autonomous_engine_demo.py`](../scripts/run_autonomous_engine_demo.py) | Demostración E2E del bucle cerrado auto-evolutivo | `python scripts/run_autonomous_engine_demo.py` |
+| [`autonomous_orchestrator.py`](../portfolio/autonomous_orchestrator.py) | Orquestador central del bucle cerrado y control de costes | `python -m portfolio.autonomous_orchestrator` |
+| [`alpha_health_monitor.py`](../portfolio/alpha_health_monitor.py) | Monitoreo de salud: Rolling IC, CUSUM y KS drift | `python -m portfolio.alpha_health_monitor` |
+| [`alpha_autopsy.py`](../portfolio/alpha_autopsy.py) | Agente forense de autopsias con LLM (OpenRouter) | `python -m portfolio.alpha_autopsy` |
+| [`llm_alpha_generator.py`](../mining/llm_alpha_generator.py) | Sintetizador de factores cuantitativos guiado por LLM | `python -m mining.llm_alpha_generator` |
+| [`formula_parser.py`](../mining/formula_parser.py) | Compilador seguro AST Zero-Eval (Python 3.14) | `python -m mining.formula_parser` |
+| [`live_market_feed.py`](../data_engine/live_market_feed.py) | Ingesta continua en streaming con RLock reentrante | `python -m data_engine.live_market_feed` |
 | [`advanced_metrics.py`](../scripts/advanced_metrics.py) | Cálculo de PSR, Deflated Sharpe (DSR), CPCV y PBO | `python scripts/advanced_metrics.py` |
 | [`fractional_diff.py`](../scripts/fractional_diff.py) | Expansión FFD y búsqueda automática de $d$ óptimo | `python scripts/fractional_diff.py` |
 | [`triple_barrier_metalabeling.py`](../scripts/triple_barrier_metalabeling.py) | Triple Barrera, Meta-Etiquetado y Bet Sizing continuo | `python scripts/triple_barrier_metalabeling.py` |
@@ -149,18 +187,19 @@ Los resultados de los backtests oficiales fueron sometidos a la suite estadísti
 
 ---
 
-## 7. Protocolos Operativos y Runbook de Producción
+## 8. Protocolos Operativos y Runbook de Producción
 
-1. **Despliegue Docker:** Operar en contenedor con `docker compose -f docker-compose.futures.yml up -d` y monitorear FreqUI en puerto 8081.
+1. **Despliegue Docker:** Operar en contenedor con `docker compose -f docker-compose.futures.yml up -d` y monitorear FreqUI en puerto 8081 y Cockpit en puerto 8088.
 2. **Protección Kill-Switch:** Si el drawdown de equidad total alcanza el **25%**, se crea el testigo `user_data/KILL_SWITCH`, bloqueando nuevas entradas de inmediato.
-3. **Criterio de Liberación a Producción:** Ningún código se despliega sin que los 21 tests de la suite unitaria pasen al 100%:
-   ```powershell
-   python -m pytest tests/test_advanced_metrics.py tests/test_fractional_diff.py tests/test_triple_barrier_metalabeling.py tests/test_profit_ratchet.py tests/test_delta_neutral_vault.py tests/test_regime_classifier.py tests/test_futures_v7_quantum.py -v
+3. **Criterio de Liberación a Producción:** Ningún código se despliega sin que los **110 tests de la suite completa** pasen al 100%:
+   ```bash
+   docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
    ```
+   **Certificación Oficial:** **110/110 tests pasando al 100% (0 errores)** en contenedor Docker hermético.
 
 ---
 
-## 8. Registro de Decisiones Arquitectónicas (ADRs)
+## 9. Registro de Decisiones Arquitectónicas (ADRs)
 
 * **[ADR-001: Asymmetric Short-Only Bias](architecture/decisions/ADR-001_asymmetric_short_only_bias.md):** Justificación matemática del descarte de Longs y explotación de la desinflación secular.
 * **[ADR-002: Arquitectura Híbrida Barbell](architecture/decisions/ADR-002_hybrid_barbell_cash_and_carry.md):** Justificación de la aceleración agresiva + trinquete del 60% + bóveda Cash & Carry.
@@ -169,7 +208,7 @@ Los resultados de los backtests oficiales fueron sometidos a la suite estadísti
 
 ---
 
-## 9. Compendio de Estrategia y Hoja de Ruta Cuantitativa
+## 10. Compendio de Estrategia y Hoja de Ruta Cuantitativa
 
 * **[ESTRATEGIA_MAESTRA_UNIFICADA.md](strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) (STRAT-MASTER-001):** Compendio canónico integral de estrategia cuantitativa, micro-capital 10X, arquitectura Barbell y blindaje anti-overfitting.
 * **[HYPOTHESIS.md](strategy/HYPOTHESIS.md) (STRAT-001):** Formulación de la hipótesis causal del edge Short-Bias 4h.
@@ -177,4 +216,5 @@ Los resultados de los backtests oficiales fueron sometidos a la suite estadísti
 * **[PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md](strategy/PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md) (STRAT-003):** Especificación técnica del trinquete del 60% y la Bóveda Delta-Neutral.
 * **[PLAN_DESMITIFICACION_RIESGOS.md](strategy/PLAN_DESMITIFICACION_RIESGOS.md) (STRAT-004):** Protocolo de ablación, CPCV y certificación fuera de muestra.
 * **[SCRUM_PLAN.md](strategy/SCRUM_PLAN.md) (STRAT-ROADMAP-001):** Roadmap maestro y registro detallado de los Sprints 1 a 20.
+* **[SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md):** Plan Scrum de 4 Sprints para hardening de seguridad, streaming desacoplado y gobernanza económica.
 

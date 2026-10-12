@@ -245,7 +245,10 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
                 "actions": report.actions_taken,
                 "quarantined": report.quarantined_strategies,
                 "promoted": report.promoted_strategies,
-                "new_weights": report.new_weights
+                "new_weights": report.new_weights,
+                "goal_reached": report.goal_reached,
+                "estimated_cycle_cost_usd": report.estimated_cycle_cost_usd,
+                "accumulated_cost_usd": report.accumulated_cost_usd
             })
         except Exception as e:
             logger.error(f"Error durante el ciclo autónomo: {e}", exc_info=True)

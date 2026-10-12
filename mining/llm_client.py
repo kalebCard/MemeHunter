@@ -40,12 +40,30 @@ class OpenRouterClient:
         app_name: str = "MemeHunter Autonomous Quant Loop",
         timeout: float = 30.0
     ):
-        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY", "")
+        # Auto-descubrir clave desde .env solo si api_key no fue provista explícitamente (api_key is None)
+        if api_key is None:
+            resolved_key = os.getenv("OPENROUTER_API_KEY", "")
+            if not resolved_key:
+                env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+                if os.path.exists(env_path):
+                    try:
+                        with open(env_path, "r", encoding="utf-8") as f:
+                            for line in f:
+                                line = line.strip()
+                                if line.startswith("OPENROUTER_API_KEY="):
+                                    resolved_key = line.split("=", 1)[1].strip().strip('"').strip("'")
+                                    break
+                    except Exception:
+                        pass
+        else:
+            resolved_key = api_key
+
+        self.api_key = resolved_key
         self.default_model = default_model
         self.site_url = site_url
         self.app_name = app_name
         self.timeout = timeout
-        self.max_daily_tokens = int(os.getenv("OPENROUTER_MAX_DAILY_TOKENS", "100000"))
+        self.max_daily_tokens = int(os.getenv("OPENROUTER_MAX_DAILY_TOKENS", "150000"))
         self.total_tokens_used = 0
         self.total_calls = 0
         self.is_offline_mode = not bool(self.api_key.strip())

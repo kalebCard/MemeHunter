@@ -26,15 +26,19 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
    * **Monitoreo Continuo:** `AlphaHealthMonitor` calcula Information Coefficient (IC) rodante y detecta rupturas estructurales con CUSUM (Page-Hinkley) y *data drift* con Kolmogorov-Smirnov.
    * **Incubadora Autónoma:** Transición mecánica sin intervención humana entre `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED` con período de gracia real.
    * **Asignación HRP:** Reponderación dinámica de capital vía Paridad Jerárquica de Riesgo con regularización ante singularidades de varianza.
-2. **Cerebro Cognitivo de IA (OpenRouter):**
+2. **Cerebro Cognitivo de IA (OpenRouter) & Fallback Offline:**
    * **Autopsias Forenses (`AlphaAutopsyAgent`):** Modelos de razonamiento profundo (DeepSeek-R1 / Claude 3.5 Sonnet) identifican la causa raíz de la degradación y emiten recomendaciones de búsqueda con marcas de tiempo UTC dinámicas.
    * **Síntesis Semántica (`LLMAlphaSynthesizer`):** Formulación de factores basados en hipótesis de microestructura (desbalances de volumen, Amihud ratio, compresión en Dollar Bars).
    * **Compilador Seguro (`FormulaASTParser`):** Sanitizador AST *Zero Eval* compatible con Python 3.14 (`ast.Constant`).
-   * **Control de Presupuesto:** Limitador de tasa y tope máximo de tokens por sesión para prevenir agotamiento de saldo.
+   * **Fallback Heurístico Resiliente:** Si no hay API key de inferencia o falla la red, el sistema opera en modo offline heurístico autónomo a coste $0.00 USD.
 3. **Cockpit Visual Seguro y Multihilo (Dashboard Web):**
    * Servidor HTTP concurrente (`ThreadingHTTPServer`) accesible en `http://localhost:8088` con autenticación por token Bearer en endpoints de control y CORS restringido.
 4. **Streaming en Vivo sin Deadlock (`LiveMarketFeed`):**
    * Ingesta de velas y trades de memecoins (`DOGE`, `PEPE`, `SHIB`) con lock reentrante (`RLock`) y notificación de eventos desacoplada para máxima concurrencia.
+5. **Gobernanza Económica, Límites de Gasto y Meta de Parada:**
+   * **Coste por Ciclo:** **~$0.00125 USD** (~2,700 tokens por ciclo con DeepSeek-R1 y DeepSeek-V3).
+   * **Meta Cuantitativa de Convergencia:** Sharpe Ponderado $\ge 2.50$ (`AUTONOMOUS_TARGET_SHARPE=2.50`), congelando mutaciones al alcanzar la meta para evitar sobreajuste.
+   * **Circuit Breakers de Protección:** Tope presupuestario de $1.00 USD (`AUTONOMOUS_MAX_BUDGET_USD=1.00`), límite de 10 ciclos y cuota diaria de 150,000 tokens.
 
 ---
 

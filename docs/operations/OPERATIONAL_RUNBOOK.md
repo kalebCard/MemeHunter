@@ -109,10 +109,53 @@ Luego navega localmente a `http://localhost:8088`.
 
 ---
 
-## 5. 📊 Batería de Validación Previa a Producción (CI/CD)
+## 5. 🤖 Operación del Motor Autónomo y Gobernanza de Costes
+
+El motor auto-evolutivo (`portfolio/autonomous_orchestrator.py`) y el bucle en vivo (`scripts/run_live_alpha_loop.py`) ejecutan ciclos de diagnóstico, autopsia, síntesis de alfas y rebalanceo HRP con salvaguardas económicas estrictas.
+
+### 5.1 Configuración de Variables de Entorno en `.env`
+```env
+# Meta Cuantitativa de Convergencia (Sharpe del Portafolio)
+AUTONOMOUS_TARGET_SHARPE=2.50
+
+# Límites Presupuestarios y de Parada (Circuit Breakers)
+AUTONOMOUS_MAX_BUDGET_USD=1.00
+AUTONOMOUS_MAX_CYCLES=10
+OPENROUTER_MAX_DAILY_TOKENS=150000
+
+# Proveedor Cognitivo de IA (OpenRouter)
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxxxxxx
+OPENROUTER_MODEL_REASONING=deepseek/deepseek-r1
+OPENROUTER_MODEL_SYNTHESIS=deepseek/deepseek-chat
+```
+
+> [!IMPORTANT]
+> **Nota sobre Claves de API de OpenRouter:**
+> Asegúrate de utilizar una **API Key estándar de inferencia** creada en [openrouter.ai/keys](https://openrouter.ai/keys) con crédito o balance. Las claves de tipo *Management / Provisioning* no tienen permisos para `/api/v1/chat/completions`. Si se detecta un error 401 o falta de clave, el sistema activará **automáticamente el modo fallback heurístico offline a coste $0.00 USD**, manteniendo el bucle 100% operativo sin interrupciones.
+
+### 5.2 Comandos de Ejecución
+```powershell
+# 1. Bucle continuo conectado a streaming de Binance:
+python scripts/run_live_alpha_loop.py
+
+# 2. Demostración E2E de un ciclo completo:
+python scripts/run_autonomous_engine_demo.py
+```
+
+### 5.3 Comportamiento al Alcanzar la Meta (*Target Sharpe*)
+Cuando el Sharpe Ponderado del portafolio alcanza o supera `AUTONOMOUS_TARGET_SHARPE` (por defecto 2.50) con $\ge 2$ estrategias en `LIVE`:
+* El orquestador marca `goal_reached = True`.
+* Notifica el éxito en consola y en el Cockpit Web (`/api/status`).
+* Frena la síntesis de nuevos factores para prevenir sobreajuste (*overfitting*) innecesario.
+* Mantiene la monitorización de salud pasiva.
+
+---
+
+## 6. 📊 Batería de Validación Previa a Producción (CI/CD)
 
 Antes de desplegar cualquier cambio a producción, ejecutar la suite completa de pruebas en el entorno hermético Docker:
 ```bash
 docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
 ```
 **Criterio de aceptación obligatorio:** **110/110 tests pasando al 100% (0 errores)**.
+

@@ -11,6 +11,7 @@ Implementa el bucle cerrado cognitivo:
 6. Rebalanceo automático de capital mediante Hierarchical Risk Parity (HRP).
 """
 
+import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
@@ -37,11 +38,15 @@ class SelfHealingCycleReport:
     mining_triggered: bool
     trigger_reason: Optional[str] = None
     autopsies: Dict[str, AutopsyVerdict] = field(default_factory=dict)
+    goal_reached: bool = False
+    estimated_cycle_cost_usd: float = 0.0
+    accumulated_cost_usd: float = 0.0
 
 
 class AutonomousPortfolioOrchestrator:
     """
     Controlador central del bucle cerrado auto-evolutivo asistido por OpenRouter.
+    Implementa metas cuantitativas (Target Sharpe) y límites estrictos de gasto y ciclos.
     """
 
     def __init__(
@@ -50,13 +55,23 @@ class AutonomousPortfolioOrchestrator:
         health_monitor: Optional[AlphaHealthMonitor] = None,
         miner_daemon: Optional[AlphaMinerDaemon] = None,
         autopsy_agent: Optional[AlphaAutopsyAgent] = None,
-        llm_synthesizer: Optional[LLMAlphaSynthesizer] = None
+        llm_synthesizer: Optional[LLMAlphaSynthesizer] = None,
+        target_portfolio_sharpe: float = 2.50,
+        max_cycles: int = 10,
+        max_budget_usd: float = 1.00
     ):
         self.incubator = incubator or StrategyLifecycleIncubator()
         self.health_monitor = health_monitor or AlphaHealthMonitor()
         self.miner_daemon = miner_daemon
         self.autopsy_agent = autopsy_agent
         self.llm_synthesizer = llm_synthesizer
+        
+        # Parámetros de Meta y Límites Cuantitativos
+        self.target_sharpe = float(os.getenv("AUTONOMOUS_TARGET_SHARPE", str(target_portfolio_sharpe)))
+        self.max_cycles = int(os.getenv("AUTONOMOUS_MAX_CYCLES", str(max_cycles)))
+        self.max_budget_usd = float(os.getenv("AUTONOMOUS_MAX_BUDGET_USD", str(max_budget_usd)))
+        self.completed_cycles = 0
+        self.accumulated_cost_usd = 0.0
 
     def process_cycle(
         self,
@@ -164,6 +179,36 @@ class AutonomousPortfolioOrchestrator:
         new_weights = self.incubator.rebalance_live_portfolio(returns_matrix_df)
         actions.append(f"Rebalanceo HRP ejecutado. Estrategias activas ponderadas: {list(new_weights.keys())}")
 
+        # 6. Evaluación de Meta Cuantitativa (Target Portfolio Sharpe) y Control de Coste
+        self.completed_cycles += 1
+        
+        # Estimar costo del ciclo: DeepSeek-V3 (~$0.27/M tok) + DeepSeek-R1 (~$0.55/M tok)
+        # 1 ciclo promedio consume ~2,500 tokens si hay autopsia y síntesis
+        tokens_this_cycle = 0
+        if len(autopsies) > 0:
+            tokens_this_cycle += 1500 * len(autopsies)
+        if mining_needed and self.llm_synthesizer is not None:
+            tokens_this_cycle += 1200
+        cycle_cost_usd = (tokens_this_cycle / 1_000_000.0) * 0.40
+        self.accumulated_cost_usd += cycle_cost_usd
+
+        # Calcular Sharpe Ponderado del portafolio activo
+        weighted_sharpe = sum(
+            rec.backtest_sharpe * new_weights.get(sid, 0.0)
+            for sid, rec in self.incubator.strategies.items()
+            if rec.status == StrategyLifecycleStatus.LIVE
+        )
+        
+        goal_reached = bool(weighted_sharpe >= self.target_sharpe and len(new_weights) >= 2)
+        if goal_reached:
+            actions.append(f"🎯 META CUANTITATIVA ALCANZADA: Sharpe de portafolio {weighted_sharpe:.2f} >= {self.target_sharpe:.2f}. Auto-mejora satisfecha.")
+
+        if self.completed_cycles >= self.max_cycles:
+            actions.append(f"🛑 LÍMITE DE CICLOS ALCANZADO ({self.completed_cycles}/{self.max_cycles}). Deteniendo iteraciones automáticas.")
+
+        if self.accumulated_cost_usd >= self.max_budget_usd:
+            actions.append(f"🛑 LÍMITE DE PRESUPUESTO ALCANZADO (${self.accumulated_cost_usd:.4f} >= ${self.max_budget_usd:.2f}). Bloqueando llamadas LLM adicionales.")
+
         return SelfHealingCycleReport(
             cycle_timestamp=datetime.now(timezone.utc).isoformat(),
             actions_taken=actions,
@@ -173,5 +218,8 @@ class AutonomousPortfolioOrchestrator:
             new_weights=new_weights,
             mining_triggered=mining_needed,
             trigger_reason=trigger_reason,
-            autopsies=autopsies
+            autopsies=autopsies,
+            goal_reached=goal_reached,
+            estimated_cycle_cost_usd=cycle_cost_usd,
+            accumulated_cost_usd=self.accumulated_cost_usd
         )

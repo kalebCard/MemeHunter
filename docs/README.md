@@ -2,13 +2,13 @@
 id: DOC-INDEX-001
 title: Centro de Documentación y Convenciones del Sistema
 category: index
-version: 6.0
+version: 7.1
 status: ACTIVE
 last_updated: 2026-10-11
 author: Quantitative Engineering & Research Core
 ---
 
-# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v6.0)
+# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v7.1)
 
 Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y operativa de **Meme Hunter**. Toda la información del proyecto ha sido estandarizada bajo convenciones formales de ingeniería documental (**DocOps**) y el marco pedagógico Diátaxis.
 
@@ -17,7 +17,7 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 ## 🌟 Documento de Referencia Principal
 
 > ### 👉 [📖 Manual Maestro Unificado del Sistema (DOC-MASTER-001)](MANUAL_UNIFICADO_DEL_SISTEMA.md)
-> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura y catálogo de scripts.*
+> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con cognición IA y catálogo de scripts.*
 
 ---
 
@@ -25,7 +25,7 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 
 ```
 docs/
-├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v6.0
+├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v7.1
 ├── architecture/
 │   ├── DAS_AUTONOMOUS_ENGINE.md     # 🌌 Arquitectura v7.0: Motor Auto-Evolutivo & Cockpit IA
 │   ├── DAS.md                       # Documento de Arquitectura de Software base (v6.0)
@@ -88,6 +88,7 @@ author: [Autor / Equipo]
 ## 📂 Índice Clasificado de Documentos
 
 ### 🏛️ 1. Arquitectura y Decisiones de Diseño
+* **[DAS_AUTONOMOUS_ENGINE.md](architecture/DAS_AUTONOMOUS_ENGINE.md) (Arquitectura v7.0):** Especificación del motor de bucle cerrado, autopsias con OpenRouter, compilador AST y Cockpit multihilo (puerto 8088).
 * **[DAS.md](architecture/DAS.md) (Arquitectura v6.0):** Especificación completa de la infraestructura Freqtrade, CCXT, Bóveda Delta-Neutral y Machine Learning asimétrico.
 * **[ADR-001: Asymmetric Short-Only Bias](architecture/decisions/ADR-001_asymmetric_short_only_bias.md):** Justificación de la supresión de Longs en memecoins (+63.24% neto).
 * **[ADR-002: Arquitectura Híbrida Barbell](architecture/decisions/ADR-002_hybrid_barbell_cash_and_carry.md):** División entre motor de aceleración agresivo y bóveda Cash & Carry.
@@ -95,6 +96,7 @@ author: [Autor / Equipo]
 * **[ADR-004: Airbag Técnico y Órdenes Market](architecture/decisions/ADR-004_airbag_technical_exit_market_orders.md):** Retención de `exit_signal` y órdenes de mercado forzadas contra el riesgo de no-fill.
 
 ### 🧠 2. Estrategia Cuantitativa y Planificación
+* **[SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md):** 🛡️ Plan Scrum de 4 Sprints para hardening de seguridad en Cockpit, streaming desacoplado y gobernanza económica.
 * **[ESTRATEGIA_MAESTRA_UNIFICADA.md](strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) (STRAT-MASTER-001):** 🌟 Compendio canónico integral que consolida hipótesis, genealogía V1-V7, escalado 10X, arquitectura Barbell y blindaje anti-overfitting.
 * **[HYPOTHESIS.md](strategy/HYPOTHESIS.md) (STRAT-001):** Fundamento económico del alfa en desinflación gravitacional post-pump y quiebre de EMA 200 en 4h.
 * **[SCRUM_PLAN.md](strategy/SCRUM_PLAN.md) (STRAT-ROADMAP-001):** Registro histórico de los Sprints 1 a 20 con el Product Backlog trazable y Definición de Hecho (DoD).
@@ -111,7 +113,7 @@ author: [Autor / Equipo]
 * **[REPORTE_EJECUTIVO_MEME_HUNTER_V4.md](reports/REPORTE_EJECUTIVO_MEME_HUNTER_V4.md):** Resumen ejecutivo orientado a inversores.
 
 ### 🛠️ 4. Operaciones y Producción
-* **[OPERATIONAL_RUNBOOK.md](operations/OPERATIONAL_RUNBOOK.md):** Procedimientos de despliegue Docker, variables `.env`, protocolos del Kill-Switch de 25% y comandos de contingencia.
+* **[OPERATIONAL_RUNBOOK.md](operations/OPERATIONAL_RUNBOOK.md):** Procedimientos de despliegue Docker, variables `.env`, protocolos del Kill-Switch de 25%, parámetros del motor autónomo y Cockpit en puerto 8088.
 
 ---
 
@@ -120,7 +122,7 @@ author: [Autor / Equipo]
 | Perfil | Ruta de Lectura Sugerida |
 | :--- | :--- |
 | **Inversor / Ejecutivo** | [`MANUAL_UNIFICADO_DEL_SISTEMA.md`](MANUAL_UNIFICADO_DEL_SISTEMA.md) ➔ [`reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
-| **Investigador Cuantitativo** | [`strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md`](strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) ➔ [`architecture/decisions/`](architecture/decisions/) ➔ [`reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
-| **Ingeniero de Software** | [`architecture/DAS.md`](architecture/DAS.md) ➔ [`strategy/SCRUM_PLAN.md`](strategy/SCRUM_PLAN.md) ➔ [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) |
-| **Operador de Producción** | [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) ➔ [`README.md`](../README.md) ➔ Dashboard FreqUI |
+| **Investigador Cuantitativo** | [`strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md`](strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) ➔ [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
+| **Ingeniero de Software** | [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md`](sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md) ➔ [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) |
+| **Operador de Producción** | [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) ➔ Cockpit Web ([http://localhost:8088](http://localhost:8088)) ➔ Dashboard FreqUI |
 
