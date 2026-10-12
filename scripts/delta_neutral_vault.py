@@ -141,19 +141,65 @@ class DeltaNeutralVault:
         }
 
 
+    def auto_scan_and_rebalance(self, min_apr: Optional[float] = None) -> List[dict]:
+        """
+        Escanea oportunidades de funding en vivo desde Binance vía CCXT y rebalancea la bóveda.
+        Si CCXT no está disponible o falla, mantiene la asignación actual.
+        """
+        threshold = min_apr or self.min_apr_threshold
+        try:
+            import ccxt
+            exchange = ccxt.binance({"enableRateLimit": True, "options": {"defaultType": "future"}})
+            exchange.load_markets()
+            funding_rates = exchange.fetch_funding_rates()
+            opportunities = []
+            for symbol, data in funding_rates.items():
+                if not symbol.endswith(":USDT"):
+                    continue
+                rate = data.get("fundingRate")
+                if rate is None or rate <= 0:
+                    continue
+                apr = rate * 3 * 365 * 100.0
+                if apr >= threshold:
+                    opportunities.append({
+                        "symbol": symbol,
+                        "apr": round(apr, 2),
+                        "funding_rate": rate
+                    })
+            opportunities.sort(key=lambda x: x["apr"], reverse=True)
+            if opportunities:
+                LOG.info(f"Escaneo en vivo exitoso: {len(opportunities)} oportunidades detectadas (Top APR: {opportunities[0]['symbol']} {opportunities[0]['apr']}%)")
+                self.allocate_capital(opportunities)
+            return opportunities
+        except Exception as e:
+            LOG.warning(f"No se pudo completar el escaneo en vivo: {e}. Usando posiciones registradas.")
+            return []
+
+
 def main():
-    vault = DeltaNeutralVault(initial_capital=5000.0)
-    
-    # Ejemplo de oportunidades de mercado escaneadas
-    dummy_opps = [
-        {"symbol": "PEPE/USDT:USDT", "apr": 32.5, "funding_rate": 0.0296},
-        {"symbol": "WIF/USDT:USDT", "apr": 24.8, "funding_rate": 0.0226},
-        {"symbol": "DOGE/USDT:USDT", "apr": 16.2, "funding_rate": 0.0148},
-    ]
+    import argparse
+    parser = argparse.ArgumentParser(description="Orquestador de la Bóveda Segura Delta-Neutral")
+    parser.add_argument("--scan", action="store_true", help="Escanear Binance Futures en vivo")
+    parser.add_argument("--capital", type=float, default=None, help="Inyectar capital inicial si la bóveda está vacía")
+    args = parser.parse_args()
 
-    vault.allocate_capital(dummy_opps)
+    vault = DeltaNeutralVault()
+    if args.capital and vault.total_capital <= 0:
+        vault.deposit(args.capital)
+
+    if args.scan:
+        print("[+] Escaneando Binance Futures en busca de oportunidades Cash & Carry...")
+        vault.auto_scan_and_rebalance()
+    elif not vault.positions:
+        # Ejemplo demostrativo si no hay posiciones configuradas
+        dummy_opps = [
+            {"symbol": "PEPE/USDT:USDT", "apr": 32.5, "funding_rate": 0.0296},
+            {"symbol": "WIF/USDT:USDT", "apr": 24.8, "funding_rate": 0.0226},
+            {"symbol": "DOGE/USDT:USDT", "apr": 16.2, "funding_rate": 0.0148},
+        ]
+        vault.allocate_capital(dummy_opps)
+
     summary = vault.get_summary()
-
     print("=" * 65)
     print("[ESTADO DE LA BOVEDA SEGURA DELTA-NEUTRAL] (PB-69)")
     print("=" * 65)
