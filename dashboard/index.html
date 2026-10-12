@@ -277,6 +277,67 @@
           <div id="diversityNichesContainer">
             <!-- Nichos renderizados aquí -->
           </div>
+        <!-- Panel: Arquitectura Híbrida Barbell (Trinquete & Bóveda) -->
+        <article class="glass-panel" id="panel-barbell-architecture">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16">
+                <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 2v8.5a.5.5 0 0 1-1 0V5H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8z"/>
+              </svg>
+              Arquitectura Barbell: Trinquete & Bóveda
+            </h2>
+            <span class="panel-tag" id="tag-barbell-status">DELTA-NEUTRAL (&Delta;=0)</span>
+          </div>
+          
+          <div class="barbell-container" id="barbellContainer">
+            <!-- Sub-bloque Trinquete -->
+            <div class="barbell-card" id="ratchetCard">
+              <div class="barbell-card-header">
+                <span class="barbell-badge ratchet-badge">VÁLVULA DE TRINQUETE</span>
+                <span class="barbell-metric-val" id="ratchetHarvestedVal">+$660.00 USDT</span>
+              </div>
+              <div class="barbell-details">
+                <div class="barbell-row">
+                  <span>Capital Base:</span>
+                  <strong id="ratchetBaseVal">$1,440.00 USDT</strong>
+                </div>
+                <div class="barbell-row">
+                  <span>Peak Equity:</span>
+                  <strong id="ratchetPeakVal">$1,440.00 USDT</strong>
+                </div>
+                <div class="barbell-row">
+                  <span>Cosecha en 2X:</span>
+                  <span class="text-emerald">60% a Bóveda Segura</span>
+                </div>
+                <div class="barbell-row">
+                  <span>Kill-Switch:</span>
+                  <span class="badge-safe" id="ratchetKillSwitchBadge">Protección Activa (-25%)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sub-bloque Bóveda Cash & Carry -->
+            <div class="barbell-card" id="vaultCard">
+              <div class="barbell-card-header">
+                <span class="barbell-badge vault-badge">BÓVEDA CASH & CARRY</span>
+                <span class="barbell-metric-val text-cyan" id="vaultCapitalVal">$5,000.00 USDT</span>
+              </div>
+              <div class="barbell-details">
+                <div class="barbell-row">
+                  <span>Rendimiento Pasivo:</span>
+                  <strong class="text-emerald" id="vaultDailyYieldVal">+$1.68 USDT/día</strong>
+                </div>
+                <div class="barbell-row">
+                  <span>Estrategia:</span>
+                  <span>Long Spot + Short 1x Perp</span>
+                </div>
+              </div>
+              <!-- Mini lista de posiciones activas en Bóveda -->
+              <div class="vault-positions-list" id="vaultPositionsList">
+                <!-- Inyectado dinámicamente -->
+              </div>
+            </div>
+          </div>
         </article>
 
         <!-- Panel 6: Terminal Log en Tiempo Real -->

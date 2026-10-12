@@ -26,6 +26,7 @@ from portfolio.alpha_autopsy import AlphaAutopsyAgent
 from mining.alpha_daemon import AlphaMinerDaemon
 from mining.llm_alpha_generator import LLMAlphaSynthesizer
 from mining.llm_client import OpenRouterClient
+from portfolio.atomic_io import atomic_write_json
 
 logger = logging.getLogger("CockpitServer")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -164,12 +165,34 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             except Exception as e:
                 logger.error(f"Error leyendo historial: {e}")
 
+        # Cargar estado de Trinquete de Ganancias (Profit Ratchet)
+        ratchet_path = os.path.join(BASE_DIR, "user_data", "ratchet_state.json")
+        ratchet_data = None
+        if os.path.exists(ratchet_path):
+            try:
+                with open(ratchet_path, "r", encoding="utf-8") as rf:
+                    ratchet_data = json.load(rf)
+            except Exception as e:
+                logger.error(f"Error leyendo ratchet_state: {e}")
+
+        # Cargar estado de Bóveda Delta-Neutral (Cash & Carry Vault)
+        vault_path = os.path.join(BASE_DIR, "user_data", "vault_state.json")
+        vault_data = None
+        if os.path.exists(vault_path):
+            try:
+                with open(vault_path, "r", encoding="utf-8") as vf:
+                    vault_data = json.load(vf)
+            except Exception as e:
+                logger.error(f"Error leyendo vault_state: {e}")
+
         self._send_json({
             "status": "ONLINE",
             "strategies": strategies,
             "autopsies": autopsies,
             "niches": niches,
-            "history": history
+            "history": history,
+            "ratchet": ratchet_data,
+            "vault": vault_data
         })
 
     def _handle_trigger_loop(self):
@@ -276,8 +299,7 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             history.insert(0, cycle_entry)
             history = history[:25] # Retener últimos 25 ciclos
             try:
-                with open(history_path, "w", encoding="utf-8") as hf:
-                    json.dump(history, hf, indent=2)
+                atomic_write_json(history_path, history)
             except Exception as e:
                 logger.error(f"Error guardando cycle_history: {e}")
 

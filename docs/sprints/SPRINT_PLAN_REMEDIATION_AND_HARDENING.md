@@ -157,9 +157,9 @@ gantt
 - **Quiero:** Que las escrituras a `incubator_state.json`, `diversity_archive.json` y `autopsies.json` se realicen mediante archivos temporales y reemplazo atómico (`os.replace`).
 - **Para:** Evitar que un fallo inesperado del proceso corrompa o trunque los archivos de estado a 0 bytes.
 - **Criterios de Aceptación:**
-  - [ ] Crear utilidad `atomic_write_json(filepath, data)`.
-  - [ ] Aplicar la utilidad en `StrategyLifecycleIncubator.save_state`, `QualityDiversityArchive.save_archive` y `AlphaAutopsyAgent.save_history`.
-  - [ ] Añadir pruebas unitarias simulando interrupción de escritura.
+  - [x] Crear utilidad `atomic_write_json(filepath, data)`.
+  - [x] Aplicar la utilidad en `StrategyLifecycleIncubator.save_state`, `QualityDiversityArchive.save_archive` y `AlphaAutopsyAgent.save_history`.
+  - [x] Añadir pruebas unitarias simulando interrupción de escritura.
 
 #### 🟢 US-4.2: Eliminación de Hardcoded Timestamps y Rutas Específicas de SO (8 SP)
 - **Como:** DevOps Engineer.

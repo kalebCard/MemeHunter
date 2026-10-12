@@ -17,7 +17,9 @@ import sqlite3
 import argparse
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
+
+from portfolio.atomic_io import atomic_write_json
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,10 +80,9 @@ class ProfitRatchetDaemon:
             "peak_equity": self.peak_equity,
             "total_harvested": self.total_harvested,
             "cycle_count": self.cycle_count,
-            "updated_at": datetime.utcnow().isoformat()
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
-        with open(self.state_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4)
+        atomic_write_json(self.state_file, data, indent=4)
 
     def get_db_metrics(self):
         if not self.db_path.exists():

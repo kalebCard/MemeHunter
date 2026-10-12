@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Any
 
 from mining.llm_client import OpenRouterClient, OpenRouterModel
 from portfolio.alpha_health_monitor import HealthReport, HealthStatus
+from portfolio.atomic_io import atomic_write_json
 
 logger = logging.getLogger("AlphaAutopsyAgent")
 
@@ -63,9 +64,7 @@ class AlphaAutopsyAgent:
                 logger.warning(f"No se pudo cargar historial de autopsias previo: {e}")
 
     def save_history(self):
-        os.makedirs(os.path.dirname(os.path.abspath(self.history_path)), exist_ok=True)
-        with open(self.history_path, "w", encoding="utf-8") as f:
-            json.dump([asdict(item) for item in self.autopsy_records], f, indent=2)
+        atomic_write_json(self.history_path, [asdict(item) for item in self.autopsy_records])
 
     def conduct_autopsy(
         self,

@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 
 from portfolio.hrp_allocator import HierarchicalRiskParityAllocator
+from portfolio.atomic_io import atomic_write_json
 
 
 class StrategyLifecycleStatus(str, Enum):
@@ -162,16 +163,12 @@ class StrategyLifecycleIncubator:
         return weights
 
     def save_state(self, filepath: str = "portfolio/incubator_state.json") -> None:
-        """Persiste el estado de la incubadora en formato JSON estructurado."""
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        """Persiste el estado de la incubadora en formato JSON estructurado de forma atómica."""
         data = {sid: asdict(rec) for sid, rec in self.strategies.items()}
         # Convertir enum a string
         for k, v in data.items():
             v['status'] = v['status'].value if hasattr(v['status'], 'value') else str(v['status'])
-        temp_file = f"{filepath}.tmp"
-        with open(temp_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
-        os.replace(temp_file, filepath)
+        atomic_write_json(filepath, data)
 
     def load_state(self, filepath: str = "portfolio/incubator_state.json") -> None:
         """Carga el estado de la incubadora desde disco si existe."""

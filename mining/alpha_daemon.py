@@ -19,6 +19,8 @@ from typing import Dict, List, Optional, Tuple, Callable
 import numpy as np
 import pandas as pd
 
+from portfolio.atomic_io import atomic_write_json
+
 from mining.genetic_search import GeneticAlphaMiner, AlphaFactor
 from mining.alpha_grammar import AlphaGrammar
 
@@ -113,8 +115,7 @@ class QualityDiversityArchive:
             }
             for niche_id, c in self.cells.items()
         }
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+        atomic_write_json(file_path, data)
 
     def load_archive(self, file_path: str):
         """Carga el archivo desde disco si existe."""

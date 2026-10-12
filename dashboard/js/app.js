@@ -34,8 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
       { ts: "22:42:07", type: "ai", text: "Autopsia OpenRouter (DeepSeek-R1): ALPHA_DECAY_VOLATILITY_COMPRESSION confirmado." },
       { ts: "22:42:08", type: "ai", text: "OpenRouter sintetiza 5 nuevos factores ortogonales basados en microestructura." },
       { ts: "22:42:09", type: "info", text: "Rebalanceo HRP ejecutado: 100% capital reasignado a ALPHA_MOM_01 y ALPHA_VOL_02." }
-    ]
-    history: []
+    ],
+    history: [],
+    ratchet: null,
+    vault: null
   };
 
   let equityChart = null;
@@ -361,10 +363,58 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.autopsies) appState.autopsies = data.autopsies;
         if (data.niches) appState.niches = data.niches;
         if (data.history) appState.history = data.history;
+        if (data.ratchet) appState.ratchet = data.ratchet;
+        if (data.vault) appState.vault = data.vault;
         updateUI();
       }
     } catch (e) {
       console.log('Modo visual local independiente activo.');
+    }
+  }
+
+  // 8. Renderizado de la Arquitectura Barbell (Trinquete y Bóveda)
+  function renderBarbell() {
+    if (appState.ratchet) {
+      const r = appState.ratchet;
+      const harvestedEl = document.getElementById('ratchetHarvestedVal');
+      const baseEl = document.getElementById('ratchetBaseVal');
+      const peakEl = document.getElementById('ratchetPeakVal');
+      if (harvestedEl) harvestedEl.innerText = `+$${(r.total_harvested || 0).toFixed(2)} USDT`;
+      if (baseEl) baseEl.innerText = `$${(r.base_capital || 0).toFixed(2)} USDT`;
+      if (peakEl) peakEl.innerText = `$${(r.peak_equity || 0).toFixed(2)} USDT`;
+    }
+
+    if (appState.vault) {
+      const v = appState.vault;
+      const capitalEl = document.getElementById('vaultCapitalVal');
+      const yieldEl = document.getElementById('vaultDailyYieldVal');
+      const listEl = document.getElementById('vaultPositionsList');
+
+      if (capitalEl) capitalEl.innerText = `$${(v.total_capital || 0).toFixed(2)} USDT`;
+
+      let totalDaily = 0;
+      if (listEl) {
+        listEl.innerHTML = '';
+        const positions = v.positions || {};
+        const pairs = Object.keys(positions);
+        if (pairs.length === 0) {
+          listEl.innerHTML = '<span style="color: var(--text-muted); font-size: 0.75rem;">Sin posiciones abiertas.</span>';
+        } else {
+          pairs.forEach(pair => {
+            const pos = positions[pair];
+            totalDaily += (pos.projected_daily_yield || 0);
+            const item = document.createElement('div');
+            item.className = 'vault-pos-item';
+            item.innerHTML = `
+              <span class="vault-pos-pair">${pair.split(':')[0]}</span>
+              <span style="color: var(--text-secondary); font-size: 0.72rem;">${(pos.expected_apr || 0).toFixed(1)}% APR</span>
+              <span class="vault-pos-yield">+$${(pos.projected_daily_yield || 0).toFixed(2)}/d</span>
+            `;
+            listEl.appendChild(item);
+          });
+        }
+      }
+      if (yieldEl) yieldEl.innerText = `+$${totalDaily.toFixed(2)} USDT/día`;
     }
   }
 
@@ -490,6 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCycleHistory();
     renderAutopsies();
     renderNiches();
+    renderBarbell();
     renderLogs();
     
     // Actualizar KPIs
