@@ -2,13 +2,13 @@
 id: DOC-MASTER-001
 title: Manual Maestro Unificado del Sistema Meme Hunter
 category: master
-version: 7.1
+version: 7.2
 status: CERTIFIED
-last_updated: 2026-10-11
+last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 ---
 
-# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.1)
+# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.2)
 
 Este documento consolida la totalidad del conocimiento teórico, arquitectónico, cuantitativo y operativo del proyecto **meme_hunter**, unificando los planes estratégicos, informes forenses, especificaciones técnicas del motor autónomo auto-evolutivo y gobernanza de costes en una única referencia canónica.
 
@@ -26,6 +26,7 @@ Este documento consolida la totalidad del conocimiento teórico, arquitectónico
 8. [Protocolos Operativos y Runbook de Producción](#8-protocolos-operativos-y-runbook-de-producción)
 9. [Registro de Decisiones Arquitectónicas (ADRs)](#9-registro-de-decisiones-arquitectónicas-adrs)
 10. [Compendio de Estrategia y Hoja de Ruta Cuantitativa](#10-compendio-de-estrategia-y-hoja-de-ruta-cuantitativa)
+11. [Centro de Control Unificado (Cockpit v7.2) y Laboratorio Cuantitativo](#11-centro-de-control-unificado-cockpit-v72-y-laboratorio-cuantitativo)
 
 ---
 
@@ -180,6 +181,8 @@ graph LR
 | [`multiple_testing.py`](../validation/multiple_testing.py) | Control de falsos descubrimientos FDR, Bonferroni y PBO | `python -m validation.multiple_testing` |
 | [`hrp_allocator.py`](../portfolio/hrp_allocator.py) | Asignación de capital por Paridad Jerárquica de Riesgo (HRP) | `python -m portfolio.hrp_allocator` |
 | [`strategy_incubator.py`](../portfolio/strategy_incubator.py) | Orquestador de ciclo de vida (Sandbox -> Live -> Retiro) | `python -m portfolio.strategy_incubator` |
+| [`backtest_scanner.py`](../dashboard/backtest_scanner.py) | Lector de 11 estrategias Freqtrade, 34 zips de backtests y SQLite | `python -m dashboard.backtest_scanner` |
+| [`strategy_tester.py`](../dashboard/strategy_tester.py) | Motor vectorial de backtesting y AST Zero-Eval para el Studio | `python -m dashboard.strategy_tester` |
 | [`regime_classifier.py`](../scripts/regime_classifier.py) | Clasificador dinámico de régimen (Bull/Bear/Chop) | `python scripts/regime_classifier.py --symbol BTC/USDT:USDT` |
 | [`order_flow_imbalance.py`](../scripts/order_flow_imbalance.py) | Microestructura Nivel 2 y desequilibrio de órdenes (OFI) | `python scripts/order_flow_imbalance.py --symbol DOGE/USDT:USDT` |
 | [`meme_sentinel.py`](../scripts/meme_sentinel.py) | Detección temprana de volumen relativo anormal (RVOL) | `python scripts/meme_sentinel.py --top 10` |
@@ -217,4 +220,51 @@ graph LR
 * **[PLAN_DESMITIFICACION_RIESGOS.md](strategy/PLAN_DESMITIFICACION_RIESGOS.md) (STRAT-004):** Protocolo de ablación, CPCV y certificación fuera de muestra.
 * **[SCRUM_PLAN.md](strategy/SCRUM_PLAN.md) (STRAT-ROADMAP-001):** Roadmap maestro y registro detallado de los Sprints 1 a 20.
 * **[SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md):** Plan Scrum de 4 Sprints para hardening de seguridad, streaming desacoplado y gobernanza económica.
+
+---
+
+## 11. Centro de Control Unificado (Cockpit v7.2) y Laboratorio Cuantitativo
+
+El Cockpit Web (`http://localhost:8088`) integra la totalidad del ecosistema algorítmico y operativo en una única interfaz multihilo y modular.
+
+### 11.1 Arquitectura de Pestañas Operativas
+1. **`🎮 Centro de Mando (Live)`:**
+   * Monitoreo de la estrategia en ejecución (`MemeHunterFuturesV7_Quantum`) en Docker.
+   * Conexión en tiempo real con la base de datos `tradesv3.futures.sqlite` para listar órdenes abiertas (precio de entrada, stake, apalancamiento) y trades cerrados con ganancia neta.
+   * Visualización del estado del Profit Ratchet (pico de equidad, capital base) y de la Bóveda Cash & Carry (rendimiento pasivo diario).
+   * Consola interactiva de auditoría autónoma en vivo.
+2. **`📚 Estrategias & Backtests (Freqtrade)`:**
+   * **Catálogo de 11 Estrategias Físicas (`user_data/strategies/`):** Inspector con badges de Timeframe, Stop Loss, Short-Bias, diferenciación fraccionaria FFD ($d=0.40$), dimensionamiento continuo Kelly y KillSwitch.
+   * **Historial de 34 Backtests Freqtrade (`user_data/backtest_results/`):** Lector de archivos `.zip` que extrae en milisegundos número de trades, winrate, retorno en USDT, max drawdown, Sharpe, Sortino y Profit Factor, con filtrado dinámico por estrategia.
+   * **Auditoría de Resiliencia Institucional:** Desglose de Choque de Fricciones (5 escenarios hasta iliquidez severa) y consistencia trimestral 2024-2026.
+3. **`🧪 Laboratorio Cuantitativo (Studio Designer & Live Tester)`:**
+   * Diseñador de fórmulas simbólicas con 5 plantillas pre-construidas.
+   * Validador AST *Zero-Eval* en tiempo real (`/api/validate-formula`) que rechaza inyecciones de código y reporta profundidad y variables detectadas.
+   * Backtester vectorial 4H ultrarrápido sobre datos reales de Binance Futures (`C:/meme_hunter_data/binance/futures/*.feather`), aplicando fees reales (maker 0.02%, taker 0.05%) y deslizamiento.
+   * Generación de curva de equidad interactiva con Chart.js y despliegue a Sandbox en 1 clic con persistencia atómica.
+4. **`🧠 Incubadora Autónoma & Autopsias Forenses`:**
+   * Stepper interactivo del pipeline de 5 etapas (CUSUM -> Autopsia DeepSeek-R1 -> Síntesis AST -> MAP-Elites -> HRP).
+   * Curva de equidad de portafolio y monitoreo de Information Coefficient (IC) con alerta de CUSUM decay.
+   * Tabla de máquina de estados (`LIVE`, `SANDBOX`, `ALPHA_DECAY`, `RETIRED`) y autopsias forenses.
+
+### 11.2 Especificación de la API REST del Cockpit (`server.py`)
+| Endpoint | Verbo | Descripción | Autenticación |
+| :--- | :---: | :--- | :---: |
+| `/api/status` | `GET` | Estado del sistema, estrategia activa, métricas HRP y Barbell | Pública |
+| `/api/strategies-catalog` | `GET` | Catálogo de las 11 estrategias Python físicas en `user_data/strategies/` | Pública |
+| `/api/backtests-catalog` | `GET` | Historial de los 34 reportes de backtest extraídos de los `.zip` | Pública |
+| `/api/stress-report` | `GET` | Escenarios de estrés de fricción y desglose trimestral | Pública |
+| `/api/live-trades` | `GET` | Posiciones abiertas y trades cerrados desde SQLite | Pública |
+| `/api/validate-formula` | `POST` | Validación sintáctica y seguridad AST *Zero-Eval* | Bearer Token |
+| `/api/test-strategy` | `POST` | Backtesting vectorial rápido con fricciones de futuros | Bearer Token |
+| `/api/deploy-to-sandbox` | `POST` | Despliegue atómico a la incubadora (`incubator_state.json`) | Bearer Token |
+| `/api/trigger-loop` | `POST` | Disparo manual de ciclo autónomo de optimización | Bearer Token |
+| `/api/synthesize-alpha` | `POST` | Síntesis semántica de factores vía OpenRouter | Bearer Token |
+
+### 11.3 Certificación de Calidad Oficial
+La suite completa cuenta con **117 tests pasando al 100%** de forma hermética:
+```bash
+docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
+```
+Certificando la no-regresión de todos los módulos matemáticos, de microestructura, de red y de visualización.
 

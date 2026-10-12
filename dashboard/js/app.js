@@ -37,11 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
     ],
     history: [],
     ratchet: null,
-    vault: null
+    vault: null,
+    freqtradeStrategies: [],
+    backtestResults: [],
+    stressReport: null,
+    liveTrades: null
   };
 
+  const API_AUTH_TOKEN = localStorage.getItem('cockpit_token') || 'meme_hunter_dev_token_2026';
   let equityChart = null;
   let icChart = null;
+  let backtestChart = null;
+  let lastTestedStrategy = null;
 
   // ANIMACIÓN VISUAL DEL PIPELINE DE 5 ETAPAS
   async function animatePipeline(stageIndex) {
@@ -418,8 +425,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const API_AUTH_TOKEN = localStorage.getItem('cockpit_token') || 'meme_hunter_dev_token_2026';
-
   // 8. Acciones de los Botones con Animación & Feedback Inmediato
   const btnTrigger = document.getElementById('btn-trigger-cycle');
   btnTrigger.addEventListener('click', async () => {
@@ -535,6 +540,307 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // 9. Laboratorio Cuantitativo: Diseñador & Probador de Estrategias
+  function renderBacktestChart(curveData) {
+    const canvas = document.getElementById('backtestChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let rawList = curveData && curveData.length ? curveData : [1000, 1015, 1022, 1038, 1050, 1065, 1058, 1082, 1105, 1130];
+    if (rawList.length > 100) {
+      const step = Math.ceil(rawList.length / 100);
+      rawList = rawList.filter((_, idx) => idx % step === 0 || idx === rawList.length - 1);
+    }
+    const values = rawList.map(p => (typeof p === 'object' && p !== null && p.equity !== undefined) ? p.equity : Number(p));
+    const labels = rawList.map((p, idx) => {
+      if (typeof p === 'object' && p !== null && p.timestamp) {
+        return p.timestamp.slice(5, 16);
+      }
+      return `B${idx + 1}`;
+    });
+
+    if (backtestChart) {
+      backtestChart.data.labels = labels;
+      backtestChart.data.datasets[0].data = values;
+      backtestChart.update();
+      return;
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, 'rgba(0, 242, 254, 0.35)');
+    gradient.addColorStop(1, 'rgba(0, 242, 254, 0.0)');
+
+    backtestChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Equity Simulado (USDT)',
+          data: sampled,
+          borderColor: '#00f2fe',
+          backgroundColor: gradient,
+          borderWidth: 2,
+          tension: 0.25,
+          fill: true,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `Equity: $${Number(ctx.raw).toFixed(2)} USDT`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.04)' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 8 }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.04)' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } }
+          }
+        }
+      }
+    });
+  }
+
+  async function validateFormulaAST(formula) {
+    const feedback = document.getElementById('formulaFeedback');
+    const tagStatus = document.getElementById('tag-ast-status');
+    if (!formula || !formula.trim()) {
+      if (feedback) feedback.innerHTML = '<span class="text-rose">⚠ La fórmula no puede estar vacía.</span>';
+      return false;
+    }
+    try {
+      const res = await fetch('/api/validate-formula', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ formula })
+      });
+      const data = await res.json();
+      if (res.ok && data.valid) {
+        if (feedback) {
+          feedback.innerHTML = `<span class="text-emerald">✔ AST Válido | Profundidad: ${data.depth} | Variables: ${data.variables.join(', ')}</span>`;
+        }
+        if (tagStatus) {
+          tagStatus.innerText = 'AST ZERO-EVAL VALIDADO';
+          tagStatus.style.color = 'var(--accent-emerald)';
+          tagStatus.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        }
+        return true;
+      } else {
+        if (feedback) {
+          feedback.innerHTML = `<span class="text-rose">✖ Error AST: ${data.error || 'Sintaxis inválida'}</span>`;
+        }
+        if (tagStatus) {
+          tagStatus.innerText = 'ERROR SINTAXIS AST';
+          tagStatus.style.color = 'var(--accent-rose)';
+          tagStatus.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+        }
+        return false;
+      }
+    } catch (err) {
+      console.error('Error validando AST:', err);
+      return false;
+    }
+  }
+
+  function initStudioControls() {
+    const templateSelect = document.getElementById('select-formula-template');
+    const formulaInput = document.getElementById('input-formula');
+    const btnValidate = document.getElementById('btn-validate-ast');
+    const btnRun = document.getElementById('btn-run-backtest');
+    const btnDeploy = document.getElementById('btn-deploy-sandbox');
+
+    if (templateSelect && formulaInput) {
+      templateSelect.addEventListener('change', () => {
+        if (templateSelect.value) {
+          formulaInput.value = templateSelect.value;
+          validateFormulaAST(formulaInput.value);
+        }
+      });
+    }
+
+    if (btnValidate && formulaInput) {
+      btnValidate.addEventListener('click', () => {
+        validateFormulaAST(formulaInput.value);
+      });
+      formulaInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') validateFormulaAST(formulaInput.value);
+      });
+    }
+
+    if (btnRun) {
+      btnRun.addEventListener('click', async () => {
+        const formula = formulaInput ? formulaInput.value.trim() : '';
+        const pair = document.getElementById('select-pair').value;
+        const direction = document.getElementById('select-direction').value;
+        const leverage = parseFloat(document.getElementById('select-leverage').value) || 1.0;
+        const stoploss = parseFloat(document.getElementById('select-stoploss').value) || 0.10;
+
+        if (!formula) {
+          alert('Por favor ingresa una fórmula matemática válida.');
+          return;
+        }
+
+        btnRun.disabled = true;
+        btnRun.innerHTML = `<span class="pulse-dot"></span> Simulando Barras 4H...`;
+        addLog('info', `Ejecutando vector backtest en ${pair} (${direction}, lev=${leverage}x)...`);
+
+        try {
+          const res = await fetch('/api/test-strategy', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              formula,
+              pair,
+              direction,
+              leverage,
+              stoploss
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.status === 'success') {
+            lastTestedStrategy = {
+              ...data,
+              leverage,
+              stoploss
+            };
+
+            const m = data.metrics;
+            const elNet = document.getElementById('btNetReturn');
+            const elSharpe = document.getElementById('btSharpe');
+            const elDD = document.getElementById('btMaxDD');
+            const elWin = document.getElementById('btWinRate');
+            const elTrades = document.getElementById('btTotalTrades');
+            const elDSR = document.getElementById('btDSRScore');
+
+            if (elNet) {
+              elNet.innerText = `${m.net_return_pct >= 0 ? '+' : ''}${m.net_return_pct.toFixed(2)}%`;
+              elNet.style.color = m.net_return_pct >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+            }
+            if (elSharpe) {
+              elSharpe.innerText = m.sharpe_ratio.toFixed(2);
+              elSharpe.style.color = m.sharpe_ratio >= 1.5 ? 'var(--accent-cyan)' : 'var(--accent-amber)';
+            }
+            if (elDD) {
+              elDD.innerText = `-${m.max_drawdown_pct.toFixed(2)}%`;
+            }
+            if (elWin) {
+              elWin.innerText = `${m.win_rate_pct.toFixed(1)}%`;
+            }
+            if (elTrades) {
+              elTrades.innerText = `${m.total_trades}`;
+            }
+            if (elDSR) {
+              elDSR.innerText = `${m.dsr_score_pct.toFixed(1)}%`;
+            }
+
+            renderBacktestChart(data.equity_curve || []);
+
+            if (btnDeploy) {
+              btnDeploy.disabled = false;
+              btnDeploy.title = `Desplegar ${data.strategy_id} a Sandbox`;
+              btnDeploy.innerHTML = `
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                </svg>
+                Desplegar a Incubadora (SANDBOX)
+              `;
+            }
+
+            addLog('ai', `Backtest completado: ${data.strategy_id} | Retorno: ${m.net_return_pct.toFixed(1)}% | Sharpe: ${m.sharpe_ratio.toFixed(2)} | Trades: ${m.total_trades}`);
+          } else {
+            alert(`Error en backtest: ${data.error || 'Error desconocido'}`);
+            addLog('error', `Fallo al probar estrategia: ${data.error || 'Desconocido'}`);
+          }
+        } catch (err) {
+          console.error(err);
+          addLog('error', `Error de red en backtest: ${err.message}`);
+        } finally {
+          btnRun.disabled = false;
+          btnRun.innerHTML = `
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+            </svg>
+            Ejecutar Backtest Rápido
+          `;
+        }
+      });
+    }
+
+    if (btnDeploy) {
+      btnDeploy.addEventListener('click', async () => {
+        if (!lastTestedStrategy) return;
+
+        btnDeploy.disabled = true;
+        btnDeploy.innerHTML = `<span class="pulse-dot"></span> Inyectando en Incubadora...`;
+        addLog('info', `Inyectando ${lastTestedStrategy.strategy_id} en incubadora autónoma...`);
+
+        try {
+          const res = await fetch('/api/deploy-to-sandbox', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              strategy_id: lastTestedStrategy.strategy_id,
+              formula: lastTestedStrategy.formula,
+              pair: lastTestedStrategy.pair,
+              direction: lastTestedStrategy.direction,
+              leverage: lastTestedStrategy.leverage,
+              stoploss: lastTestedStrategy.stoploss,
+              backtest_sharpe: lastTestedStrategy.metrics.sharpe_ratio,
+              net_return_pct: lastTestedStrategy.metrics.net_return_pct,
+              max_drawdown_pct: lastTestedStrategy.metrics.max_drawdown_pct,
+              win_rate_pct: lastTestedStrategy.metrics.win_rate_pct
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.status === 'success') {
+            addLog('ai', `🚀 Estrategia ${lastTestedStrategy.strategy_id} desplegada exitosamente a SANDBOX (Slot asignado).`);
+            btnDeploy.innerHTML = `✔ Desplegada a SANDBOX`;
+            btnDeploy.style.borderColor = 'var(--accent-emerald)';
+            btnDeploy.style.color = 'var(--accent-emerald)';
+
+            await fetchBackendStatus();
+          } else {
+            alert(`Error al desplegar: ${data.error || 'Error desconocido'}`);
+            btnDeploy.disabled = false;
+            btnDeploy.innerHTML = `Desplegar a Incubadora (SANDBOX)`;
+          }
+        } catch (err) {
+          console.error(err);
+          btnDeploy.disabled = false;
+          btnDeploy.innerHTML = `Desplegar a Incubadora (SANDBOX)`;
+        }
+      });
+    }
+
+    // Inicializar visualización de la fórmula default y gráfica inicial
+    if (formulaInput && formulaInput.value) {
+      validateFormulaAST(formulaInput.value);
+    }
+    renderBacktestChart();
+  }
+
   function updateUI() {
     renderIncubatorTable();
     renderCycleHistory();
@@ -551,8 +857,319 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('val-decay-count').innerHTML = `${decayCount} <span style="font-size: 0.9rem; color: var(--accent-muted);">Alpha Decay</span>`;
   }
 
+  // 10. Navegación Unificada de Tabs
+  function initTabNavigation() {
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.getAttribute('data-tab');
+        if (!targetTab) return;
+
+        // Actualizar tabs activos
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Actualizar paneles activos
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+          pane.classList.remove('active');
+        });
+
+        const targetPane = document.getElementById(targetTab);
+        if (targetPane) {
+          targetPane.classList.add('active');
+        }
+
+        // Redimensionar gráficos de Chart.js si se hacen visibles
+        if (targetTab === 'tab-autonomous-incubator') {
+          setTimeout(() => {
+            if (equityChart) equityChart.resize();
+            if (icChart) icChart.resize();
+          }, 100);
+        } else if (targetTab === 'tab-strategy-studio') {
+          setTimeout(() => {
+            if (backtestChart) backtestChart.resize();
+          }, 100);
+        }
+      });
+    });
+  }
+
+  // 11. Carga y Renderizado del Ecosistema Freqtrade (Estrategias y Backtests)
+  async function fetchFreqtradeEcosystem() {
+    try {
+      // 1. Estrategias
+      const resStrats = await fetch('/api/strategies-catalog');
+      if (resStrats.ok) {
+        const data = await resStrats.json();
+        appState.freqtradeStrategies = data.strategies || [];
+        renderFreqtradeStrategies();
+      }
+
+      // 2. Backtests
+      const resBts = await fetch('/api/backtests-catalog');
+      if (resBts.ok) {
+        const data = await resBts.json();
+        appState.backtestResults = data.backtests || [];
+        renderBacktestResults();
+      }
+
+      // 3. Stress Report
+      const resStress = await fetch('/api/stress-report');
+      if (resStress.ok) {
+        const data = await resStress.json();
+        appState.stressReport = data.data || {};
+        renderStressReport();
+      }
+
+      // 4. Live Trades
+      const resTrades = await fetch('/api/live-trades');
+      if (resTrades.ok) {
+        const data = await resTrades.json();
+        appState.liveTrades = data.data || {};
+        renderLiveTrades();
+      }
+    } catch (e) {
+      console.error('Error cargando ecosistema Freqtrade:', e);
+    }
+  }
+
+  function renderFreqtradeStrategies() {
+    const grid = document.getElementById('strategiesGrid');
+    const selectFilter = document.getElementById('select-strategy-filter');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    if (selectFilter) {
+      selectFilter.innerHTML = '<option value="ALL">-- Todas las Estrategias --</option>';
+    }
+
+    const tagCount = document.getElementById('tag-strats-count');
+    if (tagCount) {
+      tagCount.innerText = `${appState.freqtradeStrategies.length} ESTRATEGIAS PYTHON AUDITADAS`;
+    }
+
+    appState.freqtradeStrategies.forEach(s => {
+      // Agregar al filtro
+      if (selectFilter) {
+        const opt = document.createElement('option');
+        opt.value = s.strategy_id;
+        opt.innerText = s.name;
+        selectFilter.appendChild(opt);
+      }
+
+      const card = document.createElement('div');
+      card.className = `strategy-card ${s.is_active ? 'active-prod' : ''}`;
+
+      const activeBadge = s.is_active
+        ? '<span class="strat-badge-active">EN PRODUCCIÓN (V7 QUANTUM)</span>'
+        : '<span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">' + s.updated_at + '</span>';
+
+      card.innerHTML = `
+        <div class="strat-card-header">
+          <span class="strat-name">${s.name}</span>
+          ${activeBadge}
+        </div>
+        <div class="strat-desc">${s.description}</div>
+        <div class="strat-tags-row">
+          <span class="strat-tag">${s.timeframe}</span>
+          <span class="strat-tag">SL: ${(s.stoploss * 100).toFixed(0)}%</span>
+          <span class="strat-tag">${s.can_short ? 'SHORT-READY' : 'LONG-ONLY'}</span>
+          ${s.has_ffd ? '<span class="strat-tag highlight">FFD d=0.40</span>' : ''}
+          ${s.has_bet_sizing ? '<span class="strat-tag highlight">KELLY BET SIZING</span>' : ''}
+          ${s.has_killswitch ? '<span class="strat-tag">KILLSWITCH</span>' : ''}
+        </div>
+        <div class="strat-card-footer">
+          <span>Tamaño: ${s.size_kb} KB</span>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-action" style="padding: 3px 8px; font-size: 0.72rem;" onclick="filterBacktestsBy('${s.strategy_id}')">
+              Ver Backtests
+            </button>
+            <button class="btn-action" style="padding: 3px 8px; font-size: 0.72rem; border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="loadIntoStudio('${s.strategy_id}')">
+              Cargar en Studio
+            </button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    if (selectFilter) {
+      selectFilter.addEventListener('change', () => {
+        renderBacktestResults(selectFilter.value);
+      });
+    }
+  }
+
+  window.filterBacktestsBy = function(stratId) {
+    const selectFilter = document.getElementById('select-strategy-filter');
+    if (selectFilter) {
+      selectFilter.value = stratId;
+    }
+    renderBacktestResults(stratId);
+    const el = document.getElementById('backtestsTable');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.loadIntoStudio = function(stratId) {
+    const studioTabBtn = document.querySelector('.nav-tab[data-tab="tab-strategy-studio"]');
+    if (studioTabBtn) studioTabBtn.click();
+    addLog('info', `Estrategia ${stratId} seleccionada para experimentación en el Laboratorio Cuantitativo.`);
+  };
+
+  function renderBacktestResults(filter = 'ALL') {
+    const tbody = document.getElementById('backtestsTableBody');
+    const lblCount = document.getElementById('lbl-filter-results-count');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    const filtered = filter === 'ALL'
+      ? appState.backtestResults
+      : appState.backtestResults.filter(b => b.strategy === filter);
+
+    if (lblCount) {
+      lblCount.innerText = `Mostrando ${filtered.length} de ${appState.backtestResults.length} ejecuciones`;
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 18px;">No hay reportes de backtest para esta estrategia.</td></tr>';
+      return;
+    }
+
+    filtered.forEach(b => {
+      const tr = document.createElement('tr');
+      const winColor = b.winrate_pct >= 50 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
+      const sharpeColor = b.sharpe_ratio >= 1.5 ? 'color: var(--accent-cyan)' : (b.sharpe_ratio >= 1.0 ? 'color: var(--accent-emerald)' : 'color: var(--text-secondary)');
+      const profitColor = b.profit_total_usdt >= 0 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
+
+      tr.innerHTML = `
+        <td style="font-family: var(--font-mono); font-size: 0.78rem; color: #fff;">${b.date}</td>
+        <td style="font-weight: 700; color: #cbd5e1;">${b.strategy}</td>
+        <td>${b.trades}</td>
+        <td style="${winColor}; font-weight: 600;">${b.winrate_pct}%</td>
+        <td style="${profitColor}; font-weight: 700;">${b.profit_total_usdt >= 0 ? '+' : ''}${b.profit_total_usdt} USDT</td>
+        <td style="color: var(--accent-rose); font-weight: 600;">-${b.max_drawdown_pct}%</td>
+        <td style="${sharpeColor}; font-weight: 700;">${b.sharpe_ratio.toFixed(2)}</td>
+        <td>${b.sortino_ratio.toFixed(2)}</td>
+        <td style="font-family: var(--font-mono);">${b.profit_factor}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderStressReport() {
+    const shockBody = document.getElementById('stressShockTableBody');
+    const quarterBody = document.getElementById('quarterlyBreakdownTableBody');
+    const rep = appState.stressReport;
+    if (!rep || !rep.stress_test) return;
+
+    const st = rep.stress_test;
+
+    if (shockBody && st.friction_shock) {
+      shockBody.innerHTML = '';
+      st.friction_shock.forEach(fs => {
+        const tr = document.createElement('tr');
+        const roiColor = fs.roi_pct >= 0 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
+        const aliveBadge = fs.alive
+          ? '<span class="status-pill status-live" style="font-size: 0.65rem;">VIVO</span>'
+          : '<span class="status-pill status-decay" style="font-size: 0.65rem;">LIQUIDADO</span>';
+
+        tr.innerHTML = `
+          <td style="color: #fff; font-weight: 600;">${fs.scenario}</td>
+          <td style="font-family: var(--font-mono);">${fs.friction_rt_pct}%</td>
+          <td style="${roiColor}; font-weight: 700;">${fs.roi_pct >= 0 ? '+' : ''}${fs.roi_pct.toFixed(1)}%</td>
+          <td>${fs.winrate.toFixed(1)}%</td>
+          <td style="color: var(--accent-rose); font-weight: 600;">-${fs.max_dd_pct.toFixed(1)}%</td>
+          <td>${aliveBadge}</td>
+        `;
+        shockBody.appendChild(tr);
+      });
+    }
+
+    if (quarterBody && st.quarterly_breakdown) {
+      quarterBody.innerHTML = '';
+      const qkeys = Object.keys(st.quarterly_breakdown).slice(-8);
+      qkeys.forEach(q => {
+        const qdata = st.quarterly_breakdown[q];
+        const tr = document.createElement('tr');
+        const pColor = qdata.profit_abs >= 0 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
+
+        tr.innerHTML = `
+          <td style="font-family: var(--font-mono); color: #fff;">${q}</td>
+          <td>${qdata.trades}</td>
+          <td style="color: var(--accent-cyan); font-weight: 600;">${qdata.wins}</td>
+          <td style="${pColor}; font-weight: 700;">${qdata.profit_abs >= 0 ? '+' : ''}${qdata.profit_abs.toFixed(2)} USDT</td>
+        `;
+        quarterBody.appendChild(tr);
+      });
+    }
+  }
+
+  function renderLiveTrades() {
+    const openBody = document.getElementById('openPositionsTableBody');
+    const closedBody = document.getElementById('closedTradesTableBody');
+    const tagOpenCount = document.getElementById('tag-open-positions-count');
+    const tagTotalPnl = document.getElementById('tag-total-realized-pnl');
+    const trades = appState.liveTrades;
+    if (!trades) return;
+
+    if (tagOpenCount) {
+      tagOpenCount.innerText = `${trades.open_positions.length} ABIERTAS`;
+    }
+    if (tagTotalPnl) {
+      const p = trades.total_realized_profit || 0.0;
+      tagTotalPnl.innerText = `PNL: ${p >= 0 ? '+' : ''}$${p.toFixed(2)} USDT`;
+      tagTotalPnl.style.color = p >= 0 ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+    }
+
+    if (openBody) {
+      openBody.innerHTML = '';
+      if (trades.open_positions.length === 0) {
+        openBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 14px;">Sin posiciones abiertas en este momento.</td></tr>';
+      } else {
+        trades.open_positions.forEach(pos => {
+          const tr = document.createElement('tr');
+          const sideColor = pos.direction === 'SHORT' ? 'color: var(--accent-rose)' : 'color: var(--accent-emerald)';
+          tr.innerHTML = `
+            <td style="font-weight: 700; color: #fff;">${pos.pair}</td>
+            <td style="${sideColor}; font-weight: 700;">${pos.direction}</td>
+            <td style="font-family: var(--font-mono);">${pos.leverage}x</td>
+            <td style="font-family: var(--font-mono);">${pos.open_rate}</td>
+            <td style="color: var(--accent-cyan); font-weight: 700;">$${pos.stake_amount}</td>
+            <td style="color: var(--text-secondary); font-size: 0.75rem;">${pos.strategy}</td>
+          `;
+          openBody.appendChild(tr);
+        });
+      }
+    }
+
+    if (closedBody) {
+      closedBody.innerHTML = '';
+      if (trades.closed_trades.length === 0) {
+        closedBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 14px;">Sin trades cerrados registrados aún.</td></tr>';
+      } else {
+        trades.closed_trades.forEach(t => {
+          const tr = document.createElement('tr');
+          const pColor = t.profit_pct >= 0 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
+          const sideColor = t.direction === 'SHORT' ? 'color: var(--accent-rose)' : 'color: var(--accent-emerald)';
+          tr.innerHTML = `
+            <td style="font-weight: 700; color: #fff;">${t.pair}</td>
+            <td style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">${t.close_date ? t.close_date.slice(5, 16) : '--'}</td>
+            <td style="${sideColor}; font-weight: 600;">${t.direction}</td>
+            <td style="${pColor}; font-weight: 700;">${t.profit_pct >= 0 ? '+' : ''}${t.profit_pct}%</td>
+            <td style="${pColor}; font-weight: 600;">${t.profit_abs >= 0 ? '+' : ''}$${t.profit_abs}</td>
+            <td><span class="badge-action-pill">${t.exit_reason}</span></td>
+          `;
+          closedBody.appendChild(tr);
+        });
+      }
+    }
+  }
+
   // Inicializar
   initCharts();
+  initTabNavigation();
+  initStudioControls();
   updateUI();
   fetchBackendStatus();
+  fetchFreqtradeEcosystem();
 });

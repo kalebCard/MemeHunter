@@ -3,33 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MemeHunter | Cockpit Cuantitativo Auto-Evolutivo & Monitor IA</title>
-  <meta name="description" content="Dashboard interactivo de monitoreo en tiempo real del motor cuantitativo MemeHunter, incubadora de alphas y bucle de auto-sanación con IA.">
+  <title>MemeHunter Autonomous Alpha Cockpit - Unified Control Interface</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Chart.js para visualizaciones cuantitativas en tiempo real -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-  <div class="dashboard-container">
-    <!-- Navbar Header -->
-    <header class="top-navbar" id="top-navbar">
-      <div class="brand-wrapper">
-        <div class="brand-logo" id="brand-logo" aria-label="Logo de MemeHunter">
-          <svg viewBox="0 0 24 24">
+  <div class="cockpit-container">
+    <!-- Top Header & Brand Bar -->
+    <header class="cockpit-header">
+      <div class="brand-group">
+        <div class="logo-shield">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
           </svg>
         </div>
-        <div class="brand-title">
+        <div class="brand-text">
           <h1>MEMEHUNTER QUANT COCKPIT</h1>
-          <p>AUTONOMOUS ALPHA FACTORY & AI AUTOPSY ENGINE</p>
+          <p>UNIFIED MISSION CONTROL & AUTONOMOUS ALPHA FACTORY</p>
         </div>
       </div>
 
       <div class="header-status">
         <div class="pulse-badge" id="system-health-badge">
           <span class="pulse-dot"></span>
-          <span id="system-health-text">SISTEMA ACTIVO (24/7)</span>
+          <span id="system-health-text">SISTEMA UNIFICADO ACTIVO (24/7)</span>
         </div>
 
         <button class="btn-action" id="btn-trigger-cycle">
@@ -49,315 +47,642 @@
       </div>
     </header>
 
-    <!-- KPI Grid Banner -->
-    <section class="kpi-grid" id="kpi-metrics-grid">
-      <div class="kpi-card" id="kpi-sharpe">
-        <div class="kpi-label">Sharpe Ratio Cartera</div>
-        <div class="kpi-value" id="val-sharpe">2.14 <span style="font-size: 0.9rem; color: var(--accent-emerald);">+12%</span></div>
-        <div class="kpi-subtext">Out-of-Sample Combinatorio</div>
-      </div>
+    <!-- NAVEGACIÓN UNIFICADA DE CONTROL (TABS) -->
+    <nav class="cockpit-nav-tabs">
+      <button class="nav-tab active" data-tab="tab-control-center">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2z"/></svg>
+        🎮 Centro de Mando (Live)
+      </button>
+      <button class="nav-tab" data-tab="tab-freqtrade-catalog">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg>
+        📚 Estrategias & Backtests (Freqtrade)
+      </button>
+      <button class="nav-tab" data-tab="tab-strategy-studio">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 1v3H1v5h2v6h10V9h2V4h-5V1H6zm1 1h2v2H7V2zm-4 3h10v3H3V5zm2 5h6v4H5v-4z"/></svg>
+        🧪 Laboratorio Cuantitativo
+      </button>
+      <button class="nav-tab" data-tab="tab-autonomous-incubator">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm.5 4v4.25l3.25 1.95-.75 1.25L7 9V4h1.5z"/></svg>
+        🧠 Incubadora Autónoma & Autopsias
+      </button>
+    </nav>
 
-      <div class="kpi-card" id="kpi-alphas-live">
-        <div class="kpi-label">Alphas en Producción (LIVE)</div>
-        <div class="kpi-value" id="val-alphas-live">4 <span style="font-size: 0.9rem; color: var(--accent-cyan);">/ 12 total</span></div>
-        <div class="kpi-subtext">Ponderados dinámicamente por HRP</div>
-      </div>
-
-      <div class="kpi-card" id="kpi-avg-ic">
-        <div class="kpi-label">Mean Information Coeff (IC)</div>
-        <div class="kpi-value" id="val-avg-ic">0.078 <span style="font-size: 0.9rem; color: var(--accent-emerald);">p < 0.01</span></div>
-        <div class="kpi-subtext">Ventana móvil de 60 barras</div>
-      </div>
-
-      <div class="kpi-card" id="kpi-decay-rate">
-        <div class="kpi-label">Alphas en Cuarentena</div>
-        <div class="kpi-value" id="val-decay-count" style="color: var(--accent-amber);">1 <span style="font-size: 0.9rem; color: var(--accent-muted);">Alpha Decay</span></div>
-        <div class="kpi-subtext">Auto-sustitución activada</div>
-      </div>
-
-      <div class="kpi-card" id="kpi-diversity-bank">
-        <div class="kpi-label">Banco de Reserva Ortogonal</div>
-        <div class="kpi-value" id="val-diversity-count" style="color: var(--accent-purple);">6 <span style="font-size: 0.9rem; color: var(--accent-purple);">MAP-Elites</span></div>
-        <div class="kpi-subtext">Factores listos para relevo</div>
-      </div>
-    </section>
-
-    <!-- LIVE WORKFLOW PIPELINE ANIMATION BAR -->
-    <section class="pipeline-section glass-panel" id="pipeline-panel">
-      <div class="panel-header" style="margin-bottom: 12px;">
-        <h2>
-          <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16">
-            <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-            <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-          </svg>
-          Flujo de Auto-Mejora y Transición Cuantitativa en Tiempo Real
-        </h2>
-        <span class="panel-tag" id="pipeline-status-badge">REPOSO (IDLE)</span>
-      </div>
-
-      <div class="pipeline-stepper" id="pipelineStepper">
-        <div class="pipeline-step" id="step-monitor">
-          <div class="step-icon">1</div>
-          <div class="step-info">
-            <span class="step-title">1. Observabilidad</span>
-            <span class="step-desc">IC & CUSUM Decay</span>
+    <!-- ========================================================================= -->
+    <!-- TAB 1: CENTRO DE MANDO & PRODUCCIÓN (LIVE & BOT)                         -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane active" id="tab-control-center">
+      <!-- Banner de Estado de Producción Freqtrade -->
+      <section class="bot-status-banner">
+        <div class="bot-info-main">
+          <div class="bot-pulse-indicator"></div>
+          <div class="bot-title-wrap">
+            <h3 id="bot-active-strategy-title">MemeHunterFuturesV7_Quantum (PB-74)</h3>
+            <span>Estrategia activa en Freqtrade Futures (Docker: meme_hunter_futures)</span>
           </div>
         </div>
-
-        <div class="pipeline-connector" id="conn-1"></div>
-
-        <div class="pipeline-step" id="step-autopsy">
-          <div class="step-icon">2</div>
-          <div class="step-info">
-            <span class="step-title">2. Autopsia IA</span>
-            <span class="step-desc">DeepSeek-R1 Forense</span>
-          </div>
+        <div class="bot-badges-row">
+          <span class="badge-hardening safe">✔ FFD d=0.40 Habilitado</span>
+          <span class="badge-hardening safe">✔ Kelly Sigmoidal Activo</span>
+          <span class="badge-hardening safe">✔ Kill-Switch (-25%)</span>
+          <span class="badge-hardening safe">✔ Funding Guardian (-0.05%)</span>
+          <span class="badge-hardening">Trailing Stop (12% / 4%)</span>
         </div>
-
-        <div class="pipeline-connector" id="conn-2"></div>
-
-        <div class="pipeline-step" id="step-synthesis">
-          <div class="step-icon">3</div>
-          <div class="step-info">
-            <span class="step-title">3. Síntesis AST</span>
-            <span class="step-desc">Microestructura Zero-Eval</span>
-          </div>
-        </div>
-
-        <div class="pipeline-connector" id="conn-3"></div>
-
-        <div class="pipeline-step" id="step-diversity">
-          <div class="step-icon">4</div>
-          <div class="step-info">
-            <span class="step-title">4. Incubación</span>
-            <span class="step-desc">MAP-Elites & Sandbox</span>
-          </div>
-        </div>
-
-        <div class="pipeline-connector" id="conn-4"></div>
-
-        <div class="pipeline-step" id="step-rebalance">
-          <div class="step-icon">5</div>
-          <div class="step-info">
-            <span class="step-title">5. Asignación HRP</span>
-            <span class="step-desc">Risk Parity & Live Exec</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Main Content Layout -->
-    <main class="main-dashboard-grid">
-      <!-- Columna Izquierda: Gráficos y Tabla de Incubadora -->
-      <section class="left-column">
-        <!-- Panel 1: Gráfico de Equity de Portafolio -->
-        <article class="glass-panel" id="panel-equity-chart">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16">
-                <path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.707l-4.146 4.147a.5.5 0 0 1-.708 0L7 6.707l-4.646 4.647a.5.5 0 0 1-.708-.708l5-5a.5.5 0 0 1 .708 0L9.5 7.793 13.293 4H10.5a.5.5 0 0 1-.5-.5z"/>
-              </svg>
-              Curva de Equity de Portafolio & Auto-Recuperación
-            </h2>
-            <span class="panel-tag">ONLINE HRP ALLOCATION</span>
-          </div>
-          <div class="chart-container">
-            <canvas id="equityChart"></canvas>
-          </div>
-        </article>
-
-        <!-- Panel 2: Gráfico de Information Coefficient (IC) Rodante -->
-        <article class="glass-panel" id="panel-ic-chart">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16">
-                <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2z"/>
-              </svg>
-              Monitoreo de Predictibilidad: Rolling IC & Detección de Decay
-            </h2>
-            <span class="panel-tag">SPEARMAN RANK CORRELATION</span>
-          </div>
-          <div class="chart-container">
-            <canvas id="icChart"></canvas>
-          </div>
-        </article>
-
-        <!-- Panel 3: Tabla de la Incubadora de Estrategias -->
-        <article class="glass-panel" id="panel-incubator-table">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-purple)" viewBox="0 0 16 16">
-                <path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11z"/>
-              </svg>
-              Estado de la Incubadora & Asignación de Capital
-            </h2>
-            <span class="panel-tag">LIFECYCLE STATE MACHINE</span>
-          </div>
-          <div class="table-responsive">
-            <table class="quant-table" id="incubatorTable">
-              <thead>
-                <tr>
-                  <th>Estrategia ID</th>
-                  <th>Fórmula Simbólica</th>
-                  <th>Estado</th>
-                  <th>Peso Asignado</th>
-                  <th>Backtest Sharpe</th>
-                  <th>IC Actual</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="incubatorTableBody">
-                <!-- Inyectado dinámicamente por JavaScript -->
-              </tbody>
-            </table>
-        </article>
-
-        <!-- Panel 4: Historial de Resultados & Ciclos de Auto-Mejora -->
-        <article class="glass-panel" id="panel-cycle-history">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-amber)" viewBox="0 0 16 16">
-                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.756.2 1.114.34l-.348.935zm1.87 1.015a6.995 6.995 0 0 0-.825-.57l.487-.873c.338.189.658.404.957.643l-.619.8zm1.608 1.491c-.244-.224-.51-.43-.794-.616l.547-.837c.334.218.647.46.934.723l-.687.73zm1.207 1.87a6.989 6.989 0 0 0-.616-.794l.73-.687c.263.287.505.6.723.934l-.837.547zm.758 2.052a7.001 7.001 0 0 0-.34-.985l.935-.348c.14.358.254.731.34 1.114l-.976-.219zM8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-              </svg>
-              Historial de Resultados y Ciclos de Optimización
-            </h2>
-            <span class="panel-tag" id="tag-history-count">0 CICLOS REGISTRADOS</span>
-          </div>
-          <div class="table-responsive">
-            <table class="quant-table" id="cycleHistoryTable">
-              <thead>
-                <tr>
-                  <th>Hora / Timestamp</th>
-                  <th>Estrategias Live</th>
-                  <th>Degradadas</th>
-                  <th>Promovidas</th>
-                  <th>Coste Ciclo</th>
-                  <th>Meta Sharpe</th>
-                  <th>Detalle / Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="cycleHistoryTableBody">
-                <!-- Inyectado dinámicamente -->
-              </tbody>
-            </table>
-          </div>
-        </article>
       </section>
 
-      <!-- Columna Derecha: Autopsias IA, Banco de Diversidad y Log Terminal -->
-      <aside class="right-column">
-        <!-- Panel 4: Autopsia Forense de Alphas (IA) -->
-        <article class="glass-panel" id="panel-ai-autopsies">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-purple)" viewBox="0 0 16 16">
-                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H9v2.5a.5.5 0 0 1-1 0V8.5H5.5a.5.5 0 0 1 0-1H8V5a.5.5 0 0 1 1 0v2.5h2.5z"/>
-              </svg>
-              Autopsias Forenses IA (OpenRouter)
-            </h2>
-            <span class="panel-tag" id="tag-autopsy-count">DEEPSEEK-R1 / CLAUDE</span>
-          </div>
-          <div id="autopsyListContainer">
-            <!-- Inyectado dinámicamente -->
-          </div>
-        </article>
+      <!-- KPI Grid Banner -->
+      <section class="kpi-grid" id="kpi-metrics-grid">
+        <div class="kpi-card" id="kpi-sharpe">
+          <div class="kpi-label">Sharpe Ratio Cartera</div>
+          <div class="kpi-value" id="val-sharpe">2.14 <span style="font-size: 0.9rem; color: var(--accent-emerald);">+12%</span></div>
+          <div class="kpi-subtext">Out-of-Sample Combinatorio</div>
+        </div>
 
-        <!-- Panel 5: Banco de Diversidad (Quality-Diversity Archive) -->
-        <article class="glass-panel" id="panel-diversity-archive">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16">
-                <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/>
-              </svg>
-              Archivo de Diversidad (MAP-Elites)
-            </h2>
-            <span class="panel-tag">DESCORRELACION < 0.50</span>
-          </div>
-          <div id="diversityNichesContainer">
-            <!-- Nichos renderizados aquí -->
-          </div>
-        <!-- Panel: Arquitectura Híbrida Barbell (Trinquete & Bóveda) -->
-        <article class="glass-panel" id="panel-barbell-architecture">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16">
-                <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 2v8.5a.5.5 0 0 1-1 0V5H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8z"/>
-              </svg>
-              Arquitectura Barbell: Trinquete & Bóveda
-            </h2>
-            <span class="panel-tag" id="tag-barbell-status">DELTA-NEUTRAL (&Delta;=0)</span>
-          </div>
-          
-          <div class="barbell-container" id="barbellContainer">
-            <!-- Sub-bloque Trinquete -->
-            <div class="barbell-card" id="ratchetCard">
-              <div class="barbell-card-header">
-                <span class="barbell-badge ratchet-badge">VÁLVULA DE TRINQUETE</span>
-                <span class="barbell-metric-val" id="ratchetHarvestedVal">+$660.00 USDT</span>
+        <div class="kpi-card" id="kpi-alphas-live">
+          <div class="kpi-label">Alphas en Producción (LIVE)</div>
+          <div class="kpi-value" id="val-alphas-live">4 <span style="font-size: 0.9rem; color: var(--accent-cyan);">/ 12 total</span></div>
+          <div class="kpi-subtext">Ponderados dinámicamente por HRP</div>
+        </div>
+
+        <div class="kpi-card" id="kpi-avg-ic">
+          <div class="kpi-label">Mean Information Coeff (IC)</div>
+          <div class="kpi-value" id="val-avg-ic">0.078 <span style="font-size: 0.9rem; color: var(--accent-emerald);">p &lt; 0.01</span></div>
+          <div class="kpi-subtext">Ventana móvil de 60 barras</div>
+        </div>
+
+        <div class="kpi-card" id="kpi-decay-rate">
+          <div class="kpi-label">Alphas en Cuarentena</div>
+          <div class="kpi-value" id="val-decay-count" style="color: var(--accent-amber);">1 <span style="font-size: 0.9rem; color: var(--accent-muted);">Alpha Decay</span></div>
+          <div class="kpi-subtext">Auto-sustitución activada</div>
+        </div>
+
+        <div class="kpi-card" id="kpi-diversity-bank">
+          <div class="kpi-label">Banco de Reserva Ortogonal</div>
+          <div class="kpi-value" id="val-diversity-count" style="color: var(--accent-purple);">6 <span style="font-size: 0.9rem; color: var(--accent-purple);">MAP-Elites</span></div>
+          <div class="kpi-subtext">Factores listos para relevo</div>
+        </div>
+      </section>
+
+      <!-- Grid de Posiciones Reales y Barbell -->
+      <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; margin-bottom: 24px;">
+        <!-- Columna Izquierda: Posiciones Abiertas y Trades de SQLite -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <article class="glass-panel">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-14v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>
+                Posiciones de Futuros Abiertas (SQLite Engine)
+              </h2>
+              <span class="panel-tag" id="tag-open-positions-count">0 ABIERTAS</span>
+            </div>
+            <div class="table-responsive">
+              <table class="quant-table">
+                <thead>
+                  <tr>
+                    <th>ID / Par</th>
+                    <th>Dirección</th>
+                    <th>Apalancamiento</th>
+                    <th>Precio Entrada</th>
+                    <th>Stake USDT</th>
+                    <th>Estrategia</th>
+                  </tr>
+                </thead>
+                <tbody id="openPositionsTableBody">
+                  <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Sin posiciones abiertas en este momento.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="glass-panel">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16"><path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V2zm-4 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6zm-4 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4z"/></svg>
+                Historial de Trades Cerrados Recientes
+              </h2>
+              <span class="panel-tag" id="tag-total-realized-pnl">PNL: +$0.00 USDT</span>
+            </div>
+            <div class="table-responsive">
+              <table class="quant-table">
+                <thead>
+                  <tr>
+                    <th>Par</th>
+                    <th>Fecha Cierre</th>
+                    <th>Dirección</th>
+                    <th>Retorno %</th>
+                    <th>Ganancia USDT</th>
+                    <th>Motivo Salida</th>
+                  </tr>
+                </thead>
+                <tbody id="closedTradesTableBody">
+                  <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Cargando historial de trades...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+
+        <!-- Columna Derecha: Barbell y Terminal Log -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Panel: Arquitectura Híbrida Barbell -->
+          <article class="glass-panel" id="panel-barbell-architecture">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16"><path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 2v8.5a.5.5 0 0 1-1 0V5H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8z"/></svg>
+                Arquitectura Barbell: Trinquete & Bóveda
+              </h2>
+              <span class="panel-tag" id="tag-barbell-status">DELTA-NEUTRAL (&Delta;=0)</span>
+            </div>
+            
+            <div class="barbell-container" id="barbellContainer">
+              <div class="barbell-card" id="ratchetCard">
+                <div class="barbell-card-header">
+                  <span class="barbell-badge ratchet-badge">VÁLVULA DE TRINQUETE</span>
+                  <span class="barbell-metric-val" id="ratchetHarvestedVal">+$660.00 USDT</span>
+                </div>
+                <div class="barbell-details">
+                  <div class="barbell-row">
+                    <span>Capital Base:</span>
+                    <strong id="ratchetBaseVal">$1,440.00 USDT</strong>
+                  </div>
+                  <div class="barbell-row">
+                    <span>Peak Equity:</span>
+                    <strong id="ratchetPeakVal">$1,440.00 USDT</strong>
+                  </div>
+                  <div class="barbell-row">
+                    <span>Cosecha en 2X:</span>
+                    <span class="text-emerald">60% a Bóveda Segura</span>
+                  </div>
+                  <div class="barbell-row">
+                    <span>Kill-Switch:</span>
+                    <span class="badge-safe" id="ratchetKillSwitchBadge">Protección Activa (-25%)</span>
+                  </div>
+                </div>
               </div>
-              <div class="barbell-details">
-                <div class="barbell-row">
-                  <span>Capital Base:</span>
-                  <strong id="ratchetBaseVal">$1,440.00 USDT</strong>
+
+              <div class="barbell-card" id="vaultCard">
+                <div class="barbell-card-header">
+                  <span class="barbell-badge vault-badge">BÓVEDA CASH & CARRY</span>
+                  <span class="barbell-metric-val text-cyan" id="vaultCapitalVal">$5,000.00 USDT</span>
                 </div>
-                <div class="barbell-row">
-                  <span>Peak Equity:</span>
-                  <strong id="ratchetPeakVal">$1,440.00 USDT</strong>
+                <div class="barbell-details">
+                  <div class="barbell-row">
+                    <span>Rendimiento Pasivo:</span>
+                    <strong class="text-emerald" id="vaultDailyYieldVal">+$1.68 USDT/día</strong>
+                  </div>
+                  <div class="barbell-row">
+                    <span>Estrategia:</span>
+                    <span>Long Spot + Short 1x Perp</span>
+                  </div>
                 </div>
-                <div class="barbell-row">
-                  <span>Cosecha en 2X:</span>
-                  <span class="text-emerald">60% a Bóveda Segura</span>
+                <div class="vault-positions-list" id="vaultPositionsList"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Panel: Terminal Log en Tiempo Real -->
+          <article class="glass-panel" id="panel-terminal-logs">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2z"/></svg>
+                Consola de Auditoría Autónoma
+              </h2>
+              <span class="panel-tag">LIVE AUDIT LOG</span>
+            </div>
+            <div class="terminal-console" id="terminalLogConsole"></div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: CATÁLOGO DE ESTRATEGIAS FREQTRADE & HISTORIAL DE BACKTESTS        -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane" id="tab-freqtrade-catalog">
+      <!-- 1. Grid de Estrategias Físicas en user_data/strategies/ -->
+      <section class="glass-panel" style="margin-bottom: 24px;">
+        <div class="panel-header">
+          <h2>
+            <svg width="22" height="22" fill="var(--accent-cyan)" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg>
+            Catálogo de Estrategias Freqtrade (user_data/strategies/)
+          </h2>
+          <span class="panel-tag" id="tag-strats-count">11 ESTRATEGIAS PYTHON AUDITADAS</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Estrategias cuantitativas de futuros implementadas como clases <code style="color: var(--accent-cyan);">IStrategy</code> listas para producción o backtesting institucional.
+        </p>
+        <div class="strategies-grid" id="strategiesGrid">
+          <!-- Inyectado dinámicamente por app.js -->
+        </div>
+      </section>
+
+      <!-- 2. Historial de Backtests en user_data/backtest_results/ -->
+      <section class="glass-panel" style="margin-bottom: 24px;">
+        <div class="panel-header">
+          <h2>
+            <svg width="22" height="22" fill="var(--accent-emerald)" viewBox="0 0 16 16"><path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2z"/></svg>
+            Historial de Ejecuciones de Backtesting Freqtrade (user_data/backtest_results/)
+          </h2>
+          <span class="panel-tag" id="tag-backtests-count">34 REPORTES (.ZIP) EXTRAÍDOS</span>
+        </div>
+
+        <div class="backtest-filter-bar">
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label for="select-strategy-filter" style="font-size: 0.82rem; color: var(--text-secondary);">Filtrar por Estrategia:</label>
+            <select id="select-strategy-filter" class="studio-select-sm" style="min-width: 220px;">
+              <option value="ALL">-- Todas las Estrategias --</option>
+            </select>
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-muted);" id="lbl-filter-results-count">Mostrando todos los resultados</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="quant-table" id="backtestsTable">
+            <thead>
+              <tr>
+                <th>Fecha / Archivo</th>
+                <th>Estrategia</th>
+                <th>Trades (N)</th>
+                <th>Win Rate %</th>
+                <th>Retorno Total USDT</th>
+                <th>Max Drawdown %</th>
+                <th>Sharpe Ratio</th>
+                <th>Sortino</th>
+                <th>Profit Factor</th>
+              </tr>
+            </thead>
+            <tbody id="backtestsTableBody">
+              <!-- Inyectado dinámicamente por app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. Reporte de Robustez de Estrés & Monte Carlo -->
+      <section class="glass-panel">
+        <div class="panel-header">
+          <h2>
+            <svg width="22" height="22" fill="var(--accent-purple)" viewBox="0 0 16 16"><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-14v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>
+            Auditoría de Resiliencia Institucional: Stress Testing & Monte Carlo
+          </h2>
+          <span class="panel-tag">MARCO LOPEZ DE PRADO PROTOCOL</span>
+        </div>
+
+        <div class="stress-grid">
+          <!-- Tarjeta 1: Frictional Shock Scenarios -->
+          <div class="stress-card">
+            <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--accent-cyan);">Pruebas de Choque de Fricción (Fee + Slippage)</h4>
+            <div class="table-responsive">
+              <table class="quant-table" style="font-size: 0.78rem;">
+                <thead>
+                  <tr>
+                    <th>Escenario</th>
+                    <th>Fricción R/T</th>
+                    <th>ROI Final %</th>
+                    <th>Winrate %</th>
+                    <th>Max DD %</th>
+                    <th>Supervivencia</th>
+                  </tr>
+                </thead>
+                <tbody id="stressShockTableBody">
+                  <!-- Inyectado dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tarjeta 2: Quarterly Breakdown -->
+          <div class="stress-card">
+            <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--accent-emerald);">Rendimiento Trimestral Consistente (2024 - 2026)</h4>
+            <div class="table-responsive">
+              <table class="quant-table" style="font-size: 0.78rem;">
+                <thead>
+                  <tr>
+                    <th>Trimestre</th>
+                    <th>Trades</th>
+                    <th>Wins</th>
+                    <th>Profit Absoluto</th>
+                  </tr>
+                </thead>
+                <tbody id="quarterlyBreakdownTableBody">
+                  <!-- Inyectado dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: LABORATORIO CUANTITATIVO (STUDIO DESIGNER & LIVE BACKTESTER)      -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane" id="tab-strategy-studio">
+      <section class="studio-section glass-panel" id="panel-strategy-studio">
+        <div class="panel-header">
+          <h2>
+            <svg width="22" height="22" fill="var(--accent-cyan)" viewBox="0 0 16 16"><path d="M6 1v3H1v5h2v6h10V9h2V4h-5V1H6zm1 1h2v2H7V2zm-4 3h10v3H3V5zm2 5h6v4H5v-4z"/></svg>
+            Laboratorio Cuantitativo: Diseñador & Probador de Estrategias en Vivo
+          </h2>
+          <div class="studio-header-actions">
+            <span class="panel-tag" id="tag-ast-status">AST ZERO-EVAL VALIDADO</span>
+          </div>
+        </div>
+
+        <div class="studio-grid">
+          <!-- Columna Izquierda del Studio: Editor de Fórmula y Parámetros -->
+          <div class="studio-builder">
+            <div class="builder-group">
+              <div class="builder-label-row">
+                <label for="input-formula">Fórmula Simbólica de Señal / Alpha Factor:</label>
+                <div class="template-selector-wrap">
+                  <select id="select-formula-template" class="studio-select-sm" title="Cargar plantilla probada">
+                    <option value="">-- Cargar Plantilla Cuantitativa --</option>
+                    <option value="ts_decay_linear(returns, 5) * ts_rank(volume, 10)">1. Momentum Desinflación + Volumen (Canónica)</option>
+                    <option value="ts_rank((volume / (vwap + 1e-6)), 14)">2. Desbalance de Flujo LOB vs VWAP</option>
+                    <option value="ts_zscore((high - low), 10) * rvol">3. Expansión RVOL & Agotamiento de Rango</option>
+                    <option value="ts_rank(close - ts_delay(close, 5), 10) * ts_rank(volume, 5)">4. Continuación de Quiebre de Estructura</option>
+                    <option value="-ts_rank(returns, 10)">5. Reversión Gravitacional Post-Pump</option>
+                  </select>
                 </div>
-                <div class="barbell-row">
-                  <span>Kill-Switch:</span>
-                  <span class="badge-safe" id="ratchetKillSwitchBadge">Protección Activa (-25%)</span>
-                </div>
+              </div>
+              <div class="formula-input-wrap">
+                <input type="text" id="input-formula" class="studio-input" value="ts_decay_linear(returns, 5) * ts_rank(volume, 10)" placeholder="Ej: ts_decay_linear(returns, 5) * ts_rank(volume, 10)">
+                <button class="btn-studio-action" id="btn-validate-ast">Validar AST</button>
+              </div>
+              <div class="formula-feedback" id="formulaFeedback">
+                <span class="text-emerald">✔ Sintaxis válida. Profundidad: 3 | Variables: returns, volume</span>
               </div>
             </div>
 
-            <!-- Sub-bloque Bóveda Cash & Carry -->
-            <div class="barbell-card" id="vaultCard">
-              <div class="barbell-card-header">
-                <span class="barbell-badge vault-badge">BÓVEDA CASH & CARRY</span>
-                <span class="barbell-metric-val text-cyan" id="vaultCapitalVal">$5,000.00 USDT</span>
+            <!-- Parámetros del Backtest -->
+            <div class="params-row">
+              <div class="param-item">
+                <label for="select-pair">Activo (Binance Futures):</label>
+                <select id="select-pair" class="studio-select">
+                  <option value="1000PEPE">1000PEPE / USDT (Datos Reales)</option>
+                  <option value="WIF">WIF / USDT (Datos Reales)</option>
+                  <option value="DOGE">DOGE / USDT (Datos Reales)</option>
+                  <option value="POPCAT">POPCAT / USDT (Datos Reales)</option>
+                  <option value="SOL">SOL / USDT (Datos Reales)</option>
+                  <option value="SUI">SUI / USDT (Datos Reales)</option>
+                  <option value="TIA">TIA / USDT (Datos Reales)</option>
+                  <option value="WLD">WLD / USDT (Datos Reales)</option>
+                </select>
               </div>
-              <div class="barbell-details">
-                <div class="barbell-row">
-                  <span>Rendimiento Pasivo:</span>
-                  <strong class="text-emerald" id="vaultDailyYieldVal">+$1.68 USDT/día</strong>
-                </div>
-                <div class="barbell-row">
-                  <span>Estrategia:</span>
-                  <span>Long Spot + Short 1x Perp</span>
-                </div>
+
+              <div class="param-item">
+                <label for="select-direction">Sesgo Operativo:</label>
+                <select id="select-direction" class="studio-select">
+                  <option value="short_only">Short-Bias (Desinflación 4H)</option>
+                  <option value="long_only">Long-Only (Momentum)</option>
+                  <option value="both">Bidireccional (Long / Short)</option>
+                </select>
               </div>
-              <!-- Mini lista de posiciones activas en Bóveda -->
-              <div class="vault-positions-list" id="vaultPositionsList">
-                <!-- Inyectado dinámicamente -->
+
+              <div class="param-item">
+                <label for="select-leverage">Apalancamiento:</label>
+                <select id="select-leverage" class="studio-select">
+                  <option value="1.5">1.5x Moderado (Half-Kelly)</option>
+                  <option value="1.0">1.0x Plano (Sin apalancar)</option>
+                  <option value="2.0">2.0x Convicción Alta</option>
+                </select>
+              </div>
+
+              <div class="param-item">
+                <label for="select-stoploss">Stop Loss / Trailing:</label>
+                <select id="select-stoploss" class="studio-select">
+                  <option value="0.10">SL: -10% | Trailing: 4%</option>
+                  <option value="0.05">SL: -5% | Trailing: 2%</option>
+                  <option value="0.15">SL: -15% | Trailing: 6%</option>
+                </select>
               </div>
             </div>
-          </div>
-        </article>
 
-        <!-- Panel 6: Terminal Log en Tiempo Real -->
-        <article class="glass-panel" id="panel-terminal-logs">
-          <div class="panel-header">
-            <h2>
-              <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16">
-                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2z"/>
-                <path d="M5.854 4.146a.5.5 0 0 1 0 .708L3.707 7l2.147 2.146a.5.5 0 0 1-.708.708l-2.5-2.5a.5.5 0 0 1 0-.708l2.5-2.5a.5.5 0 0 1 .708 0zM7 10.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
-              </svg>
-              Consola de Auditoría Autónoma
-            </h2>
-            <span class="panel-tag">LIVE AUDIT LOG</span>
+            <!-- Botones de Acción del Studio -->
+            <div class="studio-actions-bar">
+              <button class="btn-action btn-studio-run" id="btn-run-backtest">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                Ejecutar Backtest Rápido
+              </button>
+              <button class="btn-action btn-studio-deploy" id="btn-deploy-sandbox" disabled title="Ejecuta primero un backtest exitoso">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                Desplegar a Incubadora (SANDBOX)
+              </button>
+            </div>
           </div>
-          <div class="terminal-console" id="terminalLogConsole">
-            <!-- Líneas de log reactivas -->
+
+          <!-- Columna Derecha del Studio: Resultados del Backtest -->
+          <div class="studio-results" id="studioResults">
+            <div class="backtest-kpi-grid">
+              <div class="bt-kpi-card">
+                <span class="bt-kpi-lbl">Retorno Neto</span>
+                <strong class="bt-kpi-val" id="btNetReturn">-- %</strong>
+              </div>
+              <div class="bt-kpi-card">
+                <span class="bt-kpi-lbl">Sharpe Ratio</span>
+                <strong class="bt-kpi-val text-cyan" id="btSharpe">--</strong>
+              </div>
+              <div class="bt-kpi-card">
+                <span class="bt-kpi-lbl">Max Drawdown</span>
+                <strong class="bt-kpi-val text-rose" id="btMaxDD">-- %</strong>
+              </div>
+              <div class="bt-kpi-card">
+                <span class="bt-kpi-lbl">Win Rate</span>
+                <strong class="bt-kpi-val text-emerald" id="btWinRate">-- %</strong>
+              </div>
+              <div class="bt-kpi-card">
+                <span class="bt-kpi-lbl">Trades (N)</span>
+                <strong class="bt-kpi-val" id="btTotalTrades">--</strong>
+              </div>
+              <div class="bt-kpi-card">
+                <span class="bt-kpi-lbl">Score DSR</span>
+                <strong class="bt-kpi-val text-purple" id="btDSRScore">-- %</strong>
+              </div>
+            </div>
+
+            <!-- Gráfico de Equity del Backtest -->
+            <div class="backtest-chart-container">
+              <canvas id="backtestChart"></canvas>
+            </div>
           </div>
-        </article>
-      </aside>
-    </main>
+        </div>
+      </section>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: INCUBADORA AUTÓNOMA & AUTOPSIAS FORENSES                          -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane" id="tab-autonomous-incubator">
+      <!-- LIVE WORKFLOW PIPELINE ANIMATION BAR -->
+      <section class="pipeline-section glass-panel" id="pipeline-panel" style="margin-bottom: 24px;">
+        <div class="panel-header" style="margin-bottom: 12px;">
+          <h2>
+            <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
+            Flujo de Auto-Mejora y Transición Cuantitativa en Tiempo Real
+          </h2>
+          <span class="panel-tag" id="pipeline-status-badge">REPOSO (IDLE)</span>
+        </div>
+
+        <div class="pipeline-stepper" id="pipelineStepper">
+          <div class="pipeline-step" id="step-monitor">
+            <div class="step-icon">1</div>
+            <div class="step-info">
+              <span class="step-title">1. Observabilidad</span>
+              <span class="step-desc">IC & CUSUM Decay</span>
+            </div>
+          </div>
+          <div class="pipeline-connector" id="conn-1"></div>
+
+          <div class="pipeline-step" id="step-autopsy">
+            <div class="step-icon">2</div>
+            <div class="step-info">
+              <span class="step-title">2. Autopsia IA</span>
+              <span class="step-desc">DeepSeek-R1 Forense</span>
+            </div>
+          </div>
+          <div class="pipeline-connector" id="conn-2"></div>
+
+          <div class="pipeline-step" id="step-synthesis">
+            <div class="step-icon">3</div>
+            <div class="step-info">
+              <span class="step-title">3. Síntesis AST</span>
+              <span class="step-desc">Microestructura Zero-Eval</span>
+            </div>
+          </div>
+          <div class="pipeline-connector" id="conn-3"></div>
+
+          <div class="pipeline-step" id="step-diversity">
+            <div class="step-icon">4</div>
+            <div class="step-info">
+              <span class="step-title">4. Incubación</span>
+              <span class="step-desc">MAP-Elites & Sandbox</span>
+            </div>
+          </div>
+          <div class="pipeline-connector" id="conn-4"></div>
+
+          <div class="pipeline-step" id="step-rebalance">
+            <div class="step-icon">5</div>
+            <div class="step-info">
+              <span class="step-title">5. Asignación HRP</span>
+              <span class="step-desc">Risk Parity & Live Exec</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Content Layout del Optimizer -->
+      <main class="main-dashboard-grid">
+        <section class="left-column">
+          <!-- Panel 1: Gráfico de Equity de Portafolio -->
+          <article class="glass-panel" id="panel-equity-chart">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16"><path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.707l-4.146 4.147a.5.5 0 0 1-.708 0L7 6.707l-4.646 4.647a.5.5 0 0 1-.708-.708l5-5a.5.5 0 0 1 .708 0L9.5 7.793 13.293 4H10.5a.5.5 0 0 1-.5-.5z"/></svg>
+                Curva de Equity de Portafolio & Auto-Recuperación
+              </h2>
+              <span class="panel-tag">ONLINE HRP ALLOCATION</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="equityChart"></canvas>
+            </div>
+          </article>
+
+          <!-- Panel 2: Gráfico de Information Coefficient (IC) Rodante -->
+          <article class="glass-panel" id="panel-ic-chart">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-emerald)" viewBox="0 0 16 16"><path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2z"/></svg>
+                Monitoreo de Predictibilidad: Rolling IC & Detección de Decay
+              </h2>
+              <span class="panel-tag">SPEARMAN RANK CORRELATION</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="icChart"></canvas>
+            </div>
+          </article>
+
+          <!-- Panel 3: Tabla de la Incubadora de Estrategias -->
+          <article class="glass-panel" id="panel-incubator-table">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-purple)" viewBox="0 0 16 16"><path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11z"/></svg>
+                Estado de la Incubadora & Asignación de Capital
+              </h2>
+              <span class="panel-tag">LIFECYCLE STATE MACHINE</span>
+            </div>
+            <div class="table-responsive">
+              <table class="quant-table" id="incubatorTable">
+                <thead>
+                  <tr>
+                    <th>Estrategia ID</th>
+                    <th>Fórmula Simbólica</th>
+                    <th>Estado</th>
+                    <th>Peso Asignado</th>
+                    <th>Backtest Sharpe</th>
+                    <th>IC Actual</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="incubatorTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- Panel 4: Historial de Resultados & Ciclos -->
+          <article class="glass-panel" id="panel-cycle-history">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-amber)" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.756.2 1.114.34l-.348.935zm1.87 1.015a6.995 6.995 0 0 0-.825-.57l.487-.873c.338.189.658.404.957.643l-.619.8zm1.608 1.491c-.244-.224-.51-.43-.794-.616l.547-.837c.334.218.647.46.934.723l-.687.73zm1.207 1.87a6.989 6.989 0 0 0-.616-.794l.73-.687c.263.287.505.6.723.934l-.837.547zm.758 2.052a7.001 7.001 0 0 0-.34-.985l.935-.348c.14.358.254.731.34 1.114l-.976-.219zM8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/></svg>
+                Historial de Resultados y Ciclos de Optimización
+              </h2>
+              <span class="panel-tag" id="tag-history-count">0 CICLOS REGISTRADOS</span>
+            </div>
+            <div class="table-responsive">
+              <table class="quant-table" id="cycleHistoryTable">
+                <thead>
+                  <tr>
+                    <th>Hora / Timestamp</th>
+                    <th>Estrategias Live</th>
+                    <th>Degradadas</th>
+                    <th>Promovidas</th>
+                    <th>Coste Ciclo</th>
+                    <th>Meta Sharpe</th>
+                    <th>Detalle / Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="cycleHistoryTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <aside class="right-column">
+          <!-- Autopsias Forenses -->
+          <article class="glass-panel" id="panel-autopsies">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-rose)" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
+                Autopsias Forenses de Alphas (DeepSeek-R1)
+              </h2>
+              <span class="panel-tag">FORENSIC AGENT</span>
+            </div>
+            <div id="autopsyListContainer"></div>
+          </article>
+
+          <!-- Archivo de Diversidad -->
+          <article class="glass-panel" id="panel-diversity-archive">
+            <div class="panel-header">
+              <h2>
+                <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/></svg>
+                Archivo de Diversidad (MAP-Elites)
+              </h2>
+              <span class="panel-tag">DESCORRELACIÓN &lt; 0.50</span>
+            </div>
+            <div id="diversityNichesContainer"></div>
+          </article>
+        </aside>
+      </main>
+    </div>
   </div>
 
   <script src="js/app.js"></script>

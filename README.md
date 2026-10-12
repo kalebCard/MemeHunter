@@ -1,6 +1,6 @@
-# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit IA (v7.0)
+# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit Unificado (v7.2)
 
-Plataforma cuantitativa institucional que combina **minería genética de factores (NSGA-II)**, **ingesta continua de Dollar Bars en tiempo real desde Binance**, **bucle cerrado de auto-sanación con detección CUSUM e IC Decay**, **cerebro cognitivo de autopsias y síntesis semántica vía OpenRouter**, y un **Cockpit Visual interactivo** para monitoreo y control en vivo.
+Plataforma cuantitativa institucional que combina **minería genética de factores (NSGA-II)**, **ingesta continua de Dollar Bars en tiempo real desde Binance**, **bucle cerrado de auto-sanación con detección CUSUM e IC Decay**, **cerebro cognitivo de autopsias y síntesis semántica vía OpenRouter**, un **Laboratorio Cuantitativo en Vivo (Strategy Studio)** con compilador AST *Zero-Eval*, y un **Centro de Control Unificado (Unified Mission Control Cockpit)** para monitoreo, backtesting y ejecución en tiempo real.
 
 ---
 
@@ -8,6 +8,7 @@ Plataforma cuantitativa institucional que combina **minería genética de factor
 
 La documentación del proyecto se encuentra estructurada en el directorio [`docs/`](docs/README.md):
 
+* **[Manual Maestro Unificado del Sistema (v7.2):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa y operativa.
 * **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
 * **Plan Scrum de Remediación & Hardening (v7.1):** [docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md)
 * **Arquitectura de Software Auto-Evolutiva (v7.0):** [docs/architecture/DAS_AUTONOMOUS_ENGINE.md](docs/architecture/DAS_AUTONOMOUS_ENGINE.md)
@@ -20,19 +21,22 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🚀 Innovaciones Clave de la Versión 7.0 & 7.1
+## 🚀 Innovaciones Clave de la Versión 7.0, 7.1 & 7.2
 
-1. **Bucle Cerrado Auto-Evolutivo (Closed-Loop Engine):**
+1. **Centro de Control Unificado (Cockpit v7.2) & Sistema de 4 Pestañas:**
+   * **`🎮 Centro de Mando (Live)`:** Monitoreo en tiempo real de la estrategia activa en Docker (`MemeHunterFuturesV7_Quantum`), posiciones abiertas y trades cerrados desde SQLite (`tradesv3.futures.sqlite`), defensas de Hardening (FFD, Kelly, Killswitch -25%, Funding Guardian) y arquitectura Barbell.
+   * **`📚 Estrategias & Backtests (Freqtrade)`:** Catálogo visual de las 11 estrategias Python físicas (`user_data/strategies/`) y descompresor automático de los 34 reportes históricos `.zip` en `user_data/backtest_results/` con análisis de estrés y Monte Carlo.
+   * **`🧪 Laboratorio Cuantitativo (Studio)`:** Diseñador simbólico con validación AST *Zero-Eval*, backtesting vectorial 4H con comisiones y slippage sobre datos reales de Binance Futures y despliegue a Sandbox en 1 clic.
+   * **`🧠 Incubadora Autónoma`:** Pipeline de 5 etapas, curvas de equity HRP, rolling IC decay, autopsias forenses y MAP-Elites.
+2. **Bucle Cerrado Auto-Evolutivo (Closed-Loop Engine):**
    * **Monitoreo Continuo:** `AlphaHealthMonitor` calcula Information Coefficient (IC) rodante y detecta rupturas estructurales con CUSUM (Page-Hinkley) y *data drift* con Kolmogorov-Smirnov.
-   * **Incubadora Autónoma:** Transición mecánica sin intervención humana entre `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED` con período de gracia real.
+   * **Incubadora Autónoma:** Transición mecánica sin intervención humana entre `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED` con período de gracia real y persistencia atómica (`atomic_write_json`).
    * **Asignación HRP:** Reponderación dinámica de capital vía Paridad Jerárquica de Riesgo con regularización ante singularidades de varianza.
-2. **Cerebro Cognitivo de IA (OpenRouter) & Fallback Offline:**
+3. **Cerebro Cognitivo de IA (OpenRouter) & Fallback Offline:**
    * **Autopsias Forenses (`AlphaAutopsyAgent`):** Modelos de razonamiento profundo (DeepSeek-R1 / Claude 3.5 Sonnet) identifican la causa raíz de la degradación y emiten recomendaciones de búsqueda con marcas de tiempo UTC dinámicas.
    * **Síntesis Semántica (`LLMAlphaSynthesizer`):** Formulación de factores basados en hipótesis de microestructura (desbalances de volumen, Amihud ratio, compresión en Dollar Bars).
    * **Compilador Seguro (`FormulaASTParser`):** Sanitizador AST *Zero Eval* compatible con Python 3.14 (`ast.Constant`).
    * **Fallback Heurístico Resiliente:** Si no hay API key de inferencia o falla la red, el sistema opera en modo offline heurístico autónomo a coste $0.00 USD.
-3. **Cockpit Visual Seguro y Multihilo (Dashboard Web):**
-   * Servidor HTTP concurrente (`ThreadingHTTPServer`) accesible en `http://localhost:8088` con autenticación por token Bearer en endpoints de control y CORS restringido.
 4. **Streaming en Vivo sin Deadlock (`LiveMarketFeed`):**
    * Ingesta de velas y trades de memecoins (`DOGE`, `PEPE`, `SHIB`) con lock reentrante (`RLock`) y notificación de eventos desacoplada para máxima concurrencia.
 5. **Gobernanza Económica, Límites de Gasto y Meta de Parada:**
@@ -129,11 +133,28 @@ docker compose -f docker-compose.futures.yml up -d
 * **Dashboard Web (FreqUI):** [http://localhost:8081](http://localhost:8081)
 * **Cockpit Visual Seguro:** [http://localhost:8088](http://localhost:8088) *(No colisiona con FreqUI)*
 
-### 4. Ejecutar la Suite Completa de Tests (110 Tests Certificados)
+### 4. Ejecutar la Suite Completa de Tests (117 Tests Certificados)
 ```powershell
 docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
 ```
-* **Certificación:** **110/110 tests pasando al 100% (0 errores)** en contenedor hermético.
+* **Certificación:** **117/117 tests pasando al 100% (0 errores)** en contenedor hermético.
+
+---
+
+## 🌐 API REST del Centro de Control Unificado (`http://localhost:8088`)
+
+| Método | Endpoint | Descripción | Autenticación |
+| :---: | :--- | :--- | :---: |
+| `GET` | `/api/status` | Resumen global del sistema, estrategia activa, estado HRP, Barbell y métricas. | Pública |
+| `GET` | `/api/strategies-catalog` | Catálogo de las 11 estrategias Python físicas en `user_data/strategies/`. | Pública |
+| `GET` | `/api/backtests-catalog` | Historial de los 34 reportes `.zip` de backtesting en `user_data/backtest_results/`. | Pública |
+| `GET` | `/api/stress-report` | Pruebas de choque de fricción y desglose trimestral de consistencia. | Pública |
+| `GET` | `/api/live-trades` | Posiciones abiertas y trades cerrados extraídos de `tradesv3.futures.sqlite`. | Pública |
+| `POST` | `/api/validate-formula` | Validación sintáctica y seguridad AST *Zero-Eval* de expresiones simbólicas. | Bearer Token |
+| `POST` | `/api/test-strategy` | Backtest rápido vectorial de 4H con comisiones y slippage sobre datos de futuros. | Bearer Token |
+| `POST` | `/api/deploy-to-sandbox` | Inyección atómica de una estrategia validada a la incubadora (`portfolio/incubator_state.json`). | Bearer Token |
+| `POST` | `/api/trigger-loop` | Disparo manual del ciclo autónomo (CUSUM, autopsia, síntesis y HRP). | Bearer Token |
+| `POST` | `/api/synthesize-alpha` | Generación de nuevos alphas semánticos vía inferencia OpenRouter. | Bearer Token |
 
 ---
 
@@ -141,11 +162,13 @@ docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade t
 
 ```
 meme_hunter/
-├── dashboard/                   # 🖥️ Cockpit Visual Web & API REST
-│   ├── index.html               # Interfaz Glassmorphism con Chart.js
+├── dashboard/                   # 🖥️ Centro de Control Unificado & API REST
+│   ├── index.html               # Interfaz Glassmorphism con 4 pestañas de mando
 │   ├── css/style.css            # Sistema de diseño moderno en Vanilla CSS
-│   ├── js/app.js                # Lógica reactiva y gráficos en tiempo real
-│   └── server.py                # Servidor HTTP y API REST integrado
+│   ├── js/app.js                # Lógica reactiva, tab switching y Chart.js
+│   ├── server.py                # Servidor HTTP multihilo y API REST integrada
+│   ├── backtest_scanner.py      # Lector de estrategias, zips de backtest y SQLite
+│   └── strategy_tester.py       # Motor vectorial de backtesting y AST Zero-Eval
 ├── data_engine/                 # 📡 Ingesta y Microestructura
 │   ├── dollar_bars.py           # Generador de Information-Driven Bars
 │   ├── live_market_feed.py      # Streaming en vivo con Binance Spot/Futures
@@ -166,13 +189,17 @@ meme_hunter/
 ├── validation/                  # 🛡️ Validación Institucional Anti-Overfitting
 │   ├── cpcv_engine.py           # Combinatorial Purged Cross-Validation
 │   └── multiple_testing.py      # Control FDR (Benjamini-Hochberg) y PBO
+├── user_data/                   # 📊 Datos de Producción, Estrategias y Resultados
+│   ├── strategies/              # 11 Estrategias Freqtrade Python (V7 Quantum activa)
+│   ├── backtest_results/        # 34 Archivos .zip de backtests históricos y estrés
+│   └── tradesv3.futures.sqlite  # Base de datos de posiciones y órdenes de futuros
 ├── docs/                        # 📚 Centro integral de documentación
 │   ├── architecture/            # DAS v7.0 y registros ADR
 │   ├── sprints/                 # Sprints de ingeniería ágil
 │   ├── strategy/                # Hipótesis y modelos de escalado
 │   └── reports/                 # Informes de auditoría forense
 ├── scripts/                     # 🛠️ Suite de herramientas ejecutables
-└── tests/                       # 🧪 Pruebas unitarias e integrales (100% pass)
+└── tests/                       # 🧪 Pruebas unitarias e integrales (117 tests, 100% pass)
 ```
 
 ### Ejecutar las Pruebas Automatizadas

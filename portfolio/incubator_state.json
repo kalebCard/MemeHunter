@@ -75,5 +75,16 @@
     "days_in_stage": 0,
     "decay_zscore": 0.0,
     "last_audit_date": "2026-10-12"
+  },
+  "STUDIO_1000PEPE_1791827708": {
+    "strategy_id": "STUDIO_1000PEPE_1791827708",
+    "name": "ts_decay_linear(returns, 5) * ts_rank(volume, 10)",
+    "status": "SANDBOX",
+    "target_capital_weight": 0.0,
+    "backtest_sharpe": 4.55,
+    "live_sharpe": 0.0,
+    "days_in_stage": 0,
+    "decay_zscore": 0.0,
+    "last_audit_date": "2026-10-12"
   }
 }

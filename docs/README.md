@@ -2,13 +2,13 @@
 id: DOC-INDEX-001
 title: Centro de Documentación y Convenciones del Sistema
 category: index
-version: 7.1
+version: 7.2
 status: ACTIVE
-last_updated: 2026-10-11
+last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 ---
 
-# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v7.1)
+# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v7.2)
 
 Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y operativa de **Meme Hunter**. Toda la información del proyecto ha sido estandarizada bajo convenciones formales de ingeniería documental (**DocOps**) y el marco pedagógico Diátaxis.
 
@@ -17,7 +17,7 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 ## 🌟 Documento de Referencia Principal
 
 > ### 👉 [📖 Manual Maestro Unificado del Sistema (DOC-MASTER-001)](MANUAL_UNIFICADO_DEL_SISTEMA.md)
-> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con cognición IA y catálogo de scripts.*
+> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con cognición IA, Centro de Control Unificado (Cockpit v7.2) y catálogo de scripts.*
 
 ---
 
@@ -25,7 +25,7 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 
 ```
 docs/
-├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v7.1
+├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v7.2
 ├── architecture/
 │   ├── DAS_AUTONOMOUS_ENGINE.md     # 🌌 Arquitectura v7.0: Motor Auto-Evolutivo & Cockpit IA
 │   ├── DAS.md                       # Documento de Arquitectura de Software base (v6.0)

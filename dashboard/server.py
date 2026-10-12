@@ -11,6 +11,7 @@ Provee:
 import os
 import sys
 import json
+import time
 import logging
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from typing import Dict, Any
@@ -27,6 +28,12 @@ from mining.alpha_daemon import AlphaMinerDaemon
 from mining.llm_alpha_generator import LLMAlphaSynthesizer
 from mining.llm_client import OpenRouterClient
 from portfolio.atomic_io import atomic_write_json
+from dashboard.backtest_scanner import (
+    scan_strategies,
+    scan_backtest_results,
+    load_stress_and_monte_carlo,
+    get_live_trades_from_db
+)
 
 logger = logging.getLogger("CockpitServer")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -57,6 +64,14 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             return super().do_GET()
         elif self.path == "/api/status":
             self._handle_api_status()
+        elif self.path == "/api/strategies-catalog":
+            self._handle_strategies_catalog()
+        elif self.path == "/api/backtests-catalog":
+            self._handle_backtests_catalog()
+        elif self.path == "/api/stress-report":
+            self._handle_stress_report()
+        elif self.path == "/api/live-trades":
+            self._handle_live_trades()
         else:
             return super().do_GET()
 
@@ -69,6 +84,12 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             self._handle_trigger_loop()
         elif self.path == "/api/synthesize-alpha":
             self._handle_synthesize_alpha()
+        elif self.path == "/api/validate-formula":
+            self._handle_validate_formula()
+        elif self.path == "/api/test-strategy":
+            self._handle_test_strategy()
+        elif self.path == "/api/deploy-to-sandbox":
+            self._handle_deploy_to_sandbox()
         else:
             self.send_error(404, "Endpoint no encontrado")
 
@@ -185,8 +206,18 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             except Exception as e:
                 logger.error(f"Error leyendo vault_state: {e}")
 
+        # Resumen del ecosistema Freqtrade
+        prod_strats = scan_strategies()
+        backtests_data = scan_backtest_results()
+        live_trades_data = get_live_trades_from_db()
+
         self._send_json({
             "status": "ONLINE",
+            "active_strategy": "MemeHunterFuturesV7_Quantum",
+            "production_strategies_count": len(prod_strats),
+            "historical_backtests_count": len(backtests_data),
+            "open_positions": live_trades_data.get("open_positions", []),
+            "total_realized_profit": live_trades_data.get("total_realized_profit", 0.0),
             "strategies": strategies,
             "autopsies": autopsies,
             "niches": niches,
@@ -194,6 +225,26 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             "ratchet": ratchet_data,
             "vault": vault_data
         })
+
+    def _handle_strategies_catalog(self):
+        """Devuelve el catálogo de las 11 estrategias Python físicas de Freqtrade."""
+        strats = scan_strategies()
+        self._send_json({"success": True, "strategies": strats, "total": len(strats)})
+
+    def _handle_backtests_catalog(self):
+        """Devuelve los 34 reportes históricos de backtesting extraídos de los zips."""
+        bts = scan_backtest_results()
+        self._send_json({"success": True, "backtests": bts, "total": len(bts)})
+
+    def _handle_stress_report(self):
+        """Devuelve el reporte de Stress Testing y Monte Carlo."""
+        rep = load_stress_and_monte_carlo()
+        self._send_json({"success": True, "data": rep})
+
+    def _handle_live_trades(self):
+        """Devuelve posiciones abiertas y trades recientes de la BD SQLite."""
+        trades = get_live_trades_from_db()
+        self._send_json({"success": True, "data": trades})
 
     def _handle_trigger_loop(self):
         """Ejecuta un ciclo autónomo de auto-diagnóstico en vivo."""
@@ -333,6 +384,86 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             logger.error(f"Error sintetizando alphas: {e}", exc_info=True)
             self._send_json({"success": False, "error": str(e)}, status_code=500)
+
+    def _read_json_body(self) -> Dict[str, Any]:
+        content_len = int(self.headers.get("Content-Length", 0))
+        if content_len == 0:
+            return {}
+        raw = self.rfile.read(content_len)
+        try:
+            return json.loads(raw.decode("utf-8"))
+        except Exception:
+            return {}
+
+    def _handle_validate_formula(self):
+        """Valida una fórmula mediante AST Zero-Eval."""
+        data = self._read_json_body()
+        formula = data.get("formula", "").strip()
+        from dashboard.strategy_tester import validate_formula_ast
+        res = validate_formula_ast(formula)
+        self._send_json(res)
+
+    def _handle_test_strategy(self):
+        """Ejecuta el backtest rápido vectorial de una estrategia diseñada."""
+        try:
+            data = self._read_json_body()
+            formula = data.get("formula", "").strip()
+            pair = data.get("pair", "1000PEPE")
+            timeframe = data.get("timeframe", "4h")
+            direction = data.get("direction", "short_only")
+            leverage = float(data.get("leverage", 1.5))
+            stoploss = float(data.get("stoploss", 0.10))
+            trailing_stop = float(data.get("trailing_stop", 0.04))
+
+            logger.info(f"Ejecutando backtest para fórmula '{formula}' en {pair} ({timeframe}, {direction}, {leverage}x)...")
+            from dashboard.strategy_tester import run_strategy_backtest
+            res = run_strategy_backtest(
+                formula=formula,
+                pair=pair,
+                timeframe=timeframe,
+                direction=direction,
+                leverage=leverage,
+                stoploss_pct=stoploss,
+                trailing_stop_pct=trailing_stop
+            )
+            self._send_json(res)
+        except Exception as e:
+            logger.error(f"Error en backtest: {e}", exc_info=True)
+            self._send_json({"success": False, "status": "error", "error": str(e)}, status_code=500)
+
+    def _handle_deploy_to_sandbox(self):
+        """Inyecta una estrategia testeada a la incubadora en estado SANDBOX."""
+        try:
+            data = self._read_json_body()
+            strategy_id = data.get("strategy_id", f"CUSTOM_{int(time.time())}")
+            formula = data.get("formula", "").strip()
+            sharpe = float(data.get("backtest_sharpe", data.get("sharpe", 0.0)))
+
+            incubator_path = os.path.join(BASE_DIR, "portfolio", "incubator_state.json")
+            incubator = StrategyLifecycleIncubator()
+            if os.path.exists(incubator_path):
+                incubator.load_state(incubator_path)
+
+            rec = incubator.register_strategy(strategy_id=strategy_id, name=formula, backtest_sharpe=sharpe)
+            incubator.save_state(incubator_path)
+            logger.info(f"Estrategia {strategy_id} desplegada exitosamente a SANDBOX (Sharpe: {sharpe}).")
+
+            self._send_json({
+                "success": True,
+                "status": "success",
+                "message": f"Estrategia '{strategy_id}' registrada con éxito en SANDBOX.",
+                "strategy": {
+                    "id": rec.strategy_id,
+                    "name": rec.name,
+                    "status": rec.status.value,
+                    "backtest_sharpe": rec.backtest_sharpe
+                }
+            })
+        except Exception as e:
+            logger.error(f"Error desplegando a sandbox: {e}", exc_info=True)
+            self._send_json({"success": False, "status": "error", "error": str(e)}, status_code=500)
+
+
 
 
 def run_server(port: int = 8088):
