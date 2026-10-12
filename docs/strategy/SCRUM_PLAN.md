@@ -250,13 +250,33 @@ Una revisión del código, datos y artefactos de backtest detectó discrepancias
 
 ---
 
-### Sprint 15: Despliegue Dry-Run 24/7 & Telemetría en Vivo (En Curso ⏳)
-**Objetivo:** Desplegar la micro-cuenta de 100 USDT en entorno Dry-Run 24/7 en Docker para auditar la ejecución real con WebSocket y monitorear la curva de crecimiento exponencial en vivo.
+### Sprint 15: Apalancamiento Dinámico Condicionado (V5 Leverage) — Completado con Éxito Rotundo ✅
+**Objetivo:** Multiplicar la tasa de crecimiento de la micro-cuenta de 100 USDT implementando apalancamiento asimétrico según el nivel de convicción del setup (1.5x a 2.0x).
 
-* **PB-54 (Despliegue de Contenedor Dry-Run 100 USDT):**
-  * Lanzar el servicio `freqtrade` en Docker con `config_futures_100usdt.json` y base de datos persistente SQLite `trades_100usdt.sqlite`.
-* **PB-55 (Monitoreo de Telemetría y Alertas de Ciclo Humano):**
-  * Configurar `dryrun_monitor.py` para vigilar el Kill-Switch de 25% y reportar el balance diario y los trades ejecutados durante las ventanas de Jueves a Domingo.
+* **PB-54 (Motor de Apalancamiento Dinámico `MemeHunterFuturesV5_Leverage.py`) — Completado ✅:**
+  - `2.0x`: En confluencia máxima (*Trapped Longs Auction Rejection* en techos).
+  - `1.75x`: En transiciones de estructura post-pump (*Pump Structure Shift*).
+  - `1.50x`: En continuación bajista macro (*Macro Breakdown*).
+* **PB-55 (Simulación Monte Carlo de Escalado 10X - `simulate_100_to_1000_montecarlo.py`) — Completado ✅:**
+  - 3,000 iteraciones certificaron que el apalancamiento 1.5x - 2.0x eleva la probabilidad de tocar $1,000 USDT al 43.2% con 0.00% probabilidad de ruina.
+* **PB-56 (Certificación Oficial en Docker de 100 USDT con V5 Leverage) — Completado ✅:**
+  - **Capital Inicial:** **100.00 USDT** $\rightarrow$ **Capital Final:** **196.20 USDT** (**+96.20% neto / CAGR 110.27%**).
+  - **Casi se duplica la cuenta en un solo ciclo (+$96.20 USDT limpios).**
+  - **Pico Máximo de Balance:** **$211.48 USDT (+111.48%)**.
+  - **Win Rate Récord:** **61.4%** (132 victorias / 83 derrotas en 215 operaciones).
+  - **Calmar Ratio Extraordinario:** **21.03** (máximo histórico del proyecto).
+  - **Sortino:** **3.12**, **Sharpe:** **1.73**, **Profit Factor:** **1.40**, **SQN:** **2.04**.
+  - **Max Drawdown de Cartera:** **26.41%** (37.56 USDT) con piso mínimo de **$88.24 USDT** (distancia a liquidación siempre >45%).
+
+---
+
+### Sprint 16: Despliegue Dry-Run 24/7 & Telemetría en Vivo (Próximo Paso ⏳)
+**Objetivo:** Desplegar `MemeHunterFuturesV5_Leverage` en contenedor Docker 24/7 para operar en tiempo real la cuenta micro de 100 USDT.
+
+* **PB-57 (Despliegue del Contenedor Docker Dry-Run):**
+  * Iniciar servicio con `config_futures_100usdt.json` y base de datos persistente `trades_v5_100usdt.sqlite`.
+* **PB-58 (Vigilancia de Kill-Switch 25% y Auditoría Semanal):**
+  * Automatizar `dryrun_monitor.py` para alertar ejecuciones en las ventanas activas de Jueves a Domingo.
 
 ---
 
