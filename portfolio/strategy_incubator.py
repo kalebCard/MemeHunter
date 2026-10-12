@@ -168,5 +168,35 @@ class StrategyLifecycleIncubator:
         # Convertir enum a string
         for k, v in data.items():
             v['status'] = v['status'].value if hasattr(v['status'], 'value') else str(v['status'])
-        with open(filepath, 'w', encoding='utf-8') as f:
+        temp_file = f"{filepath}.tmp"
+        with open(temp_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
+        os.replace(temp_file, filepath)
+
+    def load_state(self, filepath: str = "portfolio/incubator_state.json") -> None:
+        """Carga el estado de la incubadora desde disco si existe."""
+        if not os.path.exists(filepath):
+            return
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            for sid, item in data.items():
+                status_str = item.get("status", "SANDBOX")
+                try:
+                    status = StrategyLifecycleStatus(status_str)
+                except ValueError:
+                    status = StrategyLifecycleStatus.SANDBOX
+                rec = StrategyRecord(
+                    strategy_id=item["strategy_id"],
+                    name=item["name"],
+                    status=status,
+                    target_capital_weight=float(item.get("target_capital_weight", 0.0)),
+                    backtest_sharpe=float(item.get("backtest_sharpe", 0.0)),
+                    live_sharpe=float(item.get("live_sharpe", 0.0)),
+                    days_in_stage=int(item.get("days_in_stage", 0)),
+                    decay_zscore=float(item.get("decay_zscore", 0.0)),
+                    last_audit_date=item.get("last_audit_date", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+                )
+                self.strategies[sid] = rec
+        except Exception as e:
+            pass

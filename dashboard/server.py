@@ -171,27 +171,74 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             sig_ok = ret * 0.8 + np.random.normal(0, 0.002, 60)
             sig_bad = np.random.normal(0, 1.0, 60)
 
-            signals_df = pd.DataFrame({'ALPHA_MOM_01': sig_ok, 'ALPHA_VOL_02': sig_bad}, index=dates)
-            fwd_ret = pd.Series(ret, index=dates)
-            ret_matrix = pd.DataFrame({'ALPHA_MOM_01': ret, 'ALPHA_VOL_02': -ret}, index=dates)
+            incubator_path = os.path.join(BASE_DIR, "portfolio", "incubator_state.json")
+            archive_path = os.path.join(BASE_DIR, "mining", "diversity_archive.json")
+            autopsy_path = os.path.join(BASE_DIR, "portfolio", "autopsies.json")
 
             incubator = StrategyLifecycleIncubator()
-            incubator.register_strategy("ALPHA_MOM_01", "ts_rank(close, 14)", 2.1, StrategyLifecycleStatus.LIVE)
-            incubator.register_strategy("ALPHA_VOL_02", "ts_delay(close, 10)", 1.6, StrategyLifecycleStatus.LIVE)
+            if os.path.exists(incubator_path):
+                incubator.load_state(incubator_path)
+            
+            # Si no hay estrategias registradas, registrar lote base
+            if not incubator.strategies:
+                incubator.register_strategy("ALPHA_MOM_01", "ts_rank(close, 14)", 2.1, StrategyLifecycleStatus.LIVE)
+                incubator.register_strategy("ALPHA_VOL_02", "ts_zscore((high - low), 10) * rvol", 1.85, StrategyLifecycleStatus.LIVE)
+                incubator.register_strategy("ALPHA_DECAY_03", "ts_delay(close, 10)", 1.4, StrategyLifecycleStatus.LIVE)
+
+            daemon = AlphaMinerDaemon(archive_path=archive_path)
+            daemon.archive.load_archive(archive_path)
+
+            autopsy_agent = AlphaAutopsyAgent(history_path=autopsy_path)
+            llm_synthesizer = LLMAlphaSynthesizer()
 
             orchestrator = AutonomousPortfolioOrchestrator(
                 incubator=incubator,
                 health_monitor=AlphaHealthMonitor(rolling_window=20),
-                miner_daemon=AlphaMinerDaemon(),
-                autopsy_agent=AlphaAutopsyAgent(),
-                llm_synthesizer=LLMAlphaSynthesizer()
+                miner_daemon=daemon,
+                autopsy_agent=autopsy_agent,
+                llm_synthesizer=llm_synthesizer
             )
+
+            # Construir señales con las estrategias vivas en la incubadora
+            sig_dict = {}
+            ret_dict = {}
+            strat_keys = list(incubator.strategies.keys())
+            for idx, sid in enumerate(strat_keys):
+                # Si es una estrategia degradada simular choque, de lo contrario retener señal
+                if "DECAY" in sid or idx == len(strat_keys) - 1:
+                    sig_dict[sid] = sig_bad
+                    ret_dict[sid] = -ret
+                else:
+                    sig_dict[sid] = sig_ok
+                    ret_dict[sid] = ret
+
+            signals_df = pd.DataFrame(sig_dict, index=dates)
+            fwd_ret = pd.Series(ret, index=dates)
+            ret_matrix = pd.DataFrame(ret_dict, index=dates)
+
+            # Crear DataFrame de mercado sintético si no hay streaming activo
+            market_df = pd.DataFrame({
+                'open': np.ones(60) * 10,
+                'high': np.ones(60) * 10.5,
+                'low': np.ones(60) * 9.5,
+                'close': np.ones(60) * 10,
+                'volume': np.random.uniform(500, 2000, 60),
+                'vwap': np.ones(60) * 10,
+                'rvol': np.ones(60),
+                'hl_spread': np.ones(60) * 0.1,
+                'returns': ret
+            }, index=dates)
 
             report = orchestrator.process_cycle(
                 signals_df=signals_df,
                 forward_returns=fwd_ret,
-                returns_matrix_df=ret_matrix
+                returns_matrix_df=ret_matrix,
+                market_df=market_df
             )
+
+            # Persistir estado actualizado de forma atómica
+            incubator.save_state(incubator_path)
+            daemon.archive.save_archive(archive_path)
 
             self._send_json({
                 "success": True,
