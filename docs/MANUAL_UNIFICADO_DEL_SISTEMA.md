@@ -23,10 +23,11 @@ Este documento consolida la totalidad del conocimiento teórico, arquitectónico
 5. [Microestructura de Mercado y Control de Fricciones](#5-microestructura-de-mercado-y-control-de-fricciones)
 6. [Motor Cuantitativo Auto-Evolutivo, Cognición IA y Modelo Económico](#6-motor-cuantitativo-auto-evolutivo-cognición-ia-y-modelo-económico)
 7. [Catálogo Integral de Scripts y Módulos Satélite](#7-catálogo-integral-de-scripts-y-módulos-satélite)
-8. [Protocolos Operativos y Runbook de Producción](#8-protocolos-operativos-y-runbook-de-producción)
+8. [Protocolos Operativos, CLI Unificado y Runbook de Producción](#8-protocolos-operativos-cli-unificado-y-runbook-de-producción)
 9. [Registro de Decisiones Arquitectónicas (ADRs)](#9-registro-de-decisiones-arquitectónicas-adrs)
 10. [Compendio de Estrategia y Hoja de Ruta Cuantitativa](#10-compendio-de-estrategia-y-hoja-de-ruta-cuantitativa)
 11. [Centro de Control Unificado (Cockpit v7.2) y Laboratorio Cuantitativo](#11-centro-de-control-unificado-cockpit-v72-y-laboratorio-cuantitativo)
+12. [Arquitectura de Estabilización y Blindaje Operativo](#12-arquitectura-de-estabilización-y-blindaje-operativo)
 
 ---
 
@@ -156,6 +157,8 @@ graph LR
 
 | Módulo / Script | Propósito Cuantitativo | Comando de Ejecución |
 |---|---|---|
+| [`meme_cli.py`](../scripts/meme_cli.py) | 🌟 **CLI Unificado de Operaciones, Salud, Test y Control** | `python scripts/meme_cli.py [health|cockpit|futures|test|research]` |
+| [`check_health.py`](../scripts/check_health.py) | 🩺 **Centinela de Salud y Diagnóstico Rápido (2 segundos)** | `python scripts/check_health.py` |
 | [`start_dashboard.py`](../scripts/start_dashboard.py) | Cockpit Visual Web multihilo con Chart.js (Puerto 8088) | `python scripts/start_dashboard.py` |
 | [`run_live_alpha_loop.py`](../scripts/run_live_alpha_loop.py) | Bucle cerrado continuo E2E conectado a Binance | `python scripts/run_live_alpha_loop.py` |
 | [`run_autonomous_engine_demo.py`](../scripts/run_autonomous_engine_demo.py) | Demostración E2E del bucle cerrado auto-evolutivo | `python scripts/run_autonomous_engine_demo.py` |
@@ -190,15 +193,20 @@ graph LR
 
 ---
 
-## 8. Protocolos Operativos y Runbook de Producción
+## 8. Protocolos Operativos, CLI Unificado y Runbook de Producción
 
-1. **Despliegue Docker:** Operar en contenedor con `docker compose -f docker-compose.futures.yml up -d` y monitorear FreqUI en puerto 8081 y Cockpit en puerto 8088.
+1. **Gestión Estandarizada mediante CLI (`meme_cli.py`):**
+   * Auditoría de salud operativa: `python scripts/meme_cli.py health` (diagnóstico en ~1.5s).
+   * Monitoreo y control del Cockpit: `python scripts/meme_cli.py cockpit` (puerto 8088).
+   * Motor de futuros en Docker: `python scripts/meme_cli.py futures [start|stop|logs|status]`.
+   * Pruebas automáticas: `python scripts/meme_cli.py test`.
+   * Herramientas de I+D: `python scripts/meme_cli.py research [stress|vault|monte-carlo|sentinel]`.
 2. **Protección Kill-Switch:** Si el drawdown de equidad total alcanza el **25%**, se crea el testigo `user_data/KILL_SWITCH`, bloqueando nuevas entradas de inmediato.
-3. **Criterio de Liberación a Producción:** Ningún código se despliega sin que los **110 tests de la suite completa** pasen al 100%:
+3. **Criterio de Liberación a Producción:** Ningún código se despliega sin que los **117 tests de la suite completa** pasen al 100%:
    ```bash
    docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
    ```
-   **Certificación Oficial:** **110/110 tests pasando al 100% (0 errores)** en contenedor Docker hermético.
+   **Certificación Oficial:** **117/117 tests pasando al 100% (0 errores)** en contenedor Docker hermético.
 
 ---
 
@@ -267,4 +275,47 @@ La suite completa cuenta con **117 tests pasando al 100%** de forma hermética:
 docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
 ```
 Certificando la no-regresión de todos los módulos matemáticos, de microestructura, de red y de visualización.
+
+---
+
+## 12. Arquitectura de Estabilización y Blindaje Operativo
+
+Para mitigar el riesgo de hiper-crecimiento y sobre-ingeniería tras iterar de la versión v1.0 a la v7.2, el sistema adopta el **Modelo de 3 Capas Herméticas**:
+
+```mermaid
+flowchart LR
+    subgraph Capa 1: Core de Ejecución [Capa 1: Core de Ejecución (Misión Crítica)]
+        FT[Freqtrade Futures Engine]
+        DB[(tradesv3.futures.sqlite)]
+        KS[Killswitch -25% & Funding Bleed Guard]
+        V7[MemeHunterFuturesV7_Quantum]
+    end
+
+    subgraph Capa 2: Observabilidad [Capa 2: Cockpit de Observabilidad]
+        CP[Cockpit Web Server :8088]
+        RD[Read-Only SQLite Concurrency]
+        UI[Glassmorphism Dashboard]
+    end
+
+    subgraph Capa 3: Laboratorio I+D [Capa 3: Strategy Studio & Mining Lab]
+        GM[Genetic Miner NSGA-II]
+        LLM[OpenRouter / DeepSeek-R1]
+        INC[Incubadora Sandbox State]
+        ST[Vectorial Strategy Tester]
+    end
+
+    Capa 1 -.->|Solo Lectura Telemetría| Capa 2
+    Capa 3 -.->|Promoción Manual Auditada| Capa 1
+```
+
+### 12.1 Las 3 Capas Herméticas de Protección
+1. **Capa 1: Core de Ejecución (Zero External Dependency):**
+   * El bot de trading (`docker-compose.futures.yml`) ejecuta exclusivamente la estrategia canónica `MemeHunterFuturesV7_Quantum` con margin aislado (`isolated`) y orden pasiva Maker.
+   * **Inviolabilidad:** No realiza llamadas HTTP externas a LLMs ni depende de procesos de minería en vivo. Si el dashboard o servicios satélite fallan, el bot continúa operando y liquidando posiciones por trailing stop o airbag técnico sin interrupciones.
+2. **Capa 2: Observabilidad Pasiva y Concurrencia SQLite:**
+   * El Cockpit (`:8088`) consulta la base de datos `tradesv3.futures.sqlite` mediante URI de solo lectura estricta (`mode=ro`) con timeout defensivo. Esto impide bloqueos o excepciones de `database is locked` contra el motor en vivo.
+   * Monitoreo instantáneo con el centinela `python scripts/meme_cli.py health` en ~1.5 segundos.
+3. **Capa 3: Laboratorio de I+D & Sandbox (Confinamiento de Riesgo):**
+   * La minería genética (NSGA-II), las autopsias cognitivas vía OpenRouter (DeepSeek-R1) y las nuevas fórmulas AST residen en la incubadora (`portfolio/incubator_state.json`) en estado `SANDBOX`.
+   * **Regla de Oro:** Ninguna estrategia generada automáticamente puede ejecutar órdenes reales en vivo sin una auditoría de significancia estadística ($p < 0.01$), validación fuera de muestra (CPCV/PBO) y promoción manual explícita.
 
