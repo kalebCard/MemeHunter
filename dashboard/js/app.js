@@ -44,7 +44,26 @@ document.addEventListener('DOMContentLoaded', () => {
     liveTrades: null
   };
 
-  const API_AUTH_TOKEN = localStorage.getItem('cockpit_token') || 'meme_hunter_dev_token_2026';
+  let API_AUTH_TOKEN = localStorage.getItem('cockpit_token') || '';
+  if (!API_AUTH_TOKEN) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('token')) {
+      API_AUTH_TOKEN = urlParams.get('token');
+      localStorage.setItem('cockpit_token', API_AUTH_TOKEN);
+    }
+  }
+
+  function getActiveAuthToken() {
+    if (!API_AUTH_TOKEN) {
+      const input = prompt("🔐 Se requiere Token Bearer de Autorización para el Cockpit.\nIngrese su DASHBOARD_API_TOKEN configurado en el servidor:");
+      if (input && input.trim()) {
+        API_AUTH_TOKEN = input.trim();
+        localStorage.setItem('cockpit_token', API_AUTH_TOKEN);
+      }
+    }
+    return API_AUTH_TOKEN;
+  }
+
   let equityChart = null;
   let icChart = null;
   let backtestChart = null;
@@ -440,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/trigger-loop', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+          'Authorization': `Bearer ${getActiveAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -516,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/synthesize-alpha', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+          'Authorization': `Bearer ${getActiveAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -629,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/validate-formula', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+          'Authorization': `Bearer ${getActiveAuthToken()}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ formula })
@@ -709,7 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const res = await fetch('/api/test-strategy', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+              'Authorization': `Bearer ${getActiveAuthToken()}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -804,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const res = await fetch('/api/deploy-to-sandbox', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${API_AUTH_TOKEN}`,
+              'Authorization': `Bearer ${getActiveAuthToken()}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({

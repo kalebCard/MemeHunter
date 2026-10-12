@@ -13,8 +13,12 @@ import sys
 import json
 import time
 import logging
+import hashlib
+import hmac
+import secrets
+import threading
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Set
 
 # Asegurar path raíz del proyecto
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,6 +32,7 @@ from mining.alpha_daemon import AlphaMinerDaemon
 from mining.llm_alpha_generator import LLMAlphaSynthesizer
 from mining.llm_client import OpenRouterClient
 from portfolio.atomic_io import atomic_write_json
+from portfolio.secrets_vault import get_secret
 from dashboard.backtest_scanner import (
     scan_strategies,
     scan_backtest_results,
@@ -39,7 +44,100 @@ logger = logging.getLogger("CockpitServer")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 DASHBOARD_DIR = os.path.dirname(os.path.abspath(__file__))
-API_SECRET_TOKEN = os.getenv("DASHBOARD_API_TOKEN", "meme_hunter_dev_token_2026")
+INSECURE_DEFAULT_TOKEN = "meme_hunter_dev_token_2026"
+MIN_TOKEN_LENGTH = 32
+
+
+class TokenBucketRateLimiter:
+    """Limitador de tasa por IP en memoria para proteger endpoints de mutación REST (Sprint 1: US-1.3)."""
+
+    def __init__(self, capacity: int = 30, refill_rate_per_sec: float = 2.0):
+        self.capacity = capacity
+        self.refill_rate = refill_rate_per_sec
+        self._tokens: Dict[str, float] = {}
+        self._last_check: Dict[str, float] = {}
+        self._lock = threading.Lock()
+
+    def is_allowed(self, client_ip: str) -> bool:
+        now = time.time()
+        with self._lock:
+            last = self._last_check.get(client_ip, now)
+            tokens = self._tokens.get(client_ip, float(self.capacity))
+            elapsed = now - last
+            tokens = min(float(self.capacity), tokens + elapsed * self.refill_rate)
+            self._last_check[client_ip] = now
+            if tokens >= 1.0:
+                self._tokens[client_ip] = tokens - 1.0
+                return True
+            else:
+                self._tokens[client_ip] = tokens
+                return False
+
+
+rate_limiter = TokenBucketRateLimiter(capacity=30, refill_rate_per_sec=2.0)
+
+
+def resolve_and_validate_token(enforce_production: bool = False) -> str:
+    """
+    Resuelve el token API y valida los estándares de seguridad 2026 (Sprint 1: US-1.1).
+    Falla tempranamente (fail-fast) si el token falta, es inseguro o menor a 32 caracteres.
+    """
+    token = os.getenv("DASHBOARD_API_TOKEN", "")
+    if not token:
+        try:
+            token = get_secret("DASHBOARD_API_TOKEN", "") or ""
+        except Exception:
+            pass
+
+    if not token:
+        env_path = os.path.join(BASE_DIR, ".env")
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("DASHBOARD_API_TOKEN="):
+                            token = line.split("=", 1)[1].strip().strip('"').strip("'")
+                            break
+            except Exception:
+                pass
+
+    if enforce_production:
+        if not token:
+            raise RuntimeError(
+                "CRITICAL SECURITY ERROR: 'DASHBOARD_API_TOKEN' no está configurado. "
+                "Para operar de forma segura, defina la variable DASHBOARD_API_TOKEN en su entorno o archivo .env "
+                "con al menos 32 caracteres criptográficos (ej. generado con `secrets.token_hex(32)`)."
+            )
+        if token == INSECURE_DEFAULT_TOKEN:
+            raise RuntimeError(
+                "CRITICAL SECURITY ERROR: Se detectó el token por defecto inseguro ('meme_hunter_dev_token_2026'). "
+                "Por favor configure un token criptográficamente seguro en DASHBOARD_API_TOKEN."
+            )
+        if len(token) < MIN_TOKEN_LENGTH:
+            raise RuntimeError(
+                f"SECURITY ERROR: 'DASHBOARD_API_TOKEN' es demasiado corto ({len(token)} caracteres). "
+                f"Debe tener al menos {MIN_TOKEN_LENGTH} caracteres para prevenir ataques de fuerza bruta."
+            )
+    else:
+        if not token or token == INSECURE_DEFAULT_TOKEN:
+            token = secrets.token_hex(32)
+
+    return token
+
+
+# Cargar token inicial seguro
+try:
+    API_SECRET_TOKEN = resolve_and_validate_token(enforce_production=False)
+except Exception:
+    API_SECRET_TOKEN = secrets.token_hex(32)
+
+# Orígenes CORS estrictos configurables (nunca wildcard '*')
+RAW_ALLOWED_ORIGINS = os.getenv(
+    "DASHBOARD_ALLOWED_ORIGINS",
+    "http://127.0.0.1:8088,http://localhost:8088,http://127.0.0.1:8080,http://localhost:8080"
+)
+ALLOWED_ORIGINS: Set[str] = {o.strip() for o in RAW_ALLOWED_ORIGINS.split(",") if o.strip()}
 
 
 class CockpitAPIHandler(SimpleHTTPRequestHandler):
@@ -49,10 +147,10 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
 
     def _check_auth(self) -> bool:
-        """Verifica el token de autorización Bearer para llamadas de mutación/control."""
-        auth_header = self.headers.get("Authorization", "")
+        """Verifica el token de autorización Bearer de forma segura en tiempo constante."""
+        auth_header = self.headers.get("Authorization", "").strip()
         expected = f"Bearer {API_SECRET_TOKEN}"
-        if auth_header == expected:
+        if auth_header and hmac.compare_digest(auth_header, expected):
             return True
         # Rechazo explícito con 401
         self._send_json({"error": "No autorizado. Token Bearer requerido o inválido."}, status_code=401)
@@ -72,11 +170,26 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             self._handle_stress_report()
         elif self.path == "/api/live-trades":
             self._handle_live_trades()
+        elif self.path == "/api/emergency/kill-switch":
+            self._handle_get_kill_switch()
+        elif self.path == "/api/sentinel/status":
+            self._handle_get_sentinel_status()
+        elif self.path == "/api/llm/telemetry":
+            self._handle_get_llm_telemetry()
         else:
             return super().do_GET()
 
     def do_POST(self):
-        # Exigir autenticación para endpoints que ejecutan lógica o consumen cuotas
+        # 1. Rate limiting defensivo por IP (Sprint 1: US-1.3)
+        client_ip = self.client_address[0]
+        if not rate_limiter.is_allowed(client_ip):
+            self._send_json(
+                {"error": "Límite de peticiones excedido (429 Too Many Requests). Espere antes de reintentar."},
+                status_code=429
+            )
+            return
+
+        # 2. Exigir autenticación Bearer para endpoints que ejecutan lógica o consumen cuotas
         if not self._check_auth():
             return
 
@@ -90,6 +203,10 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             self._handle_test_strategy()
         elif self.path == "/api/deploy-to-sandbox":
             self._handle_deploy_to_sandbox()
+        elif self.path == "/api/emergency/kill-switch":
+            self._handle_post_kill_switch()
+        elif self.path == "/api/emergency/kill-switch/reset":
+            self._handle_post_kill_switch_reset()
         else:
             self.send_error(404, "Endpoint no encontrado")
 
@@ -98,27 +215,42 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
-        # Cabeceras CORS
-        client_origin = self.headers.get("Origin", "")
-        if client_origin:
+
+        # Cabeceras CORS estrictas (nunca wildcard '*')
+        client_origin = self.headers.get("Origin", "").strip()
+        if client_origin in ALLOWED_ORIGINS:
             self.send_header("Access-Control-Allow-Origin", client_origin)
+            self.send_header("Vary", "Origin")
         else:
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:8088")
+
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+        # Cabeceras de seguridad reforzadas
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-XSS-Protection", "1; mode=block")
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com;"
+        )
         self.end_headers()
         self.wfile.write(body)
 
     def do_OPTIONS(self):
-        """Manejo de pre-flight CORS para navegadores."""
+        """Manejo de pre-flight CORS seguro para navegadores."""
         self.send_response(204)
-        client_origin = self.headers.get("Origin", "")
-        if client_origin:
+        client_origin = self.headers.get("Origin", "").strip()
+        if client_origin in ALLOWED_ORIGINS:
             self.send_header("Access-Control-Allow-Origin", client_origin)
+            self.send_header("Vary", "Origin")
         else:
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:8088")
+
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.end_headers()
 
     def _handle_api_status(self):
@@ -463,17 +595,99 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             logger.error(f"Error desplegando a sandbox: {e}", exc_info=True)
             self._send_json({"success": False, "status": "error", "error": str(e)}, status_code=500)
 
+    def _handle_get_kill_switch(self):
+        """Retorna el estado de seguridad en tiempo real del EmergencyKillSwitch."""
+        try:
+            from portfolio.kill_switch import EmergencyKillSwitch
+            ks = EmergencyKillSwitch()
+            self._send_json({
+                "status": "success",
+                "is_active": ks.is_active,
+                "current_level": int(ks.current_level),
+                "level_name": ks.current_level.name,
+                "last_trigger_reason": ks.last_trigger_reason,
+                "last_triggered_at": ks.last_triggered_at
+            })
+        except Exception as e:
+            logger.error(f"Error obteniendo estado del kill-switch: {e}")
+            self._send_json({"status": "error", "error": str(e)}, status_code=500)
+
+    def _handle_get_sentinel_status(self):
+        """Retorna el estado de supervisión del AdversarialMarketSentinel."""
+        try:
+            from portfolio.adversarial_sentinel import AdversarialMarketSentinel
+            sentinel = AdversarialMarketSentinel()
+            self._send_json({
+                "status": "success",
+                "max_vol_to_depth_ratio": sentinel.max_vol_to_depth,
+                "max_price_divergence_pct": sentinel.max_divergence,
+                "max_funding_imbalance_pct": sentinel.max_funding,
+                "audit_history_count": len(sentinel.audit_history)
+            })
+        except Exception as e:
+            logger.error(f"Error obteniendo estado del centinela: {e}")
+            self._send_json({"status": "error", "error": str(e)}, status_code=500)
+
+    def _handle_get_llm_telemetry(self):
+        """Retorna telemetría cuantitativa de consumo y SLAs del cliente LLM."""
+        try:
+            from mining.llm_client import OpenRouterClient
+            client = OpenRouterClient()
+            self._send_json({
+                "status": "success",
+                "telemetry": client.get_sla_telemetry()
+            })
+        except Exception as e:
+            logger.error(f"Error obteniendo telemetría LLM: {e}")
+            self._send_json({"status": "error", "error": str(e)}, status_code=500)
+
+    def _handle_post_kill_switch(self):
+        """Dispara de forma forzada un nivel de bloqueo en el EmergencyKillSwitch."""
+        try:
+            data = self._read_json_body()
+            level = int(data.get("level", 1))
+            reason = str(data.get("reason", "Disparo manual desde Cockpit API"))
+            from portfolio.kill_switch import EmergencyKillSwitch
+            ks = EmergencyKillSwitch()
+            res = ks.trigger(level, reason)
+            self._send_json({"status": "success", "result": res})
+        except Exception as e:
+            logger.error(f"Error activando kill-switch: {e}")
+            self._send_json({"status": "error", "error": str(e)}, status_code=500)
+
+    def _handle_post_kill_switch_reset(self):
+        """Restaura el estado de trading a NORMAL con verificación de token."""
+        try:
+            data = self._read_json_body()
+            token = str(data.get("auth_token", ""))
+            from portfolio.kill_switch import EmergencyKillSwitch
+            ks = EmergencyKillSwitch()
+            success = ks.reset(auth_token=token, expected_token=API_SECRET_TOKEN)
+            if success:
+                self._send_json({"status": "success", "message": "Kill-switch restablecido a NORMAL"})
+            else:
+                self._send_json({"status": "error", "message": "Token de autorización inválido"}, status_code=403)
+        except Exception as e:
+            logger.error(f"Error reseteando kill-switch: {e}")
+            self._send_json({"status": "error", "error": str(e)}, status_code=500)
+
 
 
 
 def run_server(port: int = 8088):
+    global API_SECRET_TOKEN
+    # Validación fail-fast estricta en producción
+    API_SECRET_TOKEN = resolve_and_validate_token(enforce_production=True)
+    masked_fingerprint = hashlib.sha256(API_SECRET_TOKEN.encode("utf-8")).hexdigest()[:12]
+
     host = os.getenv("DASHBOARD_HOST", "0.0.0.0")
     server_address = (host, port)
     httpd = ThreadingHTTPServer(server_address, CockpitAPIHandler)
     print("=" * 80)
-    print(f" [MEMEHUNTER QUANT COCKPIT] Servidor Visual Seguro Multihilo Iniciado")
+    print(" [MEMEHUNTER QUANT COCKPIT] Servidor Visual Seguro Multihilo Iniciado")
     print(f"  -> Acceso Local: http://localhost:{port}")
-    print(f"  -> Token Autenticación API: {API_SECRET_TOKEN}")
+    print(f"  -> Seguridad API: Bearer Token ACTIVO [SHA256 Fingerprint: {masked_fingerprint}...****]")
+    print(f"  -> Orígenes CORS Autorizados: {', '.join(sorted(ALLOWED_ORIGINS))}")
     print("  -> Presiona Ctrl+C para detener el servidor.")
     print("=" * 80)
     try:

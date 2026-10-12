@@ -20,6 +20,8 @@ import scipy.stats as ss
 
 from mining.formula_parser import FormulaASTParser
 from mining.alpha_grammar import AlphaGrammar
+from data_engine.slippage_engine import MicrostructureSlippageEngine
+from portfolio.order_router import SmartExitRouter, ExitUrgency, OrderExecutionStage
 
 DATA_DIR = Path("C:/meme_hunter_data/binance/futures")
 
@@ -177,51 +179,71 @@ def run_strategy_backtest(
     std_sig = signal.rolling(30, min_periods=5).std().replace(0, 1e-6)
     z_signal = ((signal - mean_sig) / std_sig).fillna(0.0)
 
-    # 4. Simulación bar-by-bar con control de riesgo
+    # 4. Simulación bar-by-bar con control de microestructura (Sprint 3: US-3.2 & US-3.3)
     wallet = float(initial_wallet)
     equity_curve = [{"timestamp": str(df['timestamp'].iloc[0]), "equity": round(wallet, 2), "benchmark": 1000.0}]
-    
+
+    slippage_engine = MicrostructureSlippageEngine()
+    order_router = SmartExitRouter(slippage_engine=slippage_engine, hard_stoploss_pct=-abs(stoploss_pct))
+
+    daily_vol_usdt = float(df['volume'].tail(6).sum() * df['close'].iloc[-1]) if 'volume' in df.columns else 5_000_000.0
+    daily_vol_usdt = max(500_000.0, daily_vol_usdt)
+    rolling_vol = df['close'].pct_change().rolling(20, min_periods=5).std().fillna(0.02)
+    rolling_rvol = df['rvol'] if 'rvol' in df.columns else pd.Series(1.0, index=df.index)
+
     trades = []
     active_trade: Optional[Dict[str, Any]] = None
-    fee_maker = 0.0002   # 0.02%
-    fee_taker = 0.0005   # 0.05%
-    slippage = 0.0002    # 0.02%
-    
+    total_slippage_drag_usd = 0.0
+    total_fees_paid_usd = 0.0
+    total_funding_pnl_usd = 0.0
+
     # Umbrales de señal
     entry_threshold = 0.75
-    
+    mmr = 1.0 / (2.0 * max(1.0, leverage))  # Tasa de margen de mantenimiento Binance Futures
+    max_adverse_liquidation_pct = (1.0 - mmr) / max(1.0, leverage)
+
     for i in range(30, len(df)):
         current_time = str(df['timestamp'].iloc[i])
         close_p = float(df['close'].iloc[i])
         high_p = float(df['high'].iloc[i])
         low_p = float(df['low'].iloc[i])
         sig = float(z_signal.iloc[i])
-        
+        curr_vol = float(rolling_vol.iloc[i])
+        curr_rvol = float(rolling_rvol.iloc[i])
+
         # Gestión de posición activa
         if active_trade:
             pos_type = active_trade["type"]
             entry_p = active_trade["entry_price"]
             peak_p = active_trade["peak_price"]
-            
+
+            # Acumular costo/ingreso de tasa de financiación (Funding Rate cada 8h / 2 barras 4h)
+            bars_held = i - active_trade["entry_bar"]
+            if bars_held > 0 and bars_held % 2 == 0:
+                funding_rate_8h = 0.0001  # 0.01% por ciclo de 8h típico en memecoins
+                funding_step_usdt = active_trade["stake"] * leverage * funding_rate_8h
+                if pos_type == "SHORT":
+                    # Los cortos cobran tasa de financiación positiva en memecoins en expansión
+                    active_trade["funding_acc_usdt"] += funding_step_usdt
+                else:
+                    active_trade["funding_acc_usdt"] -= funding_step_usdt
+
             # Actualizar pico
             if pos_type == "SHORT":
                 if close_p < peak_p:
                     active_trade["peak_price"] = close_p
                     peak_p = close_p
-                # PnL no realizado %
                 unrealized_pct = (entry_p - close_p) / entry_p
                 drawdown_from_peak = (close_p - peak_p) / entry_p
-                
+
                 # Chequear StopLoss
                 hit_sl = (high_p - entry_p) / entry_p >= stoploss_pct
-                # Chequear Trailing Stop
                 hit_ts = (unrealized_pct >= 0.08) and (drawdown_from_peak >= trailing_stop_pct)
-                # Chequear Take Profit técnico
                 hit_tp = unrealized_pct >= 0.25
-                # Chequear salida por reversión de señal
                 signal_exit = sig > 0.0
-                
-            else: # LONG
+                is_liquidated = unrealized_pct <= -max_adverse_liquidation_pct
+
+            else:  # LONG
                 if close_p > peak_p:
                     active_trade["peak_price"] = close_p
                     peak_p = close_p
@@ -231,18 +253,56 @@ def run_strategy_backtest(
                 hit_ts = (unrealized_pct >= 0.08) and (drawdown_from_peak >= trailing_stop_pct)
                 hit_tp = unrealized_pct >= 0.25
                 signal_exit = sig < 0.0
+                is_liquidated = unrealized_pct <= -max_adverse_liquidation_pct
 
-            should_exit = hit_sl or hit_ts or hit_tp or signal_exit
+            should_exit = hit_sl or hit_ts or hit_tp or signal_exit or is_liquidated
             if should_exit:
-                exit_reason = "STOP_LOSS" if hit_sl else ("TRAILING_STOP" if hit_ts else ("TAKE_PROFIT" if hit_tp else "SIGNAL_REVERSAL"))
-                exit_price = close_p * (1.0 + slippage if pos_type == "SHORT" else 1.0 - slippage)
-                raw_pnl_pct = (entry_p - exit_price) / entry_p if pos_type == "SHORT" else (exit_price - entry_p) / entry_p
-                
-                # Descontar comisiones
-                net_pnl_pct = (raw_pnl_pct * leverage) - (fee_maker + fee_taker)
-                pnl_usdt = active_trade["stake"] * net_pnl_pct
+                if is_liquidated:
+                    exit_reason = "LIQUIDATION"
+                    urgency = ExitUrgency.EMERGENCY
+                elif hit_sl:
+                    exit_reason = "STOP_LOSS"
+                    urgency = ExitUrgency.EMERGENCY
+                elif hit_ts:
+                    exit_reason = "TRAILING_STOP"
+                    urgency = ExitUrgency.MEDIUM
+                elif hit_tp:
+                    exit_reason = "TAKE_PROFIT"
+                    urgency = ExitUrgency.LOW
+                else:
+                    exit_reason = "SIGNAL_REVERSAL"
+                    urgency = ExitUrgency.LOW
+
+                exit_order = order_router.route_exit(
+                    symbol=pair,
+                    side="buy" if pos_type == "SHORT" else "sell",
+                    current_price=close_p,
+                    order_size_usdt=active_trade["stake"] * leverage,
+                    unrealized_pnl_pct=unrealized_pct,
+                    daily_volume_usdt=daily_vol_usdt,
+                    volatility=curr_vol,
+                    rvol=curr_rvol,
+                    urgency=urgency
+                )
+
+                exit_price = exit_order.executed_price
+                exit_fees_usdt = exit_order.total_fees_usdt
+                slippage_drag_usdt = exit_order.slippage_drag_usdt
+
+                total_slippage_drag_usd += slippage_drag_usdt
+                total_fees_paid_usd += (active_trade["entry_fee_usdt"] + exit_fees_usdt)
+                total_funding_pnl_usd += active_trade["funding_acc_usdt"]
+
+                if is_liquidated:
+                    pnl_usdt = -active_trade["stake"]
+                    net_pnl_pct = -100.0
+                else:
+                    raw_price_pnl = (entry_p - exit_price) / entry_p if pos_type == "SHORT" else (exit_price - entry_p) / entry_p
+                    pnl_usdt = (active_trade["stake"] * leverage * raw_price_pnl) - (active_trade["entry_fee_usdt"] + exit_fees_usdt) + active_trade["funding_acc_usdt"]
+                    net_pnl_pct = (pnl_usdt / active_trade["stake"]) * 100.0
+
                 wallet += pnl_usdt
-                
+
                 trades.append({
                     "id": len(trades) + 1,
                     "type": pos_type,
@@ -250,33 +310,56 @@ def run_strategy_backtest(
                     "exit_time": current_time,
                     "entry_price": round(entry_p, 6),
                     "exit_price": round(exit_price, 6),
-                    "pnl_pct": round(net_pnl_pct * 100, 2),
+                    "pnl_pct": round(net_pnl_pct, 2),
                     "pnl_usdt": round(pnl_usdt, 2),
-                    "exit_reason": exit_reason
+                    "exit_reason": exit_reason,
+                    "stage": exit_order.stage.value,
+                    "slippage_bps": round(exit_order.effective_slippage_bps, 1)
                 })
                 active_trade = None
-        
+
         # Apertura de nueva posición
         if not active_trade and wallet > 50:
             stake = wallet * 0.25  # 25% por slot (4 slots)
             if direction in ["short_only", "both"] and sig > entry_threshold:
-                # Factor con bias a desinflación: señal alta dispara Short
-                entry_p = close_p * (1.0 - slippage)
+                entry_res = slippage_engine.simulate_order_execution(
+                    side="sell",
+                    order_type="maker",
+                    price=close_p,
+                    order_size_usdt=stake * leverage,
+                    daily_volume_usdt=daily_vol_usdt,
+                    volatility=curr_vol,
+                    rvol=curr_rvol
+                )
                 active_trade = {
                     "type": "SHORT",
-                    "entry_price": entry_p,
-                    "peak_price": entry_p,
+                    "entry_price": entry_res.executed_price,
+                    "peak_price": entry_res.executed_price,
                     "entry_time": current_time,
-                    "stake": stake
+                    "entry_bar": i,
+                    "stake": stake,
+                    "entry_fee_usdt": entry_res.liquidity_cost_usdt,
+                    "funding_acc_usdt": 0.0
                 }
             elif direction in ["long_only", "both"] and sig < -entry_threshold:
-                entry_p = close_p * (1.0 + slippage)
+                entry_res = slippage_engine.simulate_order_execution(
+                    side="buy",
+                    order_type="maker",
+                    price=close_p,
+                    order_size_usdt=stake * leverage,
+                    daily_volume_usdt=daily_vol_usdt,
+                    volatility=curr_vol,
+                    rvol=curr_rvol
+                )
                 active_trade = {
                     "type": "LONG",
-                    "entry_price": entry_p,
-                    "peak_price": entry_p,
+                    "entry_price": entry_res.executed_price,
+                    "peak_price": entry_res.executed_price,
                     "entry_time": current_time,
-                    "stake": stake
+                    "entry_bar": i,
+                    "stake": stake,
+                    "entry_fee_usdt": entry_res.liquidity_cost_usdt,
+                    "funding_acc_usdt": 0.0
                 }
 
         # Grabar equity periódico (cada 4 barras)
@@ -295,25 +378,25 @@ def run_strategy_backtest(
         wins = [p for p in pnls if p > 0]
         losses = [p for p in pnls if p <= 0]
         win_rate = len(wins) / total_trades
-        
+
         mean_ret = float(np.mean(pnls))
         std_ret = float(np.std(pnls)) if len(pnls) > 1 else 0.01
-        
+
         # Anualización (4h = 6 velas/día * 365 = 2190)
         annual_factor = math.sqrt(2190 / 12)  # Trade holding ~12 barras
         sharpe = round(float((mean_ret / max(std_ret, 1e-6)) * annual_factor), 2)
-        
+
         downside_std = float(np.std([p for p in pnls if p < 0])) if len(losses) > 1 else 0.01
         sortino = round(float((mean_ret / max(downside_std, 1e-6)) * annual_factor), 2)
-        
+
         profit_factor = round(abs(sum(wins) / min(sum(losses), -1e-6)), 2) if losses else 9.99
-        
+
         # Max Drawdown
         eq_series = np.array([p["equity"] for p in equity_curve])
         cum_max = np.maximum.accumulate(eq_series)
         drawdowns = (eq_series - cum_max) / cum_max
         max_dd = round(float(abs(np.min(drawdowns)) * 100), 2)
-        
+
         # p-value y DSR proxy
         t_stat = (mean_ret / max(std_ret, 1e-6)) * math.sqrt(total_trades)
         p_val = round(float(2 * (1 - ss.t.cdf(abs(t_stat), df=max(1, total_trades - 1)))), 4)
@@ -356,7 +439,11 @@ def run_strategy_backtest(
             "p_value": p_val,
             "dsr_score": dsr_score,
             "dsr_score_pct": dsr_score,
-            "expectancy_pct": round(mean_ret * 100, 2)
+            "expectancy_pct": round(mean_ret * 100, 2),
+            "total_slippage_drag_usd": round(total_slippage_drag_usd, 2),
+            "total_fees_paid_usd": round(total_fees_paid_usd, 2),
+            "total_funding_pnl_usd": round(total_funding_pnl_usd, 2),
+            "effective_spread_bps": round(float(slippage_engine.base_spread_bps), 1)
         },
         "equity_curve": equity_curve,
         "recent_trades": trades[-10:] if trades else []

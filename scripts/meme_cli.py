@@ -53,7 +53,7 @@ def cmd_cockpit(args):
             if resp.getcode() == 200:
                 print("🟢 ESTADO: El Cockpit está ACTIVO y respondiendo.")
                 print("🌐 URL: http://localhost:8088")
-                print("🔑 Token por defecto: meme_hunter_dev_token_2026")
+                print("🔑 Token de Acceso: Bearer Token configurado en DASHBOARD_API_TOKEN (.env)")
                 print("\nPestañas disponibles:")
                 print("  • 🎮 Centro de Mando (Live Trades & Defensas)")
                 print("  • 📚 Estrategias & Backtests (Catálogo Freqtrade)")
