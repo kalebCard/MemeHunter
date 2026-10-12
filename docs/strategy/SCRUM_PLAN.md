@@ -118,6 +118,7 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 | **PB-71** | **Módulo de Diferenciación Fraccionaria (FFD) con preservación de memoria y test ADF.** | 15 | 8 | ✅ Completado (`scripts/fractional_diff.py` con tests 100% pasando) |
 | **PB-72** | **Suite de Métricas Anti-Data Snooping: PSR, Deflated Sharpe Ratio (DSR), CPCV y PBO.** | 15 | 8 | ✅ Completado (`scripts/advanced_metrics.py` con tests 100% pasando) |
 | **PB-73** | **Generador de Triple Barrera, Meta-Etiquetado y Bet Sizing Continuo (Fórmula López de Prado).** | 15 | 8 | ✅ Completado (`scripts/triple_barrier_metalabeling.py` con tests 100% pasando) |
+| **PB-74** | **Estrategia Canónica V7 Quantum: Integración FFD, Bet Sizing Continuo de Apalancamiento y Hardening Institucional.** | 15 | 8 | ✅ Completado (`MemeHunterFuturesV7_Quantum.py` con tests 100% pasando) |
 
 ---
 
@@ -398,6 +399,12 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
     $$m = 2 Z\left[\frac{p - 0.5}{\sqrt{p(1-p)}}\right] - 1$$
     eliminando el apalancamiento discreto subjetivo y parametrizando de 1.0x a 2.0x según la probabilidad de éxito matemática.
   - Suite de tests unitarios [`tests/test_triple_barrier_metalabeling.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_triple_barrier_metalabeling.py) pasando al 100% (3/3 tests exitosos).
+* **PB-74 (Estrategia Canónica `MemeHunterFuturesV7_Quantum.py`) — Completado ✅:**
+  - Desarrollada [`user_data/strategies/MemeHunterFuturesV7_Quantum.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/user_data/strategies/MemeHunterFuturesV7_Quantum.py) unificando:
+    * Filtro de memoria estacionaria FFD ($d=0.40$).
+    * Hook `leverage()` con Bet Sizing Continuo de López de Prado parametrizando de 1.0x a 2.0x según la confluencia estocástica.
+    * Salidas y stoploss forzados como órdenes `market` para erradicar el riesgo de no-fills en caídas violentas.
+  - Suite de tests unitarios [`tests/test_futures_v7_quantum.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_futures_v7_quantum.py) pasando al 100% (2/2 tests exitosos).
 * **Conclusión del Sprint 20:** La infraestructura del proyecto cuenta con el arsenal cuantitativo más riguroso de la literatura contemporánea, erradicando la trampa de los micro-patrones y blindando la toma de decisiones contra el sesgo de minería de datos.
 
 ---
