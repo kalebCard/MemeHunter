@@ -448,3 +448,164 @@ table.quant-table tr:hover td {
   color: var(--accent-purple);
   font-weight: bold;
 }
+
+/* ==========================================================================
+   Pipeline Stepper & Live Process Animations
+   ========================================================================== */
+.pipeline-section {
+  margin-bottom: 24px;
+  padding: 20px 24px;
+}
+
+.pipeline-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  position: relative;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 175px;
+}
+
+.step-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  transition: all 0.35s ease;
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: color 0.35s ease;
+}
+
+.step-desc {
+  font-size: 0.70rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Conectores con animación de flujo */
+.pipeline-connector {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 10px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.pipeline-connector.active {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.pipeline-connector.flowing::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #00f2fe, #9d4edd, transparent);
+  animation: energyFlow 1.2s infinite linear;
+}
+
+@keyframes energyFlow {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Estado activo y completado de cada paso */
+.pipeline-step.step-active {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.35);
+  transform: translateY(-2px);
+}
+
+.pipeline-step.step-active .step-icon {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  color: #000;
+  box-shadow: 0 0 15px var(--accent-cyan);
+  animation: pulseIcon 1.5s infinite;
+}
+
+.pipeline-step.step-active .step-title {
+  color: #fff;
+}
+
+.pipeline-step.step-active .step-desc {
+  color: var(--accent-cyan);
+}
+
+.pipeline-step.step-done {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.pipeline-step.step-done .step-icon {
+  background: var(--accent-emerald);
+  color: #000;
+}
+
+.pipeline-step.step-done .step-title {
+  color: var(--accent-emerald);
+}
+
+@keyframes pulseIcon {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Animación de carga para botones en ejecución */
+.btn-action.loading {
+  pointer-events: none;
+  opacity: 0.85;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.4), rgba(157, 78, 221, 0.4));
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+  animation: pulse 1.2s infinite;
+}
+
+/* Badges para el historial */
+.badge-action-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  margin: 2px;
+  color: #cbd5e1;
+}

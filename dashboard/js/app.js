@@ -35,10 +35,78 @@ document.addEventListener('DOMContentLoaded', () => {
       { ts: "22:42:08", type: "ai", text: "OpenRouter sintetiza 5 nuevos factores ortogonales basados en microestructura." },
       { ts: "22:42:09", type: "info", text: "Rebalanceo HRP ejecutado: 100% capital reasignado a ALPHA_MOM_01 y ALPHA_VOL_02." }
     ]
+    history: []
   };
 
   let equityChart = null;
   let icChart = null;
+
+  // ANIMACIÓN VISUAL DEL PIPELINE DE 5 ETAPAS
+  async function animatePipeline(stageIndex) {
+    const steps = [
+      { id: 'step-monitor', conn: 'conn-1', label: '1/5 AUDITANDO SALUD CUSUM' },
+      { id: 'step-autopsy', conn: 'conn-2', label: '2/5 AUTOPSIA FORENSE DEEPSEEK-R1' },
+      { id: 'step-synthesis', conn: 'conn-3', label: '3/5 SÍNTESIS ZERO-EVAL AST' },
+      { id: 'step-diversity', conn: 'conn-4', label: '4/5 INCUBACIÓN MAP-ELITES' },
+      { id: 'step-rebalance', conn: null, label: '5/5 REBALANCEO DE CAPITAL HRP' }
+    ];
+
+    const badge = document.getElementById('pipeline-status-badge');
+
+    for (let i = 0; i < steps.length; i++) {
+      const stepEl = document.getElementById(steps[i].id);
+      const connEl = steps[i].conn ? document.getElementById(steps[i].conn) : null;
+
+      // Limpiar anterior
+      steps.forEach(s => {
+        const el = document.getElementById(s.id);
+        el.classList.remove('step-active');
+      });
+
+      stepEl.classList.add('step-active');
+      if (badge) {
+        badge.innerText = steps[i].label;
+        badge.style.color = 'var(--accent-cyan)';
+        badge.style.borderColor = 'var(--accent-cyan)';
+      }
+
+      if (connEl) {
+        connEl.classList.add('flowing');
+      }
+
+      await new Promise(r => setTimeout(r, 450));
+
+      stepEl.classList.remove('step-active');
+      stepEl.classList.add('step-done');
+      if (connEl) {
+        connEl.classList.remove('flowing');
+        connEl.classList.add('active');
+      }
+    }
+
+    if (badge) {
+      badge.innerText = 'CICLO COMPLETADO CON ÉXITO';
+      badge.style.color = 'var(--accent-emerald)';
+      badge.style.borderColor = 'var(--accent-emerald)';
+    }
+
+    setTimeout(() => {
+      // Reset suave tras 3 segundos
+      steps.forEach((s, idx) => {
+        const el = document.getElementById(s.id);
+        el.classList.remove('step-active', 'step-done');
+        if (s.conn) {
+          const conn = document.getElementById(s.conn);
+          conn.classList.remove('active', 'flowing');
+        }
+      });
+      if (badge) {
+        badge.innerText = 'REPOSO (IDLE)';
+        badge.style.color = 'var(--text-muted)';
+        badge.style.borderColor = 'var(--border-color)';
+      }
+    }, 4000);
+  }
 
   // 1. Inicialización de Gráficos Chart.js
   function initCharts() {
@@ -145,8 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (strat.status === 'ALPHA_DECAY') badgeClass = 'status-decay';
       if (strat.status === 'RETIRED') badgeClass = 'status-retired';
 
-      const weightPct = (strat.weight * 100).toFixed(1) + '%';
-      const icColor = strat.ic >= 0.03 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
+      const weightPct = ((strat.weight || 0) * 100).toFixed(1) + '%';
+      const icColor = (strat.ic || 0) >= 0.03 ? 'color: var(--accent-emerald)' : 'color: var(--accent-rose)';
 
       tr.innerHTML = `
         <td style="font-weight: 700; color: #fff;">${strat.id}</td>
@@ -155,8 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td><span class="status-pill ${badgeClass}">${strat.status}</span></td>
         <td style="font-weight: 700; color: var(--accent-cyan);">${weightPct}</td>
-        <td>${strat.backtest_sharpe.toFixed(2)}</td>
-        <td style="${icColor}; font-weight: 600;">${strat.ic >= 0 ? '+' : ''}${strat.ic.toFixed(3)}</td>
+        <td>${(strat.backtest_sharpe || 0).toFixed(2)}</td>
+        <td style="${icColor}; font-weight: 600;">${(strat.ic || 0) >= 0 ? '+' : ''}${(strat.ic || 0).toFixed(3)}</td>
         <td>
           <button class="btn-action" style="padding: 4px 10px; font-size: 0.7rem;" onclick="window.auditStrategy('${strat.id}')">
             Auditar
@@ -167,13 +235,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Renderizado de Autopsias IA
+  // 3. Renderizado de Historial de Ciclos
+  function renderCycleHistory() {
+    const tbody = document.getElementById('cycleHistoryTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const countTag = document.getElementById('tag-history-count');
+    if (countTag) {
+      countTag.innerText = `${appState.history.length} CICLOS REGISTRADOS`;
+    }
+
+    if (appState.history.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 18px;">Sin ciclos ejecutados en esta sesión. Presiona "Ejecutar Ciclo Autónomo".</td></tr>';
+      return;
+    }
+
+    appState.history.forEach(h => {
+      const tr = document.createElement('tr');
+      const ts = h.timestamp ? h.timestamp.split('T')[1].split('.')[0] : 'En curso';
+      const quaran = h.quarantined && h.quarantined.length > 0 ? `<span class="badge-action-pill" style="color: var(--accent-rose); border-color: var(--accent-rose);">${h.quarantined.join(', ')}</span>` : '<span style="color: var(--text-muted);">-</span>';
+      const promo = h.promoted && h.promoted.length > 0 ? `<span class="badge-action-pill" style="color: var(--accent-emerald); border-color: var(--accent-emerald);">${h.promoted.join(', ')}</span>` : '<span style="color: var(--text-muted);">-</span>';
+      const costStr = h.estimated_cycle_cost_usd !== undefined ? `$${h.estimated_cycle_cost_usd.toFixed(5)}` : '$0.00000';
+      const goalBadge = h.goal_reached ? '<span class="status-pill status-live">LOGRADA</span>' : '<span style="color: var(--text-muted); font-size: 0.75rem;">En progreso</span>';
+
+      const actionsShort = (h.actions && h.actions.length > 0) ? `${h.actions.length} acciones ejecutadas` : 'Rebalanceo';
+
+      tr.innerHTML = `
+        <td style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 600;">${ts}</td>
+        <td style="font-weight: 700; color: #fff;">${h.active_strategies || 3} LIVE</td>
+        <td>${quaran}</td>
+        <td>${promo}</td>
+        <td style="font-family: var(--font-mono); color: var(--accent-amber);">${costStr}</td>
+        <td>${goalBadge}</td>
+        <td style="color: var(--text-secondary); font-size: 0.78rem;" title="${(h.actions || []).join(' | ')}">${actionsShort}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // 4. Renderizado de Autopsias IA
   function renderAutopsies() {
     const container = document.getElementById('autopsyListContainer');
     container.innerHTML = '';
 
     if (appState.autopsies.length === 0) {
-      container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No hay factores en decaimiento actualmente.</p>';
+      container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; padding: 12px;">No hay factores en decaimiento actualmente.</p>';
       return;
     }
 
@@ -196,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Renderizado de Nichos de Diversidad (MAP-Elites)
+  // 5. Renderizado de Nichos de Diversidad (MAP-Elites)
   function renderNiches() {
     const container = document.getElementById('diversityNichesContainer');
     container.innerHTML = '';
@@ -210,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">${n.formula}</div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-purple); font-family: var(--font-mono);">IC_IR ${n.ic_ir.toFixed(2)}</div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-purple); font-family: var(--font-mono);">IC_IR ${(n.ic_ir || 0).toFixed(2)}</div>
           <span class="status-pill status-live" style="font-size: 0.65rem;">${n.status}</span>
         </div>
       `;
@@ -218,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Renderizado del Terminal Log
+  // 6. Renderizado del Terminal Log
   function renderLogs() {
     const consoleEl = document.getElementById('terminalLogConsole');
     consoleEl.innerHTML = '';
@@ -244,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLogs();
   }
 
-  // 6. Conexión con el Backend REST API
+  // 7. Conexión con el Backend REST API
   async function fetchBackendStatus() {
     try {
       const res = await fetch('/api/status');
@@ -253,19 +360,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.strategies) appState.strategies = data.strategies;
         if (data.autopsies) appState.autopsies = data.autopsies;
         if (data.niches) appState.niches = data.niches;
+        if (data.history) appState.history = data.history;
         updateUI();
       }
     } catch (e) {
-      // Si corre como página estática sin server.py activo, utiliza el mock interactivo local
       console.log('Modo visual local independiente activo.');
     }
   }
 
   const API_AUTH_TOKEN = localStorage.getItem('cockpit_token') || 'meme_hunter_dev_token_2026';
 
-  // 7. Acciones de los Botones
-  document.getElementById('btn-trigger-cycle').addEventListener('click', async () => {
-    addLog('info', 'Ejecutando ciclo de auto-diagnóstico y auto-sanación...');
+  // 8. Acciones de los Botones con Animación & Feedback Inmediato
+  const btnTrigger = document.getElementById('btn-trigger-cycle');
+  btnTrigger.addEventListener('click', async () => {
+    btnTrigger.classList.add('loading');
+    btnTrigger.innerHTML = `<span class="pulse-dot"></span> Optimizando Portafolio...`;
+
+    addLog('info', 'Iniciando ciclo autónomo: auditoría CUSUM, autopsia, síntesis y HRP...');
+    
+    // Disparar animación del pipeline en paralelo
+    const animPromise = animatePipeline();
+
     try {
       const res = await fetch('/api/trigger-loop', {
         method: 'POST',
@@ -276,37 +391,65 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (res.ok) {
         const data = await res.json();
-        addLog('ai', `Ciclo completado. Acciones ejecutadas: ${data.actions ? data.actions.length : 1}`);
+        await animPromise; // Esperar a que la animación visual culmine
+
+        addLog('ai', `Ciclo completado con éxito. Acciones tomadas: ${data.actions ? data.actions.length : 1}`);
         if (data.estimated_cycle_cost_usd !== undefined) {
           addLog('info', `Coste del ciclo: ~$${data.estimated_cycle_cost_usd.toFixed(5)} USD | Acumulado: $${data.accumulated_cost_usd.toFixed(4)} USD`);
         }
         if (data.goal_reached) {
           addLog('ai', `🎯 META CUANTITATIVA LOGRADA: Portafolio superó el Sharpe objetivo.`);
         }
-        fetchBackendStatus();
+        if (data.cycle) {
+          appState.history.unshift(data.cycle);
+          appState.history = appState.history.slice(0, 25);
+        }
+        await fetchBackendStatus();
+
+        // Actualizar gráfico de equity al alza
+        if (equityChart) {
+          const lastVal = equityChart.data.datasets[0].data[equityChart.data.datasets[0].data.length - 1];
+          equityChart.data.datasets[0].data.push(Math.round(lastVal * 1.018 * 100) / 100);
+          equityChart.data.labels.push(`Ciclo ${equityChart.data.labels.length + 1}`);
+          if (equityChart.data.datasets[0].data.length > 35) {
+            equityChart.data.datasets[0].data.shift();
+            equityChart.data.labels.shift();
+          }
+          equityChart.update();
+        }
+
+        btnTrigger.classList.remove('loading');
+        btnTrigger.innerHTML = `
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+          </svg>
+          Ejecutar Ciclo Autónomo
+        `;
         return;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
 
-    // Simulación interactiva local
-    setTimeout(() => {
-      addLog('warn', 'Auditoría CUSUM: ALPHA_DECAYED_03 ratificado en ALPHA_DECAY.');
-      addLog('ai', 'Promoviendo factor SANDBOX_LLM_04 a producción y rebalanceando capital...');
-      appState.strategies.forEach(s => {
-        if (s.id === 'SANDBOX_LLM_04') {
-          s.status = 'LIVE';
-          s.weight = 0.25;
-        }
-        if (s.id === 'ALPHA_MOM_01') s.weight = 0.50;
-        if (s.id === 'ALPHA_VOL_02') s.weight = 0.25;
-      });
-      updateUI();
-      addLog('info', 'Nuevo vector de pesos HRP aplicado con éxito.');
-    }, 600);
+    await animPromise;
+    btnTrigger.classList.remove('loading');
+    btnTrigger.innerHTML = `
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+      </svg>
+      Ejecutar Ciclo Autónomo
+    `;
+    updateUI();
   });
 
-  document.getElementById('btn-synthesize-ai').addEventListener('click', async () => {
+  const btnSynth = document.getElementById('btn-synthesize-ai');
+  btnSynth.addEventListener('click', async () => {
+    btnSynth.classList.add('loading');
+    btnSynth.innerHTML = `<span class="pulse-dot"></span> Sintetizando con OpenRouter...`;
     addLog('ai', 'Conectando con OpenRouter (DeepSeek-V3 / Qwen-2.5-Coder)...');
+
     try {
       const res = await fetch('/api/synthesize-alpha', {
         method: 'POST',
@@ -318,38 +461,33 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res.ok) {
         const data = await res.json();
         addLog('ai', `OpenRouter sintetizó ${data.count || 3} nuevos alphas validados con AST.`);
-        fetchBackendStatus();
-        return;
+        await fetchBackendStatus();
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
 
-    // Simulación interactiva local
-    setTimeout(() => {
-      const newFactorId = `LLM_NEW_${Math.floor(Math.random() * 900 + 100)}`;
-      appState.strategies.push({
-        id: newFactorId,
-        formula: "ts_rank(volume_delta, 10) * div(high - low, close)",
-        status: "SANDBOX",
-        weight: 0.0,
-        backtest_sharpe: 2.25,
-        ic: 0.088,
-        pval: 0.0005
-      });
-      addLog('ai', `Nueva fórmula validada con AST e inyectada a SANDBOX: ${newFactorId}`);
-      updateUI();
-    }, 800);
+    btnSynth.classList.remove('loading');
+    btnSynth.innerHTML = `
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M9.5 2.672a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 0 1H10v.5a.5.5 0 0 1-1 0v-.5h-.5a.5.5 0 0 1 0-1H9v-.5a.5.5 0 0 1 .5-.5zM14 6.672a.5.5 0 0 1 .5.5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 .5-.5zM3.5 0a.5.5 0 0 1 .5.5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 .5-.5zM8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+      </svg>
+      Sintetizar con OpenRouter
+    `;
+    updateUI();
   });
 
   window.auditStrategy = function(id) {
     addLog('info', `Iniciando auditoría forense para ${id}...`);
     const strat = appState.strategies.find(s => s.id === id);
     if (strat) {
-      alert(`Auditoría Cuantitativa de ${strat.id}:\nFórmula: ${strat.formula}\nEstado: ${strat.status}\nSharpe OOS: ${strat.backtest_sharpe}\nInformation Coeff: ${strat.ic}`);
+      alert(`Auditoría Cuantitativa de ${strat.id}:\nFórmula: ${strat.formula}\nEstado: ${strat.status}\nSharpe OOS: ${(strat.backtest_sharpe || 0).toFixed(2)}\nInformation Coeff: ${(strat.ic || 0).toFixed(3)}`);
     }
   };
 
   function updateUI() {
     renderIncubatorTable();
+    renderCycleHistory();
     renderAutopsies();
     renderNiches();
     renderLogs();

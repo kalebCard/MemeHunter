@@ -1,0 +1,54 @@
+{
+  "MOMENTUM_PRICE_LOW_DEPTH": {
+    "niche_id": "MOMENTUM_PRICE_LOW_DEPTH",
+    "feature_type": "MOMENTUM_PRICE",
+    "complexity_tier": "LOW_DEPTH",
+    "fitness_score": -1.0,
+    "factor": null
+  },
+  "MOMENTUM_PRICE_HIGH_DEPTH": {
+    "niche_id": "MOMENTUM_PRICE_HIGH_DEPTH",
+    "feature_type": "MOMENTUM_PRICE",
+    "complexity_tier": "HIGH_DEPTH",
+    "fitness_score": -1.0,
+    "factor": null
+  },
+  "MICROSTRUCTURE_VOLUME_LOW_DEPTH": {
+    "niche_id": "MICROSTRUCTURE_VOLUME_LOW_DEPTH",
+    "feature_type": "MICROSTRUCTURE_VOLUME",
+    "complexity_tier": "LOW_DEPTH",
+    "fitness_score": -1.0,
+    "factor": null
+  },
+  "MICROSTRUCTURE_VOLUME_HIGH_DEPTH": {
+    "niche_id": "MICROSTRUCTURE_VOLUME_HIGH_DEPTH",
+    "feature_type": "MICROSTRUCTURE_VOLUME",
+    "complexity_tier": "HIGH_DEPTH",
+    "fitness_score": 15.361686851093022,
+    "factor": {
+      "factor_id": "LLM_ALPHA_03",
+      "formula": "ts_decay_linear(returns, 5) * ts_rank(volume, 10)",
+      "ic_mean": 0.6974235798459368,
+      "ic_std": 0.026796644856982053,
+      "ic_ir": 26.02555499067393,
+      "sharpe_proxy": -9.520672141262414,
+      "turnover": 0.9273076983600831,
+      "depth": 3,
+      "correlation_with_existing": 0.0
+    }
+  },
+  "VOLATILITY_LOW_DEPTH": {
+    "niche_id": "VOLATILITY_LOW_DEPTH",
+    "feature_type": "VOLATILITY",
+    "complexity_tier": "LOW_DEPTH",
+    "fitness_score": -1.0,
+    "factor": null
+  },
+  "VOLATILITY_HIGH_DEPTH": {
+    "niche_id": "VOLATILITY_HIGH_DEPTH",
+    "feature_type": "VOLATILITY",
+    "complexity_tier": "HIGH_DEPTH",
+    "fitness_score": -1.0,
+    "factor": null
+  }
+}

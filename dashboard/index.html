@@ -82,6 +82,70 @@
       </div>
     </section>
 
+    <!-- LIVE WORKFLOW PIPELINE ANIMATION BAR -->
+    <section class="pipeline-section glass-panel" id="pipeline-panel">
+      <div class="panel-header" style="margin-bottom: 12px;">
+        <h2>
+          <svg width="20" height="20" fill="var(--accent-cyan)" viewBox="0 0 16 16">
+            <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+            <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+          </svg>
+          Flujo de Auto-Mejora y Transición Cuantitativa en Tiempo Real
+        </h2>
+        <span class="panel-tag" id="pipeline-status-badge">REPOSO (IDLE)</span>
+      </div>
+
+      <div class="pipeline-stepper" id="pipelineStepper">
+        <div class="pipeline-step" id="step-monitor">
+          <div class="step-icon">1</div>
+          <div class="step-info">
+            <span class="step-title">1. Observabilidad</span>
+            <span class="step-desc">IC & CUSUM Decay</span>
+          </div>
+        </div>
+
+        <div class="pipeline-connector" id="conn-1"></div>
+
+        <div class="pipeline-step" id="step-autopsy">
+          <div class="step-icon">2</div>
+          <div class="step-info">
+            <span class="step-title">2. Autopsia IA</span>
+            <span class="step-desc">DeepSeek-R1 Forense</span>
+          </div>
+        </div>
+
+        <div class="pipeline-connector" id="conn-2"></div>
+
+        <div class="pipeline-step" id="step-synthesis">
+          <div class="step-icon">3</div>
+          <div class="step-info">
+            <span class="step-title">3. Síntesis AST</span>
+            <span class="step-desc">Microestructura Zero-Eval</span>
+          </div>
+        </div>
+
+        <div class="pipeline-connector" id="conn-3"></div>
+
+        <div class="pipeline-step" id="step-diversity">
+          <div class="step-icon">4</div>
+          <div class="step-info">
+            <span class="step-title">4. Incubación</span>
+            <span class="step-desc">MAP-Elites & Sandbox</span>
+          </div>
+        </div>
+
+        <div class="pipeline-connector" id="conn-4"></div>
+
+        <div class="pipeline-step" id="step-rebalance">
+          <div class="step-icon">5</div>
+          <div class="step-info">
+            <span class="step-title">5. Asignación HRP</span>
+            <span class="step-desc">Risk Parity & Live Exec</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Main Content Layout -->
     <main class="main-dashboard-grid">
       <!-- Columna Izquierda: Gráficos y Tabla de Incubadora -->
@@ -144,6 +208,37 @@
               </thead>
               <tbody id="incubatorTableBody">
                 <!-- Inyectado dinámicamente por JavaScript -->
+              </tbody>
+            </table>
+        </article>
+
+        <!-- Panel 4: Historial de Resultados & Ciclos de Auto-Mejora -->
+        <article class="glass-panel" id="panel-cycle-history">
+          <div class="panel-header">
+            <h2>
+              <svg width="20" height="20" fill="var(--accent-amber)" viewBox="0 0 16 16">
+                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.756.2 1.114.34l-.348.935zm1.87 1.015a6.995 6.995 0 0 0-.825-.57l.487-.873c.338.189.658.404.957.643l-.619.8zm1.608 1.491c-.244-.224-.51-.43-.794-.616l.547-.837c.334.218.647.46.934.723l-.687.73zm1.207 1.87a6.989 6.989 0 0 0-.616-.794l.73-.687c.263.287.505.6.723.934l-.837.547zm.758 2.052a7.001 7.001 0 0 0-.34-.985l.935-.348c.14.358.254.731.34 1.114l-.976-.219zM8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+              </svg>
+              Historial de Resultados y Ciclos de Optimización
+            </h2>
+            <span class="panel-tag" id="tag-history-count">0 CICLOS REGISTRADOS</span>
+          </div>
+          <div class="table-responsive">
+            <table class="quant-table" id="cycleHistoryTable">
+              <thead>
+                <tr>
+                  <th>Hora / Timestamp</th>
+                  <th>Estrategias Live</th>
+                  <th>Degradadas</th>
+                  <th>Promovidas</th>
+                  <th>Coste Ciclo</th>
+                  <th>Meta Sharpe</th>
+                  <th>Detalle / Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="cycleHistoryTableBody">
+                <!-- Inyectado dinámicamente -->
               </tbody>
             </table>
           </div>

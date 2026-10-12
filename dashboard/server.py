@@ -76,11 +76,12 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
-        # Restricción de CORS para evitar explotación cross-origin indiscriminada
+        # Cabeceras CORS
         client_origin = self.headers.get("Origin", "")
-        allowed_origins = {"http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8088", "http://127.0.0.1:8088"}
-        if client_origin in allowed_origins:
+        if client_origin:
             self.send_header("Access-Control-Allow-Origin", client_origin)
+        else:
+            self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
@@ -90,9 +91,10 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         """Manejo de pre-flight CORS para navegadores."""
         self.send_response(204)
         client_origin = self.headers.get("Origin", "")
-        allowed_origins = {"http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8088", "http://127.0.0.1:8088"}
-        if client_origin in allowed_origins:
+        if client_origin:
             self.send_header("Access-Control-Allow-Origin", client_origin)
+        else:
+            self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
@@ -153,11 +155,21 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             except Exception as e:
                 logger.error(f"Error leyendo archivo de nichos: {e}")
 
+        history = []
+        history_path = os.path.join(BASE_DIR, "portfolio", "cycle_history.json")
+        if os.path.exists(history_path):
+            try:
+                with open(history_path, "r", encoding="utf-8") as hf:
+                    history = json.load(hf)
+            except Exception as e:
+                logger.error(f"Error leyendo historial: {e}")
+
         self._send_json({
             "status": "ONLINE",
             "strategies": strategies,
             "autopsies": autopsies,
-            "niches": niches
+            "niches": niches,
+            "history": history
         })
 
     def _handle_trigger_loop(self):
@@ -240,8 +252,39 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             incubator.save_state(incubator_path)
             daemon.archive.save_archive(archive_path)
 
+            # Persistir en historial de ciclos
+            history_path = os.path.join(BASE_DIR, "portfolio", "cycle_history.json")
+            history = []
+            if os.path.exists(history_path):
+                try:
+                    with open(history_path, "r", encoding="utf-8") as hf:
+                        history = json.load(hf)
+                except Exception:
+                    pass
+
+            cycle_entry = {
+                "timestamp": report.cycle_timestamp,
+                "actions": report.actions_taken,
+                "quarantined": report.quarantined_strategies,
+                "promoted": report.promoted_strategies,
+                "new_weights": report.new_weights,
+                "goal_reached": report.goal_reached,
+                "estimated_cycle_cost_usd": report.estimated_cycle_cost_usd,
+                "accumulated_cost_usd": report.accumulated_cost_usd,
+                "active_strategies": len([s for s in incubator.strategies.values() if s.status.value == "LIVE"])
+            }
+            history.insert(0, cycle_entry)
+            history = history[:25] # Retener últimos 25 ciclos
+            try:
+                with open(history_path, "w", encoding="utf-8") as hf:
+                    json.dump(history, hf, indent=2)
+            except Exception as e:
+                logger.error(f"Error guardando cycle_history: {e}")
+
             self._send_json({
                 "success": True,
+                "cycle": cycle_entry,
+                "history": history,
                 "actions": report.actions_taken,
                 "quarantined": report.quarantined_strategies,
                 "promoted": report.promoted_strategies,
@@ -271,7 +314,8 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
 
 
 def run_server(port: int = 8088):
-    server_address = ("127.0.0.1", port)
+    host = os.getenv("DASHBOARD_HOST", "0.0.0.0")
+    server_address = (host, port)
     httpd = ThreadingHTTPServer(server_address, CockpitAPIHandler)
     print("=" * 80)
     print(f" [MEMEHUNTER QUANT COCKPIT] Servidor Visual Seguro Multihilo Iniciado")
