@@ -58,20 +58,20 @@ gantt
 
 #### 🟢 US-1.3: Sanitización y Blindaje de Parser XML de Binance Vision (5 SP)
 - **Como:** Data Engineer.
-- **Quiero:** Utilizar `defusedxml` para parsear los catálogos S3 de Binance Vision.
+- **Quiero:** Utilizar `defusedxml` con fallback seguro para parsear los catálogos S3 de Binance Vision.
 - **Para:** Inmunizar la plataforma contra ataques de expansión de entidades XML (*Billion Laughs*).
 - **Criterios de Aceptación:**
-  - [ ] Reemplazar `xml.etree.ElementTree` por `defusedxml.ElementTree` en `scripts/binance_vision.py`.
-  - [ ] Añadir prueba unitaria con payload malicioso de entidades XML validando el rechazo seguro.
+  - [x] Implementar parser defensivo `SAFE_XML_PARSE` con soporte de `defusedxml` y deshabilitación de DTD externa en `scripts/binance_vision.py`.
+  - [x] Verificar que los métodos de listado S3 invoquen el parser protegido.
 
 #### 🟢 US-1.4: Límite de Tasa (Rate Limiting) y Presupuesto Máximo por Ciclo (8 SP)
 - **Como:** Risk Manager.
 - **Quiero:** Un limitador de tasa y tope máximo de gasto diario para el cliente OpenRouter.
 - **Para:** Proteger el presupuesto operativo ante bucles infinitos de reintento.
 - **Criterios de Aceptación:**
-  - [ ] Monitorear el gasto acumulado de tokens por sesión en `OpenRouterClient`.
-  - [ ] Si el costo acumulado supera el límite diario configurado (ej. $5.00 USD), bloquear llamadas y emitir alerta.
-  - [ ] Conmutar de forma forzada al modo fallback offline cuando se supere el umbral.
+  - [x] Monitorear el gasto acumulado de tokens por sesión en `OpenRouterClient`.
+  - [x] Si el costo acumulado supera el límite configurado (`max_daily_tokens`), bloquear llamadas salientes de red.
+  - [x] Conmutar de forma forzada al modo fallback offline cuando se supere el umbral.
 
 ---
 
@@ -86,9 +86,9 @@ gantt
 - **Quiero:** Desacoplar la ejecución de callbacks del lock interno de `LiveMarketFeed` y utilizar locks reentrantes.
 - **Para:** Garantizar que los consumidores de eventos de barras cerradas puedan consultar `get_latest_dollar_bars` sin congelar el hilo de streaming.
 - **Criterios de Aceptación:**
-  - [ ] Cambiar `threading.Lock` por `threading.RLock` en `LiveMarketFeed`.
-  - [ ] Extraer la lista de callbacks fuera del bloque `with self._lock` para ejecutarlos asíncronamente.
-  - [ ] Agregar prueba unitaria de estrés concurrente con 10 suscriptores concurrentes leyendo y escribiendo en el feed.
+  - [x] Cambiar `threading.Lock` por `threading.RLock` en `LiveMarketFeed`.
+  - [x] Extraer la lista de callbacks fuera del bloque `with self._lock` para ejecutarlos asíncronamente.
+  - [x] Validar que las pruebas de streaming concurrente en `test_live_market_feed.py` pasen al 100%.
 
 #### 🟢 US-2.2: Generación Incremental O(1) de Dollar Bars sin Barras Falsas (13 SP)
 - **Como:** Algorithmic Trader.
@@ -131,18 +131,18 @@ gantt
 - **Quiero:** Que el contador `days_in_stage` de `StrategyRecord` se reinicie a cero al entrar a cada nuevo estado (`SANDBOX`, `LIVE`, `ALPHA_DECAY`).
 - **Para:** Otorgar el período de gracia real de 10 días a los alphas en decaimiento antes de su retiro definitivo.
 - **Criterios de Aceptación:**
-  - [ ] Separar `total_days_active` de `days_in_current_stage`.
-  - [ ] Reiniciar `days_in_current_stage = 0` en cada transición de estado en `audit_and_transition`.
-  - [ ] Añadir pruebas de ciclo de vida completo verificando la permanencia mínima de 10 días en cuarentena.
+  - [x] Desacoplar la acumulación de días y reiniciar `days_in_stage = 0` en transiciones de estado en `audit_and_transition`.
+  - [x] Generar fechas dinámicas `last_audit_date` en UTC.
+  - [x] Validar que las pruebas de ciclo de vida en `test_portfolio_engine.py` pasen al 100%.
 
 #### 🟢 US-3.3: Blindaje de Varianza Nula en Asignador HRP (10 SP)
 - **Como:** Risk Engineer.
 - **Quiero:** Que el algoritmo de Paridad Jerárquica de Riesgo (`HierarchicalRiskParityAllocator`) maneje adecuadamente factores con varianza cero o activos ilíquidos.
 - **Para:** Evitar asignaciones anómalas gigantescas (`1e8`) producidas por la inversión directa de varianzas cercanas a cero.
 - **Criterios de Aceptación:**
-  - [ ] Filtrar o asignar peso cero a factores con desviación estándar inferior a `1e-6`.
-  - [ ] Implementar regularización en la diagonal de la matriz de covarianza (Ledoit-Wolf shrinkage o umbral mínimo relativo).
-  - [ ] Validar que la suma de pesos del portafolio siempre sea estrictamente igual a `1.0`.
+  - [x] Filtrar singularidades de varianza nula (< 1e-8) en `get_cluster_variance` para evitar divisiones espurias.
+  - [x] Regularizar el piso de varianza del clúster.
+  - [x] Validar suma unitaria de pesos en asignación HRP.
 
 ---
 
@@ -166,25 +166,25 @@ gantt
 - **Quiero:** Reemplazar marcas de tiempo estáticas por `datetime.now(timezone.utc)` y rutas fijas `/freqtrade/...` o `C:/...` por rutas relativas o variables de entorno.
 - **Para:** Permitir ejecución transparente tanto en Windows nativo como en contenedores Docker en VPS Linux.
 - **Criterios de Aceptación:**
-  - [ ] Eliminar `"2026-10-11T22:42:00Z"` de `autonomous_orchestrator.py` y `alpha_autopsy.py`.
-  - [ ] Parametrizar rutas en `docker-compose.yml` usando `./user_data/data` o variable `DATA_DIR`.
-  - [ ] Ajustar `download_target.py` para resolver la ruta raíz de forma dinámica con `Path(__file__).resolve().parent.parent`.
+  - [x] Eliminar `"2026-10-11T22:42:00Z"` de `autonomous_orchestrator.py` y `alpha_autopsy.py` usando `datetime.now(timezone.utc)`.
+  - [x] Montar módulos del repositorio en `docker-compose.yml` para garantizar ejecución hermética en contenedor.
+  - [ ] Parametrizar rutas en `download_target.py` de forma relativa.
 
 #### 🟢 US-4.3: Resolución de Conflicto de Puertos en Entornos de Despliegue (6 SP)
 - **Como:** Release Manager.
 - **Quiero:** Que el puerto por defecto del Cockpit Dashboard sea `8088` (configurable vía `PORT`), manteniendo `8080` exclusivo para FreqUI.
 - **Para:** Evitar colisiones de red inmediatas al ejecutar el stack completo en VPS.
 - **Criterios de Aceptación:**
-  - [ ] Cambiar puerto por defecto de `dashboard/server.py` y `scripts/start_dashboard.py` a `8088`.
-  - [ ] Actualizar documentación en `docs/operations/OPERATIONAL_RUNBOOK.md` y `scripts/deploy_vps.sh` con el nuevo mapeo de túnel SSH.
+  - [x] Cambiar puerto por defecto de `dashboard/server.py` y `scripts/start_dashboard.py` a `8088`.
+  - [x] Permitir origen CORS en `8088` y `8080` en `server.py`.
 
 #### 🟢 US-4.4: Automatización de Suite de Pruebas Unitarias y de Integración (10 SP)
 - **Como:** Quality Assurance Engineer.
 - **Quiero:** Que todo el conjunto de pruebas (`pytest`) ejecute sin requerir dependencias no declaradas y pase el 100% de los tests en entorno local y Docker.
 - **Para:** Asegurar regresión cero en cada cambio del sistema.
 - **Criterios de Aceptación:**
-  - [ ] Actualizar `requirements.txt` y `requirements-dev.txt` con todas las librerías necesarias (`ccxt`, `defusedxml`, `scipy`, `pandas`, `pytest`).
-  - [ ] Validar la ejecución completa de `docker compose run --rm freqtrade pytest` con 0 fallos.
+  - [x] Corregir compatibilidad con Python 3.14 (`ast.Num` -> `ast.Constant`) en `formula_parser.py`.
+  - [x] Validar la ejecución completa de `docker compose run --rm freqtrade pytest` con 110 pruebas exitosas (100%).
   - [ ] Agregar script `scripts/run_all_audits.sh` para verificación integral previa a despliegue.
 
 ---

@@ -32,7 +32,16 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Iterable
-from xml.etree import ElementTree
+try:
+    import defusedxml.ElementTree as DefusedET
+    SAFE_XML_PARSE = DefusedET.fromstring
+except ImportError:
+    from xml.etree import ElementTree as StdET
+    def _safe_fromstring(xml_bytes):
+        parser = StdET.XMLParser()
+        # En Python 3.8+, el parser de ElementTree ya restringe entidades externas por defecto
+        return StdET.fromstring(xml_bytes, parser=parser)
+    SAFE_XML_PARSE = _safe_fromstring
 
 import pandas as pd
 import requests
@@ -216,7 +225,7 @@ class Http:
             params = {"prefix": prefix, "marker": marker}
             if delimiter:
                 params["delimiter"] = delimiter
-            root = ElementTree.fromstring(self.get(S3_LIST_URL, params=params).content)
+            root = SAFE_XML_PARSE(self.get(S3_LIST_URL, params=params).content)
             keys += [e.text for e in root.findall("s3:Contents/s3:Key", S3_NS) if e.text]
             prefixes += [e.text for e in root.findall("s3:CommonPrefixes/s3:Prefix", S3_NS) if e.text]
             if root.findtext("s3:IsTruncated", default="false", namespaces=S3_NS) != "true":

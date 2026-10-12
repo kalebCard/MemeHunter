@@ -35,6 +35,7 @@ docs/
 │       ├── ADR-003_fractional_diff_and_continuous_bet_sizing.md
 │       └── ADR-004_airbag_technical_exit_market_orders.md
 ├── sprints/
+│   ├── SPRINT_PLAN_REMEDIATION_AND_HARDENING.md # 🛡️ Plan Scrum: Hardening, Streaming & DevOps
 │   ├── SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md # 🚀 Sprint 1: Bucle Cerrado & Self-Healing
 │   └── SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md  # 🧠 Sprint 2: Cognición IA con OpenRouter
 ├── strategy/

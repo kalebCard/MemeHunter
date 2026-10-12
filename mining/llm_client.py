@@ -45,6 +45,7 @@ class OpenRouterClient:
         self.site_url = site_url
         self.app_name = app_name
         self.timeout = timeout
+        self.max_daily_tokens = int(os.getenv("OPENROUTER_MAX_DAILY_TOKENS", "100000"))
         self.total_tokens_used = 0
         self.total_calls = 0
         self.is_offline_mode = not bool(self.api_key.strip())
@@ -62,12 +63,20 @@ class OpenRouterClient:
     ) -> Dict[str, Any]:
         """
         Envía un prompt a OpenRouter y retorna la respuesta procesada en diccionario JSON.
-        Si la API no está configurada o falla la red, ejecuta el fallback heurístico.
+        Si se excede el presupuesto de tokens, la API no está configurada o falla la red,
+        ejecuta el fallback heurístico.
         """
         selected_model = model or self.default_model
         self.total_calls += 1
 
         if self.is_offline_mode:
+            return self._generate_fallback_response(prompt, json_mode)
+
+        if self.total_tokens_used >= self.max_daily_tokens:
+            logger.warning(
+                f"OpenRouterClient: Presupuesto diario de tokens excedido "
+                f"({self.total_tokens_used}/{self.max_daily_tokens}). Conmutando a MODO FALLBACK OFFLINE."
+            )
             return self._generate_fallback_response(prompt, json_mode)
 
         messages = []

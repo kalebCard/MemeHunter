@@ -86,10 +86,33 @@ python scripts/delta_neutral_vault.py --scan
 
 ---
 
-## 4. 📊 Batería de Validación Previa a Producción
+## 4. 🎛️ Monitoreo Visual con Alpha Cockpit Dashboard
 
-Antes de desplegar cualquier cambio o ajuste de parámetros, ejecutar la suite completa de tests:
+El **Cockpit Dashboard** opera de manera aislada y multihilo en el puerto **8088** para no colisionar con FreqUI (puerto 8080/8081).
+
+### 4.1 Iniciar el Servidor del Dashboard
 ```powershell
-python -m pytest tests/test_advanced_metrics.py tests/test_fractional_diff.py tests/test_triple_barrier_metalabeling.py tests/test_profit_ratchet.py tests/test_delta_neutral_vault.py tests/test_regime_classifier.py tests/test_futures_v7_quantum.py -v
+# Iniciar en puerto estándar 8088
+python scripts/start_dashboard.py
 ```
-**Criterio de pase obligatorio:** 21/21 tests pasando al 100%.
+* **Acceso Local:** [http://localhost:8088](http://localhost:8088)
+* **Autenticación:** Las llamadas a mutación (`/api/trigger-loop` y `/api/synthesize-alpha`) requieren un token Bearer seguro:
+  - Token por defecto para desarrollo: `meme_hunter_dev_token_2026`
+  - Variable de entorno de producción: `DASHBOARD_API_TOKEN`
+
+### 4.2 Acceso Seguro en Servidores Remotos / VPS
+Nunca expongas el puerto 8088 a internet directamente. Utiliza un túnel cifrado SSH:
+```bash
+ssh -L 8088:127.0.0.1:8088 usuario@<IP_DEL_VPS>
+```
+Luego navega localmente a `http://localhost:8088`.
+
+---
+
+## 5. 📊 Batería de Validación Previa a Producción (CI/CD)
+
+Antes de desplegar cualquier cambio a producción, ejecutar la suite completa de pruebas en el entorno hermético Docker:
+```bash
+docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
+```
+**Criterio de aceptación obligatorio:** **110/110 tests pasando al 100% (0 errores)**.

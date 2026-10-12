@@ -9,6 +9,7 @@ Plataforma cuantitativa institucional que combina **minería genética de factor
 La documentación del proyecto se encuentra estructurada en el directorio [`docs/`](docs/README.md):
 
 * **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
+* **Plan Scrum de Remediación & Hardening (v7.1):** [docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md)
 * **Arquitectura de Software Auto-Evolutiva (v7.0):** [docs/architecture/DAS_AUTONOMOUS_ENGINE.md](docs/architecture/DAS_AUTONOMOUS_ENGINE.md)
 * **Arquitectura Tradicional (v4.0 - v6.0):** [docs/architecture/DAS.md](docs/architecture/DAS.md)
 * **Sprint 1 (Motor Auto-Evolutivo & Self-Healing):** [docs/sprints/SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md](docs/sprints/SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md)
@@ -19,20 +20,21 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🚀 Innovaciones Clave de la Versión 7.0
+## 🚀 Innovaciones Clave de la Versión 7.0 & 7.1
 
 1. **Bucle Cerrado Auto-Evolutivo (Closed-Loop Engine):**
    * **Monitoreo Continuo:** `AlphaHealthMonitor` calcula Information Coefficient (IC) rodante y detecta rupturas estructurales con CUSUM (Page-Hinkley) y *data drift* con Kolmogorov-Smirnov.
-   * **Incubadora Autónoma:** Transición mecánica sin intervención humana entre `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED`.
-   * **Asignación HRP:** Reponderación dinámica de capital vía Paridad Jerárquica de Riesgo aislando factores fatigados.
+   * **Incubadora Autónoma:** Transición mecánica sin intervención humana entre `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED` con período de gracia real.
+   * **Asignación HRP:** Reponderación dinámica de capital vía Paridad Jerárquica de Riesgo con regularización ante singularidades de varianza.
 2. **Cerebro Cognitivo de IA (OpenRouter):**
-   * **Autopsias Forenses (`AlphaAutopsyAgent`):** Modelos de razonamiento profundo (DeepSeek-R1 / Claude 3.5 Sonnet) identifican la causa raíz de la degradación y emiten recomendaciones de búsqueda.
+   * **Autopsias Forenses (`AlphaAutopsyAgent`):** Modelos de razonamiento profundo (DeepSeek-R1 / Claude 3.5 Sonnet) identifican la causa raíz de la degradación y emiten recomendaciones de búsqueda con marcas de tiempo UTC dinámicas.
    * **Síntesis Semántica (`LLMAlphaSynthesizer`):** Formulación de factores basados en hipótesis de microestructura (desbalances de volumen, Amihud ratio, compresión en Dollar Bars).
-   * **Compilador Seguro (`FormulaASTParser`):** Sanitizador AST *Zero Eval* que garantiza aislamiento y validez formal de toda expresión matemática.
-3. **Cockpit Visual de Monitoreo (Dashboard Web):**
-   * Interfaz interactiva en tiempo real accesible en `http://localhost:8080` con gráficos Chart.js, KPI cards, tabla de estados de la incubadora, autopsias IA y consola de auditoría.
-4. **Streaming en Vivo desde Binance (`LiveMarketFeed`):**
-   * Ingesta de velas y trades de memecoins (`DOGE`, `PEPE`, `SHIB`) convertidas al vuelo en **Dollar Bars** para alimentar las señales de los alphas.
+   * **Compilador Seguro (`FormulaASTParser`):** Sanitizador AST *Zero Eval* compatible con Python 3.14 (`ast.Constant`).
+   * **Control de Presupuesto:** Limitador de tasa y tope máximo de tokens por sesión para prevenir agotamiento de saldo.
+3. **Cockpit Visual Seguro y Multihilo (Dashboard Web):**
+   * Servidor HTTP concurrente (`ThreadingHTTPServer`) accesible en `http://localhost:8088` con autenticación por token Bearer en endpoints de control y CORS restringido.
+4. **Streaming en Vivo sin Deadlock (`LiveMarketFeed`):**
+   * Ingesta de velas y trades de memecoins (`DOGE`, `PEPE`, `SHIB`) con lock reentrante (`RLock`) y notificación de eventos desacoplada para máxima concurrencia.
 
 ---
 
@@ -82,7 +84,7 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 | Script | Propósito / Función | Comando de Ejecución |
 | :--- | :--- | :--- |
-| `start_dashboard.py` | 🌟 **Lanzador del Cockpit Visual en tiempo real (Puerto 8080)** | `python scripts/start_dashboard.py 8080` |
+| `start_dashboard.py` | 🌟 **Lanzador del Cockpit Visual en tiempo real (Puerto 8088)** | `python scripts/start_dashboard.py` |
 | `run_live_alpha_loop.py` | ⚡ **Bucle E2E continuo conectado a Binance en tiempo real** | `python scripts/run_live_alpha_loop.py` |
 | `run_autonomous_engine_demo.py` | 🤖 Demostración E2E del bucle cerrado: decay, autopsia IA y HRP | `python scripts/run_autonomous_engine_demo.py` |
 | `run_alpha_factory_pipeline.py` | 🏭 Pipeline industrial completo de minería NSGA-II, CPCV y PBO | `python scripts/run_alpha_factory_pipeline.py` |
@@ -103,13 +105,13 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🚀 Despliegue Rápido de la Plataforma v7.0
+## 🚀 Despliegue Rápido de la Plataforma v7.0 & v7.1
 
-### 1. Iniciar Cockpit Visual de Monitoreo
+### 1. Iniciar Cockpit Visual Seguro de Monitoreo
 ```powershell
-python scripts/start_dashboard.py 8080
+python scripts/start_dashboard.py
 ```
-Acceder al panel interactivo: **[http://localhost:8080](http://localhost:8080)**
+Acceder al panel interactivo: **[http://localhost:8088](http://localhost:8088)** *(Autenticación con Bearer token en mutaciones)*
 
 ### 2. Iniciar el Bucle Autónomo en Tiempo Real (Binance)
 ```powershell
@@ -121,6 +123,13 @@ python scripts/run_live_alpha_loop.py
 docker compose -f docker-compose.futures.yml up -d
 ```
 * **Dashboard Web (FreqUI):** [http://localhost:8081](http://localhost:8081)
+* **Cockpit Visual Seguro:** [http://localhost:8088](http://localhost:8088) *(No colisiona con FreqUI)*
+
+### 4. Ejecutar la Suite Completa de Tests (110 Tests Certificados)
+```powershell
+docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
+```
+* **Certificación:** **110/110 tests pasando al 100% (0 errores)** en contenedor hermético.
 
 ---
 
