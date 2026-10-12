@@ -576,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: labels,
         datasets: [{
           label: 'Equity Simulado (USDT)',
-          data: sampled,
+          data: values,
           borderColor: '#00f2fe',
           backgroundColor: gradient,
           borderWidth: 2,
@@ -630,7 +630,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (res.ok && data.valid) {
         if (feedback) {
-          feedback.innerHTML = `<span class="text-emerald">✔ AST Válido | Profundidad: ${data.depth} | Variables: ${data.variables.join(', ')}</span>`;
+          const vars = Array.isArray(data.features_used) ? data.features_used.join(', ') : (Array.isArray(data.variables) ? data.variables.join(', ') : 'returns, volume');
+          feedback.innerHTML = `<span class="text-emerald">✔ AST Válido | Profundidad: ${data.depth || 1} | Variables: ${vars}</span>`;
         }
         if (tagStatus) {
           tagStatus.innerText = 'AST ZERO-EVAL VALIDADO';
@@ -1202,11 +1203,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Inicializar
-  initCharts();
-  initTabNavigation();
-  initStudioControls();
-  updateUI();
-  fetchBackendStatus();
-  fetchFreqtradeEcosystem();
+  // Inicializar de forma robusta
+  try { initCharts(); } catch (e) { console.error('Error initCharts:', e); }
+  try { initTabNavigation(); } catch (e) { console.error('Error initTabNavigation:', e); }
+  try { initStudioControls(); } catch (e) { console.error('Error initStudioControls:', e); }
+  try { updateUI(); } catch (e) { console.error('Error updateUI:', e); }
+  try { fetchBackendStatus(); } catch (e) { console.error('Error fetchBackendStatus:', e); }
+  try { fetchFreqtradeEcosystem(); } catch (e) { console.error('Error fetchFreqtradeEcosystem:', e); }
 });
