@@ -857,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('val-decay-count').innerHTML = `${decayCount} <span style="font-size: 0.9rem; color: var(--accent-muted);">Alpha Decay</span>`;
   }
 
-  // 10. Navegación Unificada de Tabs
+  // 10. Navegación Unificada de Tabs y Subvistas I+D
   function initTabNavigation() {
     const tabs = document.querySelectorAll('.nav-tab');
     tabs.forEach(tab => {
@@ -885,10 +885,43 @@ document.addEventListener('DOMContentLoaded', () => {
             if (equityChart) equityChart.resize();
             if (icChart) icChart.resize();
           }, 100);
-        } else if (targetTab === 'tab-strategy-studio') {
+        } else if (targetTab === 'tab-strategies-rd' || targetTab === 'tab-strategy-studio') {
           setTimeout(() => {
             if (backtestChart) backtestChart.resize();
           }, 100);
+        }
+      });
+    });
+
+    initSubviewNavigation();
+  }
+
+  function initSubviewNavigation() {
+    const subBtns = document.querySelectorAll('.subview-btn');
+    const hintBadge = document.getElementById('subview-hint-status');
+    subBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetView = btn.getAttribute('data-subview');
+        if (!targetView) return;
+
+        subBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.subview-pane').forEach(p => p.classList.remove('active'));
+        const targetPane = document.getElementById(targetView);
+        if (targetPane) targetPane.classList.add('active');
+
+        if (hintBadge) {
+          if (targetView === 'subview-studio') {
+            hintBadge.innerText = 'Modo: Taller Interactivo de Fórmulas';
+            hintBadge.style.color = 'var(--accent-cyan)';
+            hintBadge.style.borderColor = 'rgba(0, 242, 254, 0.25)';
+            setTimeout(() => { if (backtestChart) backtestChart.resize(); }, 100);
+          } else {
+            hintBadge.innerText = 'Modo: Catálogo Histórico y Resiliencia Freqtrade';
+            hintBadge.style.color = 'var(--accent-emerald)';
+            hintBadge.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+          }
         }
       });
     });
@@ -1011,8 +1044,12 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   window.loadIntoStudio = function(stratId) {
-    const studioTabBtn = document.querySelector('.nav-tab[data-tab="tab-strategy-studio"]');
-    if (studioTabBtn) studioTabBtn.click();
+    const rdTabBtn = document.querySelector('.nav-tab[data-tab="tab-strategies-rd"]');
+    if (rdTabBtn) rdTabBtn.click();
+    const studioSubBtn = document.querySelector('.subview-btn[data-subview="subview-studio"]');
+    if (studioSubBtn) studioSubBtn.click();
+    const el = document.getElementById('panel-strategy-studio');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     addLog('info', `Estrategia ${stratId} seleccionada para experimentación en el Laboratorio Cuantitativo.`);
   };
 
