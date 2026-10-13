@@ -157,6 +157,8 @@ graph LR
 
 ## 7. Catálogo Integral de Scripts y Módulos Satélite
 
+> **Catálogo Modular:** Para la especificación exhaustiva y categorizada de los 47 scripts distribuidos en sus 6 dominios funcionales (`research/`, `backtest/`, `simulation/`, `pipelines/`, `data/`, `ops/`), consultar el [**Manual Operativo de Scripts**](../scripts/README.md).
+
 | Módulo / Script | Propósito Cuantitativo | Comando de Ejecución |
 |---|---|---|
 | [`meme_cli.py`](../scripts/meme_cli.py) | 🌟 **CLI Unificado de Operaciones, Salud, Test y Control** | `python scripts/meme_cli.py [health|cockpit|futures|test|research]` |

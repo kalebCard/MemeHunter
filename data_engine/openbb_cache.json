@@ -1,11 +1,11 @@
 {
-  "tvl_solana_usd": 6067404350.020877,
-  "tvl_ethereum_usd": 51296961999.89405,
+  "tvl_solana_usd": 6051692461.821139,
+  "tvl_ethereum_usd": 51232932092.6837,
   "tvl_24h_change_pct": 0.0,
   "global_funding_rate_avg": 0.0001,
   "macro_sentiment_score": 0.2,
   "is_bear_contraction": false,
   "source": "DEFILLAMA_DIRECT_API",
-  "timestamp_utc": "2026-10-13T05:59:18.008652+00:00",
-  "_cached_at_ts": 1791871158.0086522
+  "timestamp_utc": "2026-10-13T23:42:45.254579+00:00",
+  "_cached_at_ts": 1791934965.2545795
 }

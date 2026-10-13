@@ -1,32 +1,21 @@
 {
-  "ALPHA_MOM_01": {
-    "strategy_id": "ALPHA_MOM_01",
+  "ALPHA_LIVE_01": {
+    "strategy_id": "ALPHA_LIVE_01",
     "name": "ts_rank(close, 14)",
-    "status": "ALPHA_DECAY",
-    "target_capital_weight": 0.0,
-    "backtest_sharpe": 2.1,
+    "status": "LIVE",
+    "target_capital_weight": 1.0,
+    "backtest_sharpe": 2.2,
     "live_sharpe": 0.0,
     "days_in_stage": 0,
     "decay_zscore": 0.0,
     "last_audit_date": "2026-10-13"
   },
-  "ALPHA_VOL_02": {
-    "strategy_id": "ALPHA_VOL_02",
-    "name": "ts_zscore((high - low), 10) * rvol",
+  "ALPHA_CAND_02": {
+    "strategy_id": "ALPHA_CAND_02",
+    "name": "ts_zscore((high - low), 10)",
     "status": "ALPHA_DECAY",
     "target_capital_weight": 0.0,
-    "backtest_sharpe": 1.85,
-    "live_sharpe": 0.0,
-    "days_in_stage": 0,
-    "decay_zscore": 0.0,
-    "last_audit_date": "2026-10-13"
-  },
-  "ALPHA_CAND_03": {
-    "strategy_id": "ALPHA_CAND_03",
-    "name": "ts_decay(close, 10)",
-    "status": "ALPHA_DECAY",
-    "target_capital_weight": 0.0,
-    "backtest_sharpe": 1.5,
+    "backtest_sharpe": 1.9,
     "live_sharpe": 0.0,
     "days_in_stage": 0,
     "decay_zscore": 0.0,

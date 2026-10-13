@@ -73,6 +73,7 @@ docs/
 * **[CLI_REFERENCE.md](reference/CLI_REFERENCE.md):** Manual completo de comandos `meme-hunter` (`db`, `run`, `mine`, `backtest`, `sim`, `serve`).
 * **[DATABASE_SCHEMA.md](reference/DATABASE_SCHEMA.md):** Esquema relacional de SQLite WAL (`strategies`, `portfolio_allocations`, `alpha_autopsies`, `market_biases`, etc.).
 * **[API_REFERENCE.md](reference/API_REFERENCE.md):** Documentación de endpoints FastAPI (`/api/system`, `/api/strategies`, `/api/dag`) y WebSockets.
+* **[Manual Operativo de Scripts](../scripts/README.md):** Catálogo y guía operativa de los 47 scripts organizados en 6 dominios funcionales.
 
 ### 🔬 4. Investigación Cuantitativa (`docs/research/`)
 * **[ESTRATEGIA_MAESTRA_UNIFICADA.md](research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md):** Compendio cuantitativo integral de hipótesis, genealogía V1-V7 y escalado.

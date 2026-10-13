@@ -51,8 +51,7 @@ class MemeHunter_MinedEnsemble(IStrategy):
         "ALPHA_001": 0.25,
         "ALPHA_002": 0.2499999987543191,
         "ALPHA_004": 0.5000000012456809,
-        "STRAT_A": 0.187585,
-        "STRAT_B": 0.812415,
+        "STRAT_A": 1.0,
         "ALPHA_LIVE_01": 1.0,
         "HEALTHY_01": 1.0
 }
@@ -126,17 +125,11 @@ class MemeHunter_MinedEnsemble(IStrategy):
         f_norm_ALPHA_004 = (f_val_ALPHA_004 - f_val_ALPHA_004.mean()) / f_std_ALPHA_004
         composite_score += f_norm_ALPHA_004.fillna(0.0) * 0.500000
 
-        # Factor STRAT_A (Peso HRP: 0.1876)
-        f_val_STRAT_A = (dataframe['close'].pct_change().fillna(0.0))
+        # Factor STRAT_A (Peso HRP: 1.0000)
+        f_val_STRAT_A = (ts_delta(dataframe['close'], 1))
         f_std_STRAT_A = float(f_val_STRAT_A.std()) if float(f_val_STRAT_A.std()) > 1e-8 else 1.0
         f_norm_STRAT_A = (f_val_STRAT_A - f_val_STRAT_A.mean()) / f_std_STRAT_A
-        composite_score += f_norm_STRAT_A.fillna(0.0) * 0.187585
-
-        # Factor STRAT_B (Peso HRP: 0.8124)
-        f_val_STRAT_B = (dataframe['close'].pct_change().fillna(0.0))
-        f_std_STRAT_B = float(f_val_STRAT_B.std()) if float(f_val_STRAT_B.std()) > 1e-8 else 1.0
-        f_norm_STRAT_B = (f_val_STRAT_B - f_val_STRAT_B.mean()) / f_std_STRAT_B
-        composite_score += f_norm_STRAT_B.fillna(0.0) * 0.812415
+        composite_score += f_norm_STRAT_A.fillna(0.0) * 1.000000
 
         # Factor ALPHA_LIVE_01 (Peso HRP: 1.0000)
         f_val_ALPHA_LIVE_01 = (ts_rank(dataframe['close'], 14))

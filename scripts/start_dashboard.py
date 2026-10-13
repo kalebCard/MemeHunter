@@ -1,17 +1,18 @@
 """
-Script lanzador para el MemeHunter Alpha Cockpit Visual Dashboard.
-Sprint 3: Monitoreo Visual e Interfaz de Control Cuantitativo.
+Meme Hunter - Backward Compatibility Shim
+Canonical Location: scripts/ops/start_dashboard.py
 """
-
-import os
 import sys
+from pathlib import Path
 
-# Agregar path raíz
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, BASE_DIR)
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-from dashboard.server import run_server
+_TARGET = Path(__file__).resolve().parent / "ops" / "start_dashboard.py"
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8088
-    run_server(port)
+    import runpy
+    runpy.run_path(str(_TARGET), run_name="__main__")
+else:
+    from scripts.ops.start_dashboard import *
