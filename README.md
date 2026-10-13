@@ -8,8 +8,10 @@ Plataforma cuantitativa institucional que combina **arquitectura Multi-Agente en
 
 La documentación del proyecto se encuentra estructurada en el directorio [`docs/`](docs/README.md):
 
-* **[Manual Maestro Unificado del Sistema (v7.3):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa y operativa.
+* **[Manual Estándar de Ingeniería y Desarrollo (v8.0):](docs/MANUAL_ESTANDAR_DEL_PROYECTO.md)** Norma técnica canónica obligatoria para desarrollo, arquitectura modular, SQLite WAL, estándares de código y testing.
+* **[Manual Maestro Unificado del Sistema (v7.4):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa, estratégica y operativa.
 * **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
+* **Sprints 40-43 (Remediación Crítica, Resiliencia de Concurrencia y Arquitectura v8.0):** [docs/sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md](docs/sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md)
 * **Sprints 36-39 (Arquitectura de 4 Capas: Cortafuegos Pydantic, Sesgo Asíncrono, Trigger Determinista y Kill Switch):** [docs/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md](docs/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md)
 * **Sprints 33-35 (Aceleración Polars/VectorBT, Riskfolio-Lib HERC/CVaR y OpenBB):** [docs/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md](docs/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md)
 * **Sprints 30-32 (Arquitectura Multi-Agente, Orquestador DAG y Cockpit HITL):** [docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md](docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md), [docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md](docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md), [docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md](docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md)

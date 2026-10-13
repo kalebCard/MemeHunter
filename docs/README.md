@@ -14,10 +14,13 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 
 ---
 
-## 🌟 Documento de Referencia Principal
+## 🌟 Documentos de Referencia Canónicos
 
-> ### 👉 [📖 Manual Maestro Unificado del Sistema (DOC-MASTER-001)](MANUAL_UNIFICADO_DEL_SISTEMA.md)
-> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con fábrica SQLite WAL, compuertas OOS, ensamble bidireccional Long/Short, arquitectura Multi-Agente en Grafo (DAG), fusión bayesiana, cognición IA, Centro de Control Unificado (Cockpit v7.4 con Visor Visual DAG y controles HITL) y catálogo de scripts.*
+> ### 🛡️ [📖 Manual Estándar de Ingeniería y Desarrollo (MANUAL-STD-001)](MANUAL_ESTANDAR_DEL_PROYECTO.md)
+> *La norma técnica canónica obligatoria para desarrolladores e ingenieros: arquitectura modular `src/meme_hunter`, eliminación de Split-Brain (SQLite WAL), desacoplamiento asíncrono con Event Bus, Pydantic Settings, pirámide de testing y catálogo CLI `meme-hunter`.*
+
+> ### 🌌 [📖 Manual Maestro Unificado del Sistema (DOC-MASTER-001)](MANUAL_UNIFICADO_DEL_SISTEMA.md)
+> *El compendio canónico integral que consolida: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con fábrica SQLite WAL, compuertas OOS y orquestador DAG.*
 
 ---
 
@@ -130,6 +133,6 @@ author: [Autor / Equipo]
 | :--- | :--- |
 | **Inversor / Ejecutivo** | [`MANUAL_UNIFICADO_DEL_SISTEMA.md`](MANUAL_UNIFICADO_DEL_SISTEMA.md) ➔ [`reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
 | **Investigador Cuantitativo** | [`strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md`](strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) ➔ [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
-| **Ingeniero de Software** | [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md`](sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md) ➔ [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) |
-| **Operador de Producción** | [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) ➔ Cockpit Web ([http://localhost:8088](http://localhost:8088)) ➔ Dashboard FreqUI ([http://localhost:8081](http://localhost:8081)) |
+| **Ingeniero de Software** | [`MANUAL_ESTANDAR_DEL_PROYECTO.md`](MANUAL_ESTANDAR_DEL_PROYECTO.md) ➔ [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) |
+| **Operador de Producción** | [`MANUAL_ESTANDAR_DEL_PROYECTO.md`](MANUAL_ESTANDAR_DEL_PROYECTO.md) ➔ [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) ➔ Cockpit Web ([http://localhost:8088](http://localhost:8088)) |
 
