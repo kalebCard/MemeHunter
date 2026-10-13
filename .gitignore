@@ -14,11 +14,21 @@ user_data/hyperopt_results/
 user_data/backtest_results/
 user_data/plot/
 
-# Python
+# Python & Build Artifacts
 __pycache__/
 *.pyc
+*.egg-info/
+build/
+dist/
 .venv/
 venv/
+.pytest_cache/
+
+# Local Storage Database
+storage/*.db
+storage/*.db-*
+storage/*.sqlite
+storage/*.sqlite-*
 
 # Editor / SO
 .vscode/
