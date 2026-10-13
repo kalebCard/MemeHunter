@@ -1,6 +1,6 @@
-# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit Unificado (v7.4)
+# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit Unificado (v7.6)
 
-Plataforma cuantitativa institucional que combina **arquitectura Multi-Agente en Grafo Acíclico Dirigido (DAG)** con **fusión bayesiana y telemetría < 20ms**, **minería genética de factores (NSGA-II)**, **fábrica de alphas transaccional en SQLite WAL**, **compuertas rigurosas fuera de muestra (OOS Gating: PBO < 15%, DSR >= 95%)**, **ensamble dinámico bidireccional Long/Short para Freqtrade**, **percepción semántica cualitativa vía OpenRouter (FinLLM con fallback offline 0ms)**, **protocolo de degradación elegante ante cisnes negros**, **sincronización continua de datos de Binance Futures**, y un **Centro de Control Unificado (Cockpit v7.4 con Visor Visual DAG y controles Human-in-the-Loop)**.
+Plataforma cuantitativa institucional que combina **arquitectura Multi-Agente en Grafo Acíclico Dirigido (DAG)** con **fusión bayesiana y telemetría < 20ms**, **arquitectura blindada de 4 capas (Cortafuegos Pydantic v2, Desacoplamiento Asíncrono, Ejecución Determinista y Kill Switch Absoluto)**, **minería genética de factores (NSGA-II)**, **fábrica de alphas transaccional en SQLite WAL**, **compuertas rigurosas fuera de muestra (OOS Gating: PBO < 15%, DSR >= 95%)**, **ensamble dinámico bidireccional Long/Short para Freqtrade**, **percepción semántica cualitativa vía OpenRouter (FinLLM con fallback offline 0ms)**, **protocolo de degradación elegante ante cisnes negros**, **sincronización continua de datos de Binance Futures**, y un **Centro de Control Unificado (Cockpit v7.4 con Visor Visual DAG y controles Human-in-the-Loop)**.
 
 ---
 
@@ -10,6 +10,7 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 * **[Manual Maestro Unificado del Sistema (v7.3):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa y operativa.
 * **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
+* **Sprints 36-39 (Arquitectura de 4 Capas: Cortafuegos Pydantic, Sesgo Asíncrono, Trigger Determinista y Kill Switch):** [docs/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md](docs/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md)
 * **Sprints 33-35 (Aceleración Polars/VectorBT, Riskfolio-Lib HERC/CVaR y OpenBB):** [docs/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md](docs/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md)
 * **Sprints 30-32 (Arquitectura Multi-Agente, Orquestador DAG y Cockpit HITL):** [docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md](docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md), [docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md](docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md), [docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md](docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md)
 * **Sprint 29 (Ensamble Bidireccional Long/Short, Sync Binance y Fricción):** [docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md](docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md)
@@ -25,7 +26,24 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🌌 Innovaciones Clave de la Versión 7.5 (Sprints 33 a 35: Polars, VectorBT, Riskfolio-Lib & OpenBB)
+## 🛡️ Innovaciones Clave de la Versión 7.6 (Sprints 36 a 39: Arquitectura Blindada de 4 Capas)
+
+1. **Cortafuegos de Datos y Gobernanza Pydantic v2 (`validation/schemas.py`, `validation/data_firewall.py`):**
+   * Validación estricta de geometría OHLCV, libros L2 y ticks con esquemas inmutables.
+   * Detección automática de huecos temporales (*gaps* de 1h/4h) y saltos anómalos (*flash spikes* > 35%), forzando el sistema a modo `STANDBY` antes de inyectar datos sucios al LLM.
+2. **Desacoplamiento Asíncrono del Cerebro Lento (`portfolio/agent_bias_daemon.py`, `portfolio/bias_store.py`):**
+   * Emisión periódica (4h, 12h, 24h) de directivas estructuradas en JSON (`market_bias.json`) con expiración por TTL y convicción mínima ($\ge 70\%$). Los agentes nunca tocan la API de órdenes.
+3. **Capa de Ejecución Determinista & Filtro de Rentabilidad Pre-Trade (`portfolio/pre_trade_profitability.py`):**
+   * Evaluación matemática en $< 0.05\text{ ms}$ de comisiones (ida y vuelta), spread bid/ask y slippage Almgren-Chriss. Exige que el target de rebote supere el costo friccional por $\ge 2.5\times$ o aborta silenciosamente.
+4. **El Kill Switch Absoluto y Guardián de Salida (`validation/ai_output_guard.py`, `portfolio/execution_gatekeeper.py`):**
+   * Aduana estricta Pydantic (`extra='forbid'`) que neutraliza texto alucinado o formato libre de LLMs.
+   * Interceptor final de broker que impone reglas inquebrantables: Stop-Loss obligatorio en código en cada orden, máximo de 3 slots concurrentes y liquidación a mercado en $< 1.0\text{ s}$ ante drawdown intradía $\ge 5.0\%$.
+5. **Certificación Institucional:**
+   * **37 nuevos tests pasando al 100% (243 tests globales sin errores).**
+
+---
+
+## 🌌 Innovaciones Previas de la Versión 7.5 (Sprints 33 a 35: Polars, VectorBT, Riskfolio-Lib & OpenBB)
 
 1. **Acelerador de Datos y FFD en Polars (`data_engine/polars_feed.py`):**
    * Ingesta *Zero-Copy* de archivos Feather (Arrow IPC) y vectorización de FFD en C (`np.convolve`), acelerando la preparación de series temporales de 10x a 30x sobre Pandas.

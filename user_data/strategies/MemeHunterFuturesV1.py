@@ -4,14 +4,33 @@ from pathlib import Path
 import json
 import logging
 
-from freqtrade.strategy import (
-    IStrategy,
-    IntParameter,
-    DecimalParameter,
-)
-from freqtrade.persistence import Trade
+try:
+    from freqtrade.strategy import (
+        IStrategy,
+        IntParameter,
+        DecimalParameter,
+    )
+    from freqtrade.persistence import Trade
+except ImportError:
+    class IStrategy:
+        def __init__(self, config=None):
+            self.config = config or {}
+    class Trade:
+        @staticmethod
+        def get_trades_proxy(*args, **kwargs):
+            return []
+    class IntParameter:
+        def __init__(self, low, high, default=0, space="buy", optimize=True):
+            self.value = default
+    class DecimalParameter:
+        def __init__(self, low, high, default=0.0, space="buy", optimize=True):
+            self.value = default
+
 from pandas import DataFrame
-import pandas_ta as ta
+try:
+    import pandas_ta as ta
+except ImportError:
+    ta = None
 
 LOG = logging.getLogger(__name__)
 

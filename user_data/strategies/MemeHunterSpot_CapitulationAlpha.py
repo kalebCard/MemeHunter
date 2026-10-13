@@ -20,9 +20,16 @@ Fundamento Cuantitativo y Microestructura (Actualizado con Auditoría Forense):
 
 import math
 from datetime import datetime, timezone
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 import logging
 from pathlib import Path
+
+try:
+    from portfolio.bias_store import BiasStore
+    from portfolio.pre_trade_profitability import PreTradeProfitabilityGate
+except ImportError:
+    BiasStore = None
+    PreTradeProfitabilityGate = None
 
 try:
     from freqtrade.strategy import (
@@ -146,6 +153,40 @@ class MemeHunterSpot_CapitulationAlpha(IStrategy):
         'exit': 'GTC'
     }
 
+    # -----------------------------------------------------
+    # Conexión con Arquitectura Multi-Capa (Sprints 37-38)
+    # -----------------------------------------------------
+    enforce_agent_bias: bool = False       # Si True, exige autorización previa de BiasStore
+    enforce_profitability_gate: bool = True # Valida que target > fricción * 2.5x
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs) if hasattr(super(), '__init__') else None
+        self.bias_store = BiasStore() if BiasStore is not None else None
+        self.profitability_gate = PreTradeProfitabilityGate() if PreTradeProfitabilityGate is not None else None
+
+    def check_pre_trade_filters(
+        self,
+        pair: str,
+        current_price: float,
+        spread_pct: float = 0.0010
+    ) -> Tuple[bool, str]:
+        """Auditoría determinista previa a la orden (Sesgo del Agente + Rentabilidad)."""
+        if getattr(self, "enforce_agent_bias", False) and self.bias_store is not None:
+            is_auth, reason = self.bias_store.is_authorized(pair, "LONG")
+            if not is_auth:
+                return False, f"BIAS_BLOCKED: {reason}"
+
+        if getattr(self, "enforce_profitability_gate", True) and self.profitability_gate is not None:
+            dec = self.profitability_gate.evaluate_entry(
+                symbol=pair,
+                current_price=current_price,
+                spread_pct=spread_pct
+            )
+            if not dec.is_approved:
+                return False, dec.rejection_reason or "FRICTION_BLOCKED"
+
+        return True, "APPROVED"
+
     # Parámetros optimizados con rigor cuantitativo
     drop_threshold = DecimalParameter(-0.25, -0.12, default=-0.14, space="buy", optimize=True)
     rsi_capitulation = IntParameter(15, 26, default=24, space="buy", optimize=True)
@@ -234,6 +275,14 @@ class MemeHunterSpot_CapitulationAlpha(IStrategy):
         """
         dataframe.loc[:, 'enter_long'] = 0
         dataframe.loc[:, 'enter_tag'] = ''
+
+        # PB-126: Si enforce_agent_bias está activo, verificar autorización del Cerebro Lento
+        if getattr(self, "enforce_agent_bias", False) and self.bias_store is not None:
+            pair = metadata.get("pair", "")
+            if pair:
+                is_auth, _ = self.bias_store.is_authorized(pair, "LONG")
+                if not is_auth:
+                    return dataframe
 
         # -------------------------------------------------------------
         # SETUP 1: Capitulación Extrema con Confirmación de Giro

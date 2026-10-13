@@ -35,6 +35,8 @@ docs/
 │       ├── ADR-003_fractional_diff_and_continuous_bet_sizing.md
 │       └── ADR-004_airbag_technical_exit_market_orders.md
 ├── sprints/
+│   ├── SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md # 🛡️ Sprints 36-39: Arquitectura Blindada de 4 Capas (Cortafuegos, Sesgo, Trigger Determinista y Kill Switch)
+│   ├── SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md # 🏎️ Sprints 33-35: Polars, VectorBT, Riskfolio-Lib HERC & OpenBB
 │   ├── SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md # 🎮 Sprint 32: Cockpit Visual DAG e Interfaz Human-in-the-Loop (HITL)
 │   ├── SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md # 🧠 Sprint 31: Agente Cualitativo LLM y Degradación Elegante
 │   ├── SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md # 🌐 Sprint 30: Núcleo Multi-Agente y Orquestador DAG (Bayesian Fusion)
