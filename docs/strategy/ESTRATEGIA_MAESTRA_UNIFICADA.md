@@ -176,7 +176,8 @@ La siguiente matriz conecta los documentos estratégicos especializados de la ca
 | **STRAT-003** | [PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md](PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md) | Especificación Barbell y Profit Ratchet | 🟢 ACTIVE | [ADR-002](../architecture/decisions/ADR-002_hybrid_barbell_cash_and_carry.md) |
 | **STRAT-004** | [PLAN_DESMITIFICACION_RIESGOS.md](PLAN_DESMITIFICACION_RIESGOS.md) | Protocolo de auditoría y pruebas OOS | ✅ CERTIFICADO | [INFORME_METRICAS_AVANZADAS](../reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
 | **STRAT-EXP-001** | [PLAN_IMPLEMENTACION_V6_APEX.md](PLAN_IMPLEMENTACION_V6_APEX.md) | Experimento de supresión de señales técnicas | ❌ SUPERSEDED | [ADR-004](../architecture/decisions/ADR-004_airbag_technical_exit_market_orders.md) |
+| **STRAT-SPOT-001** | [ESTRATEGIA_DEFINITIVA_MEME_HUNTER_SPOT_CAPITULATION.md](ESTRATEGIA_DEFINITIVA_MEME_HUNTER_SPOT_CAPITULATION.md) | Estrategia Definitiva Spot: Caza de Capitulación y Blindaje de Capital | 🟢 ACTIVE | [MemeHunterSpot_CapitulationAlpha.py](../../user_data/strategies/MemeHunterSpot_CapitulationAlpha.py) |
 | **STRAT-ROADMAP-001** | [SCRUM_PLAN.md](SCRUM_PLAN.md) | Product Backlog y Sprints 1 a 20 | 🟢 ACTIVE | [OPERATIONAL_RUNBOOK](../operations/OPERATIONAL_RUNBOOK.md) |
 
 ---
-*Compendio generado y auditado bajo el marco formal de Ingeniería Cuantitativa de Meme Hunter v6.0.*
+*Compendio generado y auditado bajo el marco formal de Ingeniería Cuantitativa de Meme Hunter v7.4.*

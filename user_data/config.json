@@ -1,18 +1,18 @@
 {
     "$schema": "https://schema.freqtrade.io/schema.json",
-    "bot_name": "meme_hunter",
+    "bot_name": "meme_hunter_spot",
     "dry_run": true,
-    "dry_run_wallet": 1000,
+    "dry_run_wallet": 100,
     "trading_mode": "spot",
     "margin_mode": "",
 
     "stake_currency": "USDT",
-    "stake_amount": 100,
-    "max_open_trades": 10,
-    "tradable_balance_ratio": 0.5,
+    "stake_amount": "unlimited",
+    "max_open_trades": 3,
+    "tradable_balance_ratio": 0.99,
     "fiat_display_currency": "USD",
 
-    "timeframe": "4h",
+    "timeframe": "1h",
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
         "entry": 10,
