@@ -75,12 +75,14 @@ try:
     from portfolio.kill_switch import EmergencyKillSwitch, KillSwitchLevel
     from portfolio.execution_gatekeeper import ExecutionGatekeeper
     from validation.data_firewall import DataFirewallGuard
+    from portfolio.exponential_compounding_engine import ExponentialCompoundingManager
 except ImportError:
     BiasStore = None
     PreTradeProfitabilityGate = None
     EmergencyKillSwitch = None
     ExecutionGatekeeper = None
     DataFirewallGuard = None
+    ExponentialCompoundingManager = None
 
 LOG = logging.getLogger(__name__)
 
@@ -206,6 +208,7 @@ class MemeHunter_ApexOmegaAlpha(IStrategy):
     enforce_agent_bias: bool = False           # Si True, exige autorización previa de BiasStore
     enforce_profitability_gate: bool = True     # Si True, exige Ganancia >= 2.5x costos friccionales
     enforce_execution_gatekeeper: bool = True   # Si True, audita drawdown, stoploss y max slots
+    enable_exponential_compounding: bool = True # Crecimiento geométrico continuo (Half-Kelly)
 
     # Parámetros Cuantitativos Optimizados
     drop_threshold = DecimalParameter(-0.25, -0.12, default=-0.14, space="buy", optimize=True)
@@ -220,6 +223,7 @@ class MemeHunter_ApexOmegaAlpha(IStrategy):
         self.profitability_gate = PreTradeProfitabilityGate() if PreTradeProfitabilityGate is not None else None
         self.kill_switch = EmergencyKillSwitch() if EmergencyKillSwitch is not None else None
         self.gatekeeper = ExecutionGatekeeper(kill_switch=self.kill_switch) if ExecutionGatekeeper is not None else None
+        self.compounding_manager = ExponentialCompoundingManager() if ExponentialCompoundingManager is not None else None
 
     # -----------------------------------------------------
     # 1. GENERACIÓN DE INDICADORES Y FEATURES MATEMÁTICOS
@@ -441,6 +445,42 @@ class MemeHunter_ApexOmegaAlpha(IStrategy):
         }
         score = conviction_map.get(entry_tag or '', 0.65)
         return continuous_bet_sizing(score, min_lev=1.0, max_lev=min(2.0, max_leverage))
+
+    def custom_stake_amount(self, pair: str, current_time: datetime, current_rate: float,
+                            proposed_stake: float, min_stake: Optional[float], max_stake: float,
+                            leverage: float, entry_tag: Optional[str], side: str,
+                            **kwargs) -> float:
+        """
+        Cálculo dinámico del tamaño de posición según Criterio de Kelly Fraccional (Half-Kelly)
+        para escalado exponencial del capital sin riesgo de ruina.
+        """
+        if not self.enable_exponential_compounding or self.compounding_manager is None:
+            return proposed_stake
+
+        wallet_balance = float(kwargs.get("wallet", proposed_stake * 3.0))
+        open_trades = int(kwargs.get("open_trades", 0))
+
+        conviction_map = {
+            'apex_confirmed_capitulation': 0.90,
+            'apex_trapped_auction_short': 0.88,
+            'apex_confirmed_wick': 0.78,
+            'apex_structure_breakdown_short': 0.75,
+            'apex_elastic_rebound': 0.70
+        }
+        score = conviction_map.get(entry_tag or '', 0.75)
+
+        stake = self.compounding_manager.compute_stake_amount(
+            current_wallet=wallet_balance,
+            open_trades_count=open_trades,
+            conviction_score=score,
+            min_stake=min_stake,
+            max_stake=max_stake
+        )
+
+        # Monitorear trinquete de ganancias
+        self.compounding_manager.check_and_execute_profit_ratchet(wallet_balance)
+
+        return stake
 
     # -----------------------------------------------------
     # 5. TRINQUETE DE GANANCIAS (CAPITAL ARMOR)
