@@ -15,6 +15,11 @@ from scripts.regime_classifier import (
     compute_regime_features,
     classify_current_regime
 )
+try:
+    from data_engine.openbb_provider import MacroOnChainContext, OpenBBDataProvider
+except ImportError:
+    MacroOnChainContext = None
+    OpenBBDataProvider = None
 
 
 class RegimeHMMAgent(BaseSignalAgent):
@@ -30,11 +35,13 @@ class RegimeHMMAgent(BaseSignalAgent):
         weight: float = 1.0,
         active: bool = True,
         volatility_window: int = 20,
-        trend_threshold_pct: float = 2.0
+        trend_threshold_pct: float = 2.0,
+        openbb_provider: Optional[Any] = None
     ):
         super().__init__(agent_id=agent_id, agent_type="regime", weight=weight, active=active)
         self.volatility_window = volatility_window
         self.trend_threshold_pct = trend_threshold_pct
+        self.openbb_provider = openbb_provider
         self.last_detected_regime = REGIME_CHOPPY_RANGE
         self.last_probabilities: Dict[str, float] = {
             "p_bull": 0.33,
@@ -44,10 +51,17 @@ class RegimeHMMAgent(BaseSignalAgent):
 
     def _compute_proposal(self, market_data: Any) -> AgentProposal:
         """
-        Calcula las probabilidades de régimen a partir de datos OHLCV.
+        Calcula las probabilidades de régimen a partir de datos OHLCV y contexto macro on-chain.
         """
         if market_data is None:
             return self._build_default_proposal("EMPTY_DATA")
+
+        # 0. Extraer contexto macro si está disponible
+        macro_ctx = None
+        if isinstance(market_data, dict) and "macro_context" in market_data:
+            macro_ctx = market_data["macro_context"]
+        elif self.openbb_provider:
+            macro_ctx = self.openbb_provider.get_macro_context()
 
         # Aceptar DataFrame o dict con close/high/low/volume
         if isinstance(market_data, dict):
@@ -76,8 +90,8 @@ class RegimeHMMAgent(BaseSignalAgent):
 
         self.last_detected_regime = regime
 
-        # Estimación de probabilidades continuas (Softmax / Normalización Gaussiana)
-        probs = self._estimate_regime_probabilities(last_row, regime)
+        # Estimación de probabilidades continuas condicionadas por datos macro
+        probs = self._estimate_regime_probabilities(last_row, regime, macro_context=macro_ctx)
         self.last_probabilities = probs
 
         p_bull = probs["p_bull"]
@@ -106,6 +120,11 @@ class RegimeHMMAgent(BaseSignalAgent):
             "natr_14": float(last_row.get("natr_14", 0.0)) if not pd.isna(last_row.get("natr_14", 0.0)) else 0.0
         }
 
+        if macro_ctx is not None:
+            metadata["macro_onchain"] = (
+                macro_ctx.to_dict() if hasattr(macro_ctx, "to_dict") else str(macro_ctx)
+            )
+
         regime_compatibility = {
             "BULL_MOMENTUM": p_bull,
             "BEAR_BLEED": p_bear,
@@ -121,8 +140,13 @@ class RegimeHMMAgent(BaseSignalAgent):
             metadata=metadata
         )
 
-    def _estimate_regime_probabilities(self, last_row: pd.Series, regime: str) -> Dict[str, float]:
-        """Calcula probabilidades normalizadas continuas basadas en métricas cuantitativas."""
+    def _estimate_regime_probabilities(
+        self,
+        last_row: pd.Series,
+        regime: str,
+        macro_context: Optional[Any] = None
+    ) -> Dict[str, float]:
+        """Calcula probabilidades normalizadas continuas basadas en métricas cuantitativas y macro."""
         disp = float(last_row.get("ema_dispersion_pct", 0.0))
         if pd.isna(disp):
             disp = 0.0
@@ -134,6 +158,20 @@ class RegimeHMMAgent(BaseSignalAgent):
         logit_bull = np.clip((disp / 5.0) + (1.0 if regime == REGIME_BULL_MOMENTUM else -0.5), -5.0, 5.0)
         logit_bear = np.clip((-disp / 5.0) + (1.0 if regime == REGIME_BEAR_BLEED else -0.5), -5.0, 5.0)
         logit_range = np.clip((vol / 4.0) + (1.0 if regime == REGIME_CHOPPY_RANGE else -0.2), -5.0, 5.0)
+
+        # Condicionamiento PB-120 por liquidez macro y DeFi
+        if macro_context is not None:
+            is_contraction = getattr(macro_context, "is_bear_contraction", False)
+            macro_sent = getattr(macro_context, "macro_sentiment_score", 0.0)
+            if is_contraction or macro_sent < -0.2:
+                # Contracción de TVL / liquidez: penalizar fuertemente falsas rupturas alcistas
+                logit_bull -= 1.2
+                logit_bear += 0.8
+                logit_range += 0.4
+            elif macro_sent > 0.2:
+                # Entorno de expansión de liquidez
+                logit_bull += 0.6
+                logit_bear -= 0.4
 
         exp_vals = np.exp([logit_bull, logit_bear, logit_range])
         probs = exp_vals / np.sum(exp_vals)

@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 
 from portfolio.hrp_allocator import HierarchicalRiskParityAllocator
+from portfolio.riskfolio_allocator import RiskfolioPortfolioAllocator
 from portfolio.atomic_io import atomic_write_json
 
 
@@ -52,12 +53,13 @@ class StrategyLifecycleIncubator:
         self,
         min_sandbox_days: int = 15,
         min_graduation_psr: float = 0.85,
-        decay_sigma_threshold: float = -1.80
+        decay_sigma_threshold: float = -1.80,
+        allocator: Optional[Any] = None
     ):
         self.min_sandbox_days = min_sandbox_days
         self.min_graduation_psr = min_graduation_psr
         self.decay_threshold = decay_sigma_threshold
-        self.allocator = HierarchicalRiskParityAllocator()
+        self.allocator = allocator or RiskfolioPortfolioAllocator()
         self.strategies: Dict[str, StrategyRecord] = {}
         self.last_turnover: float = 0.0
         self.last_rebalance_executed: bool = False
