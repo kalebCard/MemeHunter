@@ -1,6 +1,6 @@
-# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit Unificado (v7.3)
+# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit Unificado (v7.4)
 
-Plataforma cuantitativa institucional que combina **minería genética de factores (NSGA-II)**, **fábrica de alphas transaccional en SQLite WAL**, **compuertas rigurosas fuera de muestra (OOS Gating: PBO < 15%, DSR >= 95%)**, **ensamble dinámico bidireccional Long/Short para Freqtrade**, **sincronización continua de datos de Binance Futures**, **bucle cerrado de auto-sanación con detección CUSUM e IC Decay**, **cerebro cognitivo de autopsias y síntesis semántica vía OpenRouter**, un **Laboratorio Cuantitativo en Vivo (Strategy Studio)** con compilador AST *Zero-Eval*, y un **Centro de Control Unificado (Unified Mission Control Cockpit)** para monitoreo, backtesting y ejecución en tiempo real.
+Plataforma cuantitativa institucional que combina **arquitectura Multi-Agente en Grafo Acíclico Dirigido (DAG)** con **fusión bayesiana y telemetría < 20ms**, **minería genética de factores (NSGA-II)**, **fábrica de alphas transaccional en SQLite WAL**, **compuertas rigurosas fuera de muestra (OOS Gating: PBO < 15%, DSR >= 95%)**, **ensamble dinámico bidireccional Long/Short para Freqtrade**, **percepción semántica cualitativa vía OpenRouter (FinLLM con fallback offline 0ms)**, **protocolo de degradación elegante ante cisnes negros**, **sincronización continua de datos de Binance Futures**, y un **Centro de Control Unificado (Cockpit v7.4 con Visor Visual DAG y controles Human-in-the-Loop)**.
 
 ---
 
@@ -10,6 +10,7 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 * **[Manual Maestro Unificado del Sistema (v7.3):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa y operativa.
 * **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
+* **Sprints 30-32 (Arquitectura Multi-Agente, Orquestador DAG y Cockpit HITL):** [docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md](docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md), [docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md](docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md), [docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md](docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md)
 * **Sprint 29 (Ensamble Bidireccional Long/Short, Sync Binance y Fricción):** [docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md](docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md)
 * **Sprints 25-28 (Hardening del Bucle Autónomo, SQLite WAL & OOS Gating):** [docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md](docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md)
 * **Plan Scrum de Remediación & Hardening (v7.1):** [docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md)
@@ -23,7 +24,28 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 ---
 
-## 🚀 Innovaciones Clave de la Versión 7.3 (Sprints 25 a 29)
+## 🚀 Innovaciones Clave de la Versión 7.4 (Sprints 30 a 32: Multi-Agente & Cockpit DAG HITL)
+
+1. **Orquestador DAG y Fusión Bayesiana (`portfolio/dag_orchestrator.py`):**
+   * Enrutador central de señales que sintetiza los vectores alpha de múltiples agentes especializados aplicando **Fusión Bayesiana** y pesos adaptativos condicionados por el régimen de mercado activo.
+   * Telemetría institucional de ciclo de inferencia auditada en tiempo de ejecución ($< 20\text{ ms}$) y filtro de consenso mínimo configurable ($0.68\text{ Score}$).
+2. **Ecosistema de Agentes Especializados (`portfolio/agents/`):**
+   * `RegimeHMMAgent`: Detección dinámica y probabilística de regímenes ($p_{\text{bull}}, p_{\text{bear}}, p_{\text{range}}$) para conmutar pesos de cartera.
+   * `TechnicalMicroAgent`: Microestructura rápida, FFD con memoria fraccionaria ($d=0.40$), RSI dinámico y proxy de desequilibrio de libro (OFI).
+   * `SentimentAgent`: Percepción cualitativa en tiempo real (noticias, social feed, catalizadores de memecoins) mediante OpenRouter FinLLM con **fallback offline instantáneo de $0\text{ ms}$** y caché semántica.
+3. **Gobernanza de Riesgo Dinámico y Degradación Elegante (`portfolio/graceful_degradation.py`):**
+   * `RiskManagerAgent`: Evaluación downstream de VaR al 99% paramétrico, control estricto de Kill-Switch de equidad ($-25\%$) y filtro de correlación cruzada ($< 0.40$).
+   * `GracefulDegradationGuard`: Monitoreo de microestructura Level 2; ante spreads tóxicos ($> 0.35\%$) o picos de latencia, reduce progresivamente el tamaño de posición y conmuta a órdenes pasivas Maker al Bid sin colapsar el sistema.
+4. **Cockpit Visual DAG e Interfaz Human-in-the-Loop (`dashboard/`):**
+   * Nueva pestaña: **`🌐 Orquestación Multi-Agente (DAG)`** con 8 nodos estilizados en tema oscuro neón.
+   * **Panel Inspector:** Inspección reactiva con métricas en tiempo real (`Algoritmo Sint.`, `Consenso Min.`, `Ciclo Inferencia`), switch HITL para pausar/activar nodos en caliente y slider de consenso mínimo.
+   * Endpoints REST dedicados: `/api/dag/topology`, `/api/dag/status`, `/api/dag/toggle-node`, `/api/dag/set-threshold`, `/api/dag/trigger-cycle`.
+5. **Certificación de Pruebas Institucionales:**
+   * **175+ tests pasando al 100% (24 nuevos tests de Sprints 30-32 certificados).**
+
+---
+
+## ⚡ Innovaciones Previas de la Versión 7.3 (Sprints 25 a 29)
 
 1. **Fábrica de Alphas Concurrente en SQLite WAL (`portfolio/alpha_factory.db`):**
    * Migración del estado de la incubadora desde archivos JSON planos a una base de datos relacional transaccional SQLite con modo **Write-Ahead Logging (WAL)** y pool de conexiones seguro multihilo (`db_pool.py`).

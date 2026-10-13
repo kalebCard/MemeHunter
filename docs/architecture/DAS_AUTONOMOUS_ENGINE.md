@@ -2,17 +2,17 @@
 id: DAS-AUTONOMOUS-001
 title: Documento de Arquitectura de Software - Motor Autónomo Auto-Evolutivo & Cockpit IA
 category: architecture
-version: 7.3
+version: 7.4
 status: ACTIVE
 last_updated: 2026-10-12
 author: Quantitative Core & Systems Architecture Team
 ---
 
-# 🌌 DAS: Motor Cuantitativo Auto-Evolutivo & Cockpit Cognitivo IA (v7.3)
+# 🌌 DAS: Motor Cuantitativo Auto-Evolutivo, DAG Multi-Agente & Cockpit IA (v7.4)
 
 ## 1. Resumen Ejecutivo y Visión Arquitectónica
 
-El sistema **Meme Hunter v7.3** ha evolucionado de un framework de backtesting y ejecución por lotes a un **organismo algorítmico de bucle cerrado (Closed-Loop Autonomous Alpha Engine)** con persistencia transaccional SQLite WAL y enlace de producción bidireccional. El sistema es capaz de:
+El sistema **Meme Hunter v7.4** ha evolucionado de un framework de backtesting y ejecución por lotes a un **organismo algorítmico multi-agente de bucle cerrado (Closed-Loop Autonomous Multi-Agent Engine)** con persistencia transaccional SQLite WAL, enrutamiento en Grafo Acíclico Dirigido (DAG) y enlace de producción bidireccional. El sistema es capaz de:
 1. **Auto-observar** su propio rendimiento y microestructura en tiempo real sobre datos en vivo sincronizados continuamente desde Binance Futures (`auto_data_sync.py`).
 2. **Detectar fatiga de señal (*Alpha Decay*)** y rupturas de régimen mediante algoritmos CUSUM y pruebas de Kolmogorov-Smirnov.
 3. **Aislar y realizar autopsias cognitivas** de factores degradados mediante modelos de razonamiento profundo en OpenRouter (DeepSeek-R1 / Claude 3.5 Sonnet) con caché inteligente de autopsias.
@@ -20,8 +20,10 @@ El sistema **Meme Hunter v7.3** ha evolucionado de un framework de backtesting y
 5. **Gestionar concurrencia sin bloqueos** a través de una base de datos relacional transaccional SQLite WAL (`alpha_factory.db`) con pool de conexiones multihilo (`db_pool.py`).
 6. **Filtrar alfas mediante compuertas rigurosas fuera de muestra (OOS Hard-Gating)** exigiendo $PBO < 15\%$, $DSR \ge 95\%$, correlación cruzada $< 0.40$ y zona muerta de turnover de 15%.
 7. **Compilar automáticamente ensambles bidireccionales (Long & Short)** para Freqtrade (`scripts/compile_ensemble_strategy.py`) con confirmación de momentum rápido.
-8. **Rebalancear capital dinámicamente** mediante Paridad Jerárquica de Riesgo (HRP) aislando factores defectuosos.
-9. **Ofrecer observabilidad visual completa** a través de un Dashboard Web (Cockpit) con KPIs, gráficos y consola de eventos.
+8. **Orquestar señales en Grafo Acíclico Dirigido (DAG)** con Fusión Bayesiana condicional al régimen, latencia $< 20\text{ ms}$ y filtro de consenso ($0.68$).
+9. **Supervisar el sentimiento no estructurado** con LLMs locales/API (`SentimentAgent`) con fallback instantáneo de 0ms.
+10. **Blindar el capital contra cisnes negros** mediante degradación elegante ante spreads tóxicos y cortes de liquidez (`GracefulDegradationGuard`).
+11. **Ofrecer observabilidad y control Human-in-the-Loop** en tiempo real a través del Cockpit Web (`tab-multi-agent-dag`).
 
 ---
 
@@ -112,9 +114,19 @@ graph TD
 * **Compilador Dual-Engine Bidireccional:** Traduce el vector de alfas y pesos HRP a una estrategia de producción nativa de Freqtrade (`MemeHunter_MinedEnsemble.py`) con motores simétricos para `enter_long` y `enter_short`, filtrados por confirmación rápida (EMA 50 / 4h y RSI).
 * **Cliente REST:** Comunicación con el demonio Freqtrade en el puerto 8081 para recarga en caliente (*hot reload*) sin interrupción operativa.
 
-### 3.8. `dashboard/` (Cockpit Visual Seguro)
-* **Arquitectura:** HTML5 semántico + Vanilla CSS Glassmorphism + Vanilla JS reactivo + Chart.js.
-* **Backend:** Servidor REST multihilo (`ThreadingHTTPServer` en `dashboard/server.py`) con candado asíncrono no-bloqueante para lecturas SQLite concurrentes.
+### 3.8. `portfolio/dag_orchestrator.py` & `portfolio/agents/` (Núcleo Multi-Agente & Fusión Bayesiana)
+* **`DAGSignalOrchestrator`:** Enrutador central en DAG que sintetiza las señales de `RegimeHMMAgent`, `TechnicalMicroAgent` y `SentimentAgent` mediante **Fusión Bayesiana Ponderada**.
+* **Latencia y Consenso:** Ciclos de inferencia $< 20\text{ ms}$ (promedio $\sim 2.8\text{ ms}$) y umbral de consenso configurable ($0.68\text{ Score}$).
+* **`RiskManagerAgent`:** Evaluación dinámica de VaR al 99% paramétrico, Kill-Switch de equidad ($-25\%$) y veto por multicolinealidad ($< 0.40$).
+
+### 3.9. `portfolio/graceful_degradation.py` (Degradación Elegante & Cisnes Negros)
+* **`GracefulDegradationGuard`:** Monitorea spreads Level 2 y latencias en Binance Futures.
+* **Escalado Progresivo:** Atenúa posiciones al $50\%$ ante spreads moderados ($0.15\% - 0.35\%$), restringe órdenes a Maker al Bid, y pausa nuevas entradas ante spreads tóxicos ($> 0.35\%$) preservando la telemetría viva.
+
+### 3.10. `dashboard/` (Cockpit Visual Seguro & Interfaz DAG HITL)
+* **Arquitectura:** HTML5 semántico + Vanilla CSS Glassmorphism + Vanilla JS reactivo + Chart.js + Visualizador DAG vectorial (`dag_flow.js`).
+* **Pestaña DAG HITL (`tab-multi-agent-dag`):** Grafo interactivo en tema oscuro neón con 8 nodos, panel inspector en vivo, switches de activación en caliente y slider de consenso mínimo.
+* **Backend:** Servidor REST multihilo (`ThreadingHTTPServer` en `dashboard/server.py`) con endpoints `/api/dag/*` thread-safe.
 * **Puerto y Seguridad:** Escucha en `http://localhost:8088`, autorización con Bearer Token y CORS estricto.
 
 ---
@@ -169,5 +181,5 @@ python scripts/run_live_alpha_loop.py
 ```bash
 python -m pytest tests -v
 ```
-Resultado Oficial: **151+ tests unitarios e integrales pasando al 100% (0 errores)**.
+Resultado Oficial: **175+ tests unitarios e integrales pasando al 100% (24 nuevos tests de Sprints 30 a 32 certificados con 0 errores)**.
 

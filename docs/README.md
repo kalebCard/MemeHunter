@@ -2,13 +2,13 @@
 id: DOC-INDEX-001
 title: Centro de Documentación y Convenciones del Sistema
 category: index
-version: 7.3
+version: 7.4
 status: ACTIVE
 last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 ---
 
-# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v7.3)
+# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v7.4)
 
 Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y operativa de **Meme Hunter**. Toda la información del proyecto ha sido estandarizada bajo convenciones formales de ingeniería documental (**DocOps**) y el marco pedagógico Diátaxis.
 
@@ -17,7 +17,7 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 ## 🌟 Documento de Referencia Principal
 
 > ### 👉 [📖 Manual Maestro Unificado del Sistema (DOC-MASTER-001)](MANUAL_UNIFICADO_DEL_SISTEMA.md)
-> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con fábrica SQLite WAL, compuertas OOS, ensamble bidireccional Long/Short, cognición IA, Centro de Control Unificado (Cockpit v7.3) y catálogo de scripts.*
+> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con fábrica SQLite WAL, compuertas OOS, ensamble bidireccional Long/Short, arquitectura Multi-Agente en Grafo (DAG), fusión bayesiana, cognición IA, Centro de Control Unificado (Cockpit v7.4 con Visor Visual DAG y controles HITL) y catálogo de scripts.*
 
 ---
 
@@ -25,9 +25,9 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 
 ```
 docs/
-├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v7.3
+├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v7.4
 ├── architecture/
-│   ├── DAS_AUTONOMOUS_ENGINE.md     # 🌌 Arquitectura v7.3: Motor Auto-Evolutivo, SQLite WAL & Cockpit IA
+│   ├── DAS_AUTONOMOUS_ENGINE.md     # 🌌 Arquitectura v7.4: Motor Multi-Agente, Orquestador DAG & Cockpit HITL
 │   ├── DAS.md                       # Documento de Arquitectura de Software base (v6.0)
 │   └── decisions/                   # Architecture Decision Records (ADRs)
 │       ├── ADR-001_asymmetric_short_only_bias.md
@@ -35,6 +35,9 @@ docs/
 │       ├── ADR-003_fractional_diff_and_continuous_bet_sizing.md
 │       └── ADR-004_airbag_technical_exit_market_orders.md
 ├── sprints/
+│   ├── SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md # 🎮 Sprint 32: Cockpit Visual DAG e Interfaz Human-in-the-Loop (HITL)
+│   ├── SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md # 🧠 Sprint 31: Agente Cualitativo LLM y Degradación Elegante
+│   ├── SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md # 🌐 Sprint 30: Núcleo Multi-Agente y Orquestador DAG (Bayesian Fusion)
 │   ├── SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md # ⚡ Sprint 29: Ensamble Bidireccional Long/Short, Sync Binance y Fricción
 │   ├── SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md # 🚀 Sprints 25-28: SQLite WAL, Ingesta Real, Gating OOS y Hot-Reload
 │   ├── SPRINT_PLAN_REMEDIATION_AND_HARDENING.md # 🛡️ Plan Scrum: Hardening, Streaming & DevOps (v7.1)

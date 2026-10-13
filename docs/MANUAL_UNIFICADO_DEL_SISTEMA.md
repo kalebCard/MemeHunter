@@ -2,13 +2,13 @@
 id: DOC-MASTER-001
 title: Manual Maestro Unificado del Sistema Meme Hunter
 category: master
-version: 7.3
+version: 7.4
 status: CERTIFIED
 last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 ---
 
-# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.3)
+# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.4)
 
 Este documento consolida la totalidad del conocimiento teórico, arquitectónico, cuantitativo y operativo del proyecto **meme_hunter**, unificando los planes estratégicos, informes forenses, especificaciones técnicas del motor autónomo auto-evolutivo y gobernanza de costes en una única referencia canónica.
 
@@ -29,6 +29,7 @@ Este documento consolida la totalidad del conocimiento teórico, arquitectónico
 11. [Centro de Control Unificado (Cockpit v7.2) y Laboratorio Cuantitativo](#11-centro-de-control-unificado-cockpit-v72-y-laboratorio-cuantitativo)
 12. [Arquitectura de Estabilización y Blindaje Operativo](#12-arquitectura-de-estabilización-y-blindaje-operativo)
 13. [Fábrica de Alphas SQLite WAL, Gating OOS y Enlace Bidireccional](#13-fábrica-de-alphas-sqlite-wal-gating-oos-y-enlace-bidireccional-sprints-25-a-29)
+14. [Arquitectura Multi-Agente, Orquestador DAG y Cockpit Human-in-the-Loop](#14-arquitectura-multi-agente-orquestador-dag-y-cockpit-human-in-the-loop-sprints-30-a-32)
 
 ---
 
@@ -392,5 +393,88 @@ graph TD
 * **Auto-Compilador:** Tras cada promoción o retiro, el orquestador regenera automáticamente la estrategia ejecutable.
 * **Hot-Reload REST Client ([`client/freqtrade_client.py`](file:///c:/meme_hunter/client/freqtrade_client.py)):** Notifica al bot en vivo (`POST /api/v1/reload_config` en puerto 8081) con soporte para fallbacks offline si Docker está pausado.
 * **Telemetría y Notificaciones ([`client/telemetry_notifier.py`](file:///c:/meme_hunter/client/telemetry_notifier.py)):** Despacho estructurado a webhooks de Discord/Telegram y registro inmutable en `portfolio/alpha_factory.db`.
+
+---
+
+## 14. Arquitectura Multi-Agente, Orquestador DAG y Cockpit Human-in-the-Loop (Sprints 30 a 32)
+
+Para superar definitivamente la opacidad de los algoritmos monolíticos clásicos (la "caja negra"), el sistema Meme Hunter v7.4 adopta la **arquitectura multi-agente modular y visual orientada a Grafos Acíclicos Dirigidos (DAG)** bajo la metodología **Human-in-the-Loop (HITL)**.
+
+```mermaid
+graph TD
+    subgraph Capa_1_Ingesta [1. Ingesta de Datos Multimodal]
+        IN_PV["Precio y Volumen<br/>(WebSockets L2/L3)"]
+        IN_NEWS["Noticias y Redes<br/>(APIs NLP Scraping)"]
+        IN_MACRO["Calendario Macro<br/>(Eventos FED / IPC / Funding)"]
+    end
+
+    subgraph Capa_2_Agentes [2. Procesamiento & Agentes Especializados]
+        AG_TECH["Análisis Técnico & Microestructura<br/>(AST Factors, FFD d=0.40, OFI Proxy)"]
+        AG_SENT["Agente Sentimiento<br/>(FinLLM + Fallback Offline 0ms)"]
+        AG_REG["Detector de Régimen<br/>(Gaussian HMM / CUSUM Volatilidad)"]
+    end
+
+    subgraph Capa_3_Orquestacion [3. Núcleo & Orquestador DAG]
+        ORQ["Orquestador DAG (portfolio/dag_orchestrator.py)<br/>• Algoritmo: Bayesian Fusion<br/>• Consenso Mínimo: 0.68 Score<br/>• Ciclo de Inferencia: < 20 ms"]
+    end
+
+    subgraph Capa_4_Riesgo_Ejecucion [4. Gobernanza de Riesgo & Ejecución]
+        RISK["Gestor de Riesgos (portfolio/agents/risk_manager_agent.py)<br/>• VaR 99% Paramétrico / Cornish-Fisher<br/>• Kill-Switch Total (-25%)<br/>• Multicolinealidad Corr < 0.40"]
+        GUARD["Graceful Degradation Guard<br/>(portfolio/graceful_degradation.py)<br/>• Mitigación Spread Tóxico > 0.35%"]
+        EXEC["API de Ejecución Freqtrade DMA<br/>(Maker al Bid / Salidas Market Airbag)"]
+    end
+
+    IN_PV --> AG_TECH
+    IN_NEWS --> AG_SENT
+    IN_MACRO --> AG_REG
+    AG_TECH -->|Vector Micro| ORQ
+    AG_SENT -->|Score Cualitativo| ORQ
+    AG_REG -->|Probabilidades Régimen| ORQ
+    ORQ -->|Vector Alpha| RISK
+    GUARD -->|Atenuador Sizing| RISK
+    RISK -->|Orden Aprobada| EXEC
+```
+
+### 14.1 Orquestador DAG y Fusión Bayesiana (`portfolio/dag_orchestrator.py` - Sprint 30: PB-103)
+* **Grafo Acíclico Dirigido (DAG):** Reemplaza el ensamble estático lineal por un enrutador central donde cada agente opera como un nodo desacoplado, transparente y auditable.
+* **Fusión Bayesiana Ponderada:** Las probabilidades y direcciones emitidas por los agentes se sintetizan ponderando por la afinidad condicional del régimen de mercado y la convicción estadística:
+  $$P(\text{Señal} \mid \mathbf{D}) \propto P(\text{Prior Régimen}) \prod_{i=1}^{K} P(\mathbf{S}_i \mid \text{Estado}_i)^{\omega_i}$$
+* **Telemetría de Ciclo de Inferencia:** Medición estricta de tiempo de ejecución con `time.perf_counter_ns()`, auditando que el ciclo total del grafo se complete en $< 20\text{ ms}$ (promedio real de producción: $\sim 2.8\text{ ms}$).
+* **Filtro de Consenso Mínimo ($0.68\text{ Score}$):** Si los agentes discrepan en dirección o la certeza agregada es menor a $0.68$, la propuesta se veta con dictamen formal `INSUFFICIENT_CONSENSUS`, protegiendo la cuenta de señales dudosas.
+
+### 14.2 Detección Dinámica de Régimen y Agentes Cuantitativos (PB-104 & PB-105)
+* **`RegimeHMMAgent` ([`portfolio/agents/regime_agent.py`](file:///c:/meme_hunter/portfolio/agents/regime_agent.py)):**
+  - Evalúa la dispersión respecto a la EMA 200, volatilidad realizada anualizada y ATR normalizado.
+  - Emite un vector continuo de probabilidades $[p_{\text{bull}}, p_{\text{bear}}, p_{\text{range}}]$ que modula la influencia de los demás agentes según el entorno.
+* **`TechnicalMicroAgent` ([`portfolio/agents/technical_agent.py`](file:///c:/meme_hunter/portfolio/agents/technical_agent.py)):**
+  - Integra factores de memoria fraccionaria FFD ($d=0.40$), RSI dinámico adaptativo y proxy de Order Flow Imbalance (OFI) intradiario en un formato canónico `AgentProposal`.
+
+### 14.3 Agente de Sentimiento y Noticias en Tiempo Real (Sprint 31: PB-107)
+* **`SentimentAgent` ([`portfolio/agents/sentiment_agent.py`](file:///c:/meme_hunter/portfolio/agents/sentiment_agent.py)):**
+  - Conector de cognición cualitativa que ingesta noticias, eventos macroeconómicos y flujo social de memecoins.
+  - Normaliza el tono semántico en un score cuantitativo continuo $[-1.0, +1.0]$ con convicción estadística.
+  - **Fallback Offline Instantáneo ($0\text{ ms}$):** Incorpora caché léxica y semántica local de alta velocidad. Si las APIs remotas de LLM (OpenRouter) experimentan latencia o corte de red, conmuta a modo local sin degradar el ciclo de inferencia del DAG.
+
+### 14.4 Gobernanza de Riesgo y Degradación Elegante ante Cisnes Negros (PB-108 & PB-109)
+* **`RiskManagerAgent` ([`portfolio/agents/risk_manager_agent.py`](file:///c:/meme_hunter/portfolio/agents/risk_manager_agent.py)):**
+  - Valida el `VectorAlpha` contra el Value at Risk al 99% paramétrico, el Kill-Switch de Equidad total ($-25\%$) y el límite de correlación cruzada ($< 0.40$).
+  - Emite dictámenes formales: `APPROVED`, `SCALED_DOWN` o `REJECTED`.
+* **`GracefulDegradationGuard` ([`portfolio/graceful_degradation.py`](file:///c:/meme_hunter/portfolio/graceful_degradation.py)):**
+  - Monitorea la microestructura Level 2 de Binance Futures:
+    - *Spread Normal ($< 0.15\%$):* Modo institucional normal (Sizing 1.0x).
+    - *Spread Moderado ($0.15\% - 0.35\%$):* Modo degradado, sizing al $50\%$ y ejecución forzada Maker al Bid.
+    - *Spread Tóxico ($> 0.35\%$):* Pausa inmediata de nuevas aperturas para evitar devorar el edge en comisiones.
+    - *Cisne Negro / Flash Crash ($> 0.70\%$ o latencia $> 1500\text{ ms}$):* Modo supervivencia con paradas protectoras sin colapso del sistema.
+
+### 14.5 Cockpit Visual DAG e Interfaz Human-in-the-Loop (HITL) (Sprint 32: PB-111 a PB-114)
+* **Pestaña de Orquestación Multi-Agente ([`dashboard/index.html`](file:///c:/meme_hunter/dashboard/index.html)):**
+  - Vista topológica interactiva con 8 nodos organizados en tema oscuro neón con pulsos de inferencia y glow dinámico.
+* **Panel Inspector HITL:**
+  - Al hacer clic en cualquier nodo, muestra el algoritmo activo, métricas en tiempo real y tiempo de ciclo de inferencia.
+  - **Controles del Operador:** Switch para pausar o activar nodos en caliente, slider de consenso mínimo en tiempo real y botón para disparar ciclos de inferencia manuales.
+* **Endpoints REST de Telemetría ([`dashboard/server.py`](file:///c:/meme_hunter/dashboard/server.py)):**
+  - `/api/dag/topology`, `/api/dag/status`, `/api/dag/toggle-node`, `/api/dag/set-threshold`, `/api/dag/trigger-cycle`.
+* **Certificación Oficial:** **24/24 pruebas automatizadas pasando al 100%** en `tests/test_sprint30*`, `tests/test_sprint31*` y `tests/test_sprint32*`.
+
 
 

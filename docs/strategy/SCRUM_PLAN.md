@@ -1,8 +1,8 @@
 ---
 id: STRAT-ROADMAP-001
-title: Plan de Desarrollo Scrum y Backlog de Sprints (Meme Hunter v7.3)
+title: Plan de Desarrollo Scrum y Backlog de Sprints (Meme Hunter v7.4)
 category: strategy
-version: 7.3
+version: 7.4
 status: ACTIVE
 last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
@@ -12,15 +12,18 @@ references:
   - docs/operations/OPERATIONAL_RUNBOOK.md
   - docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md
   - docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md
+  - docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
+  - docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md
+  - docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md
 ---
 
-# 📋 Plan de Desarrollo Scrum: meme_hunter (STRAT-ROADMAP-001 v7.3)
+# 📋 Plan de Desarrollo Scrum: meme_hunter (STRAT-ROADMAP-001 v7.4)
 
 > **Documento Consolidado:** Para la visión estratégica y matemática unificada del sistema, consultar el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 Este documento organiza el desarrollo del sistema **meme_hunter** transformado en un **verdadero cazador de memecoins con ventaja asimétrica y modelos cuantitativos de última generación**, superando la dependencia de indicadores tradicionales rezagados.
 
-> **Última actualización:** 12 de octubre de 2026 — Consolidación v7.3 con Sprints 21 a 29 finalizados y certificados (ver §0 y §3).
+> **Última actualización:** 12 de octubre de 2026 — Consolidación v7.4 con Sprints 21 a 32 finalizados y certificados (ver §0 y §3).
 
 ---
 
@@ -460,6 +463,25 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 * **PB-102 (Gatillo Rápido de Momentum Multi-Timeframe):**
   - Filtro de confirmación de tendencia rápida que evita ejecutar operaciones a contra-tendencia violenta.
 * **Certificación del Sprint 29:** Test suite `tests/test_sprint29_bidirectional_and_sync.py` (4/4 passed) y suite global de 151+ tests pasando al 100%.
+
+---
+
+### Sprints 30 a 32: Arquitectura Multi-Agente, Orquestador DAG y Cockpit Human-in-the-Loop (Completados ✅)
+* **Sprint 30: Núcleo Multi-Agente y Orquestador DAG de Señales (Bayesian Fusion - PB-103 a PB-106):**
+  - **PB-103:** Motor `DAGSignalOrchestrator` (`portfolio/dag_orchestrator.py`) con síntesis bayesiana, VectorAlpha, medición de latencia ($< 20\text{ ms}$) y consenso mínimo de $0.68$.
+  - **PB-104:** Agente de Régimen `RegimeHMMAgent` (`portfolio/agents/regime_agent.py`) emitiendo vector continuo de probabilidades ($p_{\text{bull}}, p_{\text{bear}}, p_{\text{range}}$) condicionante de pesos.
+  - **PB-105:** Agente Técnico `TechnicalMicroAgent` (`portfolio/agents/technical_agent.py`) integrando factores AST, memoria fraccionaria FFD ($d=0.40$), RSI dinámico y proxy OFI.
+  - **PB-106:** Suite `tests/test_sprint30_dag_orchestrator.py` (10/10 tests certificados al 100%).
+* **Sprint 31: Agente Cualitativo LLM y Degradación Elegante ante Cisnes Negros (PB-107 a PB-110):**
+  - **PB-107:** Agente Semántico `SentimentAgent` (`portfolio/agents/sentiment_agent.py`) con normalización semántica $[-1.0, +1.0]$, FinLLM OpenRouter y fallback local offline de $0\text{ ms}$.
+  - **PB-108:** Gestor de Riesgos `RiskManagerAgent` (`portfolio/agents/risk_manager_agent.py`) con VaR 99% paramétrico, Kill-Switch de equidad ($-25\%$) y filtro de correlación cruzada ($< 0.40$).
+  - **PB-109:** Guardián de Degradación Elegante `GracefulDegradationGuard` (`portfolio/graceful_degradation.py`) con monitoreo Level 2, mitigación de spread tóxico ($> 0.35\%$) y modo de supervivencia ante cisnes negros.
+  - **PB-110:** Suite `tests/test_sprint31_sentiment_and_graceful_degradation.py` (7/7 tests certificados al 100%).
+* **Sprint 32: Cockpit Visual DAG e Interfaz Human-in-the-Loop (HITL - PB-111 a PB-114):**
+  - **PB-111 & PB-112:** Vista interactiva `tab-multi-agent-dag` en `dashboard/index.html` + `dashboard/js/dag_flow.js` con 8 nodos estilizados, flujo animado, panel inspector reactivo con 3 métricas y controles HITL en caliente.
+  - **PB-113:** Endpoints REST `/api/dag/topology`, `/api/dag/status`, `/api/dag/toggle-node`, `/api/dag/set-threshold`, `/api/dag/trigger-cycle` en `dashboard/server.py`.
+  - **PB-114:** Suite `tests/test_sprint32_dag_dashboard_telemetry.py` (7/7 tests certificados al 100%).
+* **Certificación Global v7.4:** **175+ tests pasando al 100% (24 nuevos tests certificados sin errores).**
 
 ---
 

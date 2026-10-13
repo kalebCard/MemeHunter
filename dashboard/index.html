@@ -61,6 +61,10 @@
         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/></svg>
         🔄 Motor de Auto-Mejora Continua (IA)
       </button>
+      <button class="nav-tab" data-tab="tab-multi-agent-dag">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H11a2 2 0 0 1 2 2v1.5a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1a1.5 1.5 0 0 1 1.5-1.5V9a1 1 0 0 0-1-1H9v1a1.5 1.5 0 0 1-1.5 1.5h-1A1.5 1.5 0 0 1 5 9V8H3.5A1.5 1.5 0 0 1 2 6.5v-1A1.5 1.5 0 0 1 3.5 4h1A1.5 1.5 0 0 1 6 5.5V7h2V6a1.5 1.5 0 0 1-1.5-1.5v-1z"/></svg>
+        🌐 Orquestación Multi-Agente (DAG)
+      </button>
     </nav>
 
     <!-- ========================================================================= -->
@@ -724,8 +728,166 @@
         </aside>
       </main>
     </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: ORQUESTACIÓN MULTI-AGENTE & ENRUTADOR DAG (HITL) (SPRINT 32)      -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane" id="tab-multi-agent-dag">
+      <div class="dag-main-wrapper">
+        <!-- Tarjeta Principal del Grafo de Inferencia -->
+        <section class="dag-flow-card">
+          <header class="dag-flow-header">
+            <div class="dag-header-title">
+              <h2>Trading Multi-Agente</h2>
+              <p>Arquitectura de Flujo e Inferencia en Tiempo Real</p>
+            </div>
+            <div class="dag-pipeline-badge active" id="dag-pipeline-status-badge">
+              <span class="status-dot green"></span>
+              PIPELINE ACTIVO
+            </div>
+          </header>
+
+          <!-- Lienzo Topológico del Grafo Acíclico Dirigido (DAG) -->
+          <div class="dag-nodes-canvas">
+            <!-- Capa 1: Ingesta de Datos -->
+            <div class="dag-row" id="dag-layer-ingestion">
+              <div class="dag-node-capsule" data-node-id="node_price_volume">
+                <div class="dag-node-name">Precio y Volumen</div>
+                <div class="dag-node-sub">WebSockets L2/L3</div>
+              </div>
+              <div class="dag-node-capsule" data-node-id="node_news_social">
+                <div class="dag-node-name">Noticias y Redes</div>
+                <div class="dag-node-sub">APIs NLP Scraping</div>
+              </div>
+              <div class="dag-node-capsule" data-node-id="node_macro_cal">
+                <div class="dag-node-name">Calendario Macro</div>
+                <div class="dag-node-sub">Eventos FED / IPC</div>
+              </div>
+            </div>
+
+            <!-- Flechas de Flujo hacia Capa 2 -->
+            <div class="dag-row" style="gap: 220px;">
+              <span class="dag-flow-arrow">⌄</span>
+              <span class="dag-flow-arrow">⌄</span>
+              <span class="dag-flow-arrow">⌄</span>
+            </div>
+
+            <!-- Capa 2: Procesamiento & Riesgo (Agentes Especializados) -->
+            <div class="dag-row" id="dag-layer-processing">
+              <div class="dag-node-capsule" data-node-id="technical_analysis">
+                <div class="dag-node-name">Análisis Técnico</div>
+                <div class="dag-node-sub">Cuantitativo / Micro</div>
+              </div>
+              <div class="dag-node-capsule" data-node-id="sentiment_agent">
+                <div class="dag-node-name">Agente Sentimiento</div>
+                <div class="dag-node-sub">FinLLM Embeddings</div>
+              </div>
+              <div class="dag-node-capsule" data-node-id="regime_detector">
+                <div class="dag-node-name">Detector Régimen</div>
+                <div class="dag-node-sub">HMM / Volatilidad</div>
+              </div>
+            </div>
+
+            <!-- Conector y Síntesis: Vector Alpha -->
+            <div class="dag-connector-label" id="dag-vector-alpha-label">
+              <span>Vector Alpha</span>
+              <span class="dag-flow-arrow">⌄</span>
+            </div>
+
+            <!-- Capa 3: Orquestador DAG (Núcleo Central) -->
+            <div class="dag-row" id="dag-layer-core">
+              <div class="dag-node-capsule selected" data-node-id="dag_orchestrator" style="min-width: 290px;">
+                <div class="dag-node-name" style="font-size: 15px;">Orquestador DAG</div>
+                <div class="dag-node-sub" style="font-style: italic; color: #93c5fd;">Enrutador Central de Señales</div>
+              </div>
+            </div>
+
+            <!-- Conector y Propuesta -->
+            <div class="dag-connector-label">
+              <span>Propuesta</span>
+              <span class="dag-flow-arrow">⌄</span>
+            </div>
+
+            <!-- Capa 4: Gobernanza y Ejecución DMA -->
+            <div class="dag-execution-flow">
+              <div class="dag-node-capsule" data-node-id="node_risk_manager" style="min-width: 220px;">
+                <div class="dag-node-name">Gestor de Riesgos</div>
+                <div class="dag-node-sub">Filtro VaR / Drawdown</div>
+              </div>
+              <div class="dag-flow-fix">FIX &gt;</div>
+              <div class="dag-node-capsule execution-blue" data-node-id="node_execution_api" style="min-width: 220px;">
+                <div class="dag-node-name">API de Ejecución</div>
+                <div class="dag-node-sub" style="color: #93c5fd;">Broker / DMA FIX</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tarjeta Inspector de Nodo & Controles Human-in-the-Loop (HITL) -->
+        <section class="dag-inspector-card">
+          <header class="dag-inspector-header">
+            <h3 id="inspector-node-title">Orquestador DAG (Enrutador Central de Señales)</h3>
+            <span class="dag-inspector-tag" id="inspector-node-category">ORQUESTACIÓN CENTRAL</span>
+          </header>
+          <p class="dag-inspector-desc" id="inspector-node-desc">
+            Grafo Acíclico Dirigido que sintetiza los alpha-vectors de todos los agentes, aplicando pesos dinámicos según el régimen de mercado.
+          </p>
+
+          <!-- Métricas del Nodo Seleccionado -->
+          <div class="dag-inspector-metrics-grid">
+            <div class="dag-metric-box">
+              <span class="metric-label">Algoritmo Sint.</span>
+              <span class="metric-value" id="inspector-metric-algo">Bayesian Fusion</span>
+            </div>
+            <div class="dag-metric-box">
+              <span class="metric-label" id="inspector-label-consensus">Consenso Min.</span>
+              <span class="metric-value" id="inspector-metric-consensus">0.68 Score</span>
+            </div>
+            <div class="dag-metric-box">
+              <span class="metric-label">Ciclo Inferencia</span>
+              <span class="metric-value" id="inspector-metric-latency">15 ms</span>
+            </div>
+          </div>
+
+          <!-- Barra de Control Operativo HITL -->
+          <div class="dag-hitl-controls-bar">
+            <div class="hitl-control-group">
+              <button class="btn-hitl pause" id="hitl-node-toggle-btn">⏸ Pausar Nodo</button>
+              <button class="btn-hitl cycle" id="hitl-trigger-cycle-btn">⚡ Disparar Inferencia Manual</button>
+            </div>
+            <div class="hitl-control-group">
+              <span class="hitl-label">Consenso Mínimo:</span>
+              <input type="range" class="hitl-slider" id="hitl-consensus-slider" min="0.40" max="0.95" step="0.02" value="0.68">
+              <span class="metric-value" id="hitl-consensus-val" style="font-size: 13px; color: #60a5fa;">0.68 Score</span>
+            </div>
+          </div>
+
+          <!-- Pie de Página: Leyenda e Instrucción de Navegación -->
+          <footer class="dag-inspector-footer">
+            <div class="dag-legend-row">
+              <label class="dag-legend-item">
+                <input type="checkbox" id="legend-cb-ingestion">
+                <span>Ingesta de Datos</span>
+              </label>
+              <label class="dag-legend-item">
+                <input type="checkbox" id="legend-cb-processing">
+                <span>Procesamiento &amp; Riesgo</span>
+              </label>
+              <label class="dag-legend-item">
+                <input type="checkbox" id="legend-cb-core" checked>
+                <span>Núcleo &amp; Ejecución</span>
+              </label>
+            </div>
+            <div class="dag-inspector-helper">
+              Haz clic en cualquier nodo para inspeccionar
+            </div>
+          </footer>
+        </section>
+      </div>
+    </div>
   </div>
 
   <script src="js/app.js"></script>
+  <script src="js/dag_flow.js"></script>
 </body>
 </html>
