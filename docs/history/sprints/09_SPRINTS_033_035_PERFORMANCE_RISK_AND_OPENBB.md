@@ -1,16 +1,16 @@
 ---
-id: SPRINT-TIER-UPGRADE-033-035
+id: HIST-SPRINT-033-035
 title: "Plan Scrum Sprints 33-35: Aceleración de Núcleo (Polars + VectorBT), Gestión de Colas Pesadas (Riskfolio-Lib) e Ingesta Macro/DeFi (OpenBB)"
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12
 completed_date: 2026-10-12
 author: Quantitative Engineering & Systems Architecture Team
 references:
-  - docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
-  - docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md
-  - docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md
+  - docs/history/sprints/06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md
+  - docs/history/sprints/07_SPRINT_031_LLM_SENTIMENT_AND_DEGRADATION.md
+  - docs/history/sprints/08_SPRINT_032_HITL_VISUAL_DAG_COCKPIT.md
   - portfolio/hrp_allocator.py
   - data_engine/auto_data_sync.py
   - mining/genetic_search.py

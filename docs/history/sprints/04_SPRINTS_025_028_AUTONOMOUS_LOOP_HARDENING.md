@@ -1,16 +1,16 @@
 ---
-id: SPRINT-LOOP-HARDENING-001
+id: HIST-SPRINT-025-028
 title: Plan Scrum de Remediación y Producción del Bucle Autónomo (Sprints 25 a 28)
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12
 completed_date: 2026-10-12
 author: Quantitative Engineering & Architecture Team
 references:
-  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
-  - docs/strategy/SCRUM_PLAN.md
-  - docs/strategy/PLAN_SCRUM_MINERIA_Y_BACKTESTING.md
+  - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/history/scrum/SCRUM_PLAN.md
+  - docs/history/scrum/PLAN_SCRUM_MINERIA_Y_BACKTESTING.md
   - portfolio/autonomous_orchestrator.py
   - portfolio/db_pool.py
 ---

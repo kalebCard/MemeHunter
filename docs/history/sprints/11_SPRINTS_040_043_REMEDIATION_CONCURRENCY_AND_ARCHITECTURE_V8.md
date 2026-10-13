@@ -1,14 +1,14 @@
 ---
-id: SPRINT-REMEDIATION-040-043
+id: HIST-SPRINT-040-043
 title: "Plan Scrum Sprints 40-43: Remediación Crítica, Resiliencia de Concurrencia, Verdadero DAG & Arquitectura v8.0"
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-13
 author: Senior Software Architecture & Due Diligence Team
 references:
-  - docs/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md
-  - docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md
+  - docs/history/sprints/10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md
+  - docs/research/validation/INFORME_METRICAS_AVANZADAS_DSR_PBO.md
   - dashboard/server.py
   - user_data/strategies/MemeHunter_ApexOmegaAlpha.py
   - scripts/compile_ensemble_strategy.py

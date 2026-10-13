@@ -1,7 +1,7 @@
 ---
-id: SPRINT-REMEDIATION-7.1
+id: HIST-SPRINT-REMEDIATION-7.1
 title: "Plan de Sprints Scrum: Remediación, Hardening y Escalamiento Industrial (v7.1)"
-category: history
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12

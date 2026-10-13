@@ -1,7 +1,7 @@
 ---
-id: SPRINT-LLM-002
+id: HIST-SPRINT-002
 title: "Plan Scrum Sprint 2: Motor de Investigación Cuantitativa Aumentado por IA (OpenRouter)"
-category: history
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12

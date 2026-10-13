@@ -48,9 +48,10 @@ docs/
 │   ├── strategy/                    # Estrategia Maestra, Hipótesis causal, Modelo Barbell y Escalado
 │   └── reports/                     # Certificación DSR 100%, PBO 6.67%, Auditoría Forense y Futuros
 │
-└── history/                         # 📜 HISTORIA: Genealogía y Registro de Sprints
+└── history/                         # 📜 HISTORIA: Genealogía, Backlog y Sprints
     ├── INDEX_HISTORICO.md           # Memoria técnica y lecciones aprendidas de cada era
-    └── sprints/                     # Archivo cronológico de planes Scrum (Sprints 1 al 43)
+    ├── scrum/                       # 🛡️ Scrum Governance y Product Backlog (Épicas 1-12, PB-01 a PB-143)
+    └── sprints/                     # 🏃 Catálogo y planes cronológicos de sprints (Sprints 1 al 43)
 ```
 
 ---
@@ -82,7 +83,9 @@ docs/
 
 ### 📜 5. Historia y Evolución de Sprints (`docs/history/`)
 * **[INDEX_HISTORICO.md](history/INDEX_HISTORICO.md):** Registro evolutivo de las 7 eras del proyecto y lecciones aprendidas.
-* **[Catálogo de Sprints Archivados](history/INDEX_HISTORICO.md#catálogo-de-planes-de-sprint-archivados):** Registro de los planes de trabajo desde Sprint 1 hasta Sprints 40-43.
+* **[scrum/SCRUM_PLAN.md](history/scrum/SCRUM_PLAN.md):** Product Backlog Maestro unificado (Épicas 1 a 12, Historias PB-01 a PB-143 y DoD).
+* **[scrum/README.md](history/scrum/README.md):** Marco ágil, roles, ceremonias y gobernanza Scrum.
+* **[sprints/README.md](history/sprints/README.md):** Catálogo maestro de ejecución de los 13 planes de sprint cronológicos (Sprints 1 al 43).
 
 ---
 

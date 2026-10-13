@@ -1,7 +1,7 @@
 ---
-id: SPRINT-AUTO-001
+id: HIST-SPRINT-001
 title: "Plan Scrum Sprint 1: Motor Cuantitativo Auto-Evolutivo & Self-Healing"
-category: history
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12

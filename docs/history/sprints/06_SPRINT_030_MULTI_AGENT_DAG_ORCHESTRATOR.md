@@ -1,14 +1,14 @@
 ---
-id: SPRINT-MULTI-AGENT-030
+id: HIST-SPRINT-030
 title: "Plan Scrum Sprint 30: Núcleo Multi-Agente y Orquestador DAG de Señales (Bayesian Fusion)"
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12
 completed_date: 2026-10-12
 author: Quantitative Engineering & Systems Architecture Team
 references:
-  - docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md
+  - docs/history/sprints/05_SPRINT_029_BIDIRECTIONAL_AND_DATA_SYNC.md
   - docs/architecture/DAS_AUTONOMOUS_ENGINE.md
   - portfolio/oos_gating.py
   - scripts/compile_ensemble_strategy.py

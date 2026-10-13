@@ -1,14 +1,14 @@
 ---
-id: SPRINT-BIDIRECTIONAL-DATA-029
+id: HIST-SPRINT-029
 title: "Plan Scrum Sprint 29: Ensamble Bidireccional (Long/Short), Ingesta Continua y Fricción Realista"
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12
 completed_date: 2026-10-12
 author: Quantitative Engineering & Architecture Team
 references:
-  - docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md
+  - docs/history/sprints/04_SPRINTS_025_028_AUTONOMOUS_LOOP_HARDENING.md
   - scripts/compile_ensemble_strategy.py
   - user_data/strategies/MemeHunter_MinedEnsemble.py
   - data_engine/real_market_feed.py

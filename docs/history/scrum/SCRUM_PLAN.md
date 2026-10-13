@@ -1,25 +1,21 @@
 ---
 id: HIST-SCRUM-001
-title: Plan Maestro de Desarrollo Scrum y Backlog Histórico (Sprints 1 a 29)
-category: history
-version: 7.4
-status: COMPLETED
-last_updated: 2026-10-12
-author: Quantitative Engineering & Research Core
+title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-143)"
+category: history/scrum
+version: 8.0
+status: CERTIFIED
+last_updated: 2026-10-13
+author: Quantitative Engineering & Systems Architecture Core
 references:
   - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
-  - docs/MANUAL_UNIFICADO_DEL_SISTEMA.md
-  - docs/guides/OPERATIONAL_RUNBOOK.md
-  - docs/history/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md
-  - docs/history/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md
-  - docs/history/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
-  - docs/history/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md
-  - docs/history/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md
+  - docs/MANUAL_ESTANDAR_DEL_PROYECTO.md
+  - docs/history/INDEX_HISTORICO.md
+  - docs/history/sprints/README.md
 ---
 
 # 📋 Plan de Desarrollo Scrum: meme_hunter (STRAT-ROADMAP-001 v7.4)
 
-> **Documento Consolidado:** Para la visión estratégica y matemática unificada del sistema, consultar el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
+> **Documento Consolidado:** Para la visión estratégica y matemática unificada del sistema, consultar el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](../../research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 Este documento organiza el desarrollo del sistema **meme_hunter** transformado en un **verdadero cazador de memecoins con ventaja asimétrica y modelos cuantitativos de última generación**, superando la dependencia de indicadores tradicionales rezagados.
 
@@ -380,7 +376,7 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 **Objetivo:** Automatizar la desconexión del riesgo y el traspaso mecánico de utilidades desde el motor de futuros hacia la bóveda segura para escalar hacia los 10,000 USDT/mes.
 
 * **PB-70 (Simulador de Trayectoria Híbrida Barbell) — Completado ✅:**
-  - Desarrollado script [`scripts/simulate_hybrid_barbell.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/simulate_hybrid_barbell.py) con 3,000 simulaciones Monte Carlo sobre un horizonte de 5 años (60 meses) combinando motor de futuros al 42% CAGR y bóveda Cash & Carry al 18% APR.
+  - Desarrollado script [`scripts/simulate_hybrid_barbell.py`](file:///c:/meme_hunter/scripts/simulate_hybrid_barbell.py) con 3,000 simulaciones Monte Carlo sobre un horizonte de 5 años (60 meses) combinando motor de futuros al 42% CAGR y bóveda Cash & Carry al 18% APR.
   - **Hallazgos Clave de Acumulación:**
     * **Partiendo de $1,000 USDT propios:** La bóveda acumula $2,656 USDT en 5 años (~$37 USDT/mes pasivos). Demuestra que con capital personal micro no es matemáticamente viable alcanzar $10k/mes pasivos solo con capital propio sin asumir riesgo de quiebra del 95%.
     * **Partiendo de $10,000 USDT propios:** La bóveda acumula $23,717 USDT (~$330 USDT/mes pasivos).
@@ -388,14 +384,14 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
     * **Vía Escalabilidad de Capital / Copy-Trading ($1M AUM):** Un pool de $1M operado con el motor de futuros genera **$423,042 USDT acumulados en la bóveda**, produciendo **$5,875 a $10,000 USDT mensuales pasivos**.
   - **Conclusión Estratégica:** El camino más rápido y con menor riesgo de ruina para alcanzar los 10,000 USDT mensuales es usar la cuenta micro ($100–$1,000) para validar el track record y monetizar la estrategia vía AUM / Copy-Trading (Épica 7).
 * **PB-68 (Daemon de Trinquete de Ganancias - `profit_ratchet_daemon.py`) — Completado ✅:**
-  - Desarrollado [`scripts/profit_ratchet_daemon.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/profit_ratchet_daemon.py) con soporte para auditoría de equidad (`wallet_balance + unrealized_pnl`), persistencia en `ratchet_state.json` y transferencias CCXT entre subcuentas.
+  - Desarrollado [`scripts/profit_ratchet_daemon.py`](file:///c:/meme_hunter/scripts/profit_ratchet_daemon.py) con soporte para auditoría de equidad (`wallet_balance + unrealized_pnl`), persistencia en `ratchet_state.json` y transferencias CCXT entre subcuentas.
   - Implementada la extracción automática del 60% de utilidades hacia la Bóveda Segura en cada duplicación (+100%), reseteando la base operativa para inmunizar las ganancias acumuladas.
   - Integrado el Kill-Switch dinámico cortando operaciones al 25% de Drawdown.
-  - Suite de tests unitarios [`tests/test_profit_ratchet.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_profit_ratchet.py) pasando al 100% (2/2 tests exitosos).
+  - Suite de tests unitarios [`tests/test_profit_ratchet.py`](file:///c:/meme_hunter/tests/test_profit_ratchet.py) pasando al 100% (2/2 tests exitosos).
 * **PB-69 (Orquestador de Bóveda Delta-Neutral Segura - `delta_neutral_vault.py`) — Completado ✅:**
-  - Desarrollado [`scripts/delta_neutral_vault.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/delta_neutral_vault.py) con soporte para recepción de cosechas, asignación simétrica 50% Spot Long + 50% Futuros Short 1.0x aislado (Delta neto = 0) y liquidación de cobros de funding cada 8h.
+  - Desarrollado [`scripts/delta_neutral_vault.py`](file:///c:/meme_hunter/scripts/delta_neutral_vault.py) con soporte para recepción de cosechas, asignación simétrica 50% Spot Long + 50% Futuros Short 1.0x aislado (Delta neto = 0) y liquidación de cobros de funding cada 8h.
   - Implementada diversificación automática en las mejores oportunidades escaneadas con APR $\ge 12.0\%$.
-  - Suite de tests unitarios [`tests/test_delta_neutral_vault.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_delta_neutral_vault.py) pasando al 100% (2/2 tests exitosos).
+  - Suite de tests unitarios [`tests/test_delta_neutral_vault.py`](file:///c:/meme_hunter/tests/test_delta_neutral_vault.py) pasando al 100% (2/2 tests exitosos).
 * **Conclusión del Sprint 19:** El binomio híbrido Barbell queda 100% implementado y probado en código. El motor agresivo cuenta con su salvaguarda mecánica de trinquete y la bóveda pasiva está lista para recibir y acumular flujo continuo con cero riesgo direccional.
 
 ---
@@ -404,28 +400,28 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 **Objetivo:** Elevar el proyecto a la frontera institucional de las finanzas cuantitativas implementando ingeniería de características no estacionarias, prevención matemática de falsos descubrimientos (*data snooping*) y dimensionamiento continuo de apuestas desvinculado de la dirección.
 
 * **PB-71 (Diferenciación Fraccionaria de Ventana Fija - `fractional_diff.py`) — Completado ✅:**
-  - Desarrollado [`scripts/fractional_diff.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/fractional_diff.py) con expansión binomial de Hosking y ventana fija (FFD) para preservar memoria a largo plazo.
+  - Desarrollado [`scripts/fractional_diff.py`](file:///c:/meme_hunter/scripts/fractional_diff.py) con expansión binomial de Hosking y ventana fija (FFD) para preservar memoria a largo plazo.
   - Implementado algoritmo de búsqueda automática (*Grid Search*) del exponente mínimo $d \in (0, 1)$ que rechaza la hipótesis nula de raíz unitaria mediante el test Aumentado de Dickey-Fuller (ADF) manteniendo $> 90\%$ de correlación con la serie de precios original.
-  - Suite de tests unitarios [`tests/test_fractional_diff.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_fractional_diff.py) pasando al 100% (3/3 tests exitosos).
+  - Suite de tests unitarios [`tests/test_fractional_diff.py`](file:///c:/meme_hunter/tests/test_fractional_diff.py) pasando al 100% (3/3 tests exitosos).
 * **PB-72 (Métricas Avanzadas Anti-Overfitting - `advanced_metrics.py`) — Completado ✅:**
-  - Desarrollado [`scripts/advanced_metrics.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/advanced_metrics.py) con soporte para:
+  - Desarrollado [`scripts/advanced_metrics.py`](file:///c:/meme_hunter/scripts/advanced_metrics.py) con soporte para:
     * **Ratio de Sharpe Probabilístico (PSR):** Corrección estricta de asimetría ($\gamma_3$) y curtosis pesada ($\gamma_4$) típica de colas en derivados cripto.
     * **Ratio de Sharpe Deflactado (DSR):** Formulación de Marcos López de Prado que penaliza el sesgo de selección derivado de ensayar múltiples variantes ($N$ versiones probadas) con el término de Euler-Mascheroni ($\gamma \approx 0.5772$).
     * **Combinatorial Purged Cross-Validation (CPCV) & PBO:** Particionado temporal combinatorio con purga (*purging*) de solapamiento de trades y cuarentena de autocorrelación (*embargo*), calculando la Probabilidad de Sobreajuste en el Backtest (PBO).
-  - Suite de tests unitarios [`tests/test_advanced_metrics.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_advanced_metrics.py) pasando al 100% (5/5 tests exitosos).
+  - Suite de tests unitarios [`tests/test_advanced_metrics.py`](file:///c:/meme_hunter/tests/test_advanced_metrics.py) pasando al 100% (5/5 tests exitosos).
 * **PB-73 (Triple Barrera, Meta-Etiquetado & Bet Sizing Continuo - `triple_barrier_metalabeling.py`) — Completado ✅:**
-  - Desarrollado [`scripts/triple_barrier_metalabeling.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/scripts/triple_barrier_metalabeling.py) con fronteras dinámicas basadas en volatilidad exponencial continua (EWMA): barrera de toma de ganancias (PT), barrera de stop-loss (SL) y barrera temporal vertical.
+  - Desarrollado [`scripts/triple_barrier_metalabeling.py`](file:///c:/meme_hunter/scripts/triple_barrier_metalabeling.py) con fronteras dinámicas basadas en volatilidad exponencial continua (EWMA): barrera de toma de ganancias (PT), barrera de stop-loss (SL) y barrera temporal vertical.
   - Formulado el desacoplamiento institucional entre la predicción direccional (Modelo Primario de tendencia en 4H) y el pronóstico de convicción (Meta-Modelo binario).
   - Implementado el dimensionamiento continuo de apuestas (*Bet Sizing*) derivado de Kelly y la función acumulada normal:
     $$m = 2 Z\left[\frac{p - 0.5}{\sqrt{p(1-p)}}\right] - 1$$
     eliminando el apalancamiento discreto subjetivo y parametrizando de 1.0x a 2.0x según la probabilidad de éxito matemática.
-  - Suite de tests unitarios [`tests/test_triple_barrier_metalabeling.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_triple_barrier_metalabeling.py) pasando al 100% (3/3 tests exitosos).
+  - Suite de tests unitarios [`tests/test_triple_barrier_metalabeling.py`](file:///c:/meme_hunter/tests/test_triple_barrier_metalabeling.py) pasando al 100% (3/3 tests exitosos).
 * **PB-74 (Estrategia Canónica `MemeHunterFuturesV7_Quantum.py`) — Completado ✅:**
-  - Desarrollada [`user_data/strategies/MemeHunterFuturesV7_Quantum.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/user_data/strategies/MemeHunterFuturesV7_Quantum.py) unificando:
+  - Desarrollada [`user_data/strategies/MemeHunterFuturesV7_Quantum.py`](file:///c:/meme_hunter/user_data/strategies/MemeHunterFuturesV7_Quantum.py) unificando:
     * Filtro de memoria estacionaria FFD ($d=0.40$).
     * Hook `leverage()` con Bet Sizing Continuo de López de Prado parametrizando de 1.0x a 2.0x según la confluencia estocástica.
     * Salidas y stoploss forzados como órdenes `market` para erradicar el riesgo de no-fills en caídas violentas.
-  - Suite de tests unitarios [`tests/test_futures_v7_quantum.py`](file:///c:/Users/kaleb/OneDrive/Escritorio/meme_hunter/tests/test_futures_v7_quantum.py) pasando al 100% (2/2 tests exitosos).
+  - Suite de tests unitarios [`tests/test_futures_v7_quantum.py`](file:///c:/meme_hunter/tests/test_futures_v7_quantum.py) pasando al 100% (2/2 tests exitosos).
 * **Conclusión del Sprint 20:** La infraestructura del proyecto cuenta con el arsenal cuantitativo más riguroso de la literatura contemporánea, erradicando la trampa de los micro-patrones y blindando la toma de decisiones contra el sesgo de minería de datos.
 ---
 
@@ -482,6 +478,65 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
   - **PB-113:** Endpoints REST `/api/dag/topology`, `/api/dag/status`, `/api/dag/toggle-node`, `/api/dag/set-threshold`, `/api/dag/trigger-cycle` en `dashboard/server.py`.
   - **PB-114:** Suite `tests/test_sprint32_dag_dashboard_telemetry.py` (7/7 tests certificados al 100%).
 * **Certificación Global v7.4:** **175+ tests pasando al 100% (24 nuevos tests certificados sin errores).**
+
+---
+
+
+---
+
+### Sprints 33 a 35: Aceleración de Núcleo, Gestión de Colas Pesadas e Ingesta Macro (Completados ✅)
+* **Sprint 33 (Aceleración de Núcleo Polars & VectorBT - PB-115 & PB-116):**
+  - **PB-115:** Migración del motor de ingesta y cálculo de features a DataFrames de Polars / Apache Arrow, logrando latencia ultrabaja ($< 15\text{ ms}$).
+  - **PB-116:** Aceleración de backtesting vectorial masivo con VectorBT en el algoritmo genético NSGA-II (`mining/genetic_search.py`).
+* **Sprint 34 (Gestión de Colas Pesadas & HERC - PB-117 & PB-118):**
+  - **PB-117:** Asignador jerárquico HERC con optimización CVaR (`portfolio/riskfolio_allocator.py`) mediante Riskfolio-Lib.
+  - **PB-118:** Detección de multicolinealidad no lineal y pruebas de estrés de colas pesadas cripto.
+* **Sprint 35 (Ingesta Macro/DeFi con OpenBB - PB-119 & PB-120):**
+  - **PB-119:** Proveedor de datos asíncrono OpenBB (`data_engine/openbb_provider.py`) con fallback de 0 ms.
+  - **PB-120:** Condicionamiento macro en el agente de régimen `RegimeHMMAgent` y enrutador DAG.
+* **Certificación Sprints 33-35:** Ver detalle en [`docs/history/sprints/09_SPRINTS_033_035_PERFORMANCE_RISK_AND_OPENBB.md`](../sprints/09_SPRINTS_033_035_PERFORMANCE_RISK_AND_OPENBB.md).
+
+---
+
+### Sprints 36 a 39: Blindaje de 4 Capas, Cortafuegos Pydantic & Kill Switch Absoluto (Completados ✅)
+* **Sprint 36 (Cortafuegos Pydantic v2 & Sanitización - PB-120 a PB-122):**
+  - **PB-120:** Esquemas inmutables Pydantic v2 (`validation/schemas.py`) para validación estricta de señales y datos.
+  - **PB-121:** Validador de series temporales `DataFirewall` (`validation/data_firewall.py`) con detección de gaps temporales y spikes no fisiológicos.
+  - **PB-122:** Micro-gateway de sanitización de entrada en la frontera de red.
+* **Sprint 37 (Desacoplamiento Asíncrono & Cache de Sesgo - PB-123 a PB-125):**
+  - **PB-123:** Demonio periódico en segundo plano `AgentBiasDaemon` (`portfolio/agent_bias_daemon.py`).
+  - **PB-124:** Esquema de postura directiva `MarketBiasSchema` con TTL de expiración.
+  - **PB-125:** Persistencia atómica de sesgo en `BiasStore` (`portfolio/bias_store.py`).
+* **Sprint 38 (Ejecución Determinista & Gate Pre-Trade - PB-126 a PB-128):**
+  - **PB-126:** Conector de validación determinista en estrategias Freqtrade.
+  - **PB-127:** Compuerta de rentabilidad pre-trade `PreTradeProfitabilityGate` (`portfolio/pre_trade_gate.py`) bloqueando trades con rentabilidad esperada inferior a 2x el spread más comisión.
+  - **PB-128:** Aborto silencioso y telemetría de fricción microestructural.
+* **Sprint 39 (Kill Switch Absoluto & Reglas Inquebrantables - PB-129 a PB-131):**
+  - **PB-129:** Validador de esquemas de IA `AIOutputGuard` evitando alucinaciones directivas.
+  - **PB-130:** Interceptor de órdenes de broker y Kill Switch incondicional ante drawdown $\ge 25\%$.
+  - **PB-131:** Pruebas de estrés E2E y simulación de ruina por Monte Carlo.
+* **Certificación Sprints 36-39:** Ver detalle en [`docs/history/sprints/10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md`](../sprints/10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md).
+
+---
+
+### Sprints 40 a 43: Remediación Crítica, Concurrencia SQLite WAL & Arquitectura v8.0 (Completados ✅)
+* **Sprint 40 (Cierre de Brechas de Arquitectura & AST Zero-Eval - PB-132 a PB-134):**
+  - **PB-132:** Conexión real de las 4 capas en el ciclo `confirm_trade_entry()` de Freqtrade.
+  - **PB-133:** Cierre inmediato del bypass de autenticación en la API del Cockpit.
+  - **PB-134:** Sanitización AST de expresiones simbólicas erradicando `eval()` y `exec()` dinámicos.
+* **Sprint 41 (Resiliencia de Concurrencia & Persistencia Atómica - PB-135 a PB-137):**
+  - **PB-135:** Bloqueo inter-proceso atómico en `BiasStore` mediante `filelock` y pool transaccional SQLite WAL.
+  - **PB-136:** Desacoplamiento asíncrono del bucle de ingesta de mercado en worker pool dedicado.
+  - **PB-137:** Portabilidad 12-Factor App con resolución canónica de rutas (`src/meme_hunter/core/config.py`).
+* **Sprint 42 (Topología DAG Formal & Fail-Fast Hardening - PB-138 a PB-140):**
+  - **PB-138:** Topología DAG formal con ordenamiento topológico y resolución reactiva de dependencias.
+  - **PB-139:** Consolidación de persistencia de incubación y estado en SQLite WAL con timeout de 15s.
+  - **PB-140:** Gestión estricta de credenciales con fallback fail-fast y degradación elegante sin crashes.
+* **Sprint 43 (Migración FastAPI ASGI, E2E Testing & Modularización v8.0 - PB-141 a PB-143):**
+  - **PB-141:** Servidor ASGI moderno basado en FastAPI y Uvicorn con soporte de streaming WebSocket y OpenAPI docs.
+  - **PB-142:** Suite piramidal de tests (Unitarios, Integración, E2E) con cobertura integral.
+  - **PB-143:** Estructura modular `src/meme_hunter/` instalable como paquete Python (`pip install -e .`).
+* **Certificación Sprints 40-43:** Ver detalle en [`docs/history/sprints/11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md`](../sprints/11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md).
 
 ---
 

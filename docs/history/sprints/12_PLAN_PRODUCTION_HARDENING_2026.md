@@ -1,7 +1,7 @@
 ---
-id: SPRINT-HARDENING-2026
+id: HIST-SPRINT-HARDENING-2026
 title: "Plan Integral de Sprints Scrum: Production Hardening, Microestructura y Resiliencia 2026"
-category: history
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12

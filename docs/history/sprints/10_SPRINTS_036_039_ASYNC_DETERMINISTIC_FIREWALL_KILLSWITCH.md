@@ -1,16 +1,16 @@
 ---
-id: SPRINT-TIER-UPGRADE-036-039
+id: HIST-SPRINT-036-039
 title: "Plan Scrum Sprints 36-39: Arquitectura de 4 Capas (Cortafuegos Pydantic, Desacoplamiento Asíncrono, Ejecución Determinista y Kill Switch Absoluto)"
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-13
 completed_date: 2026-10-13
 author: Quantitative Engineering & Systems Architecture Team
 references:
-  - docs/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md
-  - docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
-  - docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md
+  - docs/history/sprints/09_SPRINTS_033_035_PERFORMANCE_RISK_AND_OPENBB.md
+  - docs/history/sprints/06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md
+  - docs/history/sprints/07_SPRINT_031_LLM_SENTIMENT_AND_DEGRADATION.md
   - portfolio/dag_orchestrator.py
   - portfolio/kill_switch.py
   - portfolio/graceful_degradation.py

@@ -1,14 +1,14 @@
 ---
-id: SPRINT-SENTIMENT-DEGRADATION-031
+id: HIST-SPRINT-031
 title: "Plan Scrum Sprint 31: Agente Cualitativo LLM (Sentimiento & Contexto) y Degradación Elegante"
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12
 completed_date: 2026-10-12
 author: Quantitative Engineering & Systems Architecture Team
 references:
-  - docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
+  - docs/history/sprints/06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md
   - mining/llm_client.py
   - portfolio/alpha_autopsy.py
   - portfolio/oos_gating.py

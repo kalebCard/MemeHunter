@@ -79,7 +79,7 @@ timeline
 ---
 
 ### Era 4: Persistencia SQLite WAL y Hardening del Bucle (Sprints 25 a 28)
-* **Documento Canónico:** [`docs/history/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md`](sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md)
+* **Documento Canónico:** [`docs/history/sprints/04_SPRINTS_025_028_AUTONOMOUS_LOOP_HARDENING.md`](sprints/04_SPRINTS_025_028_AUTONOMOUS_LOOP_HARDENING.md)
 * **Historias:** PB-87 a PB-92.
 * **Hitos:**
   * Migración del estado volátil en JSON a base de datos transaccional SQLite WAL (`alpha_factory.db`).
@@ -91,11 +91,11 @@ timeline
 
 ### Era 5: Ensamble Dinámico y Orquestador DAG Multi-Agente (Sprints 29 a 35)
 * **Documentos Canónicos:**
-  * [Sprint 29: Ensamble Bidireccional & Data Sync](sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md)
-  * [Sprint 30: Núcleo Multi-Agente & Orquestador DAG](sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md)
-  * [Sprint 31: Sentimiento LLM & Degradación Elegante](sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md)
-  * [Sprint 32: Cockpit Visual DAG Human-in-the-Loop](sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md)
-  * [Sprints 33-35: Polars, VectorBT, Riskfolio HERC & OpenBB](sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md)
+  * [Sprint 29: Ensamble Bidireccional & Data Sync](sprints/05_SPRINT_029_BIDIRECTIONAL_AND_DATA_SYNC.md)
+  * [Sprint 30: Núcleo Multi-Agente & Orquestador DAG](sprints/06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md)
+  * [Sprint 31: Sentimiento LLM & Degradación Elegante](sprints/07_SPRINT_031_LLM_SENTIMENT_AND_DEGRADATION.md)
+  * [Sprint 32: Cockpit Visual DAG Human-in-the-Loop](sprints/08_SPRINT_032_HITL_VISUAL_DAG_COCKPIT.md)
+  * [Sprints 33-35: Polars, VectorBT, Riskfolio HERC & OpenBB](sprints/09_SPRINTS_033_035_PERFORMANCE_RISK_AND_OPENBB.md)
 * **Historias:** PB-93 a PB-120.
 * **Hitos:**
   * Ensamble Long/Short dinámico con confirmación de momentum y sincronizador Feather continuo (`auto_data_sync.py`).
@@ -109,7 +109,7 @@ timeline
 ---
 
 ### Era 6: Arquitectura Blindada de 4 Capas (Sprints 36 a 39)
-* **Documento Canónico:** [`docs/history/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md`](sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md)
+* **Documento Canónico:** [`docs/history/sprints/10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md`](sprints/10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md)
 * **Historias:** PB-121 a PB-131.
 * **Hitos:**
   * **Capa 1 (Cortafuegos de Datos):** Validación Pydantic v2 estricta de OHLCV y libro L2, neutralizando flash-spikes y datos corruptos.
@@ -120,7 +120,7 @@ timeline
 ---
 
 ### Era 7: Arquitectura Modular v8.0, Concurrencia y Release Institucional (Sprints 40 a 43)
-* **Documento Canónico:** [`docs/history/sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md`](sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md)
+* **Documento Canónico:** [`docs/history/sprints/11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md`](sprints/11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md)
 * **Historias:** PB-132 a PB-143.
 * **Hitos:**
   * Cableado real de las 4 capas de protección al ciclo de vida nativo de Freqtrade vía `confirm_trade_entry()` (PB-132).
@@ -138,27 +138,30 @@ timeline
 
 ---
 
-## 📚 4. Índice de Archivos de Sprints Preservados
+## 📚 4. Índice Canónico de Archivos Estandarizados
 
-Todos los documentos originales de planificación Scrum se preservan intactos en el repositorio como referencia histórica auditable:
+Todos los documentos de planificación Scrum y ejecución de Sprints se encuentran rigurosamente organizados, estandarizados y auditables bajo la arquitectura de dos niveles:
 
 ```text
 docs/history/
-├── INDEX_HISTORICO.md               # 🌟 Este documento canónico de síntesis
-├── scrum/                           # Backlog integral acumulado
-│   ├── SCRUM_PLAN.md                # Product Backlog Épicas 1 a 11 (PB-01 a PB-80)
-│   └── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # Backlog de Minería de Alphas (Sprints 21 a 24)
-└── sprints/                         # Especificaciones detalladas de sprint
-    ├── SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md # Sprint 1 (Motor Auto-Evolutivo)
-    ├── SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md  # Sprint 2 (Cognición OpenRouter)
-    ├── SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md   # Sprints 25-28 (SQLite WAL & Gating)
-    ├── SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md # Sprint 29 (Ensamble Dinámico)
-    ├── SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md # Sprint 30 (DAG Bayesian Fusion)
-    ├── SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md # Sprint 31 (Sentimiento LLM)
-    ├── SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md # Sprint 32 (Cockpit Visual HITL)
-    ├── SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md # Sprints 33-35 (Polars & Riskfolio)
-    ├── SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md # Sprints 36-39 (Blindaje 4 Capas)
-    ├── SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md # Sprints 40-43 (v8.0 Release)
-    ├── SPRINT_PLAN_PRODUCTION_HARDENING_2026.md # Plan de Hardening 2026
-    └── SPRINT_PLAN_REMEDIATION_AND_HARDENING.md # Plan de Remediación v7.1
+├── INDEX_HISTORICO.md               # 🌟 Libro maestro de historia, cronología y genealogía
+├── scrum/                           # 🛡️ Nivel Estratégico: Scrum Governance & Product Backlog
+│   ├── README.md                    # Marco de trabajo ágil, DoD y ceremonias
+│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-143)
+│   └── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # Backlog temático de minería de alphas y CPCV
+└── sprints/                         # 🏃 Nivel Táctico: Planes de ejecución técnica de sprints
+    ├── README.md                    # Catálogo maestro de ejecución de sprints
+    ├── 01_SPRINT_001_AUTONOMOUS_SELF_IMPROVING_ENGINE.md # Sprint 1 (Motor Auto-Evolutivo)
+    ├── 02_SPRINT_002_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md  # Sprint 2 (Cognición OpenRouter)
+    ├── 03_SPRINTS_021_024_ALPHA_MINING_AND_BACKTESTING.md # Sprints 21-24 (Alpha Mining & L2)
+    ├── 04_SPRINTS_025_028_AUTONOMOUS_LOOP_HARDENING.md   # Sprints 25-28 (SQLite WAL & Gating)
+    ├── 05_SPRINT_029_BIDIRECTIONAL_AND_DATA_SYNC.md      # Sprint 29 (Ensamble Dinámico L/S)
+    ├── 06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md     # Sprint 30 (DAG Bayesian Fusion)
+    ├── 07_SPRINT_031_LLM_SENTIMENT_AND_DEGRADATION.md    # Sprint 31 (Sentimiento LLM & L2)
+    ├── 08_SPRINT_032_HITL_VISUAL_DAG_COCKPIT.md          # Sprint 32 (Cockpit Visual HITL)
+    ├── 09_SPRINTS_033_035_PERFORMANCE_RISK_AND_OPENBB.md # Sprints 33-35 (Polars, VectorBT, HERC)
+    ├── 10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md # Sprints 36-39 (Blindaje 4 Capas)
+    ├── 11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md # Sprints 40-43 (Release v8.0)
+    ├── 12_PLAN_PRODUCTION_HARDENING_2026.md              # Plan Integral Hardening 2026
+    └── 13_PLAN_REMEDIATION_AND_HARDENING_V7.1.md         # Plan Remediación & Hardening v7.1
 ```

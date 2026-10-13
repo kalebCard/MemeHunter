@@ -1,15 +1,15 @@
 ---
-id: SPRINT-HITL-COCKPIT-032
+id: HIST-SPRINT-032
 title: "Plan Scrum Sprint 32: Cockpit Visual DAG e Interfaz Human-in-the-Loop (HITL)"
-category: sprints
+category: history/sprints
 version: 1.0
 status: COMPLETED
 last_updated: 2026-10-12
 completed_date: 2026-10-12
 author: Quantitative Engineering & Systems Architecture Team
 references:
-  - docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
-  - docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md
+  - docs/history/sprints/06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md
+  - docs/history/sprints/07_SPRINT_031_LLM_SENTIMENT_AND_DEGRADATION.md
   - dashboard/index.html
   - dashboard/server.py
   - dashboard/css/style.css
