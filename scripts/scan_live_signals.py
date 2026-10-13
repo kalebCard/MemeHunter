@@ -8,6 +8,9 @@ en tiempo real si existen condiciones de capitulación o rebote elástico.
 import sys
 import io
 import time
+import urllib.request
+import urllib.parse
+import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -26,6 +29,29 @@ try:
     import ccxt
 except ImportError:
     ccxt = None
+
+def send_telegram_alert(text: str):
+    token = os.environ.get("FREQTRADE__TELEGRAM__TOKEN")
+    chat_id = os.environ.get("FREQTRADE__TELEGRAM__CHAT_ID")
+    if not token or not chat_id:
+        env_file = ROOT / ".env"
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line.startswith("FREQTRADE__TELEGRAM__TOKEN="):
+                    token = line.split("=", 1)[1].strip()
+                elif line.startswith("FREQTRADE__TELEGRAM__CHAT_ID="):
+                    chat_id = line.split("=", 1)[1].strip()
+    if token and chat_id:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
+        try:
+            data = urllib.parse.urlencode(payload).encode()
+            req = urllib.request.Request(url, data=data, headers={"User-Agent": "MemeHunterBot/1.0"})
+            with urllib.request.urlopen(req, timeout=5):
+                pass
+        except Exception:
+            pass
 
 PAIRS_SPOT = [
     "DOGE/USDT",
@@ -88,6 +114,19 @@ def scan_live_market():
             if enter_long == 0 and int(prev_row.get("enter_long", 0)) == 1:
                 enter_long = 1
                 enter_tag = str(prev_row.get("enter_tag", "")) + " (Vela Previa)"
+
+            if enter_long == 1:
+                alert_text = (
+                    f"🚨 *MEME HUNTER: DISPARO ACTIVO*\n"
+                    f"• *Par:* `{pair}`\n"
+                    f"• *Señal:* `{enter_tag}`\n"
+                    f"• *Precio:* `${price:.6f}`\n"
+                    f"• *Caída 16h:* `{drop:.2f}%`\n"
+                    f"• *RSI:* `{rsi:.1f}` | *Vol/SMA20:* `{vol_ratio:.2f}x`\n"
+                    f"• *Z-Score:* `{z_score:.2f}`\n"
+                    f"🎯 *Take Profit:* +3.5% (4h) / +6.0% | *Stoploss:* -3.0%"
+                )
+                send_telegram_alert(alert_text)
 
             status = "🟢 DISPARO ACTIVO" if enter_long == 1 else ("🟡 EN ZONA DE PÁNICO" if rsi < 30 or drop < -10 else "⚪ NEUTRAL")
 
