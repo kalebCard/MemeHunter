@@ -10,7 +10,7 @@ Pruebas unitarias para scripts/triple_barrier_metalabeling.py:
 import numpy as np
 import pandas as pd
 import pytest
-from scripts.triple_barrier_metalabeling import (
+from scripts.research.triple_barrier_metalabeling import (
     get_daily_volatility,
     apply_triple_barrier,
     continuous_bet_sizing

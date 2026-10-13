@@ -15,7 +15,7 @@ import pandas as pd
 
 from validation.cpcv_engine import CPCVEngine
 from validation.multiple_testing import MultipleTestingController
-from scripts.advanced_metrics import calculate_moments, probabilistic_sharpe_ratio, deflated_sharpe_ratio
+from scripts.research.advanced_metrics import calculate_moments, probabilistic_sharpe_ratio, deflated_sharpe_ratio
 
 
 @dataclass

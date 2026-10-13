@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from portfolio.agents.base_agent import BaseSignalAgent, AgentProposal
-from scripts.regime_classifier import (
+from scripts.research.regime_classifier import (
     REGIME_BULL_MOMENTUM,
     REGIME_BEAR_BLEED,
     REGIME_CHOPPY_RANGE,

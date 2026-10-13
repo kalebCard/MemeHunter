@@ -25,7 +25,7 @@ from portfolio.alpha_autopsy import AlphaAutopsyAgent, AutopsyVerdict
 from portfolio.oos_gating import OOSGatingValidator
 from mining.alpha_daemon import AlphaMinerDaemon, QualityDiversityArchive
 from mining.llm_alpha_generator import LLMAlphaSynthesizer
-from scripts.compile_ensemble_strategy import auto_compile_hook
+from scripts.pipelines.compile_ensemble_strategy import auto_compile_hook
 from client.freqtrade_client import FreqtradeRestClient
 from client.telemetry_notifier import TelemetryNotifier
 

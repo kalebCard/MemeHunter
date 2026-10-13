@@ -9,7 +9,7 @@ import os
 import ast
 from pathlib import Path
 
-from scripts.compile_ensemble_strategy import (
+from scripts.pipelines.compile_ensemble_strategy import (
     generate_ensemble_strategy_file,
     compile_ast_formula_to_python
 )

@@ -8,7 +8,7 @@ Valida:
 
 import pytest
 from pathlib import Path
-from scripts.profit_ratchet_daemon import ProfitRatchetDaemon
+from scripts.ops.profit_ratchet_daemon import ProfitRatchetDaemon
 
 
 def test_ratchet_harvest_cycle(tmp_path):

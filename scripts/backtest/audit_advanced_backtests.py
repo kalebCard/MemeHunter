@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.advanced_metrics import (
+from scripts.research.advanced_metrics import (
     calculate_moments,
     probabilistic_sharpe_ratio,
     deflated_sharpe_ratio,

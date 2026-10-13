@@ -30,9 +30,9 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Any, Tuple
 
-from scripts.fractional_diff import frac_diff_ffd, find_optimal_d
-from scripts.triple_barrier_metalabeling import apply_triple_barrier, continuous_bet_sizing, get_daily_volatility
-from scripts.advanced_metrics import (
+from scripts.research.fractional_diff import frac_diff_ffd, find_optimal_d
+from scripts.research.triple_barrier_metalabeling import apply_triple_barrier, continuous_bet_sizing, get_daily_volatility
+from scripts.research.advanced_metrics import (
     calculate_moments,
     probabilistic_sharpe_ratio,
     deflated_sharpe_ratio,

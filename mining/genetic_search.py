@@ -25,7 +25,7 @@ from mining.alpha_grammar import AlphaGrammar, ASTNode, FeatureNode, BinaryOpNod
 from validation.cpcv_engine import CPCVEngine
 from validation.multiple_testing import MultipleTestingController
 from validation.data_manifest import DataManifestEngine, RunMetadata, set_global_seed
-from scripts.advanced_metrics import probabilistic_sharpe_ratio, calculate_moments
+from scripts.research.advanced_metrics import probabilistic_sharpe_ratio, calculate_moments
 
 
 @dataclass

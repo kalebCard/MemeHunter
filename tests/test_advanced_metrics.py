@@ -11,7 +11,7 @@ Pruebas unitarias para scripts/advanced_metrics.py:
 import math
 import numpy as np
 import pytest
-from scripts.advanced_metrics import (
+from scripts.research.advanced_metrics import (
     calculate_moments,
     probabilistic_sharpe_ratio,
     deflated_sharpe_ratio,

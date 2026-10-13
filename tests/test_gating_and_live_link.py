@@ -22,7 +22,7 @@ from portfolio.strategy_incubator import (
     StrategyRecord
 )
 from portfolio.oos_gating import OOSGatingValidator, GatingValidationResult
-from scripts.compile_ensemble_strategy import generate_ensemble_strategy_file, auto_compile_hook
+from scripts.pipelines.compile_ensemble_strategy import generate_ensemble_strategy_file, auto_compile_hook
 from client.freqtrade_client import FreqtradeRestClient
 from client.telemetry_notifier import TelemetryNotifier
 from portfolio.autonomous_orchestrator import AutonomousPortfolioOrchestrator

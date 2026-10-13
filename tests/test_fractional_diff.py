@@ -10,7 +10,7 @@ Pruebas unitarias para scripts/fractional_diff.py:
 import numpy as np
 import pandas as pd
 import pytest
-from scripts.fractional_diff import get_weights_ffd, frac_diff_ffd, find_optimal_d
+from scripts.research.fractional_diff import get_weights_ffd, frac_diff_ffd, find_optimal_d
 
 
 def test_get_weights_ffd():
