@@ -48,8 +48,13 @@ class MemeHunter_MinedEnsemble(IStrategy):
 
     # Ponderaciones HRP de Factores Activos
     ACTIVE_WEIGHTS = {
-        "ALPHA_002": 0.26655593196329874,
-        "ALPHA_003": 0.2343554548070061
+        "ALPHA_001": 0.25,
+        "ALPHA_002": 0.2499999987543191,
+        "ALPHA_004": 0.5000000012456809,
+        "STRAT_A": 0.05,
+        "STRAT_B": 0.95,
+        "ALPHA_LIVE_01": 1.0,
+        "HEALTHY_01": 1.0
 }
 
     # Órdenes forzadas a mercado en salidas para erradicar riesgo de no-fill
@@ -94,20 +99,56 @@ class MemeHunter_MinedEnsemble(IStrategy):
         def ts_delta(s: pd.Series, w: int) -> pd.Series:
             return (s - s.shift(w)).fillna(0.0)
 
+        def ts_rank(s: pd.Series, w: int) -> pd.Series:
+            return s.rolling(w, min_periods=1).apply(lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False).fillna(0.5)
+
+        def ts_delay(s: pd.Series, w: int) -> pd.Series:
+            return s.shift(w).fillna(s)
+
         # 3. Evaluación Dinámica de cada Factor Minado Activo
         composite_score = pd.Series(0.0, index=dataframe.index)
 
-        # Factor ALPHA_002 (Peso HRP: 0.2666)
-        f_val_ALPHA_002 = (np.abs((2.00 - dataframe['high'])))
+        # Factor ALPHA_001 (Peso HRP: 0.2500)
+        f_val_ALPHA_001 = (Mined_ALPHA_001)
+        f_std_ALPHA_001 = float(f_val_ALPHA_001.std()) if float(f_val_ALPHA_001.std()) > 1e-8 else 1.0
+        f_norm_ALPHA_001 = (f_val_ALPHA_001 - f_val_ALPHA_001.mean()) / f_std_ALPHA_001
+        composite_score += f_norm_ALPHA_001.fillna(0.0) * 0.250000
+
+        # Factor ALPHA_002 (Peso HRP: 0.2500)
+        f_val_ALPHA_002 = (Mined_ALPHA_002)
         f_std_ALPHA_002 = float(f_val_ALPHA_002.std()) if float(f_val_ALPHA_002.std()) > 1e-8 else 1.0
         f_norm_ALPHA_002 = (f_val_ALPHA_002 - f_val_ALPHA_002.mean()) / f_std_ALPHA_002
-        composite_score += f_norm_ALPHA_002.fillna(0.0) * 0.266556
+        composite_score += f_norm_ALPHA_002.fillna(0.0) * 0.250000
 
-        # Factor ALPHA_003 (Peso HRP: 0.2344)
-        f_val_ALPHA_003 = ((dataframe['close'] + (-dataframe['high'])))
-        f_std_ALPHA_003 = float(f_val_ALPHA_003.std()) if float(f_val_ALPHA_003.std()) > 1e-8 else 1.0
-        f_norm_ALPHA_003 = (f_val_ALPHA_003 - f_val_ALPHA_003.mean()) / f_std_ALPHA_003
-        composite_score += f_norm_ALPHA_003.fillna(0.0) * 0.234355
+        # Factor ALPHA_004 (Peso HRP: 0.5000)
+        f_val_ALPHA_004 = (Mined_ALPHA_004)
+        f_std_ALPHA_004 = float(f_val_ALPHA_004.std()) if float(f_val_ALPHA_004.std()) > 1e-8 else 1.0
+        f_norm_ALPHA_004 = (f_val_ALPHA_004 - f_val_ALPHA_004.mean()) / f_std_ALPHA_004
+        composite_score += f_norm_ALPHA_004.fillna(0.0) * 0.500000
+
+        # Factor STRAT_A (Peso HRP: 0.0500)
+        f_val_STRAT_A = (dataframe['close'])
+        f_std_STRAT_A = float(f_val_STRAT_A.std()) if float(f_val_STRAT_A.std()) > 1e-8 else 1.0
+        f_norm_STRAT_A = (f_val_STRAT_A - f_val_STRAT_A.mean()) / f_std_STRAT_A
+        composite_score += f_norm_STRAT_A.fillna(0.0) * 0.050000
+
+        # Factor STRAT_B (Peso HRP: 0.9500)
+        f_val_STRAT_B = (dataframe['close'])
+        f_std_STRAT_B = float(f_val_STRAT_B.std()) if float(f_val_STRAT_B.std()) > 1e-8 else 1.0
+        f_norm_STRAT_B = (f_val_STRAT_B - f_val_STRAT_B.mean()) / f_std_STRAT_B
+        composite_score += f_norm_STRAT_B.fillna(0.0) * 0.950000
+
+        # Factor ALPHA_LIVE_01 (Peso HRP: 1.0000)
+        f_val_ALPHA_LIVE_01 = (ts_rank(dataframe['close'], 14))
+        f_std_ALPHA_LIVE_01 = float(f_val_ALPHA_LIVE_01.std()) if float(f_val_ALPHA_LIVE_01.std()) > 1e-8 else 1.0
+        f_norm_ALPHA_LIVE_01 = (f_val_ALPHA_LIVE_01 - f_val_ALPHA_LIVE_01.mean()) / f_std_ALPHA_LIVE_01
+        composite_score += f_norm_ALPHA_LIVE_01.fillna(0.0) * 1.000000
+
+        # Factor HEALTHY_01 (Peso HRP: 1.0000)
+        f_val_HEALTHY_01 = (ts_rank(dataframe['close'], 5))
+        f_std_HEALTHY_01 = float(f_val_HEALTHY_01.std()) if float(f_val_HEALTHY_01.std()) > 1e-8 else 1.0
+        f_norm_HEALTHY_01 = (f_val_HEALTHY_01 - f_val_HEALTHY_01.mean()) / f_std_HEALTHY_01
+        composite_score += f_norm_HEALTHY_01.fillna(0.0) * 1.000000
 
 
         dataframe['composite_alpha_score'] = composite_score

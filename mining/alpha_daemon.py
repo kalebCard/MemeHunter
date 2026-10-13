@@ -102,33 +102,77 @@ class QualityDiversityArchive:
         """Retorna todos los mejores factores de cada celda ocupada."""
         return [cell.best_factor for cell in self.cells.values() if cell.best_factor is not None]
 
-    def save_archive(self, file_path: str):
-        """Persiste el archivo de diversidad en JSON."""
-        os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
-        data = {
-            niche_id: {
-                'niche_id': c.niche_id,
-                'feature_type': c.feature_type,
-                'complexity_tier': c.complexity_tier,
-                'fitness_score': c.fitness_score,
-                'factor': asdict(c.best_factor) if c.best_factor else None
-            }
-            for niche_id, c in self.cells.items()
-        }
-        atomic_write_json(file_path, data)
+    def save_to_db(self, db_path: str = "portfolio/alpha_factory.db"):
+        """Persiste las celdas del archivo de diversidad en SQLite WAL."""
+        try:
+            from portfolio.db_schema import init_alpha_factory_db, upsert_diversity_cell_db
+            init_alpha_factory_db(db_path)
+            for niche_id, c in self.cells.items():
+                cell_dict = {
+                    'niche_id': c.niche_id,
+                    'feature_type': c.feature_type,
+                    'complexity_tier': c.complexity_tier,
+                    'fitness_score': c.fitness_score,
+                    'factor': asdict(c.best_factor) if c.best_factor else None
+                }
+                upsert_diversity_cell_db(cell_dict, db_path=db_path)
+        except Exception as e:
+            logger.warning(f"Error guardando QualityDiversityArchive en SQLite {db_path}: {e}")
 
-    def load_archive(self, file_path: str):
-        """Carga el archivo desde disco si existe."""
-        if not os.path.exists(file_path):
-            return
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        for niche_id, entry in data.items():
-            if niche_id in self.cells and entry.get('factor'):
-                f_data = entry['factor']
-                factor = AlphaFactor(**f_data)
-                self.cells[niche_id].best_factor = factor
-                self.cells[niche_id].fitness_score = entry['fitness_score']
+    def load_from_db(self, db_path: str = "portfolio/alpha_factory.db") -> bool:
+        """Carga las celdas del archivo de diversidad desde SQLite WAL."""
+        if not os.path.exists(db_path):
+            return False
+        try:
+            from portfolio.db_schema import get_diversity_archive_db
+            data = get_diversity_archive_db(db_path)
+            if not data:
+                return False
+            for niche_id, entry in data.items():
+                if niche_id in self.cells and entry.get('factor'):
+                    f_data = entry['factor']
+                    factor = AlphaFactor(**f_data)
+                    self.cells[niche_id].best_factor = factor
+                    self.cells[niche_id].fitness_score = entry['fitness_score']
+            return True
+        except Exception:
+            return False
+
+    def save_archive(self, file_path: str, db_path: Optional[str] = "portfolio/alpha_factory.db"):
+        """Persiste el archivo de diversidad en SQLite WAL y JSON."""
+        if db_path:
+            self.save_to_db(db_path)
+        if file_path:
+            os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
+            data = {
+                niche_id: {
+                    'niche_id': c.niche_id,
+                    'feature_type': c.feature_type,
+                    'complexity_tier': c.complexity_tier,
+                    'fitness_score': c.fitness_score,
+                    'factor': asdict(c.best_factor) if c.best_factor else None
+                }
+                for niche_id, c in self.cells.items()
+            }
+            atomic_write_json(file_path, data)
+
+    def load_archive(self, file_path: str, db_path: Optional[str] = "portfolio/alpha_factory.db"):
+        """Carga el archivo desde SQLite si existe o desde JSON como fallback."""
+        loaded = False
+        if db_path and os.path.exists(db_path):
+            loaded = self.load_from_db(db_path)
+        if not loaded and file_path and os.path.exists(file_path):
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                for niche_id, entry in data.items():
+                    if niche_id in self.cells and entry.get('factor'):
+                        f_data = entry['factor']
+                        factor = AlphaFactor(**f_data)
+                        self.cells[niche_id].best_factor = factor
+                        self.cells[niche_id].fitness_score = entry['fitness_score']
+            except Exception:
+                pass
 
 
 class AlphaMinerDaemon:

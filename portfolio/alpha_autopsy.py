@@ -51,11 +51,36 @@ class AlphaAutopsyAgent:
         self.client = client or OpenRouterClient()
         self.model = model
         self.history_path = history_path
-        self.autopsy_records: List[AutopsyVerdict] = []
+        self.db_path = "portfolio/alpha_factory.db"
+        self.enable_cache = True
         self._load_history()
 
     def _load_history(self):
-        if os.path.exists(self.history_path):
+        loaded_from_db = False
+        if os.path.exists(self.db_path):
+            try:
+                from portfolio.db_schema import get_autopsies_db
+                records = get_autopsies_db(limit=100, db_path=self.db_path)
+                if records:
+                    self.autopsy_records = [
+                        AutopsyVerdict(
+                            factor_id=r["factor_id"],
+                            formula=r["formula"],
+                            health_status=r["health_status"],
+                            diagnosis=r["diagnosis"],
+                            root_cause=r["root_cause"],
+                            recommendation=r["recommendation"],
+                            confidence_score=float(r["confidence_score"]),
+                            suggested_actions=r.get("suggested_actions", []),
+                            timestamp=r["timestamp"]
+                        )
+                        for r in reversed(records)
+                    ]
+                    loaded_from_db = True
+            except Exception:
+                pass
+
+        if not loaded_from_db and os.path.exists(self.history_path):
             try:
                 with open(self.history_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -64,6 +89,16 @@ class AlphaAutopsyAgent:
                 logger.warning(f"No se pudo cargar historial de autopsias previo: {e}")
 
     def save_history(self):
+        # 1. Guardar en SQLite
+        try:
+            from portfolio.db_schema import init_alpha_factory_db, insert_autopsy_db
+            init_alpha_factory_db(self.db_path)
+            if self.autopsy_records:
+                insert_autopsy_db(asdict(self.autopsy_records[-1]), db_path=self.db_path)
+        except Exception as e:
+            logger.warning(f"Aviso guardando autopsia en SQLite {self.db_path}: {e}")
+
+        # 2. Guardar en JSON (compatibilidad)
         atomic_write_json(self.history_path, [asdict(item) for item in self.autopsy_records])
 
     def conduct_autopsy(
@@ -75,7 +110,23 @@ class AlphaAutopsyAgent:
     ) -> AutopsyVerdict:
         """
         Ejecuta el análisis forense estructurado enviando el reporte a OpenRouter.
+        Aplica Smart Caching para reutilizar dictámenes forenses idénticos (PB-92).
         """
+        # PB-92: Smart Cache Check
+        if self.enable_cache:
+            for existing in reversed(self.autopsy_records):
+                if (
+                    existing.factor_id == factor_id
+                    and existing.health_status == health_report.status.value
+                    and existing.formula == formula
+                ):
+                    logger.info(
+                        f"[Smart Cache Hit] Autopsia previa para '{factor_id}' recuperada de cache (cero coste de API)."
+                    )
+                    if self.history_path and not os.path.exists(self.history_path):
+                        self.save_history()
+                    return existing
+
         metrics = additional_metrics or {}
 
         system_prompt = (

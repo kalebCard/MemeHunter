@@ -23,9 +23,9 @@ def configure_sqlite_wal(conn: sqlite3.Connection, read_only: bool = False) -> N
         # busy_timeout en milisegundos (15 segundos)
         cur.execute("PRAGMA busy_timeout = 15000;")
         cur.execute("PRAGMA foreign_keys = ON;")
+        cur.execute("PRAGMA synchronous = NORMAL;")
         if not read_only:
             cur.execute("PRAGMA journal_mode = WAL;")
-            cur.execute("PRAGMA synchronous = NORMAL;")
         cur.close()
     except Exception as e:
         logger.debug(f"Aviso al configurar pragmas SQLite: {e}")

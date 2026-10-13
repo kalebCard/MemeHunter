@@ -22,8 +22,12 @@ from portfolio.alpha_health_monitor import AlphaHealthMonitor, HealthStatus, Hea
 from portfolio.strategy_incubator import StrategyLifecycleIncubator, StrategyLifecycleStatus, StrategyRecord
 from portfolio.hrp_allocator import HierarchicalRiskParityAllocator
 from portfolio.alpha_autopsy import AlphaAutopsyAgent, AutopsyVerdict
+from portfolio.oos_gating import OOSGatingValidator
 from mining.alpha_daemon import AlphaMinerDaemon, QualityDiversityArchive
 from mining.llm_alpha_generator import LLMAlphaSynthesizer
+from scripts.compile_ensemble_strategy import auto_compile_hook
+from client.freqtrade_client import FreqtradeRestClient
+from client.telemetry_notifier import TelemetryNotifier
 
 
 @dataclass
@@ -56,6 +60,10 @@ class AutonomousPortfolioOrchestrator:
         miner_daemon: Optional[AlphaMinerDaemon] = None,
         autopsy_agent: Optional[AlphaAutopsyAgent] = None,
         llm_synthesizer: Optional[LLMAlphaSynthesizer] = None,
+        gating_validator: Optional[OOSGatingValidator] = None,
+        freqtrade_client: Optional[FreqtradeRestClient] = None,
+        telemetry_notifier: Optional[TelemetryNotifier] = None,
+        auto_compile_on_change: bool = True,
         target_portfolio_sharpe: float = 2.50,
         max_cycles: int = 10,
         max_budget_usd: float = 1.00
@@ -65,6 +73,10 @@ class AutonomousPortfolioOrchestrator:
         self.miner_daemon = miner_daemon
         self.autopsy_agent = autopsy_agent
         self.llm_synthesizer = llm_synthesizer
+        self.gating_validator = gating_validator or OOSGatingValidator()
+        self.freqtrade_client = freqtrade_client or FreqtradeRestClient()
+        self.telemetry_notifier = telemetry_notifier or TelemetryNotifier()
+        self.auto_compile_on_change = auto_compile_on_change
         
         # Parámetros de Meta y Límites Cuantitativos
         self.target_sharpe = float(os.getenv("AUTONOMOUS_TARGET_SHARPE", str(target_portfolio_sharpe)))
@@ -127,10 +139,28 @@ class AutonomousPortfolioOrchestrator:
                     trigger_reason = "Regime shift detectado por KS-Test"
 
                 elif rec.status == StrategyLifecycleStatus.SANDBOX and hr.status == HealthStatus.HEALTHY:
-                    if hr.rolling_ic >= 0.05 and hr.ic_pvalue <= 0.05:
+                    live_sids = [s for s, r in self.incubator.strategies.items() if r.status == StrategyLifecycleStatus.LIVE]
+                    all_trials = [r.backtest_sharpe for r in self.incubator.strategies.values()]
+                    gating_res = self.gating_validator.validate_candidate(
+                        strategy_id=sid,
+                        signal=sig,
+                        forward_returns=forward_returns,
+                        returns_matrix_df=returns_matrix_df,
+                        live_strategy_ids=live_sids,
+                        all_trials_sr=all_trials
+                    )
+                    if gating_res.passed:
                         rec.status = StrategyLifecycleStatus.LIVE
+                        rec.live_sharpe = gating_res.oos_sharpe
                         promoted.append(sid)
-                        actions.append(f"Promoción de {sid} de SANDBOX a LIVE por IC sólido ({hr.rolling_ic:.3f})")
+                        actions.append(
+                            f"✅ PROMOCIÓN OOS APROBADA para {sid} de SANDBOX a LIVE "
+                            f"(OOS Sharpe={gating_res.oos_sharpe:.2f}, PBO={gating_res.pbo:.1%}, MaxCorr={gating_res.max_correlation:.2f})"
+                        )
+                    else:
+                        actions.append(
+                            f"❌ Promoción rechazada para {sid} por Gating OOS: {gating_res.rejection_reason}"
+                        )
 
         # 2. Generación Semántica de Alphas de reemplazo con LLM si hubo decay
         if mining_needed and self.llm_synthesizer is not None and market_df is not None:
@@ -177,13 +207,35 @@ class AutonomousPortfolioOrchestrator:
 
         # 5. Rebalanceo automático de portafolio mediante Paridad Jerárquica de Riesgo (HRP)
         new_weights = self.incubator.rebalance_live_portfolio(returns_matrix_df)
-        actions.append(f"Rebalanceo HRP ejecutado. Estrategias activas ponderadas: {list(new_weights.keys())}")
+        rebal_msg = (
+            f"Rebalanceo HRP ejecutado (Turnover={self.incubator.last_turnover:.1%}). "
+            f"Estrategias activas ponderadas: {list(new_weights.keys())}"
+        )
+        if not self.incubator.last_rebalance_executed:
+            rebal_msg += " [Banda muerta < 15%: pesos preservados para evitar comisiones]"
+        actions.append(rebal_msg)
+
+        # Persistir estado actualizado en SQLite WAL y JSON
+        self.incubator.save_state()
+
+        # PB-96 & PB-97: Auto-compilación de estrategia Freqtrade y Hot-Reload en vivo
+        if (len(promoted) > 0 or len(quarantined) > 0 or self.incubator.last_rebalance_executed) and self.auto_compile_on_change:
+            try:
+                compiled_path = auto_compile_hook()
+                actions.append(f"🛠️ Auto-Compilador: Estrategia MemeHunter_MinedEnsemble regenerada en {compiled_path}")
+                if self.freqtrade_client:
+                    reload_res = self.freqtrade_client.reload_config()
+                    if reload_res.get("reloaded"):
+                        actions.append("⚡ Hot-Reload Freqtrade: Estrategia y config recargadas en vivo con éxito.")
+                    else:
+                        actions.append(f"ℹ️ Hot-Reload Freqtrade: {reload_res.get('status')} ({reload_res.get('error', 'ok')})")
+            except Exception as e:
+                actions.append(f"⚠️ Error en hook de auto-compilación: {e}")
 
         # 6. Evaluación de Meta Cuantitativa (Target Portfolio Sharpe) y Control de Coste
         self.completed_cycles += 1
         
         # Estimar costo del ciclo: DeepSeek-V3 (~$0.27/M tok) + DeepSeek-R1 (~$0.55/M tok)
-        # 1 ciclo promedio consume ~2,500 tokens si hay autopsia y síntesis
         tokens_this_cycle = 0
         if len(autopsies) > 0:
             tokens_this_cycle += 1500 * len(autopsies)
@@ -209,7 +261,7 @@ class AutonomousPortfolioOrchestrator:
         if self.accumulated_cost_usd >= self.max_budget_usd:
             actions.append(f"🛑 LÍMITE DE PRESUPUESTO ALCANZADO (${self.accumulated_cost_usd:.4f} >= ${self.max_budget_usd:.2f}). Bloqueando llamadas LLM adicionales.")
 
-        return SelfHealingCycleReport(
+        report = SelfHealingCycleReport(
             cycle_timestamp=datetime.now(timezone.utc).isoformat(),
             actions_taken=actions,
             health_reports=health_reports,
@@ -223,3 +275,22 @@ class AutonomousPortfolioOrchestrator:
             estimated_cycle_cost_usd=cycle_cost_usd,
             accumulated_cost_usd=self.accumulated_cost_usd
         )
+
+        # PB-98: Despacho de telemetría y persistencia histórica en SQLite WAL
+        if self.telemetry_notifier:
+            try:
+                self.telemetry_notifier.notify_cycle_event({
+                    "cycle_timestamp": report.cycle_timestamp,
+                    "actions": report.actions_taken,
+                    "quarantined": report.quarantined_strategies,
+                    "promoted": report.promoted_strategies,
+                    "new_weights": report.new_weights,
+                    "goal_reached": report.goal_reached,
+                    "estimated_cycle_cost_usd": report.estimated_cycle_cost_usd,
+                    "accumulated_cost_usd": report.accumulated_cost_usd,
+                    "active_strategies": len([s for s, r in self.incubator.strategies.items() if r.status == StrategyLifecycleStatus.LIVE])
+                })
+            except Exception as e:
+                actions.append(f"⚠️ Error en despacho de telemetría: {e}")
+
+        return report

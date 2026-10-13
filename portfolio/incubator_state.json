@@ -1,87 +1,32 @@
 {
-  "ALPHA_001": {
-    "strategy_id": "ALPHA_001",
-    "name": "Mined_ALPHA_001",
-    "status": "LIVE",
-    "target_capital_weight": 0.25,
-    "backtest_sharpe": -3.349155061553372,
-    "live_sharpe": 0.0,
-    "days_in_stage": 0,
-    "decay_zscore": 0.0,
-    "last_audit_date": "2026-10-11"
-  },
-  "ALPHA_002": {
-    "strategy_id": "ALPHA_002",
-    "name": "Mined_ALPHA_002",
-    "status": "LIVE",
-    "target_capital_weight": 0.2499999987543191,
-    "backtest_sharpe": 1.6578432740490234,
-    "live_sharpe": 0.0,
-    "days_in_stage": 0,
-    "decay_zscore": 0.0,
-    "last_audit_date": "2026-10-11"
-  },
-  "ALPHA_004": {
-    "strategy_id": "ALPHA_004",
-    "name": "Mined_ALPHA_004",
-    "status": "LIVE",
-    "target_capital_weight": 0.5000000012456809,
-    "backtest_sharpe": -5.729484467950397,
-    "live_sharpe": 0.0,
-    "days_in_stage": 0,
-    "decay_zscore": 0.0,
-    "last_audit_date": "2026-10-11"
-  },
-  "ALPHA_003": {
-    "strategy_id": "ALPHA_003",
-    "name": "Mined_ALPHA_003",
+  "ALPHA_MOM_01": {
+    "strategy_id": "ALPHA_MOM_01",
+    "name": "ts_rank(close, 14)",
     "status": "ALPHA_DECAY",
     "target_capital_weight": 0.0,
-    "backtest_sharpe": 9.196783727860907,
-    "live_sharpe": 0.0,
-    "days_in_stage": 0,
-    "decay_zscore": 0.0,
-    "last_audit_date": "2026-10-11"
-  },
-  "LLM_LLM_ALPHA_01": {
-    "strategy_id": "LLM_LLM_ALPHA_01",
-    "name": "ts_rank((volume / (vwap + 1e-6)), 14)",
-    "status": "SANDBOX",
-    "target_capital_weight": 0.0,
-    "backtest_sharpe": -6.238633286914826,
+    "backtest_sharpe": 2.1,
     "live_sharpe": 0.0,
     "days_in_stage": 0,
     "decay_zscore": 0.0,
     "last_audit_date": "2026-10-12"
   },
-  "LLM_LLM_ALPHA_03": {
-    "strategy_id": "LLM_LLM_ALPHA_03",
-    "name": "ts_decay_linear(returns, 5) * ts_rank(volume, 10)",
-    "status": "SANDBOX",
+  "ALPHA_VOL_02": {
+    "strategy_id": "ALPHA_VOL_02",
+    "name": "ts_zscore((high - low), 10) * rvol",
+    "status": "ALPHA_DECAY",
     "target_capital_weight": 0.0,
-    "backtest_sharpe": -9.94316086098283,
+    "backtest_sharpe": 1.85,
     "live_sharpe": 0.0,
     "days_in_stage": 0,
     "decay_zscore": 0.0,
     "last_audit_date": "2026-10-12"
   },
-  "ARCHIVE_LLM_ALPHA_03": {
-    "strategy_id": "ARCHIVE_LLM_ALPHA_03",
-    "name": "Evolved_ts_decay_linear(returns, ",
+  "ALPHA_CAND_03": {
+    "strategy_id": "ALPHA_CAND_03",
+    "name": "ts_decay(close, 10)",
     "status": "ALPHA_DECAY",
     "target_capital_weight": 0.0,
-    "backtest_sharpe": -11.087046819920293,
-    "live_sharpe": 0.0,
-    "days_in_stage": 0,
-    "decay_zscore": 0.0,
-    "last_audit_date": "2026-10-12"
-  },
-  "STUDIO_1000PEPE_1791827708": {
-    "strategy_id": "STUDIO_1000PEPE_1791827708",
-    "name": "ts_decay_linear(returns, 5) * ts_rank(volume, 10)",
-    "status": "ALPHA_DECAY",
-    "target_capital_weight": 0.0,
-    "backtest_sharpe": 4.55,
+    "backtest_sharpe": 1.5,
     "live_sharpe": 0.0,
     "days_in_stage": 0,
     "decay_zscore": 0.0,

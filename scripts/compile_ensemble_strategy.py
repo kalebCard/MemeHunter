@@ -15,7 +15,7 @@ dimensionamiento de apuestas por HRP, salidas a mercado y compatibilidad Barbell
 import os
 import sys
 import json
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 
 def compile_ast_formula_to_python(formula_str: str) -> str:
@@ -136,6 +136,12 @@ class MemeHunter_MinedEnsemble(IStrategy):
         def ts_delta(s: pd.Series, w: int) -> pd.Series:
             return (s - s.shift(w)).fillna(0.0)
 
+        def ts_rank(s: pd.Series, w: int) -> pd.Series:
+            return s.rolling(w, min_periods=1).apply(lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False).fillna(0.5)
+
+        def ts_delay(s: pd.Series, w: int) -> pd.Series:
+            return s.shift(w).fillna(s)
+
         # 3. Evaluación Dinámica de cada Factor Minado Activo
         composite_score = pd.Series(0.0, index=dataframe.index)
 
@@ -204,41 +210,83 @@ class MemeHunter_MinedEnsemble(IStrategy):
 def generate_ensemble_strategy_file(
     factor_library_path: str = "mining/factor_library.json",
     incubator_state_path: str = "portfolio/incubator_state.json",
+    db_path: Optional[str] = "portfolio/alpha_factory.db",
     output_strategy_path: str = "user_data/strategies/MemeHunter_MinedEnsemble.py"
 ) -> str:
-    """Lee los artefactos de la minería y compila la estrategia Python ejecutable."""
-    if not os.path.exists(factor_library_path) or not os.path.exists(incubator_state_path):
-        raise FileNotFoundError("Artefactos de minería o incubadora no encontrados.")
+    """
+    PB-96: Lee los artefactos de la minería o la base de datos SQLite WAL
+    y compila la estrategia ejecutable por Freqtrade (MemeHunter_MinedEnsemble.py).
+    """
+    factors_data = []
+    if os.path.exists(factor_library_path):
+        try:
+            with open(factor_library_path, 'r', encoding='utf-8') as f:
+                factors_data = json.load(f)
+        except Exception:
+            factors_data = []
 
-    with open(factor_library_path, 'r', encoding='utf-8') as f:
-        factors_data = json.load(f)
-    with open(incubator_state_path, 'r', encoding='utf-8') as f:
-        incubator_data = json.load(f)
+    live_factors: Dict[str, float] = {}
+    formula_map: Dict[str, str] = {f["factor_id"]: f["formula"] for f in factors_data}
 
-    # Identificar factores en estado LIVE
-    live_factors = {}
-    for fid, rec in incubator_data.items():
-        if rec.get("status") == "LIVE" and rec.get("target_capital_weight", 0.0) > 0.0:
-            live_factors[fid] = rec["target_capital_weight"]
+    # 1. Intentar cargar desde SQLite WAL como fuente de verdad
+    if db_path and os.path.exists(db_path):
+        try:
+            from portfolio.db_schema import get_all_strategies_db
+            records = get_all_strategies_db(db_path)
+            for r in records:
+                formula_map[r["strategy_id"]] = r["name"]
+                if r.get("status") == "LIVE" and float(r.get("target_capital_weight", 0.0)) > 0.0:
+                    live_factors[r["strategy_id"]] = float(r["target_capital_weight"])
+        except Exception:
+            pass
 
-    # Si no hay factores marcados LIVE, tomar los 2 con mejor Sharpe
+    # 2. Fallback a incubator_state.json si la DB no arrojó factores
+    if not live_factors and os.path.exists(incubator_state_path):
+        try:
+            with open(incubator_state_path, 'r', encoding='utf-8') as f:
+                incubator_data = json.load(f)
+            for fid, rec in incubator_data.items():
+                if rec.get("status") == "LIVE" and float(rec.get("target_capital_weight", 0.0)) > 0.0:
+                    live_factors[fid] = float(rec["target_capital_weight"])
+                    if "name" in rec:
+                        formula_map[fid] = rec["name"]
+        except Exception:
+            pass
+
+    # 3. Si no hay factores marcados LIVE, tomar los 2 con mejor Sharpe
     if not live_factors:
-        for f in sorted(factors_data, key=lambda x: x.get("sharpe_proxy", 0), reverse=True)[:2]:
-            live_factors[f["factor_id"]] = 0.50
+        if factors_data:
+            for f in sorted(factors_data, key=lambda x: x.get("sharpe_proxy", 0), reverse=True)[:2]:
+                live_factors[f["factor_id"]] = 0.50
+        else:
+            live_factors["ALPHA_DEFAULT_01"] = 0.50
+            live_factors["ALPHA_DEFAULT_02"] = 0.50
+            formula_map["ALPHA_DEFAULT_01"] = "ts_rank(close, 14)"
+            formula_map["ALPHA_DEFAULT_02"] = "ts_zscore((high - low), 10)"
 
-    # Construir mapa de fórmulas
-    formula_map = {f["factor_id"]: f["formula"] for f in factors_data}
+    def _is_valid_syntax(code: str) -> bool:
+        try:
+            import ast
+            ast.parse(code)
+            return True
+        except Exception:
+            return False
 
     # Generar bloques de código de cálculo para cada factor
     calc_lines = []
     for fid, weight in live_factors.items():
-        raw_formula = formula_map.get(fid, "dataframe['close']")
+        raw_formula = formula_map.get(fid, "")
+        if not _is_valid_syntax(raw_formula):
+            raw_formula = next((f["formula"] for f in factors_data if f["factor_id"] == fid), "close")
+
         py_formula = compile_ast_formula_to_python(raw_formula)
         # Adaptar referencias de columnas a dataframe['col']
         for col in ['open', 'high', 'low', 'close', 'volume', 'returns', 'hl_spread', 'vwap', 'rvol']:
-            # Reemplazar identificadores independientes
             import re
             py_formula = re.sub(rf'\b{col}\b', f"dataframe['{col}']", py_formula)
+
+        if not _is_valid_syntax(py_formula):
+            py_formula = "dataframe['close'].pct_change().fillna(0.0)"
 
         calc_lines.append(f"        # Factor {fid} (Peso HRP: {weight:.4f})")
         calc_lines.append(f"        f_val_{fid} = ({py_formula})")
@@ -259,6 +307,17 @@ def generate_ensemble_strategy_file(
         f.write(rendered_strategy)
 
     return output_strategy_path
+
+
+def auto_compile_hook(
+    db_path: str = "portfolio/alpha_factory.db",
+    output_strategy_path: str = "user_data/strategies/MemeHunter_MinedEnsemble.py"
+) -> str:
+    """Hook de compilación automática invocado tras promociones o rebalanceos."""
+    return generate_ensemble_strategy_file(
+        db_path=db_path,
+        output_strategy_path=output_strategy_path
+    )
 
 
 if __name__ == "__main__":

@@ -75,6 +75,7 @@ class TokenBucketRateLimiter:
 
 
 rate_limiter = TokenBucketRateLimiter(capacity=30, refill_rate_per_sec=2.0)
+loop_execution_lock = threading.Lock()
 
 
 def resolve_and_validate_token(enforce_production: bool = False) -> str:
@@ -176,6 +177,8 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             self._handle_get_sentinel_status()
         elif self.path == "/api/llm/telemetry":
             self._handle_get_llm_telemetry()
+        elif self.path in ("/api/loop-status", "/api/loop_status"):
+            self._handle_loop_status()
         else:
             return super().do_GET()
 
@@ -378,23 +381,39 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         trades = get_live_trades_from_db()
         self._send_json({"success": True, "data": trades})
 
-    def _handle_trigger_loop(self):
-        """Ejecuta un ciclo autónomo de auto-diagnóstico en vivo."""
-        logger.info("Disparando ciclo de orquestación autónomo desde el Cockpit UI...")
-        try:
-            import numpy as np
-            import pandas as pd
-            dates = pd.date_range("2026-03-01", periods=60, freq="15min")
-            ret = np.random.normal(0.0005, 0.015, 60)
-            sig_ok = ret * 0.8 + np.random.normal(0, 0.002, 60)
-            sig_bad = np.random.normal(0, 1.0, 60)
+    def _handle_loop_status(self):
+        """Retorna el estado de ejecución y telemetría del bucle de auto-mejora (PB-91)."""
+        db_path = os.path.join(BASE_DIR, "portfolio", "alpha_factory.db")
+        from portfolio.db_schema import get_cycle_history_db
+        recent_cycles = get_cycle_history_db(limit=5, db_path=db_path)
+        self._send_json({
+            "status": "success",
+            "is_busy": loop_execution_lock.locked(),
+            "recent_cycles": recent_cycles
+        })
 
+    def _handle_trigger_loop(self):
+        """Ejecuta un ciclo autónomo de auto-diagnóstico en vivo con datos reales (PB-90 y PB-91)."""
+        logger.info("Disparando ciclo de orquestación autónomo desde el Cockpit UI...")
+
+        if not loop_execution_lock.acquire(blocking=False):
+            self._send_json({
+                "success": False,
+                "status": "busy",
+                "error": "Un ciclo autónomo ya está ejecutándose en segundo plano. Espere a que culmine."
+            }, status_code=429)
+            return
+
+        try:
             incubator_path = os.path.join(BASE_DIR, "portfolio", "incubator_state.json")
             archive_path = os.path.join(BASE_DIR, "mining", "diversity_archive.json")
             autopsy_path = os.path.join(BASE_DIR, "portfolio", "autopsies.json")
+            db_path = os.path.join(BASE_DIR, "portfolio", "alpha_factory.db")
 
             incubator = StrategyLifecycleIncubator()
-            if os.path.exists(incubator_path):
+            if os.path.exists(db_path):
+                incubator.load_from_db(db_path)
+            elif os.path.exists(incubator_path):
                 incubator.load_state(incubator_path)
             
             # Si no hay estrategias registradas, registrar lote base
@@ -404,7 +423,7 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
                 incubator.register_strategy("ALPHA_DECAY_03", "ts_delay(close, 10)", 1.4, StrategyLifecycleStatus.LIVE)
 
             daemon = AlphaMinerDaemon(archive_path=archive_path)
-            daemon.archive.load_archive(archive_path)
+            daemon.archive.load_archive(archive_path, db_path=db_path)
 
             autopsy_agent = AlphaAutopsyAgent(history_path=autopsy_path)
             llm_synthesizer = LLMAlphaSynthesizer()
@@ -417,35 +436,13 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
                 llm_synthesizer=llm_synthesizer
             )
 
-            # Construir señales con las estrategias vivas en la incubadora
-            sig_dict = {}
-            ret_dict = {}
-            strat_keys = list(incubator.strategies.keys())
-            for idx, sid in enumerate(strat_keys):
-                # Si es una estrategia degradada simular choque, de lo contrario retener señal
-                if "DECAY" in sid or idx == len(strat_keys) - 1:
-                    sig_dict[sid] = sig_bad
-                    ret_dict[sid] = -ret
-                else:
-                    sig_dict[sid] = sig_ok
-                    ret_dict[sid] = ret
-
-            signals_df = pd.DataFrame(sig_dict, index=dates)
-            fwd_ret = pd.Series(ret, index=dates)
-            ret_matrix = pd.DataFrame(ret_dict, index=dates)
-
-            # Crear DataFrame de mercado sintético si no hay streaming activo
-            market_df = pd.DataFrame({
-                'open': np.ones(60) * 10,
-                'high': np.ones(60) * 10.5,
-                'low': np.ones(60) * 9.5,
-                'close': np.ones(60) * 10,
-                'volume': np.random.uniform(500, 2000, 60),
-                'vwap': np.ones(60) * 10,
-                'rvol': np.ones(60),
-                'hl_spread': np.ones(60) * 0.1,
-                'returns': ret
-            }, index=dates)
+            # PB-90: Ingesta de velas y microestructura real de Binance Futures
+            from data_engine.real_market_feed import load_real_market_dataframe, build_signals_and_returns_for_strategies
+            market_df = load_real_market_dataframe(pair="DOGE_USDT_USDT", timeframe="4h", n_bars=150)
+            signals_df, fwd_ret, ret_matrix = build_signals_and_returns_for_strategies(
+                market_df=market_df,
+                strategies=incubator.strategies
+            )
 
             report = orchestrator.process_cycle(
                 signals_df=signals_df,
@@ -454,9 +451,9 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
                 market_df=market_df
             )
 
-            # Persistir estado actualizado de forma atómica
-            incubator.save_state(incubator_path)
-            daemon.archive.save_archive(archive_path)
+            # Persistir estado actualizado en SQLite y JSON
+            incubator.save_state(incubator_path, db_path=db_path)
+            daemon.archive.save_archive(archive_path, db_path=db_path)
 
             # Persistir en historial de ciclos
             history_path = os.path.join(BASE_DIR, "portfolio", "cycle_history.json")
@@ -483,6 +480,8 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             history = history[:25] # Retener últimos 25 ciclos
             try:
                 atomic_write_json(history_path, history)
+                from portfolio.db_schema import record_cycle_history_db
+                record_cycle_history_db(cycle_entry, db_path=db_path)
             except Exception as e:
                 logger.error(f"Error guardando cycle_history: {e}")
 
@@ -501,6 +500,8 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             logger.error(f"Error durante el ciclo autónomo: {e}", exc_info=True)
             self._send_json({"success": False, "error": str(e)}, status_code=500)
+        finally:
+            loop_execution_lock.release()
 
     def _handle_synthesize_alpha(self):
         """Genera nuevos alphas semánticos utilizando OpenRouter."""

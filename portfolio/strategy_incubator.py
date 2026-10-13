@@ -59,6 +59,8 @@ class StrategyLifecycleIncubator:
         self.decay_threshold = decay_sigma_threshold
         self.allocator = HierarchicalRiskParityAllocator()
         self.strategies: Dict[str, StrategyRecord] = {}
+        self.last_turnover: float = 0.0
+        self.last_rebalance_executed: bool = False
 
     def register_strategy(
         self,
@@ -135,10 +137,15 @@ class StrategyLifecycleIncubator:
 
         return rec
 
-    def rebalance_live_portfolio(self, returns_matrix_df: pd.DataFrame) -> Dict[str, float]:
+    def rebalance_live_portfolio(
+        self,
+        returns_matrix_df: pd.DataFrame,
+        turnover_deadband: float = 0.15
+    ) -> Dict[str, float]:
         """
         Calcula la nueva distribución de capital por HRP para las estrategias activas (LIVE).
-        Las estrategias en SANDBOX o RETIRED reciben peso 0.0%.
+        Aplica una banda muerta de turnover (15% por defecto, PB-95) para evitar fricción
+        y comisiones innecesarias en Binance Futures.
         """
         live_strategies = [
             sid for sid, rec in self.strategies.items()
@@ -149,35 +156,78 @@ class StrategyLifecycleIncubator:
             # Si no hay vivas, todo el peso se mantiene en reserva
             for rec in self.strategies.values():
                 rec.target_capital_weight = 0.0
+            self.last_turnover = 0.0
+            self.last_rebalance_executed = False
             return {}
 
         sub_df = returns_matrix_df[live_strategies]
-        weights = self.allocator.allocate_weights(sub_df)
+        suggested_weights = self.allocator.allocate_weights(sub_df)
 
+        # PB-95: Banda Muerta de Rebalanceo y Restricción de Turnover
+        current_weights = {sid: self.strategies[sid].target_capital_weight for sid in self.strategies}
+        all_sids = set(current_weights.keys()).union(suggested_weights.keys())
+        total_turnover = 0.5 * sum(
+            abs(suggested_weights.get(sid, 0.0) - current_weights.get(sid, 0.0))
+            for sid in all_sids
+        )
+        self.last_turnover = float(total_turnover)
+
+        # Si ya había una asignación previa distribuida y el cambio es menor a la banda muerta:
+        has_prior_allocation = sum(current_weights.get(sid, 0.0) for sid in live_strategies) > 0.01
+
+        if has_prior_allocation and total_turnover < turnover_deadband:
+            # Regla de no-intervención: Preservar pesos vigentes (renormalizados entre las vivas)
+            live_weight_sum = sum(self.strategies[sid].target_capital_weight for sid in live_strategies)
+            norm_weights: Dict[str, float] = {}
+            if live_weight_sum > 1e-4:
+                for sid in live_strategies:
+                    norm_w = self.strategies[sid].target_capital_weight / live_weight_sum
+                    norm_weights[sid] = float(norm_w)
+                    self.strategies[sid].target_capital_weight = float(norm_w)
+            else:
+                norm_weights = suggested_weights
+                for sid in self.strategies:
+                    self.strategies[sid].target_capital_weight = suggested_weights.get(sid, 0.0)
+
+            # Poner en 0 las estrategias no vivas
+            for sid in self.strategies:
+                if sid not in live_strategies:
+                    self.strategies[sid].target_capital_weight = 0.0
+
+            self.last_rebalance_executed = False
+            return norm_weights
+
+        # Turnover significativo o primera asignación: Aplicar nuevos pesos sugeridos por HRP
         for sid in self.strategies:
-            if sid in weights:
-                self.strategies[sid].target_capital_weight = weights[sid]
+            if sid in suggested_weights:
+                self.strategies[sid].target_capital_weight = suggested_weights[sid]
             else:
                 self.strategies[sid].target_capital_weight = 0.0
 
-        return weights
+        self.last_rebalance_executed = True
+        return suggested_weights
 
-    def save_state(self, filepath: str = "portfolio/incubator_state.json") -> None:
-        """Persiste el estado de la incubadora en formato JSON estructurado de forma atómica."""
-        data = {sid: asdict(rec) for sid, rec in self.strategies.items()}
-        # Convertir enum a string
-        for k, v in data.items():
-            v['status'] = v['status'].value if hasattr(v['status'], 'value') else str(v['status'])
-        atomic_write_json(filepath, data)
-
-    def load_state(self, filepath: str = "portfolio/incubator_state.json") -> None:
-        """Carga el estado de la incubadora desde disco si existe."""
-        if not os.path.exists(filepath):
-            return
+    def save_to_db(self, db_path: str = "portfolio/alpha_factory.db") -> None:
+        """Persiste todas las estrategias en la base de datos SQLite WAL de forma atómica."""
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            for sid, item in data.items():
+            from portfolio.db_schema import init_alpha_factory_db, upsert_strategy_db
+            init_alpha_factory_db(db_path)
+            for sid, rec in self.strategies.items():
+                upsert_strategy_db(asdict(rec), db_path=db_path)
+        except Exception as e:
+            logger = logging.getLogger("StrategyLifecycleIncubator")
+            logger.warning(f"Error al guardar estado en SQLite {db_path}: {e}")
+
+    def load_from_db(self, db_path: str = "portfolio/alpha_factory.db") -> bool:
+        """Carga el estado de las estrategias desde la base de datos SQLite WAL."""
+        if not os.path.exists(db_path):
+            return False
+        try:
+            from portfolio.db_schema import get_all_strategies_db
+            records = get_all_strategies_db(db_path)
+            if not records:
+                return False
+            for item in records:
                 status_str = item.get("status", "SANDBOX")
                 try:
                     status = StrategyLifecycleStatus(status_str)
@@ -194,6 +244,52 @@ class StrategyLifecycleIncubator:
                     decay_zscore=float(item.get("decay_zscore", 0.0)),
                     last_audit_date=item.get("last_audit_date", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
                 )
-                self.strategies[sid] = rec
-        except Exception as e:
-            pass
+                self.strategies[item["strategy_id"]] = rec
+            return True
+        except Exception:
+            return False
+
+    def save_state(self, filepath: str = "portfolio/incubator_state.json", db_path: Optional[str] = "portfolio/alpha_factory.db") -> None:
+        """
+        Persiste el estado de la incubadora tanto en SQLite WAL (primario)
+        como en JSON atómico (compatibilidad hacia atrás).
+        """
+        if db_path:
+            self.save_to_db(db_path)
+
+        if filepath:
+            data = {sid: asdict(rec) for sid, rec in self.strategies.items()}
+            for k, v in data.items():
+                v['status'] = v['status'].value if hasattr(v['status'], 'value') else str(v['status'])
+            atomic_write_json(filepath, data)
+
+    def load_state(self, filepath: str = "portfolio/incubator_state.json", db_path: Optional[str] = "portfolio/alpha_factory.db") -> None:
+        """Carga el estado desde SQLite si existe; si no, recurre al archivo JSON."""
+        loaded_from_db = False
+        if db_path and os.path.exists(db_path):
+            loaded_from_db = self.load_from_db(db_path)
+
+        if not loaded_from_db and filepath and os.path.exists(filepath):
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                for sid, item in data.items():
+                    status_str = item.get("status", "SANDBOX")
+                    try:
+                        status = StrategyLifecycleStatus(status_str)
+                    except ValueError:
+                        status = StrategyLifecycleStatus.SANDBOX
+                    rec = StrategyRecord(
+                        strategy_id=item["strategy_id"],
+                        name=item["name"],
+                        status=status,
+                        target_capital_weight=float(item.get("target_capital_weight", 0.0)),
+                        backtest_sharpe=float(item.get("backtest_sharpe", 0.0)),
+                        live_sharpe=float(item.get("live_sharpe", 0.0)),
+                        days_in_stage=int(item.get("days_in_stage", 0)),
+                        decay_zscore=float(item.get("decay_zscore", 0.0)),
+                        last_audit_date=item.get("last_audit_date", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+                    )
+                    self.strategies[sid] = rec
+            except Exception:
+                pass
