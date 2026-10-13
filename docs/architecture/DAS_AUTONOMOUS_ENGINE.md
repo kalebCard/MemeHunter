@@ -2,61 +2,74 @@
 id: DAS-AUTONOMOUS-001
 title: Documento de Arquitectura de Software - Motor Autónomo Auto-Evolutivo & Cockpit IA
 category: architecture
-version: 7.0
+version: 7.3
 status: ACTIVE
-last_updated: 2026-10-11
+last_updated: 2026-10-12
 author: Quantitative Core & Systems Architecture Team
 ---
 
-# 🌌 DAS: Motor Cuantitativo Auto-Evolutivo & Cockpit Cognitivo IA (v7.0)
+# 🌌 DAS: Motor Cuantitativo Auto-Evolutivo & Cockpit Cognitivo IA (v7.3)
 
 ## 1. Resumen Ejecutivo y Visión Arquitectónica
 
-El sistema **Meme Hunter v7.0** ha evolucionado de un framework de backtesting y ejecución por lotes a un **organismo algorítmico de bucle cerrado (Closed-Loop Autonomous Alpha Engine)**. El sistema es capaz de:
-1. **Auto-observar** su propio rendimiento y microestructura en tiempo real sobre datos en vivo de Binance.
+El sistema **Meme Hunter v7.3** ha evolucionado de un framework de backtesting y ejecución por lotes a un **organismo algorítmico de bucle cerrado (Closed-Loop Autonomous Alpha Engine)** con persistencia transaccional SQLite WAL y enlace de producción bidireccional. El sistema es capaz de:
+1. **Auto-observar** su propio rendimiento y microestructura en tiempo real sobre datos en vivo sincronizados continuamente desde Binance Futures (`auto_data_sync.py`).
 2. **Detectar fatiga de señal (*Alpha Decay*)** y rupturas de régimen mediante algoritmos CUSUM y pruebas de Kolmogorov-Smirnov.
-3. **Aislar y realizar autopsias cognitivas** de factores degradados mediante modelos de razonamiento profundo en OpenRouter (DeepSeek-R1 / Claude 3.5 Sonnet).
+3. **Aislar y realizar autopsias cognitivas** de factores degradados mediante modelos de razonamiento profundo en OpenRouter (DeepSeek-R1 / Claude 3.5 Sonnet) con caché inteligente de autopsias.
 4. **Sintetizar hipótesis semánticas de microestructura** validadas con un compilador AST seguro (*Zero Eval*).
-5. **Rebalancear capital dinámicamente** mediante Paridad Jerárquica de Riesgo (HRP) aislando factores defectuosos.
-6. **Ofrecer observabilidad visual completa** a través de un Dashboard Web (Cockpit) con KPIs, gráficos y consola de eventos.
+5. **Gestionar concurrencia sin bloqueos** a través de una base de datos relacional transaccional SQLite WAL (`alpha_factory.db`) con pool de conexiones multihilo (`db_pool.py`).
+6. **Filtrar alfas mediante compuertas rigurosas fuera de muestra (OOS Hard-Gating)** exigiendo $PBO < 15\%$, $DSR \ge 95\%$, correlación cruzada $< 0.40$ y zona muerta de turnover de 15%.
+7. **Compilar automáticamente ensambles bidireccionales (Long & Short)** para Freqtrade (`scripts/compile_ensemble_strategy.py`) con confirmación de momentum rápido.
+8. **Rebalancear capital dinámicamente** mediante Paridad Jerárquica de Riesgo (HRP) aislando factores defectuosos.
+9. **Ofrecer observabilidad visual completa** a través de un Dashboard Web (Cockpit) con KPIs, gráficos y consola de eventos.
 
 ---
 
-## 2. Diagrama del Bucle Cerrado Cognitivo (Closed-Loop Architecture)
+## 2. Diagrama del Bucle Cerrado Cognitivo (Closed-Loop Architecture v7.3)
 
 ```mermaid
 graph TD
-    subgraph Ingesta_RealTime [1. Ingesta en Tiempo Real]
-        BINANCE["Binance Spot/Futures API"] --> LFEED["LiveMarketFeed<br/>(ccxt polling/stream)"]
+    subgraph Ingesta_RealTime [1. Ingesta y Sincronización Continua]
+        BINANCE["Binance Futures API"] --> ASYNC["auto_data_sync.py<br/>(9 pares perpetuos Feather 4H)"]
+        BINANCE --> LFEED["LiveMarketFeed<br/>(ccxt polling/stream)"]
+        ASYNC --> RFEED["real_market_feed.py<br/>(Penalización Taker 0.05% + Spread)"]
         LFEED --> DBARS["InformationBarsGenerator<br/>(Dollar Bars Notional $500k)"]
     end
 
     subgraph Observabilidad_Salud [2. Motor de Diagnóstico & Salud]
-        DBARS --> MON["AlphaHealthMonitor"]
+        RFEED --> MON["AlphaHealthMonitor"]
+        DBARS --> MON
         MON -->|Spearman Correlation| IC["Rolling IC & IC_IR"]
         MON -->|Page-Hinkley| CUSUM["CUSUM Structural Break"]
         MON -->|Two-Sample KS| DRIFT["Data Drift KS-Test"]
     end
 
     subgraph Cognicion_IA [3. Cerebro Cognitivo OpenRouter]
-        MON -->|Alerta WARNING_DECAY| AUTOPSY["AlphaAutopsyAgent<br/>(DeepSeek-R1 / Claude 3.5)"]
+        MON -->|Alerta WARNING_DECAY| AUTOPSY["AlphaAutopsyAgent<br/>(DeepSeek-R1 + Smart Cache)"]
         AUTOPSY -->|Directivas de Exclusión| SYNTH["LLMAlphaSynthesizer<br/>(DeepSeek-V3 / Qwen 2.5 Coder)"]
         SYNTH --> PARSER["FormulaASTParser<br/>(Compilador Seguro Zero-Eval)"]
     end
 
-    subgraph Mineria_Diversidad [4. Archivo de Diversidad & Minería 24/7]
+    subgraph Fabrica_Concurrente [4. Fábrica de Alphas SQLite WAL]
         PARSER --> QD["QualityDiversityArchive<br/>(MAP-Elites 6 Nichos)"]
         DAEMON["AlphaMinerDaemon 24/7<br/>(NSGA-II)"] --> QD
+        QD --> DBPOOL["SQLite WAL Pool (alpha_factory.db)<br/>(db_pool.py + db_schema.py)"]
     end
 
-    subgraph Incubadora_Capital [5. Ciclo de Vida & Asignación HRP]
-        QD -->|Inyección Relevo| INCUB["StrategyLifecycleIncubator<br/>(SANDBOX -> LIVE -> ALPHA_DECAY)"]
-        INCUB --> HRP["HierarchicalRiskParityAllocator<br/>(Matriz de Covarianza Cuasi-Diagonal)"]
-        HRP --> ORDERS["Vector de Pesos en Producción"]
+    subgraph Validacion_Gating [5. Compuertas Fuera de Muestra (OOS Gating)]
+        DBPOOL --> GATING["OOSGatingEngine (oos_gating.py)<br/>(PBO < 15%, DSR >= 95%, Corr < 0.40)"]
+        GATING --> INCUB["StrategyLifecycleIncubator<br/>(SANDBOX -> LIVE -> ALPHA_DECAY)"]
+        INCUB --> HRP["HierarchicalRiskParityAllocator<br/>(Turnover Deadband 15%)"]
     end
 
-    subgraph UI_Cockpit [6. Cockpit Visual de Monitoreo]
-        ORDERS --> DASH["Dashboard Server (Puerto 8088)<br/>(ThreadingHTTPServer, Auth Token, Chart.js)"]
+    subgraph Ejecucion_Produccion [6. Enlace de Ejecución y Hot-Reload]
+        HRP --> COMPILER["compile_ensemble_strategy.py<br/>(Ensamble Dual-Engine Long & Short)"]
+        COMPILER --> STRAT["MemeHunter_MinedEnsemble.py<br/>(user_data/strategies/)"]
+        STRAT --> FTCLIENT["Freqtrade REST Client<br/>(Hot-Reload Puerto 8081)"]
+    end
+
+    subgraph UI_Cockpit [7. Cockpit Visual de Monitoreo]
+        DBPOOL --> DASH["Dashboard Server (Puerto 8088)<br/>(ThreadingHTTPServer, Async Lock, Chart.js)"]
     end
 ```
 
@@ -64,10 +77,10 @@ graph TD
 
 ## 3. Módulos y Componentes del Sistema
 
-### 3.1. `data_engine/live_market_feed.py`
-* **Propósito:** Ingesta continua de velas 1m de memecoins (`DOGE/USDT`, `PEPE/USDT`, `SHIB/USDT`) y compresión dinámica a Dollar Bars.
-* **Métricas generadas al vuelo:** `vwap`, `rvol`, `hl_spread`, `returns`.
-* **Concurrencia:** Thread-safe pub/sub con `threading.RLock()` reentrante y despacho de callbacks desacoplado para prevenir condiciones de interbloqueo (*deadlock*).
+### 3.1. `data_engine/live_market_feed.py` & `data_engine/auto_data_sync.py`
+* **`auto_data_sync.py`:** Sincronizador continuo en vivo que descarga de Binance Futures las velas de 4h para 9 memecoins (`DOGE`, `PEPE`, `WIF`, `MEW`, `POPCAT`, `NEIRO`, `BONK`, `FLOKI`, `SHIB`) almacenándolas en `C:/meme_hunter_data/binance/futures/*.feather`.
+* **`live_market_feed.py`:** Ingesta continua de velas 1m y compresión dinámica a Dollar Bars con lock reentrante (`RLock`) desacoplado.
+* **`real_market_feed.py`:** Cargador de datos reales con deducción de fricción microestructural (0.05% comisiones taker + penalización de medio spread).
 
 ### 3.2. `portfolio/alpha_health_monitor.py`
 * **CUSUMDetector:** Algoritmo acumulativo de Page-Hinkley ($h = 4.0\sigma, k = 0.5\sigma$) para detección temprana de saltos de volatilidad o quiebres estructurales.
@@ -80,18 +93,29 @@ graph TD
 * **`FormulaASTParser`:** Compilador sintáctico formal basado en el módulo estándar `ast`. Traduce expresiones de texto a nodos ejecutables de `AlphaGrammar` (`FeatureNode`, `BinaryOpNode`, `TimeSeriesOpNode`, `UnaryOpNode`, `ConstantNode`) sin utilizar `eval()`, compatible con Python 3.14.
 
 ### 3.4. `portfolio/alpha_autopsy.py` & `mining/llm_alpha_generator.py`
-* **`AlphaAutopsyAgent`:** Analizador causal que extrae la causa raíz de la degradación y emite recomendaciones de búsqueda con marcas de tiempo dinámicas en UTC.
+* **`AlphaAutopsyAgent`:** Analizador causal que extrae la causa raíz de la degradación y emite recomendaciones de búsqueda con marcas de tiempo dinámicas en UTC y caché inteligente basada en hash de métricas para evitar llamadas redundantes a la API.
 * **`LLMAlphaSynthesizer`:** Diseña fórmulas matemáticas basadas en conceptos de microestructura económica (order flow imbalance, ratio de iliquidez de Amihud, compresión de spread en Dollar Bars).
 
-### 3.5. `mining/alpha_daemon.py` & `portfolio/strategy_incubator.py`
-* **`QualityDiversityArchive`:** Implementación del algoritmo MAP-Elites que categoriza factores en celdas ortogonales (*Momentum-Precio*, *Microestructura-Volumen*, *Volatilidad* $\times$ *Complejidad de Árbol*) y rechaza factores correlacionados ($r > 0.50$).
-* **`StrategyLifecycleIncubator`:** Máquina de estados formal: `SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED` con período de gracia real de 10 días e hidratación atómica transaccional (`os.replace`).
-* **`HierarchicalRiskParityAllocator`:** Distribución de capital inmune a matrices de covarianza singulares mediante clustering jerárquico y regularización de varianzas nulas.
+### 3.5. `portfolio/db_pool.py` & `portfolio/db_schema.py` (Fábrica SQLite WAL)
+* **`DatabasePool`:** Pool de conexiones transaccional thread-safe con modo WAL (`PRAGMA journal_mode=WAL`), `synchronous=NORMAL` y timeout de 30s.
+* **Esquema:** Tablas relacionales indexadas para `strategies`, `performance_snapshots`, `autopsies`, `rebalance_history` y `system_audit_log`.
 
-### 3.6. `dashboard/` (Cockpit Visual Seguro)
+### 3.6. `portfolio/oos_gating.py` & `portfolio/strategy_incubator.py`
+* **`OOSGatingEngine`:** Compuertas cuantitativas obligatorias antes de promover estrategias a `LIVE`:
+  * Probabilidad de Sobreajuste ($PBO < 15\%$).
+  * Deflated Sharpe Ratio ($DSR \ge 95\%$).
+  * Correlación cruzada máxima con alfas vivos ($< 0.40$).
+* **`StrategyLifecycleIncubator`:** Máquina de estados formal (`SANDBOX` $\rightarrow$ `LIVE` $\rightarrow$ `ALPHA_DECAY` $\rightarrow$ `RETIRED`) con zona muerta de rotación (15% turnover deadband).
+* **`HierarchicalRiskParityAllocator`:** Distribución de capital HRP inmune a singularidades de covarianza.
+
+### 3.7. `scripts/compile_ensemble_strategy.py` & `client/freqtrade_client.py`
+* **Compilador Dual-Engine Bidireccional:** Traduce el vector de alfas y pesos HRP a una estrategia de producción nativa de Freqtrade (`MemeHunter_MinedEnsemble.py`) con motores simétricos para `enter_long` y `enter_short`, filtrados por confirmación rápida (EMA 50 / 4h y RSI).
+* **Cliente REST:** Comunicación con el demonio Freqtrade en el puerto 8081 para recarga en caliente (*hot reload*) sin interrupción operativa.
+
+### 3.8. `dashboard/` (Cockpit Visual Seguro)
 * **Arquitectura:** HTML5 semántico + Vanilla CSS Glassmorphism + Vanilla JS reactivo + Chart.js.
-* **Backend:** Servidor REST integrado multihilo (`ThreadingHTTPServer` en `dashboard/server.py`).
-* **Puerto y Seguridad:** Escucha en `http://localhost:8088` (evitando colisión con FreqUI en 8080/8081), validación de autorización con Bearer Token y CORS estricto.
+* **Backend:** Servidor REST multihilo (`ThreadingHTTPServer` en `dashboard/server.py`) con candado asíncrono no-bloqueante para lecturas SQLite concurrentes.
+* **Puerto y Seguridad:** Escucha en `http://localhost:8088`, autorización con Bearer Token y CORS estricto.
 
 ---
 
@@ -120,19 +144,30 @@ El motor autónomo implementa salvaguardas económicas y metas de convergencia p
 
 ## 5. Guía de Ejecución Rápida
 
-### A. Iniciar el Dashboard Visual Seguro
+### A. Sincronizar Datos Reales de Binance Futures
+```bash
+python data_engine/auto_data_sync.py
+```
+
+### B. Iniciar el Dashboard Visual Seguro (Puerto 8088)
 ```bash
 python scripts/start_dashboard.py
 ```
 Abrir en el navegador: [http://localhost:8088](http://localhost:8088).
 
-### B. Iniciar el Bucle Autónomo en Vivo con Binance
+### C. Compilar la Estrategia de Ensamble Bidireccional
+```bash
+python scripts/compile_ensemble_strategy.py
+```
+
+### D. Iniciar el Bucle Autónomo en Vivo con Binance
 ```bash
 python scripts/run_live_alpha_loop.py
 ```
 
-### C. Ejecutar la Suite de Pruebas Automatizadas (Docker)
+### E. Ejecutar la Suite Completa de Pruebas Automatizadas
 ```bash
-docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
+python -m pytest tests -v
 ```
-Resultado Oficial: **110 tests unitarios e integrales pasando al 100% (0 errores)**.
+Resultado Oficial: **151+ tests unitarios e integrales pasando al 100% (0 errores)**.
+

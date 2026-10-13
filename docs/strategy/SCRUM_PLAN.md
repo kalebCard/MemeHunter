@@ -1,24 +1,26 @@
 ---
 id: STRAT-ROADMAP-001
-title: Plan de Desarrollo Scrum y Backlog de Sprints (Meme Hunter v6.0)
+title: Plan de Desarrollo Scrum y Backlog de Sprints (Meme Hunter v7.3)
 category: strategy
-version: 6.0
+version: 7.3
 status: ACTIVE
-last_updated: 2026-10-11
+last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 references:
   - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
   - docs/MANUAL_UNIFICADO_DEL_SISTEMA.md
   - docs/operations/OPERATIONAL_RUNBOOK.md
+  - docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md
+  - docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md
 ---
 
-# 📋 Plan de Desarrollo Scrum: meme_hunter (STRAT-ROADMAP-001)
+# 📋 Plan de Desarrollo Scrum: meme_hunter (STRAT-ROADMAP-001 v7.3)
 
 > **Documento Consolidado:** Para la visión estratégica y matemática unificada del sistema, consultar el [Compendio Maestro de Estrategia (STRAT-MASTER-001)](ESTRATEGIA_MAESTRA_UNIFICADA.md).
 
 Este documento organiza el desarrollo del sistema **meme_hunter** transformado en un **verdadero cazador de memecoins con ventaja asimétrica y modelos cuantitativos de última generación**, superando la dependencia de indicadores tradicionales rezagados.
 
-> **Última actualización:** 11 de octubre de 2026 — Auditoría de estado real y consolidación v6.0 (ver §0).
+> **Última actualización:** 12 de octubre de 2026 — Consolidación v7.3 con Sprints 21 a 29 finalizados y certificados (ver §0 y §3).
 
 ---
 
@@ -424,14 +426,40 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 * **Conclusión del Sprint 20:** La infraestructura del proyecto cuenta con el arsenal cuantitativo más riguroso de la literatura contemporánea, erradicando la trampa de los micro-patrones y blindando la toma de decisiones contra el sesgo de minería de datos.
 ---
 
-### Fase Siguiente: Minería de Alphas, Microestructura L2 y Portafolio Ensemble (Sprints 21 a 24)
-Para llevar el sistema a una fábrica cuantitativa industrial autónoma, se ha formalizado el plan detallado en:
-> 👉 **[Plan Scrum: Minería de Alphas y Backtesting Industrial (Sprints 21 a 24)](PLAN_SCRUM_MINERIA_Y_BACKTESTING.md)** (`STRAT-PLAN-MINING-001`)
+### Sprints 21 a 24: Fábrica de Alphas, Microestructura L2 y Portafolio Ensemble (Completados ✅)
+* **Sprint 21 (Microestructura L2 & Dollar Bars - PB-75 a PB-77):**
+  - Generador de Information-Driven Bars (`dollar_bars.py`) y simulador de deslizamiento Almgren-Chriss (`slippage_engine.py`).
+* **Sprint 22 (Minería Simbólica NSGA-II & AST - PB-78 a PB-80):**
+  - Gramática formal `AlphaGrammar`, compilador seguro AST `FormulaASTParser` y archivo MAP-Elites de calidad-diversidad (`alpha_daemon.py`).
+* **Sprint 23 (Blindaje Anti-Overfitting Industrial - PB-81 a PB-83):**
+  - Motor CPCV purgado y embargado (`cpcv_engine.py`), control FDR Benjamini-Hochberg y cálculo DSR / PBO.
+* **Sprint 24 (Ensamble Dinámico HRP & Gobernanza de Incubación - PB-84 a PB-86):**
+  - Asignador Paridad Jerárquica de Riesgo (`hrp_allocator.py`) e incubadora con máquina de estados (`strategy_incubator.py`).
 
-* **Sprint 21:** Ingesta de Barras de Información (Dollar & Volume Bars) y Simulación de Microestructura L2 (Slippage Almgren-Chriss) (PB-75 a PB-77).
-* **Sprint 22:** Motor Simbólico de Minería de Alphas con Algoritmos Genéticos NSGA-II y Árboles Sintácticos (PB-78 a PB-80).
-* **Sprint 23:** Blindaje Anti-Overfitting con CPCV Industrializado, DSR $> 95\%$ y Control de Falsos Descubrimientos FDR/FWER (PB-81 a PB-83).
-* **Sprint 24:** Ensamble de Portafolio Dinámico con Paridad Jerárquica de Riesgo (HRP) y Gobernanza de Incubación (PB-84 a PB-86).
+---
+
+### Sprints 25 a 28: Hardening del Bucle Autónomo, SQLite WAL y Gating OOS (Completados ✅)
+* **Sprint 25 (Persistencia SQLite WAL Multihilo - PB-87 a PB-89):**
+  - Migración del estado de incubación a base de datos relacional `portfolio/alpha_factory.db` con pool de conexiones transaccional multihilo `DatabasePool` (`db_pool.py`), eliminando bloqueos de concurrencia.
+* **Sprint 26 (Ingesta Real Binance Futures & Smart Cache - PB-90 a PB-92):**
+  - Integración de velas Feather 4H en `data_engine/real_market_feed.py`, candado asíncrono no-bloqueante en `dashboard/server.py` y caché inteligente en `portfolio/alpha_autopsy.py`.
+* **Sprint 27 (Compuertas Fuera de Muestra OOS & Turnover Deadband - PB-93 a PB-95):**
+  - Compuertas obligatorias en `portfolio/oos_gating.py` ($PBO < 15\%$, $DSR \ge 95\%$, $\rho < 0.40$) y zona muerta de turnover del 15% para erradicar el churn de comisiones.
+* **Sprint 28 (Hook de Auto-Compilación Freqtrade & Telemetría - PB-96 a PB-98):**
+  - Hook de compilación automática (`scripts/compile_ensemble_strategy.py`), cliente REST Freqtrade (`client/freqtrade_client.py`) y despachador de telemetría (`client/telemetry_notifier.py`).
+
+---
+
+### Sprint 29: Ensamble Bidireccional (Long/Short), Ingesta Continua y Fricción Realista (Completado ✅)
+* **PB-99 (Ensamble Dual-Engine Long & Short):**
+  - Compilación simétrica de señales para capturar expansiones alcistas parabólicas (`enter_long`) y desinflaciones bajistas (`enter_short`), respaldadas por confirmación rápida (EMA 50 / 4h y RSI).
+* **PB-100 (Sincronizador Continuo en Vivo de Binance Futures):**
+  - Daemon no-bloqueante `data_engine/auto_data_sync.py` que sincroniza periódicamente las 9 memecoins perpetuas más activas a archivos Feather de 4h.
+* **PB-101 (Penalización por Fricción Microestructural y Spread):**
+  - Deducción de comisiones taker (0.05%) y penalización de medio spread en el backtesting vectorial y en el motor de compuertas OOS.
+* **PB-102 (Gatillo Rápido de Momentum Multi-Timeframe):**
+  - Filtro de confirmación de tendencia rápida que evita ejecutar operaciones a contra-tendencia violenta.
+* **Certificación del Sprint 29:** Test suite `tests/test_sprint29_bidirectional_and_sync.py` (4/4 passed) y suite global de 151+ tests pasando al 100%.
 
 ---
 

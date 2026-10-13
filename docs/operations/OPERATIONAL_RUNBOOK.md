@@ -2,15 +2,15 @@
 id: OPS-001
 title: Manual Operativo y Runbook de Producción
 category: operations
-version: 2.0
+version: 7.3
 status: ACTIVE
-last_updated: 2026-10-11
-author: Quantitative DevOps Team
+last_updated: 2026-10-12
+author: Quantitative DevOps & Production Engineering Team
 ---
 
-# 🛠️ Manual Operativo y Runbook de Producción (Ops Runbook)
+# 🛠️ Manual Operativo y Runbook de Producción (Ops Runbook v7.3)
 
-Este documento centraliza los procedimientos de despliegue, monitoreo en vivo, gestión de emergencias y orquestación de la Arquitectura Híbrida Barbell.
+Este documento centraliza los procedimientos de despliegue, monitoreo en vivo, gestión de emergencias, sincronización continua de datos, compilación de estrategias de ensamble y orquestación de la Arquitectura Híbrida Barbell.
 
 ---
 
@@ -40,19 +40,20 @@ El método estándar recomendado para operar el sistema es a través del CLI:
 # 1. Verificar salud del sistema (2 segundos)
 python scripts/meme_cli.py health
 
-# 2. Levantar el motor de futuros en Docker
+# 2. Levantar el motor de futuros en Docker (Puerto 8081)
 python scripts/meme_cli.py futures start
 
 # 3. Ver logs en tiempo real
 python scripts/meme_cli.py futures logs
 
-# 4. Iniciar o verificar el Cockpit Visual
+# 4. Iniciar o verificar el Cockpit Visual (Puerto 8088)
 python scripts/meme_cli.py cockpit
 ```
 
 * **Cockpit Visual Unificado:** [http://localhost:8088](http://localhost:8088)
 * **Dashboard FreqUI Directo:** [http://localhost:8081](http://localhost:8081)
-* **Credenciales por defecto:** configuradas en `user_data/config_futures.json`.
+* **Credenciales por defecto:** configuradas en `user_data/config_futures.json` (Usuario: `admin`, Clave: `MemeHunter2026!`).
+* **Estrategias en Producción:** `MemeHunter_MinedEnsemble` (Ensamble dinámico bidireccional auto-minado) y `MemeHunterFuturesV7_Quantum`.
 
 ---
 
@@ -98,7 +99,7 @@ python scripts/delta_neutral_vault.py --scan
 
 ## 4. 🎛️ Monitoreo Visual con Alpha Cockpit Dashboard
 
-El **Cockpit Dashboard** opera de manera aislada y multihilo en el puerto **8088** para no colisionar con FreqUI (puerto 8080/8081).
+El **Cockpit Dashboard** opera de manera aislada y multihilo en el puerto **8088** para no colisionar con FreqUI (puerto 8081).
 
 ### 4.1 Iniciar el Servidor del Dashboard
 ```powershell
@@ -106,7 +107,7 @@ El **Cockpit Dashboard** opera de manera aislada y multihilo en el puerto **8088
 python scripts/start_dashboard.py
 ```
 * **Acceso Local:** [http://localhost:8088](http://localhost:8088)
-* **Autenticación:** Las llamadas a mutación (`/api/trigger-loop` y `/api/synthesize-alpha`) requieren un token Bearer seguro:
+* **Autenticación:** Las llamadas a mutación (`/api/trigger-loop`, `/api/synthesize-alpha`, `/api/deploy-to-sandbox`) requieren un token Bearer seguro:
   - Token por defecto para desarrollo: `meme_hunter_dev_token_2026`
   - Variable de entorno de producción: `DASHBOARD_API_TOKEN`
 
@@ -161,11 +162,57 @@ Cuando el Sharpe Ponderado del portafolio alcanza o supera `AUTONOMOUS_TARGET_SH
 
 ---
 
-## 6. 📊 Batería de Validación Previa a Producción (CI/CD)
+## 6. 🔄 Operaciones de Datos, Fábrica SQLite WAL y Ensamble (Sprints 25 a 29)
 
-Antes de desplegar cualquier cambio a producción, ejecutar la suite completa de pruebas en el entorno hermético Docker:
+### 6.1 Sincronización Automática en Vivo de Binance Futures
+Para actualizar los datos Feather de las 9 memecoins más activas de futuros sin congelar el sistema:
+```powershell
+# Ejecución directa o programada cada 4 horas
+python data_engine/auto_data_sync.py
+```
+* **Destino:** `C:/meme_hunter_data/binance/futures/*.feather`
+* **Pares sincronizados:** `DOGE`, `PEPE`, `WIF`, `MEW`, `POPCAT`, `NEIRO`, `BONK`, `FLOKI`, `SHIB`.
+
+### 6.2 Compilación del Ensamble Cuantitativo Bidireccional
+Para compilar los alfas aprobados en la fábrica hacia una estrategia de Freqtrade:
+```powershell
+python scripts/compile_ensemble_strategy.py
+```
+* **Salida generada:** `user_data/strategies/MemeHunter_MinedEnsemble.py`.
+* **Características:** Motores simétricos `enter_long` y `enter_short`, confirmación rápida de EMA 50 y RSI, y stop loss calibrado al -5.0%.
+* **Hot-Reload REST:** Si el contenedor Freqtrade está activo en el puerto 8081, el cliente REST (`client/freqtrade_client.py`) recarga la estrategia en vivo sin interrumpir las órdenes abiertas.
+
+### 6.3 Mantenimiento de la Fábrica SQLite WAL (`portfolio/alpha_factory.db`)
+El estado de la incubadora opera en modo SQLite WAL para máxima concurrencia multihilo.
+```powershell
+# Verificar integridad de la base de datos
+python -c "from portfolio.db_pool import DatabasePool; print('Estrategias:', len(DatabasePool.get_instance().get_strategies()))"
+
+# Forzar vaciado de WAL a disco (Checkpoint)
+python -c "from portfolio.db_pool import DatabasePool; DatabasePool.get_instance().execute_write('PRAGMA wal_checkpoint(TRUNCATE);')"
+```
+
+### 6.4 Auditoría de Compuertas Fuera de Muestra (OOS Gating)
+Antes de permitir la entrada de cualquier factor a producción:
+```powershell
+python -c "from portfolio.oos_gating import OOSGatingEngine; engine = OOSGatingEngine(); print('OOS Engine Listo')"
+```
+* **Criterios de paso:** $PBO < 15\%$, $DSR \ge 95\%$, Correlación $< 0.40$.
+
+---
+
+## 7. 📊 Batería de Validación y Certificación Continua (CI/CD)
+
+Antes de desplegar cualquier cambio a producción, ejecutar la suite completa de pruebas:
+```powershell
+python -m pytest tests -v
+```
+
+En entornos con Docker activo:
 ```bash
 docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
 ```
-**Criterio de aceptación obligatorio:** **110/110 tests pasando al 100% (0 errores)**.
+
+**Criterio de aceptación obligatorio:** **151+ tests pasando al 100% (0 errores)**.
+
 

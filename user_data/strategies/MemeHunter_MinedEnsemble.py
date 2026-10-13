@@ -108,25 +108,25 @@ class MemeHunter_MinedEnsemble(IStrategy):
         composite_score = pd.Series(0.0, index=dataframe.index)
 
         # Factor ALPHA_001 (Peso HRP: 0.2500)
-        f_val_ALPHA_001 = (Mined_ALPHA_001)
+        f_val_ALPHA_001 = ((dataframe['open'] + np.sign(-1.00)))
         f_std_ALPHA_001 = float(f_val_ALPHA_001.std()) if float(f_val_ALPHA_001.std()) > 1e-8 else 1.0
         f_norm_ALPHA_001 = (f_val_ALPHA_001 - f_val_ALPHA_001.mean()) / f_std_ALPHA_001
         composite_score += f_norm_ALPHA_001.fillna(0.0) * 0.250000
 
         # Factor ALPHA_002 (Peso HRP: 0.2500)
-        f_val_ALPHA_002 = (Mined_ALPHA_002)
+        f_val_ALPHA_002 = (np.abs((2.00 - dataframe['high'])))
         f_std_ALPHA_002 = float(f_val_ALPHA_002.std()) if float(f_val_ALPHA_002.std()) > 1e-8 else 1.0
         f_norm_ALPHA_002 = (f_val_ALPHA_002 - f_val_ALPHA_002.mean()) / f_std_ALPHA_002
         composite_score += f_norm_ALPHA_002.fillna(0.0) * 0.250000
 
         # Factor ALPHA_004 (Peso HRP: 0.5000)
-        f_val_ALPHA_004 = (Mined_ALPHA_004)
+        f_val_ALPHA_004 = (np.abs(ts_decay_linear(dataframe['vwap'], 10)))
         f_std_ALPHA_004 = float(f_val_ALPHA_004.std()) if float(f_val_ALPHA_004.std()) > 1e-8 else 1.0
         f_norm_ALPHA_004 = (f_val_ALPHA_004 - f_val_ALPHA_004.mean()) / f_std_ALPHA_004
         composite_score += f_norm_ALPHA_004.fillna(0.0) * 0.500000
 
         # Factor STRAT_A (Peso HRP: 1.0000)
-        f_val_STRAT_A = (Alpha_Alpha)
+        f_val_STRAT_A = (dataframe['close'].pct_change().fillna(0.0))
         f_std_STRAT_A = float(f_val_STRAT_A.std()) if float(f_val_STRAT_A.std()) > 1e-8 else 1.0
         f_norm_STRAT_A = (f_val_STRAT_A - f_val_STRAT_A.mean()) / f_std_STRAT_A
         composite_score += f_norm_STRAT_A.fillna(0.0) * 1.000000

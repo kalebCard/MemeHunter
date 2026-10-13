@@ -2,13 +2,13 @@
 id: DOC-INDEX-001
 title: Centro de Documentación y Convenciones del Sistema
 category: index
-version: 7.2
+version: 7.3
 status: ACTIVE
 last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 ---
 
-# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v7.2)
+# 📚 Centro de Documentación y Convenciones del Sistema (Meme Hunter v7.3)
 
 Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y operativa de **Meme Hunter**. Toda la información del proyecto ha sido estandarizada bajo convenciones formales de ingeniería documental (**DocOps**) y el marco pedagógico Diátaxis.
 
@@ -17,7 +17,7 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 ## 🌟 Documento de Referencia Principal
 
 > ### 👉 [📖 Manual Maestro Unificado del Sistema (DOC-MASTER-001)](MANUAL_UNIFICADO_DEL_SISTEMA.md)
-> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con cognición IA, Centro de Control Unificado (Cockpit v7.2) y catálogo de scripts.*
+> *El compendio canónico integral que consolida en un solo documento: visión económica, arquitectura Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura, motor auto-evolutivo con fábrica SQLite WAL, compuertas OOS, ensamble bidireccional Long/Short, cognición IA, Centro de Control Unificado (Cockpit v7.3) y catálogo de scripts.*
 
 ---
 
@@ -25,9 +25,9 @@ Bienvenido al centro oficial de documentación cuantitativa, arquitectónica y o
 
 ```
 docs/
-├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v7.2
+├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌟 Compendio canónico del sistema v7.3
 ├── architecture/
-│   ├── DAS_AUTONOMOUS_ENGINE.md     # 🌌 Arquitectura v7.0: Motor Auto-Evolutivo & Cockpit IA
+│   ├── DAS_AUTONOMOUS_ENGINE.md     # 🌌 Arquitectura v7.3: Motor Auto-Evolutivo, SQLite WAL & Cockpit IA
 │   ├── DAS.md                       # Documento de Arquitectura de Software base (v6.0)
 │   └── decisions/                   # Architecture Decision Records (ADRs)
 │       ├── ADR-001_asymmetric_short_only_bias.md
@@ -35,14 +35,16 @@ docs/
 │       ├── ADR-003_fractional_diff_and_continuous_bet_sizing.md
 │       └── ADR-004_airbag_technical_exit_market_orders.md
 ├── sprints/
-│   ├── SPRINT_PLAN_REMEDIATION_AND_HARDENING.md # 🛡️ Plan Scrum: Hardening, Streaming & DevOps
-│   ├── SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md # 🚀 Sprint 1: Bucle Cerrado & Self-Healing
+│   ├── SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md # ⚡ Sprint 29: Ensamble Bidireccional Long/Short, Sync Binance y Fricción
+│   ├── SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md # 🚀 Sprints 25-28: SQLite WAL, Ingesta Real, Gating OOS y Hot-Reload
+│   ├── SPRINT_PLAN_REMEDIATION_AND_HARDENING.md # 🛡️ Plan Scrum: Hardening, Streaming & DevOps (v7.1)
+│   ├── SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md # 🔄 Sprint 1: Bucle Cerrado & Self-Healing
 │   └── SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md  # 🧠 Sprint 2: Cognición IA con OpenRouter
 ├── strategy/
 │   ├── ESTRATEGIA_MAESTRA_UNIFICADA.md # 🌟 Compendio Maestro de Estrategia (STRAT-MASTER-001)
 │   ├── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # 🚀 Plan Scrum: Minería de Alphas (Sprints 21-24)
 │   ├── HYPOTHESIS.md                # Hipótesis Causal del Edge y Desinflación (STRAT-001)
-│   ├── SCRUM_PLAN.md                # Roadmap Maestro de Sprints (1 a 20)
+│   ├── SCRUM_PLAN.md                # Roadmap Maestro de Sprints (1 a 29)
 │   ├── PLAN_ESCALADO_100_A_1000_USDT.md # Modelo de Crecimiento de Micro-Capital (STRAT-002)
 │   ├── PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md # Especificación del binomio Barbell (STRAT-003)
 │   └── PLAN_DESMITIFICACION_RIESGOS.md # Protocolo de Pruebas de Estrés Anti-Overfitting (STRAT-004)
@@ -52,7 +54,7 @@ docs/
 │   ├── INFORME_FUTUROS_100_USDT.md  # Estudio de Micro-Capital 100 USDT Anti-Freeze
 │   └── PRELIMINARY_REPORT.md        # Auditoría Inicial Spot y Descarte de 1H
 └── operations/
-    └── OPERATIONAL_RUNBOOK.md       # Guía de Despliegue Docker, VPS, Kill-Switch y Bóveda
+    └── OPERATIONAL_RUNBOOK.md       # Guía de Despliegue Docker, VPS, Sync Binance, Gating OOS y Kill-Switch
 ```
 
 ---
@@ -88,7 +90,7 @@ author: [Autor / Equipo]
 ## 📂 Índice Clasificado de Documentos
 
 ### 🏛️ 1. Arquitectura y Decisiones de Diseño
-* **[DAS_AUTONOMOUS_ENGINE.md](architecture/DAS_AUTONOMOUS_ENGINE.md) (Arquitectura v7.0):** Especificación del motor de bucle cerrado, autopsias con OpenRouter, compilador AST y Cockpit multihilo (puerto 8088).
+* **[DAS_AUTONOMOUS_ENGINE.md](architecture/DAS_AUTONOMOUS_ENGINE.md) (Arquitectura v7.3):** Especificación del motor de bucle cerrado, persistencia transaccional SQLite WAL, compuertas OOS, ensamble bidireccional, autopsias con OpenRouter, compilador AST y Cockpit multihilo (puerto 8088).
 * **[DAS.md](architecture/DAS.md) (Arquitectura v6.0):** Especificación completa de la infraestructura Freqtrade, CCXT, Bóveda Delta-Neutral y Machine Learning asimétrico.
 * **[ADR-001: Asymmetric Short-Only Bias](architecture/decisions/ADR-001_asymmetric_short_only_bias.md):** Justificación de la supresión de Longs en memecoins (+63.24% neto).
 * **[ADR-002: Arquitectura Híbrida Barbell](architecture/decisions/ADR-002_hybrid_barbell_cash_and_carry.md):** División entre motor de aceleración agresivo y bóveda Cash & Carry.
@@ -96,24 +98,24 @@ author: [Autor / Equipo]
 * **[ADR-004: Airbag Técnico y Órdenes Market](architecture/decisions/ADR-004_airbag_technical_exit_market_orders.md):** Retención de `exit_signal` y órdenes de mercado forzadas contra el riesgo de no-fill.
 
 ### 🧠 2. Estrategia Cuantitativa y Planificación
-* **[SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md):** 🛡️ Plan Scrum de 4 Sprints para hardening de seguridad en Cockpit, streaming desacoplado y gobernanza económica.
+* **[SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md](sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md):** ⚡ Ensamble Dual-Engine Long/Short, sincronizador Binance Futures y fricción microestructural.
+* **[SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md](sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md):** 🚀 Sprints 25 a 28: SQLite WAL, Ingesta Real Binance, Gating OOS institucional y Hot-reload Freqtrade.
+* **[SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md):** 🛡️ Plan Scrum de Hardening de seguridad en Cockpit, streaming desacoplado y gobernanza económica.
 * **[ESTRATEGIA_MAESTRA_UNIFICADA.md](strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) (STRAT-MASTER-001):** 🌟 Compendio canónico integral que consolida hipótesis, genealogía V1-V7, escalado 10X, arquitectura Barbell y blindaje anti-overfitting.
 * **[HYPOTHESIS.md](strategy/HYPOTHESIS.md) (STRAT-001):** Fundamento económico del alfa en desinflación gravitacional post-pump y quiebre de EMA 200 en 4h.
-* **[SCRUM_PLAN.md](strategy/SCRUM_PLAN.md) (STRAT-ROADMAP-001):** Registro histórico de los Sprints 1 a 20 con el Product Backlog trazable y Definición de Hecho (DoD).
+* **[SCRUM_PLAN.md](strategy/SCRUM_PLAN.md) (STRAT-ROADMAP-001):** Registro histórico y detallado de los Sprints 1 a 29 con el Product Backlog trazable y Definición de Hecho (DoD).
 * **[PLAN_ESCALADO_100_A_1000_USDT.md](strategy/PLAN_ESCALADO_100_A_1000_USDT.md) (STRAT-002):** Hoja de ruta de crecimiento exponencial 10X mediante micro-capital Anti-Freeze y criterio de Half-Kelly.
 * **[PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md](strategy/PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md) (STRAT-003):** Especificación del traspaso mecánico del 60% de beneficios hacia la Bóveda Delta-Neutral al duplicar cuenta.
 * **[PLAN_DESMITIFICACION_RIESGOS.md](strategy/PLAN_DESMITIFICACION_RIESGOS.md) (STRAT-004):** Protocolo de ablación y pruebas no-i.i.d. contra el autoengaño estadístico.
-* **[PLAN_IMPLEMENTACION_V6_APEX.md](strategy/PLAN_IMPLEMENTACION_V6_APEX.md) (STRAT-EXP-001):** Registro post-mortem del experimento que refutó la supresión de salidas técnicas.
 
 ### 📊 3. Informes de Investigación y Auditoría Forense
 * **[INFORME_METRICAS_AVANZADAS_DSR_PBO.md](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md):** Certificación matemática de grado institucional (DSR = 100.0%, PBO = 6.67%, OOS Cross-Asset = +104.27%).
 * **[INFORME_AUDITORIA_FORENSE_RIESGOS.md](reports/INFORME_AUDITORIA_FORENSE_RIESGOS.md):** Desglose empírico de los 215 trades de V5 y desmitificación de la estacionalidad de calendario.
 * **[INFORME_FUTUROS_100_USDT.md](reports/INFORME_FUTUROS_100_USDT.md):** Estudio de micro-capital bajo restricciones reales de Binance ($5 Min Notional).
 * **[PRELIMINARY_REPORT.md](reports/PRELIMINARY_REPORT.md):** Diagnóstico preliminar de Spot y refutación científica del timeframe intradiario de 1H.
-* **[REPORTE_EJECUTIVO_MEME_HUNTER_V4.md](reports/REPORTE_EJECUTIVO_MEME_HUNTER_V4.md):** Resumen ejecutivo orientado a inversores.
 
 ### 🛠️ 4. Operaciones y Producción
-* **[OPERATIONAL_RUNBOOK.md](operations/OPERATIONAL_RUNBOOK.md):** Procedimientos de despliegue Docker, variables `.env`, protocolos del Kill-Switch de 25%, parámetros del motor autónomo y Cockpit en puerto 8088.
+* **[OPERATIONAL_RUNBOOK.md](operations/OPERATIONAL_RUNBOOK.md):** Procedimientos de despliegue Docker, variables `.env`, protocolos del Kill-Switch de 25%, sincronización de Binance, compilación de ensamble, mantenimiento SQLite WAL y Cockpit en puerto 8088.
 
 ---
 
@@ -123,6 +125,6 @@ author: [Autor / Equipo]
 | :--- | :--- |
 | **Inversor / Ejecutivo** | [`MANUAL_UNIFICADO_DEL_SISTEMA.md`](MANUAL_UNIFICADO_DEL_SISTEMA.md) ➔ [`reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
 | **Investigador Cuantitativo** | [`strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md`](strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) ➔ [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
-| **Ingeniero de Software** | [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md`](sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md) ➔ [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) |
-| **Operador de Producción** | [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) ➔ Cockpit Web ([http://localhost:8088](http://localhost:8088)) ➔ Dashboard FreqUI |
+| **Ingeniero de Software** | [`architecture/DAS_AUTONOMOUS_ENGINE.md`](architecture/DAS_AUTONOMOUS_ENGINE.md) ➔ [`sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md`](sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md) ➔ [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) |
+| **Operador de Producción** | [`operations/OPERATIONAL_RUNBOOK.md`](operations/OPERATIONAL_RUNBOOK.md) ➔ Cockpit Web ([http://localhost:8088](http://localhost:8088)) ➔ Dashboard FreqUI ([http://localhost:8081](http://localhost:8081)) |
 

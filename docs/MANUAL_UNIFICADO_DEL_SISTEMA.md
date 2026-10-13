@@ -2,13 +2,13 @@
 id: DOC-MASTER-001
 title: Manual Maestro Unificado del Sistema Meme Hunter
 category: master
-version: 7.2
+version: 7.3
 status: CERTIFIED
 last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 ---
 
-# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.2)
+# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.3)
 
 Este documento consolida la totalidad del conocimiento teórico, arquitectónico, cuantitativo y operativo del proyecto **meme_hunter**, unificando los planes estratégicos, informes forenses, especificaciones técnicas del motor autónomo auto-evolutivo y gobernanza de costes en una única referencia canónica.
 
@@ -28,6 +28,7 @@ Este documento consolida la totalidad del conocimiento teórico, arquitectónico
 10. [Compendio de Estrategia y Hoja de Ruta Cuantitativa](#10-compendio-de-estrategia-y-hoja-de-ruta-cuantitativa)
 11. [Centro de Control Unificado (Cockpit v7.2) y Laboratorio Cuantitativo](#11-centro-de-control-unificado-cockpit-v72-y-laboratorio-cuantitativo)
 12. [Arquitectura de Estabilización y Blindaje Operativo](#12-arquitectura-de-estabilización-y-blindaje-operativo)
+13. [Fábrica de Alphas SQLite WAL, Gating OOS y Enlace Bidireccional](#13-fábrica-de-alphas-sqlite-wal-gating-oos-y-enlace-bidireccional-sprints-25-a-29)
 
 ---
 
@@ -158,6 +159,11 @@ graph LR
 | Módulo / Script | Propósito Cuantitativo | Comando de Ejecución |
 |---|---|---|
 | [`meme_cli.py`](../scripts/meme_cli.py) | 🌟 **CLI Unificado de Operaciones, Salud, Test y Control** | `python scripts/meme_cli.py [health|cockpit|futures|test|research]` |
+| [`auto_data_sync.py`](../data_engine/auto_data_sync.py) | 📡 **Sincronizador continuo en vivo de Binance Futures (Feather 4H)** | `python data_engine/auto_data_sync.py` |
+| [`compile_ensemble_strategy.py`](../scripts/compile_ensemble_strategy.py) | ⚙️ **Compilador del ensamble dinámico bidireccional (Long/Short)** | `python scripts/compile_ensemble_strategy.py` |
+| [`oos_gating.py`](../portfolio/oos_gating.py) | 🛡️ **Compuertas Fuera de Muestra OOS (PBO < 15%, DSR >= 95%)** | `python -m portfolio.oos_gating` |
+| [`db_pool.py`](../portfolio/db_pool.py) | 🗄️ **Pool transaccional multihilo SQLite WAL (alpha_factory.db)** | `python -m portfolio.db_pool` |
+| [`freqtrade_client.py`](../client/freqtrade_client.py) | 🔌 **Cliente REST Freqtrade (Hot-Reload en vivo puerto 8081)** | `python -m client.freqtrade_client` |
 | [`check_health.py`](../scripts/check_health.py) | 🩺 **Centinela de Salud y Diagnóstico Rápido (2 segundos)** | `python scripts/check_health.py` |
 | [`start_dashboard.py`](../scripts/start_dashboard.py) | Cockpit Visual Web multihilo con Chart.js (Puerto 8088) | `python scripts/start_dashboard.py` |
 | [`run_live_alpha_loop.py`](../scripts/run_live_alpha_loop.py) | Bucle cerrado continuo E2E conectado a Binance | `python scripts/run_live_alpha_loop.py` |
@@ -202,11 +208,11 @@ graph LR
    * Pruebas automáticas: `python scripts/meme_cli.py test`.
    * Herramientas de I+D: `python scripts/meme_cli.py research [stress|vault|monte-carlo|sentinel]`.
 2. **Protección Kill-Switch:** Si el drawdown de equidad total alcanza el **25%**, se crea el testigo `user_data/KILL_SWITCH`, bloqueando nuevas entradas de inmediato.
-3. **Criterio de Liberación a Producción:** Ningún código se despliega sin que los **117 tests de la suite completa** pasen al 100%:
-   ```bash
-   docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
+3. **Criterio de Liberación a Producción:** Ningún código se despliega sin que los **151+ tests de la suite completa** pasen al 100%:
+   ```powershell
+   python -m pytest tests -v
    ```
-   **Certificación Oficial:** **117/117 tests pasando al 100% (0 errores)** en contenedor Docker hermético.
+   **Certificación Oficial:** **151+ tests pasando al 100% (0 errores)** certificando la suite integral sin regresiones.
 
 ---
 
@@ -265,16 +271,16 @@ El Cockpit Web (`http://localhost:8088`) integra la totalidad del ecosistema alg
 | `/api/live-trades` | `GET` | Posiciones abiertas y trades cerrados desde SQLite | Pública |
 | `/api/validate-formula` | `POST` | Validación sintáctica y seguridad AST *Zero-Eval* | Bearer Token |
 | `/api/test-strategy` | `POST` | Backtesting vectorial rápido con fricciones de futuros | Bearer Token |
-| `/api/deploy-to-sandbox` | `POST` | Despliegue atómico a la incubadora (`incubator_state.json`) | Bearer Token |
-| `/api/trigger-loop` | `POST` | Disparo manual de ciclo autónomo de optimización | Bearer Token |
+| `/api/deploy-to-sandbox` | `POST` | Despliegue transaccional SQLite WAL a la fábrica (`portfolio/alpha_factory.db`) | Bearer Token |
+| `/api/trigger-loop` | `POST` | Disparo manual de ciclo autónomo de optimización (CUSUM, Autopsia, Gating, HRP) | Bearer Token |
 | `/api/synthesize-alpha` | `POST` | Síntesis semántica de factores vía OpenRouter | Bearer Token |
 
 ### 11.3 Certificación de Calidad Oficial
-La suite completa cuenta con **117 tests pasando al 100%** de forma hermética:
-```bash
-docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade tests/ -v
+La suite completa cuenta con **151+ tests pasando al 100% (0 fallos)**:
+```powershell
+python -m pytest tests -v
 ```
-Certificando la no-regresión de todos los módulos matemáticos, de microestructura, de red y de visualización.
+Certificando la no-regresión de todos los módulos matemáticos, de microestructura, concurrencia SQLite WAL, compuertas OOS y ensamble bidireccional.
 
 ---
 
@@ -318,4 +324,73 @@ flowchart LR
 3. **Capa 3: Laboratorio de I+D & Sandbox (Confinamiento de Riesgo):**
    * La minería genética (NSGA-II), las autopsias cognitivas vía OpenRouter (DeepSeek-R1) y las nuevas fórmulas AST residen en la incubadora (`portfolio/incubator_state.json`) en estado `SANDBOX`.
    * **Regla de Oro:** Ninguna estrategia generada automáticamente puede ejecutar órdenes reales en vivo sin una auditoría de significancia estadística ($p < 0.01$), validación fuera de muestra (CPCV/PBO) y promoción manual explícita.
+
+---
+
+## 13. Fábrica de Alphas SQLite WAL, Gating OOS y Enlace Bidireccional (Sprints 25 a 29)
+
+A partir de la versión **v7.3**, Meme Hunter consolida su arquitectura de producción resolviendo la persistencia transaccional, eliminando los datos sintéticos del dashboard y enlazando las decisiones de la incubadora con Freqtrade en tiempo real.
+
+```mermaid
+graph TD
+    subgraph "Ingesta y Sincronización"
+        SYNC["data_engine/auto_data_sync.py<br/>(9 pares Binance Futures REST API)"] --> FEAT["C:/meme_hunter_data/binance/futures/<br/>(*.feather reales)"]
+        FEAT --> FEED["data_engine/real_market_feed.py<br/>(Evaluación Vectorial con Fricción)"]
+    end
+
+    subgraph "Gobernanza y Fábrica de Alphas"
+        FEED --> ORCH["portfolio/autonomous_orchestrator.py"]
+        ORCH --> GATE["portfolio/oos_gating.py<br/>(CPCV, PBO < 15%, DSR >= 95%, Corr < 0.40)"]
+        ORCH --> HRP["portfolio/strategy_incubator.py<br/>(HRP + 15% Turnover Deadband)"]
+        ORCH <--> DB["portfolio/alpha_factory.db<br/>(SQLite WAL ACID - 0 Locks)"]
+    end
+
+    subgraph "Producción Freqtrade"
+        ORCH --> HOOK["scripts/compile_ensemble_strategy.py<br/>(Dual-Engine: Long & Short)"]
+        HOOK --> STRAT["user_data/strategies/MemeHunter_MinedEnsemble.py"]
+        ORCH --> REST["client/freqtrade_client.py<br/>(POST /api/v1/reload_config)"]
+        ORCH --> TELEM["client/telemetry_notifier.py<br/>(cycle_history & Webhooks)"]
+    end
+```
+
+### 13.1 Persistencia Transaccional ACID en SQLite WAL (Sprint 25: PB-87 a PB-89)
+* **Base de Datos Canónica:** [`portfolio/alpha_factory.db`](file:///c:/meme_hunter/portfolio/alpha_factory.db).
+* **Modo WAL y Pragma Defensivos:** Conexiones gestionadas por [`portfolio/db_pool.py`](file:///c:/meme_hunter/portfolio/db_pool.py) con `PRAGMA journal_mode = WAL`, `PRAGMA synchronous = NORMAL`, y `busy_timeout = 30000ms`.
+* **Cero Bloqueos:** Certificado bajo pruebas de estrés de 15 hilos concurrentes simultáneos ([`tests/test_db_concurrency.py`](file:///c:/meme_hunter/tests/test_db_concurrency.py)).
+* **Tablas Relacionales:**
+  - `strategies`: Metadatos, estado (`SANDBOX`, `LIVE`, `ALPHA_DECAY`, `RETIRED`), Sharpe OOS y decay Z-Score.
+  - `portfolio_allocations`: Historial inmutable de pesos de capital asignados por HRP.
+  - `alpha_autopsies`: Dictámenes forenses cognitivos de autopsias de factores caídos.
+  - `diversity_archive`: Celdas del archivo MAP-Elites para preservación de diversidad.
+  - `cycle_history`: Registro cronológico completo de cada ejecución del bucle.
+
+### 13.2 Eliminación de Datos Sintéticos y Sincronización Automática (Sprint 26 & 29: PB-90 & PB-100)
+* **Erradicación de Mocks:** El servidor del Cockpit ([`dashboard/server.py`](file:///c:/meme_hunter/dashboard/server.py)) no utiliza datos aleatorios (`np.random.normal`).
+* **Sincronizador Continuo ([`data_engine/auto_data_sync.py`](file:///c:/meme_hunter/data_engine/auto_data_sync.py)):** Descarga incrementalmente velas OHLCV desde la API pública de Binance Futures para los 9 pares activos (`DOGE`, `PEPE`, `WIF`, `MEW`, `POPCAT`, `NEIRO`, `BONK`, `FLOKI`, `SHIB`), manteniendo los archivos `.feather` locales actualizados al día.
+* **Smart Cache de Autopsias (PB-92):** Evita llamadas redundantes a OpenRouter reutilizando dictámenes idénticos en milisegundos.
+
+### 13.3 Protocolo Estricto de Aceptación OOS y Multicolinealidad (Sprint 27: PB-93 & PB-94)
+* **Validador de Gobernanza ([`portfolio/oos_gating.py`](file:///c:/meme_hunter/portfolio/oos_gating.py)):**
+  - Ningún factor es promovido a `LIVE` basándose únicamente en métricas de ventana corta.
+  - **Filtro Combinatorio (CPCV):** Particiones combinatorias con purga y embargo temporal (`validation/cpcv_engine.py`).
+  - **Límites Estadísticos:** Probabilidad de Sobreajuste en el Backtest **$PBO < 15\%$** y Deflated Sharpe Ratio **$DSR \ge 95\%$**.
+  - **Filtro de Multicolinealidad Cruzada:** Máxima correlación contra cualquier estrategia activa en producción **$|\rho| < 0.40$**.
+
+### 13.4 Control de Fricción por Banda Muerta y Spread (Sprint 27 & 29: PB-95 & PB-101)
+* **Banda Muerta de Turnover (15% Deadband):** Si la rotación de pesos sugerida por HRP es $< 15\%$, se activa la regla de no-intervención, preservando los pesos vigentes y ahorrando el 100% de comisiones por rotación marginal.
+* **Deducción Realista de Fricción:** Cálculo de Sharpe en la incubadora descontando comisión taker de Binance Futures ($0.05\%$) y penalización de spread en cada cambio de señal:
+  $$R_{\text{neto}, t} = (\text{Señal}_t \times R_{t+1}) - |\Delta \text{Señal}_t| \times (0.0005 + \frac{1}{2}\text{Spread}_t)$$
+
+### 13.5 Ensamble Dual-Engine Bidireccional Long/Short (Sprint 29: PB-99 & PB-102)
+* **Estrategia Compilada:** [`user_data/strategies/MemeHunter_MinedEnsemble.py`](file:///c:/meme_hunter/user_data/strategies/MemeHunter_MinedEnsemble.py).
+* **Entradas Bidireccionales:**
+  - **LONG:** `composite_alpha_score > +0.05` $\land$ `close > ema_200` $\land$ `rsi < 68` $\land$ confirmación rápida (`fast_momentum > 0` o `close >= ema_50`).
+  - **SHORT:** `composite_alpha_score < -0.05` $\land$ `close < ema_200` $\land$ `rsi > 32` $\land$ confirmación rápida.
+* **Salidas Asimétricas tipo Airbag:** Salida ágil de Longs si el score colapsa a $<-0.10$ o RSI $>75$; salida de Shorts si el score rebota a $>+0.10$ o RSI $<25$.
+
+### 13.6 Cliente REST API de Freqtrade y Telemetría (Sprint 28: PB-96, PB-97 & PB-98)
+* **Auto-Compilador:** Tras cada promoción o retiro, el orquestador regenera automáticamente la estrategia ejecutable.
+* **Hot-Reload REST Client ([`client/freqtrade_client.py`](file:///c:/meme_hunter/client/freqtrade_client.py)):** Notifica al bot en vivo (`POST /api/v1/reload_config` en puerto 8081) con soporte para fallbacks offline si Docker está pausado.
+* **Telemetría y Notificaciones ([`client/telemetry_notifier.py`](file:///c:/meme_hunter/client/telemetry_notifier.py)):** Despacho estructurado a webhooks de Discord/Telegram y registro inmutable en `portfolio/alpha_factory.db`.
+
 

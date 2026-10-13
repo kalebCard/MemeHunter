@@ -297,12 +297,24 @@ def generate_ensemble_strategy_file(
         except Exception:
             return False
 
+    valid_cols = {'open', 'high', 'low', 'close', 'volume', 'returns', 'hl_spread', 'vwap', 'rvol'}
+    factors_lib_map = {f["factor_id"]: f["formula"] for f in factors_data}
+
     # Generar bloques de código de cálculo para cada factor
     calc_lines = []
     for fid, weight in live_factors.items():
-        raw_formula = formula_map.get(fid, "")
-        if not _is_valid_syntax(raw_formula):
-            raw_formula = next((f["formula"] for f in factors_data if f["factor_id"] == fid), "close")
+        # 1. Priorizar fórmula formal de factor_library.json
+        clean_fid = fid.replace("ARCHIVE_", "").replace("Mined_", "").replace("LLM_", "")
+        if fid in factors_lib_map:
+            raw_formula = factors_lib_map[fid]
+        elif clean_fid in factors_lib_map:
+            raw_formula = factors_lib_map[clean_fid]
+        else:
+            cand = formula_map.get(fid, "")
+            if any(c in cand.lower() for c in valid_cols):
+                raw_formula = cand
+            else:
+                raw_formula = "dataframe['close'].pct_change().fillna(0.0)"
 
         py_formula = compile_ast_formula_to_python(raw_formula)
         # Adaptar referencias de columnas a dataframe['col']
@@ -310,7 +322,7 @@ def generate_ensemble_strategy_file(
             import re
             py_formula = re.sub(rf'\b{col}\b', f"dataframe['{col}']", py_formula)
 
-        if not _is_valid_syntax(py_formula):
+        if not _is_valid_syntax(py_formula) or "dataframe['" not in py_formula:
             py_formula = "dataframe['close'].pct_change().fillna(0.0)"
 
         calc_lines.append(f"        # Factor {fid} (Peso HRP: {weight:.4f})")

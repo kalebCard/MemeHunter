@@ -34,9 +34,9 @@ class FreqtradeRestClient:
         api_token: Optional[str] = None,
         timeout_sec: float = 3.0
     ):
-        self.base_url = (base_url or os.getenv("FREQTRADE_API_URL", "http://127.0.0.1:8080")).rstrip("/")
-        self.username = username or os.getenv("FREQTRADE_API_USER", "freqtrader")
-        self.password = password or os.getenv("FREQTRADE_API_PASSWORD", "SuperSecurePassword123!")
+        self.base_url = (base_url or os.getenv("FREQTRADE_API_URL", "http://127.0.0.1:8081")).rstrip("/")
+        self.username = username or os.getenv("FREQTRADE_API_USER", "admin")
+        self.password = password or os.getenv("FREQTRADE_API_PASSWORD", "MemeHunter2026!")
         self.api_token = api_token or os.getenv("FREQTRADE_API_TOKEN")
         self.timeout_sec = float(timeout_sec)
 
