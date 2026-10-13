@@ -169,33 +169,58 @@ class MemeHunter_MinedEnsemble(IStrategy):
             rs = gain / loss
             dataframe['rsi'] = 100.0 - (100.0 / (1.0 + rs))
 
+        # 4. Indicadores de Confirmación Rápida Multi-Horizonte (PB-102)
+        dataframe['ema_50'] = dataframe['close'].ewm(span=50, adjust=False).mean()
+        dataframe['fast_momentum'] = (
+            (dataframe['close'] - dataframe['close'].shift(3)) / dataframe['close'].shift(3).replace(0, 1.0)
+        ).fillna(0.0)
+
         return dataframe
 
     def populate_entry_trend(self, dataframe: pd.DataFrame, metadata: dict) -> pd.DataFrame:
-        """Genera señales de entrada basadas en la confluencia del ensamble de factores."""
+        """
+        PB-99: Genera señales de entrada bidireccionales (LONG / SHORT) basadas en la confluencia
+        del ensamble de factores HRP y el régimen macro de microestructura.
+        """
+        dataframe['enter_long'] = 0
         dataframe['enter_short'] = 0
         dataframe['enter_tag'] = ''
 
-        # Condición de Quiebre de Memecoins con confirmación del Ensamble
-        # La confluencia ocurre cuando el composite_alpha_score supera el umbral estadístico
-        # y el precio confirma régimen bajista por debajo de la EMA 200
-        cond_alpha_short = (dataframe['composite_alpha_score'] > 0.05)
-        cond_structural = (dataframe['close'] < dataframe['ema_200']) & (dataframe['rsi'] < 52)
+        # 1. Entrada LONG: Ensamble alcista + Precio sobre EMA 200 + RSI moderado + Confirmación rápida
+        cond_alpha_long = (dataframe['composite_alpha_score'] > 0.05)
+        cond_struct_long = (dataframe['close'] > dataframe['ema_200']) & (dataframe['rsi'] < 68)
+        cond_fast_long = (dataframe['close'] >= dataframe['ema_50']) | (dataframe['fast_momentum'] > 0.0)
+        mask_long = cond_alpha_long & cond_struct_long & cond_fast_long
+        dataframe.loc[mask_long, 'enter_long'] = 1
+        dataframe.loc[mask_long, 'enter_tag'] = 'long_hrp_ensemble'
 
-        dataframe.loc[cond_alpha_short & cond_structural, 'enter_short'] = 1
-        dataframe.loc[cond_alpha_short & cond_structural, 'enter_tag'] = 'short_hrp_ensemble'
+        # 2. Entrada SHORT: Ensamble bajista + Precio bajo EMA 200 + RSI moderado + Confirmación rápida
+        cond_alpha_short = (dataframe['composite_alpha_score'] < -0.05)
+        cond_struct_short = (dataframe['close'] < dataframe['ema_200']) & (dataframe['rsi'] > 32)
+        cond_fast_short = (dataframe['close'] <= dataframe['ema_50']) | (dataframe['fast_momentum'] < 0.0)
+        mask_short = cond_alpha_short & cond_struct_short & cond_fast_short
+        dataframe.loc[mask_short, 'enter_short'] = 1
+        dataframe.loc[mask_short, 'enter_tag'] = 'short_hrp_ensemble'
 
         return dataframe
 
     def populate_exit_trend(self, dataframe: pd.DataFrame, metadata: dict) -> pd.DataFrame:
-        """Salida ágil tipo Airbag técnico para proteger el capital de rebotes súbitos."""
+        """
+        PB-99: Salida ágil tipo Airbag técnico para proteger el capital en Longs y Shorts.
+        """
+        dataframe['exit_long'] = 0
         dataframe['exit_short'] = 0
         dataframe['exit_tag'] = ''
 
-        # Salida si la señal compuesta colapsa o el RSI indica sobrecompra violenta
-        cond_exit = (dataframe['composite_alpha_score'] < -0.15) | (dataframe['rsi'] > 58)
-        dataframe.loc[cond_exit, 'exit_short'] = 1
-        dataframe.loc[cond_exit, 'exit_tag'] = 'airbag_ensemble_exit'
+        # Salida LONG: Ensamble se invierte a bajista o RSI en sobrecompra extrema
+        cond_exit_long = (dataframe['composite_alpha_score'] < -0.10) | (dataframe['rsi'] > 75)
+        dataframe.loc[cond_exit_long, 'exit_long'] = 1
+        dataframe.loc[cond_exit_long, 'exit_tag'] = 'airbag_long_exit'
+
+        # Salida SHORT: Ensamble se invierte a alcista o RSI en sobreventa extrema
+        cond_exit_short = (dataframe['composite_alpha_score'] > 0.10) | (dataframe['rsi'] < 25)
+        dataframe.loc[cond_exit_short, 'exit_short'] = 1
+        dataframe.loc[cond_exit_short, 'exit_tag'] = 'airbag_short_exit'
 
         return dataframe
 

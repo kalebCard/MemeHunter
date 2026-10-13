@@ -124,11 +124,15 @@ def evaluate_factor_series(formula: str, df: pd.DataFrame) -> pd.Series:
 
 def build_signals_and_returns_for_strategies(
     market_df: pd.DataFrame,
-    strategies: Dict[str, Any]
+    strategies: Dict[str, Any],
+    apply_friction: bool = True,
+    taker_fee_pct: float = 0.0005,
+    spread_impact_ratio: float = 0.10
 ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame]:
     """
-    Construye la matriz de señales (signals_df), retornos futuros (forward_returns)
-    y matriz de retornos por estrategia (returns_matrix_df) usando los datos reales.
+    PB-101: Construye la matriz de señales (signals_df), retornos futuros (forward_returns)
+    y matriz de retornos netos de fricción por estrategia (returns_matrix_df) usando datos reales.
+    Deduce comisiones taker de Binance Futures (0.05%) y penalización de spread en cada rotación.
     """
     if 'returns' in market_df.columns:
         ret = market_df['returns']
@@ -136,6 +140,7 @@ def build_signals_and_returns_for_strategies(
         ret = market_df['close'].pct_change().fillna(0.0)
 
     fwd_ret = ret.shift(-1).fillna(0.0)
+    hl_spread = market_df.get('hl_spread', ((market_df['high'] - market_df['low']) / market_df['close'].replace(0, 1.0)).fillna(0.002))
 
     sig_dict: Dict[str, pd.Series] = {}
     strat_ret_dict: Dict[str, pd.Series] = {}
@@ -159,7 +164,18 @@ def build_signals_and_returns_for_strategies(
 
         sig = sig.replace([np.inf, -np.inf], 0.0).fillna(0.0)
         sig_dict[sid] = sig
-        strat_ret_dict[sid] = (sig * fwd_ret).fillna(0.0)
+
+        # PB-101: Modelado de Fricción Realista (Comisión Taker + Half-Spread por turnover)
+        gross_ret = (sig * fwd_ret).fillna(0.0)
+        if apply_friction:
+            est_half_spread = (hl_spread * spread_impact_ratio).clip(lower=0.0001, upper=0.005)
+            delta_sig = sig.diff().abs().fillna(sig.abs())
+            friction = delta_sig * (taker_fee_pct + est_half_spread)
+            net_ret = (gross_ret - friction).fillna(0.0)
+        else:
+            net_ret = gross_ret
+
+        strat_ret_dict[sid] = net_ret
 
     signals_df = pd.DataFrame(sig_dict, index=market_df.index).fillna(0.0)
     returns_matrix_df = pd.DataFrame(strat_ret_dict, index=market_df.index).fillna(0.0)

@@ -49,13 +49,15 @@ def test_mined_ensemble_entry_and_exit_signals(ohlcv_dataframe):
     df = strat.populate_entry_trend(df, metadata={'pair': 'PEPE/USDT:USDT'})
     df = strat.populate_exit_trend(df, metadata={'pair': 'PEPE/USDT:USDT'})
 
+    assert 'enter_long' in df.columns
     assert 'enter_short' in df.columns
     assert 'enter_tag' in df.columns
+    assert 'exit_long' in df.columns
     assert 'exit_short' in df.columns
     assert 'exit_tag' in df.columns
 
     # Verificar apalancamiento
-    lev = strat.leverage(
+    lev_short = strat.leverage(
         pair='PEPE/USDT:USDT',
         current_time=None,
         current_rate=1.0,
@@ -64,4 +66,14 @@ def test_mined_ensemble_entry_and_exit_signals(ohlcv_dataframe):
         entry_tag='short_hrp_ensemble',
         side='short'
     )
-    assert lev == 1.5
+    lev_long = strat.leverage(
+        pair='PEPE/USDT:USDT',
+        current_time=None,
+        current_rate=1.0,
+        proposed_leverage=1.0,
+        max_leverage=5.0,
+        entry_tag='long_hrp_ensemble',
+        side='long'
+    )
+    assert lev_short == 1.5
+    assert lev_long == 1.5

@@ -47,7 +47,9 @@ class OOSGatingValidator:
         min_dsr: float = 0.95,
         min_oos_sharpe: float = 1.00,
         cpcv_splits: int = 6,
-        cpcv_test_splits: int = 2
+        cpcv_test_splits: int = 2,
+        apply_friction: bool = True,
+        taker_fee_pct: float = 0.0005
     ):
         self.min_bars = int(min_bars)
         self.max_correlation = float(max_correlation)
@@ -56,6 +58,8 @@ class OOSGatingValidator:
         self.min_oos_sharpe = float(min_oos_sharpe)
         self.cpcv_splits = int(cpcv_splits)
         self.cpcv_test_splits = int(cpcv_test_splits)
+        self.apply_friction = bool(apply_friction)
+        self.taker_fee_pct = float(taker_fee_pct)
 
     def check_multicollinearity(
         self,
@@ -112,8 +116,11 @@ class OOSGatingValidator:
         3. Evaluación Combinatoria Purged Cross-Validation (CPCV).
         4. Verificación de PBO y DSR/PSR (PB-93).
         """
-        # Calcular serie de retornos brutos de la estrategia
+        # Calcular serie de retornos brutos de la estrategia y deducir fricción
         strat_returns = (signal * forward_returns).replace([np.inf, -np.inf], 0.0).fillna(0.0)
+        if self.apply_friction:
+            delta_sig = signal.diff().abs().fillna(signal.abs())
+            strat_returns = (strat_returns - (delta_sig * self.taker_fee_pct)).fillna(0.0)
         n_samples = len(strat_returns)
 
         # 1. Verificación de longitud mínima
