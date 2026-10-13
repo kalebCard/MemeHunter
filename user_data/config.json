@@ -68,7 +68,7 @@
     ],
 
     "telegram": {
-        "enabled": false,
+        "enabled": true,
         "token": "",
         "chat_id": ""
     },
