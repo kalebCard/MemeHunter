@@ -63,7 +63,39 @@ def main():
         poll_interval_seconds=3.0
     )
 
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+
+    executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="AlphaLoopWorker")
+    cycle_lock = threading.Lock()
     iteration_count = 0
+
+    def run_cycle_background(bars_df_snapshot, fwd_returns_snapshot, sigs_snapshot, returns_matrix_snapshot):
+        if not cycle_lock.acquire(blocking=False):
+            print("  ℹ️ [PB-136] Ciclo previo aún en ejecución en segundo plano. Continuando ingesta en vivo sin bloqueo.")
+            return
+        try:
+            print("  -> [PB-136] Ejecutando ciclo de auditoría cuantitativa y auto-sanación en Worker Pool Asíncrono...")
+            report = orchestrator.process_cycle(
+                signals_df=sigs_snapshot,
+                forward_returns=fwd_returns_snapshot,
+                returns_matrix_df=returns_matrix_snapshot,
+                market_df=bars_df_snapshot
+            )
+
+            for act in report.actions_taken:
+                print(f"     [x] {act}")
+
+            print("  -> Distribución de Capital Actualizada (HRP):")
+            for sid, w in report.new_weights.items():
+                print(f"     * {sid}: {w * 100:.2f}% de capital asignado")
+
+            # Guardar estado para que el dashboard web lo refleje automáticamente
+            incubator.save_state(os.path.join(BASE_DIR, "portfolio", "incubator_state.json"))
+        except Exception as e:
+            logger.error(f"Error en worker pool de auto-sanación: {e}", exc_info=True)
+        finally:
+            cycle_lock.release()
 
     def on_dollar_bar_closed(symbol: str, newest_bar: pd.Series):
         nonlocal iteration_count
@@ -95,23 +127,14 @@ def main():
             'ALPHA_DECAY_03': sig_lag * fwd_returns
         }, index=bars_df.index)
 
-        print("  -> Ejecutando ciclo de auditoría cuantitativa y auto-sanación...")
-        report = orchestrator.process_cycle(
-            signals_df=signals_df,
-            forward_returns=fwd_returns,
-            returns_matrix_df=returns_matrix,
-            market_df=bars_df
+        # Despachar al Worker Pool asíncrono en < 0.1 ms sin bloquear el streaming de Binance
+        executor.submit(
+            run_cycle_background,
+            bars_df.copy(),
+            fwd_returns.copy(),
+            signals_df.copy(),
+            returns_matrix.copy()
         )
-
-        for act in report.actions_taken:
-            print(f"     [x] {act}")
-
-        print("  -> Distribución de Capital Actualizada (HRP):")
-        for sid, w in report.new_weights.items():
-            print(f"     * {sid}: {w * 100:.2f}% de capital asignado")
-
-        # Guardar estado para que el dashboard web lo refleje automáticamente
-        incubator.save_state(os.path.join(BASE_DIR, "portfolio", "incubator_state.json"))
 
     feed.subscribe_bar_closed(on_dollar_bar_closed)
     feed.start()
@@ -124,8 +147,9 @@ def main():
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\nDeteniendo live loop...")
+        print("\nDeteniendo live loop y worker pool...")
         feed.stop()
+        executor.shutdown(wait=False)
 
 
 if __name__ == "__main__":

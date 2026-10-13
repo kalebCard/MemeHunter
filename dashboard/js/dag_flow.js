@@ -305,11 +305,16 @@
     }
   }
 
+  function getAuthHeader() {
+    const token = window.getActiveAuthToken ? window.getActiveAuthToken() : (localStorage.getItem('cockpit_token') || '');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  }
+
   async function toggleNode(nodeId, active) {
     try {
       const resp = await fetch('/api/dag/toggle-node', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify({ node_id: nodeId, active: active })
       });
       const data = await resp.json();
@@ -329,7 +334,7 @@
     try {
       const resp = await fetch('/api/dag/set-threshold', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify({ threshold: threshold })
       });
       const data = await resp.json();
@@ -352,7 +357,7 @@
     try {
       const resp = await fetch('/api/dag/trigger-cycle', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
       });
       const data = await resp.json();
       if (data.success && data.vector) {

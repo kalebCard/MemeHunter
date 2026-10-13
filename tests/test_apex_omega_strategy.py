@@ -21,6 +21,7 @@ from user_data.strategies.MemeHunter_ApexOmegaAlpha import (
 )
 from portfolio.bias_store import BiasStore
 from validation.schemas import MarketBiasSchema, MarketBiasPosture
+from portfolio.kill_switch import KillSwitchLevel, EmergencyKillSwitch
 
 
 def test_apex_omega_indicators_and_ffd():
@@ -123,6 +124,8 @@ def test_apex_omega_time_stop_anti_bagholding():
 def test_apex_omega_four_tier_unified_filter(tmp_path):
     strat = MemeHunter_ApexOmegaAlpha()
     strat.bias_store = BiasStore(filepath=str(tmp_path / "apex_bias.json"))
+    strat.kill_switch = EmergencyKillSwitch(state_file=str(tmp_path / "apex_ks.json"))
+    strat.gatekeeper.kill_switch = strat.kill_switch
 
     # 1. Caso saludable y rentable
     ok, reason = strat.check_pre_trade_filters(
@@ -171,3 +174,58 @@ def test_apex_omega_four_tier_unified_filter(tmp_path):
     )
     assert ok_auth is True
     assert reason_auth == "APPROVED_FOR_DISPATCH"
+
+
+def test_apex_omega_confirm_trade_entry_lifecycle(tmp_path):
+    """PB-132: Valida que confirm_trade_entry ejecute el pipeline de compuertas en runtime."""
+    strat = MemeHunter_ApexOmegaAlpha()
+    strat.bias_store = BiasStore(filepath=str(tmp_path / "lifecycle_bias.json"))
+    strat.kill_switch = EmergencyKillSwitch(state_file=str(tmp_path / "lifecycle_ks.json"))
+    strat.gatekeeper.kill_switch = strat.kill_switch
+
+    now = datetime.now(timezone.utc)
+
+    # 1. Entrada válida aprobada
+    approved = strat.confirm_trade_entry(
+        pair="DOGE/USDT",
+        order_type="limit",
+        amount=100.0,
+        rate=0.15,
+        time_in_force="GTC",
+        current_time=now,
+        entry_tag="apex_confirmed_capitulation",
+        side="buy"
+    )
+    assert approved is True
+
+    # 2. Entrada bloqueada si el sesgo del agente está habilitado pero no autorizado
+    strat.enforce_agent_bias = True
+    blocked_bias = strat.confirm_trade_entry(
+        pair="DOGE/USDT",
+        order_type="limit",
+        amount=100.0,
+        rate=0.15,
+        time_in_force="GTC",
+        current_time=now,
+        entry_tag="apex_confirmed_capitulation",
+        side="buy"
+    )
+    assert blocked_bias is False
+
+    # 3. Entrada bloqueada si el Kill Switch está en emergencia
+    strat.enforce_agent_bias = False
+    strat.kill_switch.trigger(
+        target_level=KillSwitchLevel.LEVEL_1_SOFT_LOCK,
+        reason="Drawdown intradia excedido 5.0%"
+    )
+    blocked_ks = strat.confirm_trade_entry(
+        pair="DOGE/USDT",
+        order_type="limit",
+        amount=100.0,
+        rate=0.15,
+        time_in_force="GTC",
+        current_time=now,
+        entry_tag="apex_confirmed_capitulation",
+        side="buy"
+    )
+    assert blocked_ks is False

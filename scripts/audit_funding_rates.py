@@ -16,7 +16,9 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-DATA_DIR = Path("C:/meme_hunter_data/binance/futures")
+from data_engine.paths import get_futures_data_dir
+
+DATA_DIR = get_futures_data_dir()
 BACKTEST_ZIP = Path("user_data/backtest_results/backtest-result-2026-10-11_realistic_v3.zip")
 
 

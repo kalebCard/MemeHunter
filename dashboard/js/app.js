@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return API_AUTH_TOKEN;
   }
+  window.getActiveAuthToken = getActiveAuthToken;
 
   let equityChart = null;
   let icChart = null;

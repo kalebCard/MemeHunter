@@ -50,9 +50,10 @@ class BaseSignalAgent(ABC):
         """Actualiza el peso relativo del agente."""
         self.weight = max(0.0, float(weight))
 
-    def evaluate(self, market_data: Any) -> AgentProposal:
+    def evaluate(self, market_data: Any, upstream_proposals: Optional[Dict[str, Any]] = None) -> AgentProposal:
         """
         Ejecuta la evaluación del agente con medición precisa de latencia.
+        Soporta inyección de propuestas previas de upstream para agentes dependientes en el DAG.
         """
         if not self.active:
             proposal = AgentProposal(
@@ -68,7 +69,13 @@ class BaseSignalAgent(ABC):
 
         t_start = time.perf_counter_ns()
         try:
-            proposal = self._compute_proposal(market_data)
+            # Inspección dinámica de compatibilidad para agentes legacy o dependientes
+            import inspect
+            sig = inspect.signature(self._compute_proposal)
+            if "upstream_proposals" in sig.parameters or any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()):
+                proposal = self._compute_proposal(market_data, upstream_proposals=upstream_proposals)
+            else:
+                proposal = self._compute_proposal(market_data)
         except Exception as e:
             t_end = time.perf_counter_ns()
             elapsed_ms = (t_end - t_start) / 1_000_000.0
@@ -88,6 +95,6 @@ class BaseSignalAgent(ABC):
         return proposal
 
     @abstractmethod
-    def _compute_proposal(self, market_data: Any) -> AgentProposal:
+    def _compute_proposal(self, market_data: Any, **kwargs) -> AgentProposal:
         """Lógica interna de cómputo que debe implementar cada agente concreto."""
         pass

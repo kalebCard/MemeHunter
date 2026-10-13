@@ -97,6 +97,16 @@ CREATE TABLE IF NOT EXISTS cycle_history (
 );
 
 CREATE INDEX IF NOT EXISTS idx_cycle_timestamp ON cycle_history(timestamp);
+
+CREATE TABLE IF NOT EXISTS market_biases (
+    symbol TEXT PRIMARY KEY,
+    posture TEXT NOT NULL,
+    confidence REAL NOT NULL DEFAULT 0.0,
+    valid_until_utc TEXT,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_market_biases_updated ON market_biases(updated_at);
 """
 
 
@@ -322,3 +332,67 @@ def get_cycle_history_db(limit: int = 50, db_path: str = DEFAULT_DB_PATH) -> Lis
         d["goal_reached"] = bool(d["goal_reached"])
         res.append(d)
     return res
+
+
+def upsert_market_bias_db(
+    symbol: str,
+    posture: str,
+    confidence: float,
+    valid_until_utc: Optional[str] = None,
+    db_path: str = DEFAULT_DB_PATH
+) -> None:
+    """Inserta o actualiza atómicamente la directiva de sesgo en SQLite WAL."""
+    now_iso = datetime.now(timezone.utc).isoformat()
+    sql = """
+    INSERT INTO market_biases (symbol, posture, confidence, valid_until_utc, updated_at)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(symbol) DO UPDATE SET
+        posture = excluded.posture,
+        confidence = excluded.confidence,
+        valid_until_utc = excluded.valid_until_utc,
+        updated_at = excluded.updated_at;
+    """
+    with sqlite_cursor_context(db_path, commit=True) as cur:
+        cur.execute(sql, (
+            symbol.upper(),
+            str(posture),
+            float(confidence),
+            valid_until_utc,
+            now_iso
+        ))
+
+
+def get_market_bias_db(symbol: str, db_path: str = DEFAULT_DB_PATH) -> Optional[Dict[str, Any]]:
+    """Consulta el sesgo directivo activo de un símbolo desde SQLite WAL."""
+    if not os.path.exists(db_path):
+        return None
+    sql = "SELECT symbol, posture, confidence, valid_until_utc, updated_at FROM market_biases WHERE symbol = ?"
+    with sqlite_cursor_context(db_path, read_only=True) as cur:
+        cur.execute(sql, (symbol.upper(),))
+        row = cur.fetchone()
+        if not row:
+            return None
+        cols = [col[0] for col in cur.description]
+        return dict(zip(cols, row))
+
+
+def get_all_market_biases_db(db_path: str = DEFAULT_DB_PATH) -> Dict[str, Dict[str, Any]]:
+    """Recupera todos los sesgos directivos indexados por símbolo desde SQLite WAL."""
+    if not os.path.exists(db_path):
+        return {}
+    sql = "SELECT symbol, posture, confidence, valid_until_utc, updated_at FROM market_biases"
+    result = {}
+    with sqlite_cursor_context(db_path, read_only=True) as cur:
+        cur.execute(sql)
+        rows = cur.fetchall()
+        for row in rows:
+            sym, post, conf, valid, upd = row
+            result[sym] = {
+                "symbol": sym,
+                "posture": post,
+                "confidence": conf,
+                "valid_until_utc": valid,
+                "updated_at": upd
+            }
+    return result
+

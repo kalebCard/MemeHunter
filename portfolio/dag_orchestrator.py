@@ -34,11 +34,35 @@ class VectorAlpha:
         return asdict(self)
 
 
+@dataclass
+class DAGNode:
+    """
+    Nodo formal de procesamiento dentro de la topología acíclica dirigida (DAG).
+    """
+    node_id: str
+    agent: BaseSignalAgent
+    dependencies: List[str] = field(default_factory=list)
+    layer: str = "processing"   # 'input', 'processing', 'synthesis', 'risk'
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "node_id": self.node_id,
+            "agent_type": self.agent.agent_type,
+            "layer": self.layer,
+            "dependencies": list(self.dependencies),
+            "active": self.agent.active,
+            "weight": self.agent.weight,
+            "last_latency_ms": self.agent.last_latency_ms,
+            "metadata": self.metadata
+        }
+
+
 class DAGSignalOrchestrator:
     """
-    Enrutador central y orquestador en DAG.
+    Enrutador central y orquestador en Grafo Acíclico Dirigido (DAG).
     Sintetiza las propuestas de múltiples agentes especializados aplicando Fusión Bayesiana
-    y pesos condicionados por el régimen de mercado, garantizando latencias < 20 ms.
+    y pesos condicionados por el régimen de mercado, evaluados a través de etapas topológicas.
     """
 
     def __init__(
@@ -51,39 +75,67 @@ class DAGSignalOrchestrator:
         self.synthesis_algorithm = synthesis_algorithm
         self.max_history_len = max_history_len
 
-        self._agents: Dict[str, BaseSignalAgent] = {}
+        self._nodes: Dict[str, DAGNode] = {}
         self.last_vector_alpha: Optional[VectorAlpha] = None
         self.cycle_count: int = 0
         self.total_latency_ms: float = 0.0
         self._latencies: List[float] = []
         self._history: List[Dict[str, Any]] = []
 
+    @property
+    def _agents(self) -> Dict[str, BaseSignalAgent]:
+        """Compatibilidad hacia atrás para componentes que acceden a self._agents."""
+        return {nid: node.agent for nid, node in self._nodes.items()}
+
     # -------------------------------------------------------------------------
-    # Gestión de Agentes (Registro, Toggle, Pesos)
+    # Gestión de Nodos y Topología del DAG
     # -------------------------------------------------------------------------
-    def register_agent(self, agent: BaseSignalAgent) -> None:
-        """Registra un agente en la topología del DAG."""
-        self._agents[agent.agent_id] = agent
+    def register_agent(
+        self,
+        agent: BaseSignalAgent,
+        dependencies: Optional[List[str]] = None,
+        layer: str = "processing"
+    ) -> None:
+        """Registra un agente con dependencias y capa topológica en el DAG."""
+        deps = list(dependencies or [])
+        node = DAGNode(
+            node_id=agent.agent_id,
+            agent=agent,
+            dependencies=deps,
+            layer=layer
+        )
+        self._nodes[agent.agent_id] = node
+
+    def add_dependency(self, child_id: str, parent_id: str) -> None:
+        """Añade una arista dirigida en el DAG: parent_id -> child_id."""
+        if child_id not in self._nodes:
+            raise KeyError(f"Nodo hijo '{child_id}' no encontrado en el DAG.")
+        if parent_id not in self._nodes[child_id].dependencies:
+            self._nodes[child_id].dependencies.append(parent_id)
 
     def unregister_agent(self, agent_id: str) -> None:
-        """Elimina un agente de la topología."""
-        self._agents.pop(agent_id, None)
+        """Elimina un agente y sus dependencias de la topología."""
+        self._nodes.pop(agent_id, None)
+        for node in self._nodes.values():
+            if agent_id in node.dependencies:
+                node.dependencies.remove(agent_id)
 
     def get_agent(self, agent_id: str) -> Optional[BaseSignalAgent]:
         """Obtiene una referencia al agente por su ID."""
-        return self._agents.get(agent_id)
+        node = self._nodes.get(agent_id)
+        return node.agent if node else None
 
     def toggle_agent(self, agent_id: str, active: bool) -> bool:
         """Control HITL: Activa o pausa un agente individual en caliente."""
-        if agent_id in self._agents:
-            self._agents[agent_id].toggle(active)
+        if agent_id in self._nodes:
+            self._nodes[agent_id].agent.toggle(active)
             return True
         return False
 
     def set_agent_weight(self, agent_id: str, weight: float) -> bool:
         """Ajusta el peso base de un agente."""
-        if agent_id in self._agents:
-            self._agents[agent_id].set_weight(weight)
+        if agent_id in self._nodes:
+            self._nodes[agent_id].agent.set_weight(weight)
             return True
         return False
 
@@ -91,19 +143,79 @@ class DAGSignalOrchestrator:
         """Ajusta el umbral mínimo de consenso para aprobación de señales."""
         self.consensus_threshold = float(np.clip(threshold, 0.1, 1.0))
 
+    def topological_sort(self) -> List[str]:
+        """
+        Calcula el orden de ejecución topológico mediante el Algoritmo de Kahn.
+        Lanza ValueError si se detectan ciclos en la estructura del grafo.
+        """
+        nodes = self._nodes
+        if not nodes:
+            return []
+
+        in_degree = {nid: 0 for nid in nodes}
+        adj: Dict[str, List[str]] = {nid: [] for nid in nodes}
+
+        for child_id, node in nodes.items():
+            valid_deps = [dep for dep in node.dependencies if dep in nodes]
+            in_degree[child_id] = len(valid_deps)
+            for parent_id in valid_deps:
+                adj[parent_id].append(child_id)
+
+        queue = [nid for nid, deg in in_degree.items() if deg == 0]
+        sorted_order: List[str] = []
+
+        while queue:
+            curr = queue.pop(0)
+            sorted_order.append(curr)
+            for neighbor in adj.get(curr, []):
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
+
+        if len(sorted_order) != len(nodes):
+            unresolved = [nid for nid, deg in in_degree.items() if deg > 0]
+            raise ValueError(f"Ciclo detectado en la topología del DAG. Nodos no resueltos: {unresolved}")
+
+        return sorted_order
+
+    def get_execution_stages(self) -> List[List[str]]:
+        """
+        Calcula etapas ordenadas de ejecución (stages) para paralelismo o propagación secuencial.
+        Cada etapa contiene nodos cuyas dependencias fueron computadas en etapas previas.
+        """
+        order = self.topological_sort()
+        nodes = self._nodes
+        if not nodes:
+            return []
+
+        node_levels: Dict[str, int] = {}
+        for nid in order:
+            deps = [d for d in nodes[nid].dependencies if d in nodes]
+            if not deps:
+                node_levels[nid] = 0
+            else:
+                node_levels[nid] = max(node_levels[d] for d in deps) + 1
+
+        max_level = max(node_levels.values()) if node_levels else 0
+        stages: List[List[str]] = [[] for _ in range(max_level + 1)]
+        for nid in order:
+            stages[node_levels[nid]].append(nid)
+
+        return stages
+
     # -------------------------------------------------------------------------
     # Ciclo de Inferencia del DAG
     # -------------------------------------------------------------------------
     def run_inference_cycle(self, market_data: Any) -> VectorAlpha:
         """
-        Ejecuta un ciclo completo de inferencia a través de los nodos del DAG.
+        Ejecuta un ciclo completo de inferencia a través de las etapas del DAG.
         """
         t_start = time.perf_counter_ns()
         self.cycle_count += 1
 
-        all_agents = self._agents
+        all_nodes = self._nodes
 
-        if not all_agents or not any(a.active for a in all_agents.values()):
+        if not all_nodes or not any(node.agent.active for node in all_nodes.values()):
             t_end = time.perf_counter_ns()
             elapsed_ms = (t_end - t_start) / 1_000_000.0
             vector = VectorAlpha(
@@ -114,16 +226,22 @@ class DAGSignalOrchestrator:
                 inference_cycle_ms=elapsed_ms,
                 decision="ALL_AGENTS_PAUSED",
                 regime_state="UNKNOWN",
-                agent_proposals={aid: a.evaluate(market_data).to_dict() for aid, a in all_agents.items()},
+                agent_proposals={nid: node.agent.evaluate(market_data).to_dict() for nid, node in all_nodes.items()},
                 agent_weights={}
             )
             self._record_telemetry(vector, elapsed_ms)
             return vector
 
-        # 1. Ejecución de Agentes (los inactivos devuelven status PAUSED_BY_OPERATOR)
+        # 1. Ejecución ordenada por etapas topológicas con inyección de upstream context
+        stages = self.get_execution_stages()
         proposals: Dict[str, AgentProposal] = {}
-        for aid, agent in all_agents.items():
-            proposals[aid] = agent.evaluate(market_data)
+
+        for stage in stages:
+            for aid in stage:
+                node = self._nodes[aid]
+                agent = node.agent
+                upstream_ctx = {dep: proposals[dep] for dep in node.dependencies if dep in proposals}
+                proposals[aid] = agent.evaluate(market_data, upstream_proposals=upstream_ctx)
 
         # 2. Extracción del Estado de Régimen
         regime_state = self._extract_regime_state(proposals)
@@ -298,6 +416,20 @@ class DAGSignalOrchestrator:
                 "last_confidence": agent.last_proposal.confidence if agent.last_proposal else 0.0
             }
 
+        # Generar aristas y orden de ejecución formal del DAG
+        edges = []
+        for nid, node in self._nodes.items():
+            for dep in node.dependencies:
+                if dep in self._nodes:
+                    edges.append({"source": dep, "target": nid})
+
+        try:
+            topo_order = self.topological_sort()
+            stages = self.get_execution_stages()
+        except ValueError:
+            topo_order = list(self._nodes.keys())
+            stages = [list(self._nodes.keys())]
+
         return {
             "pipeline_status": "ACTIVE" if any(a.active for a in self._agents.values()) else "PAUSED",
             "synthesis_algorithm": self.synthesis_algorithm,
@@ -306,6 +438,12 @@ class DAGSignalOrchestrator:
             "avg_latency_ms": float(np.round(avg_lat, 2)),
             "p99_latency_ms": float(np.round(p99, 2)),
             "nodes": nodes_status,
+            "topology": {
+                "nodes": {nid: node.to_dict() for nid, node in self._nodes.items()},
+                "edges": edges,
+                "execution_order": topo_order,
+                "execution_stages": stages
+            },
             "last_vector_alpha": self.last_vector_alpha.to_dict() if self.last_vector_alpha else None,
             "recent_history": self._history[-10:]
         }

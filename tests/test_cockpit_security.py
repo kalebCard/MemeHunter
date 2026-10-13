@@ -107,3 +107,23 @@ def test_cors_unauthorized_origin_fallback():
     # Debe degradar al origen local primario seguro, nunca al origen malicioso
     assert sent_headers["Access-Control-Allow-Origin"] == "http://127.0.0.1:8088"
     assert sent_headers["Access-Control-Allow-Origin"] != "https://malicious-website.com"
+
+
+def test_dag_endpoints_require_authentication():
+    """PB-133: Valida que endpoints /api/dag/* exijan autenticación Bearer y rechacen sin token."""
+    mock_handler = MagicMock(spec=CockpitAPIHandler)
+    mock_handler.headers = {}
+    mock_handler.client_address = ("127.0.0.1", 54321)
+    mock_handler.path = "/api/dag/toggle-node"
+
+    sent_responses = []
+    mock_handler._send_json = lambda data, status_code=200: sent_responses.append((data, status_code))
+    mock_handler._check_auth = CockpitAPIHandler._check_auth.__get__(mock_handler)
+    mock_handler.do_POST = CockpitAPIHandler.do_POST.__get__(mock_handler)
+
+    mock_handler.do_POST()
+
+    assert len(sent_responses) == 1
+    err_body, status_code = sent_responses[0]
+    assert status_code == 401
+    assert "No autorizado" in err_body.get("error", "")

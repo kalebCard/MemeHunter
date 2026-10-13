@@ -17,6 +17,8 @@ import urllib.request
 import urllib.error
 from typing import Dict, Any, Optional
 
+from portfolio.secrets_vault import get_secret
+
 logger = logging.getLogger("FreqtradeClient")
 
 
@@ -34,10 +36,10 @@ class FreqtradeRestClient:
         api_token: Optional[str] = None,
         timeout_sec: float = 3.0
     ):
-        self.base_url = (base_url or os.getenv("FREQTRADE_API_URL", "http://127.0.0.1:8081")).rstrip("/")
-        self.username = username or os.getenv("FREQTRADE_API_USER", "admin")
-        self.password = password or os.getenv("FREQTRADE_API_PASSWORD", "MemeHunter2026!")
-        self.api_token = api_token or os.getenv("FREQTRADE_API_TOKEN")
+        self.base_url = (base_url or get_secret("FREQTRADE_API_URL") or "http://127.0.0.1:8081").rstrip("/")
+        self.username = username or get_secret("FREQTRADE_API_USER") or "admin"
+        self.password = password or get_secret("FREQTRADE_API_PASSWORD") or ""
+        self.api_token = api_token or get_secret("FREQTRADE_API_TOKEN")
         self.timeout_sec = float(timeout_sec)
 
     def _build_headers(self) -> Dict[str, str]:

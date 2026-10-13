@@ -356,9 +356,8 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
             )
             return
 
-        # 2. Exigir autenticación Bearer para endpoints protegidos (permitir control local de DAG)
-        is_dag_control = self.path.startswith("/api/dag/")
-        if not is_dag_control and not self._check_auth():
+        # 2. Exigir autenticación Bearer estricta para todos los endpoints protegidos de mutación (PB-133)
+        if not self._check_auth():
             return
 
         if self.path == "/api/trigger-loop":
@@ -847,8 +846,15 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
     # HANDLERS DAG MULTI-AGENTE & ORQUESTACIÓN VISUAL (SPRINT 32 PB-113)
     # -------------------------------------------------------------------------
     def _handle_dag_topology(self):
-        """Retorna la topología canónica y metadatos de los nodos del DAG."""
-        self._send_json(DAG_TOPOLOGY)
+        """Retorna la topología canónica y metadatos de los nodos del DAG con soporte de grafo en vivo."""
+        topo = dict(DAG_TOPOLOGY)
+        try:
+            with dag_execution_lock:
+                live_topo = global_dag_orchestrator.get_telemetry().get("topology", {})
+                topo["live_graph"] = live_topo
+        except Exception as e:
+            logger.debug(f"Live graph non-critical error: {e}")
+        self._send_json(topo)
 
     def _handle_dag_status(self):
         """Retorna el estado reactivo, latencias y último VectorAlpha del DAG."""
@@ -947,7 +953,7 @@ def run_server(port: int = 8088):
     API_SECRET_TOKEN = resolve_and_validate_token(enforce_production=True)
     masked_fingerprint = hashlib.sha256(API_SECRET_TOKEN.encode("utf-8")).hexdigest()[:12]
 
-    host = os.getenv("DASHBOARD_HOST", "0.0.0.0")
+    host = os.getenv("DASHBOARD_HOST", "127.0.0.1")
     server_address = (host, port)
     httpd = ThreadingHTTPServer(server_address, CockpitAPIHandler)
     print("=" * 80)

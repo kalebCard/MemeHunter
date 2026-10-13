@@ -223,6 +223,7 @@ class MemeHunter_ApexOmegaAlpha(IStrategy):
         self.profitability_gate = PreTradeProfitabilityGate() if PreTradeProfitabilityGate is not None else None
         self.kill_switch = EmergencyKillSwitch() if EmergencyKillSwitch is not None else None
         self.gatekeeper = ExecutionGatekeeper(kill_switch=self.kill_switch) if ExecutionGatekeeper is not None else None
+        self.data_firewall = DataFirewallGuard() if DataFirewallGuard is not None else None
         self.compounding_manager = ExponentialCompoundingManager() if ExponentialCompoundingManager is not None else None
 
     # -----------------------------------------------------
@@ -577,3 +578,69 @@ class MemeHunter_ApexOmegaAlpha(IStrategy):
                 return False, f"GATEKEEPER_BLOCKED: {reason}"
 
         return True, "APPROVED_FOR_DISPATCH"
+
+    # -----------------------------------------------------
+    # 8. HOOKS CANÓNICOS DE CICLO DE VIDA EN FREQTRADE (PB-132)
+    # -----------------------------------------------------
+    def confirm_trade_entry(
+        self,
+        pair: str,
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        current_time: datetime,
+        entry_tag: Optional[str],
+        side: str,
+        **kwargs
+    ) -> bool:
+        """
+        PB-132: Hook canónico de Freqtrade que ejecuta en runtime las 4 Capas de Protección:
+        1. Cortafuegos de Datos (DataFirewallGuard)
+        2. Sesgo Asíncrono del Cerebro Lento (BiasStore)
+        3. Filtro Matemático de Rentabilidad Pre-Trade (PreTradeProfitabilityGate)
+        4. Interceptor Final de Broker y Kill Switch (ExecutionGatekeeper)
+        """
+        try:
+            open_trades = len(Trade.get_trades_proxy(is_open=True))
+        except Exception:
+            open_trades = 0
+
+        order_size_usdt = float(amount * rate) if (amount and rate) else 33.0
+        normalized_side = "LONG" if side.lower() in ("buy", "long") else "SHORT"
+
+        ok, reason = self.check_pre_trade_filters(
+            pair=pair,
+            current_price=rate,
+            side=normalized_side,
+            spread_pct=0.0010,
+            order_size_usdt=order_size_usdt,
+            current_open_trades=open_trades
+        )
+
+        if not ok:
+            LOG.warning(f"🚫 [PB-132] Entrada RECHAZADA por compuertas [{pair} {side}]: {reason}")
+            return False
+
+        LOG.info(f"✅ [PB-132] Entrada APROBADA por las 4 capas [{pair} {side}]: {reason}")
+        return True
+
+    def confirm_trade_exit(
+        self,
+        pair: str,
+        trade: 'Trade',
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        exit_reason: str,
+        current_time: datetime,
+        **kwargs
+    ) -> bool:
+        """
+        PB-132: Hook canónico de Freqtrade para auditar salidas y acelerar liquidaciones
+        si el Kill Switch de emergencia está activo.
+        """
+        if self.kill_switch is not None and not self.kill_switch.can_open_new_position():
+            LOG.critical(f"🛑 [PB-132] Salida priorizada bajo Kill Switch de Emergencia [{pair}]: {exit_reason}")
+        return True

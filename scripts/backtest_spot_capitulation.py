@@ -19,8 +19,9 @@ if str(ROOT) not in sys.path:
 sys.path.insert(0, str(ROOT / "user_data" / "strategies"))
 
 from MemeHunterSpot_CapitulationAlpha import MemeHunterSpot_CapitulationAlpha
+from data_engine.paths import get_futures_data_dir
 
-DATA_DIR = Path("C:/meme_hunter_data/binance/futures")
+DATA_DIR = get_futures_data_dir()
 
 
 class MockTrade:

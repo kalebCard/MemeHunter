@@ -102,3 +102,29 @@ def test_bias_store_veto_and_side_mismatch(temp_bias_store):
     is_auth, reason = temp_bias_store.is_authorized("BONK/USDT", side="LONG")
     assert is_auth is False
     assert "POSTURE_MISMATCH" in reason
+
+
+def test_bias_store_concurrent_multithread_writes(temp_bias_store):
+    """PB-135: Valida que escrituras concurrentes simultáneas no provoquen colisiones ni WinError 32."""
+    import concurrent.futures
+
+    symbols = [f"COIN_{i}/USDT" for i in range(12)]
+    future = datetime.now(timezone.utc) + timedelta(hours=4)
+
+    def write_worker(sym):
+        bias = MarketBiasSchema(
+            symbol=sym,
+            posture=MarketBiasPosture.ALLOW_LONG,
+            confidence=0.80,
+            consensus_score=0.85,
+            valid_until_utc=future.isoformat()
+        )
+        return temp_bias_store.save_bias(bias)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        results = list(executor.map(write_worker, symbols))
+
+    assert all(results) is True
+    all_biases = temp_bias_store.get_all_biases()
+    for sym in symbols:
+        assert sym in all_biases

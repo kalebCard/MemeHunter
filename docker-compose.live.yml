@@ -7,7 +7,7 @@ services:
     container_name: meme_hunter_live
     volumes:
       - "./user_data:/freqtrade/user_data"
-      - "C:/meme_hunter_data:/freqtrade/user_data/data"
+      - "${MEME_DATA_DIR:-./data}:/freqtrade/user_data/data"
       - "./scripts:/freqtrade/scripts"
     ports:
       - "127.0.0.1:8080:8080"

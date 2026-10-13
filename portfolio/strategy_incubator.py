@@ -15,12 +15,15 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 import json
 import os
+import logging
 import numpy as np
 import pandas as pd
 
 from portfolio.hrp_allocator import HierarchicalRiskParityAllocator
 from portfolio.riskfolio_allocator import RiskfolioPortfolioAllocator
 from portfolio.atomic_io import atomic_write_json
+
+logger = logging.getLogger("StrategyLifecycleIncubator")
 
 
 class StrategyLifecycleStatus(str, Enum):
@@ -210,14 +213,19 @@ class StrategyLifecycleIncubator:
         return suggested_weights
 
     def save_to_db(self, db_path: str = "portfolio/alpha_factory.db") -> None:
-        """Persiste todas las estrategias en la base de datos SQLite WAL de forma atómica."""
+        """Persiste todas las estrategias y asignaciones en la base de datos SQLite WAL de forma atómica."""
         try:
-            from portfolio.db_schema import init_alpha_factory_db, upsert_strategy_db
+            from portfolio.db_schema import init_alpha_factory_db, upsert_strategy_db, record_allocations_db
             init_alpha_factory_db(db_path)
+            status_map = {}
+            weights_map = {}
             for sid, rec in self.strategies.items():
                 upsert_strategy_db(asdict(rec), db_path=db_path)
+                status_map[sid] = rec.status.value if hasattr(rec.status, 'value') else str(rec.status)
+                weights_map[sid] = float(rec.target_capital_weight)
+            if weights_map:
+                record_allocations_db(weights_map, status_map, db_path=db_path)
         except Exception as e:
-            logger = logging.getLogger("StrategyLifecycleIncubator")
             logger.warning(f"Error al guardar estado en SQLite {db_path}: {e}")
 
     def load_from_db(self, db_path: str = "portfolio/alpha_factory.db") -> bool:

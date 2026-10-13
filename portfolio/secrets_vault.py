@@ -11,7 +11,7 @@ import os
 import json
 import base64
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -143,3 +143,37 @@ def get_vault() -> SecretVaultManager:
 def get_secret(key: str, default: Optional[str] = None) -> Optional[str]:
     """Acceso rápido unificado para consultar un secreto del sistema."""
     return get_vault().get_secret(key, default)
+
+
+def validate_production_secrets(
+    required_keys: Optional[List[str]] = None,
+    fail_fast: bool = False
+) -> Dict[str, bool]:
+    """
+    Valida la disponibilidad de secretos obligatorios en producción sin exponer sus valores.
+    Si fail_fast es True y falta alguna clave crítica, levanta un RuntimeError.
+    """
+    default_required = [
+        "BINANCE_API_KEY",
+        "BINANCE_API_SECRET",
+        "FREQTRADE_API_PASSWORD"
+    ]
+    keys_to_check = required_keys or default_required
+    vault = get_vault()
+    status = {}
+    missing = []
+
+    for k in keys_to_check:
+        val = vault.get_secret(k)
+        has_secret = bool(val and str(val).strip())
+        status[k] = has_secret
+        if not has_secret:
+            missing.append(k)
+
+    if fail_fast and missing:
+        raise RuntimeError(
+            f"Fallo de seguridad Fail-Fast: Faltan secretos críticos en producción: {missing}"
+        )
+
+    return status
+

@@ -20,9 +20,11 @@ import pandas as pd
 import polars as pl
 import logging
 
+from data_engine.paths import get_futures_data_dir
+
 logger = logging.getLogger("PolarsDataFeed")
 
-DEFAULT_DATA_DIR = Path("C:/meme_hunter_data/binance/futures")
+DEFAULT_DATA_DIR = get_futures_data_dir()
 
 
 def load_feather_polars(file_path: Union[str, Path]) -> pl.DataFrame:

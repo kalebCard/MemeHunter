@@ -17,9 +17,11 @@ from typing import Dict, List, Optional, Any
 import pandas as pd
 import numpy as np
 
+from data_engine.paths import get_futures_data_dir
+
 logger = logging.getLogger("AutoDataSync")
 
-DEFAULT_DATA_DIR = Path("C:/meme_hunter_data/binance/futures")
+DEFAULT_DATA_DIR = get_futures_data_dir()
 
 # Mapeo de pares institucionales a símbolos de la API de Binance Futures
 SYMBOL_MAP = {

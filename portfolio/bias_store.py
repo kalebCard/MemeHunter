@@ -12,49 +12,96 @@ from typing import Dict, Any, Optional, Tuple
 
 from validation.schemas import MarketBiasSchema, MarketBiasPosture
 
+try:
+    from filelock import FileLock, Timeout
+except ImportError:
+    class FileLock:  # type: ignore
+        def __init__(self, lock_file, timeout=None):
+            pass
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
+    class Timeout(Exception):  # type: ignore
+        pass
+
 logger = logging.getLogger("BiasStore")
 
 
 class BiasStore:
     """
     Repositorio atómico para autorizaciones y sesgos directivos emitidos por el Cerebro Lento.
-    Permite que el Cerebro Rápido consulte en microsegundos si un par está autorizado para operar.
+    Permite que el Cerebro Rápido consulte en microsegundos si un par está autorizado para operar,
+    protegido por FileLock para evitar WinError 32 y colisiones entre procesos.
     """
 
     DEFAULT_PATH = os.path.join("portfolio", "market_bias.json")
+    DEFAULT_DB_PATH = os.path.join("portfolio", "alpha_factory.db")
 
-    def __init__(self, filepath: Optional[str] = None):
+    def __init__(self, filepath: Optional[str] = None, db_path: Optional[str] = None):
         self.filepath = filepath or self.DEFAULT_PATH
+        self.lock_path = f"{self.filepath}.lock"
+        self.db_path = db_path if db_path is not None else self.DEFAULT_DB_PATH
 
     def save_bias(self, bias: MarketBiasSchema) -> bool:
         """
         Persiste una autorización de forma atómica en el archivo JSON multi-símbolo.
-        Garantiza que no existan lecturas concurrentes corruptas.
+        Garantiza que no existan lecturas concurrentes corruptas utilizando FileLock.
         """
         try:
             os.makedirs(os.path.dirname(self.filepath) or ".", exist_ok=True)
-            existing_data: Dict[str, Any] = {}
+            lock = FileLock(self.lock_path, timeout=5.0)
 
-            if os.path.exists(self.filepath):
+            with lock:
+                existing_data: Dict[str, Any] = {}
+                if os.path.exists(self.filepath):
+                    try:
+                        with open(self.filepath, "r", encoding="utf-8") as f:
+                            existing_data = json.load(f)
+                    except Exception:
+                        existing_data = {}
+
+                if "biases" not in existing_data or not isinstance(existing_data["biases"], dict):
+                    existing_data["biases"] = {}
+
+                # Almacenar o actualizar el sesgo del símbolo
+                symbol_key = bias.symbol.upper()
+                existing_data["biases"][symbol_key] = bias.model_dump()
+                existing_data["last_updated_utc"] = datetime.now(timezone.utc).isoformat()
+
+                # Escritura atómica vía archivo temporal y rename protegido
+                temp_file = f"{self.filepath}.tmp.{os.getpid()}"
+                with open(temp_file, "w", encoding="utf-8") as f:
+                    json.dump(existing_data, f, indent=2)
+
+                # Intentos de reemplazo ante bloqueos transitorios en Windows
+                replaced = False
+                for attempt in range(5):
+                    try:
+                        os.replace(temp_file, self.filepath)
+                        replaced = True
+                        break
+                    except PermissionError:
+                        import time
+                        time.sleep(0.02 * (attempt + 1))
+
+                if not replaced and os.path.exists(temp_file):
+                    os.replace(temp_file, self.filepath)
+
+            # Sincronización canónica en SQLite WAL (PB-139)
+            if self.db_path:
                 try:
-                    with open(self.filepath, "r", encoding="utf-8") as f:
-                        existing_data = json.load(f)
-                except Exception:
-                    existing_data = {}
-
-            if "biases" not in existing_data or not isinstance(existing_data["biases"], dict):
-                existing_data["biases"] = {}
-
-            # Almacenar o actualizar el sesgo del símbolo
-            symbol_key = bias.symbol.upper()
-            existing_data["biases"][symbol_key] = bias.model_dump()
-            existing_data["last_updated_utc"] = datetime.now(timezone.utc).isoformat()
-
-            # Escritura atómica vía archivo temporal y rename
-            temp_file = f"{self.filepath}.tmp.{os.getpid()}"
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(existing_data, f, indent=2)
-            os.replace(temp_file, self.filepath)
+                    from portfolio.db_schema import upsert_market_bias_db, init_alpha_factory_db
+                    init_alpha_factory_db(self.db_path)
+                    upsert_market_bias_db(
+                        symbol=bias.symbol,
+                        posture=bias.posture.value if hasattr(bias.posture, 'value') else str(bias.posture),
+                        confidence=bias.confidence,
+                        valid_until_utc=bias.valid_until_utc,
+                        db_path=self.db_path
+                    )
+                except Exception as dbe:
+                    logger.debug(f"Sync a SQLite no completada: {dbe}")
 
             logger.info(
                 f"🎯 SESGO ACTUALIZADO [{bias.symbol}]: Postura={bias.posture.value}, "
@@ -68,6 +115,21 @@ class BiasStore:
     def get_bias(self, symbol: str) -> Optional[MarketBiasSchema]:
         """Recupera la directiva activa de un símbolo validada con Pydantic."""
         if not os.path.exists(self.filepath):
+            # Fallback a SQLite WAL si el archivo JSON no existe (PB-139)
+            if self.db_path and os.path.exists(self.db_path):
+                try:
+                    from portfolio.db_schema import get_market_bias_db
+                    row = get_market_bias_db(symbol, db_path=self.db_path)
+                    if row:
+                        return MarketBiasSchema(
+                            symbol=row["symbol"],
+                            posture=MarketBiasPosture(row["posture"]),
+                            confidence=float(row["confidence"]),
+                            consensus_score=float(row.get("consensus_score", row["confidence"])),
+                            valid_until_utc=row["valid_until_utc"]
+                        )
+                except Exception as ex:
+                    logger.debug(f"Error parseando fallback de SQLite: {ex}")
             return None
 
         try:
@@ -152,9 +214,10 @@ class BiasStore:
         return True, "AUTHORIZED"
 
     def clear(self) -> None:
-        """Limpia el almacén de sesgos (útil para tests)."""
-        if os.path.exists(self.filepath):
-            try:
-                os.remove(self.filepath)
-            except Exception:
-                pass
+        """Limpia el almacén de sesgos y sus bloqueos (útil para tests)."""
+        for p in (self.filepath, self.lock_path):
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass

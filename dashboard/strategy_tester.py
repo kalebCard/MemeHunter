@@ -21,9 +21,9 @@ import scipy.stats as ss
 from mining.formula_parser import FormulaASTParser
 from mining.alpha_grammar import AlphaGrammar
 from data_engine.slippage_engine import MicrostructureSlippageEngine
-from portfolio.order_router import SmartExitRouter, ExitUrgency, OrderExecutionStage
+from data_engine.paths import get_futures_data_dir
 
-DATA_DIR = Path("C:/meme_hunter_data/binance/futures")
+DATA_DIR = get_futures_data_dir()
 
 
 def validate_formula_ast(formula_str: str) -> Dict[str, Any]:

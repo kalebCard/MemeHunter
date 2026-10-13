@@ -289,10 +289,27 @@ def generate_ensemble_strategy_file(
             formula_map["ALPHA_DEFAULT_01"] = "ts_rank(close, 14)"
             formula_map["ALPHA_DEFAULT_02"] = "ts_zscore((high - low), 10)"
 
+    def _is_safe_factor_formula(formula: str) -> bool:
+        """
+        PB-134: Valida que la fórmula pertenezca estrictamente a la gramática formal AlphaGrammar.
+        Neutraliza intentos de inyección de código arbitrario (RCE) de forma preventiva.
+        """
+        try:
+            from mining.formula_parser import FormulaASTParser
+            FormulaASTParser.parse(formula)
+            return True
+        except Exception:
+            return False
+
     def _is_valid_syntax(code: str) -> bool:
         try:
             import ast
-            ast.parse(code)
+            tree = ast.parse(code)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Attribute) and (node.attr.startswith("__") or "import" in node.attr):
+                    return False
+                if isinstance(node, ast.Name) and (node.id.startswith("__") or node.id in ("eval", "exec", "compile", "open", "system")):
+                    return False
             return True
         except Exception:
             return False
@@ -314,7 +331,11 @@ def generate_ensemble_strategy_file(
             if any(c in cand.lower() for c in valid_cols):
                 raw_formula = cand
             else:
-                raw_formula = "dataframe['close'].pct_change().fillna(0.0)"
+                raw_formula = "ts_delta(close, 1)"
+
+        # PB-134: Sanitización Zero-Eval obligatoria
+        if not _is_safe_factor_formula(raw_formula):
+            raw_formula = "ts_delta(close, 1)"
 
         py_formula = compile_ast_formula_to_python(raw_formula)
         # Adaptar referencias de columnas a dataframe['col']
@@ -323,7 +344,7 @@ def generate_ensemble_strategy_file(
             py_formula = re.sub(rf'\b{col}\b', f"dataframe['{col}']", py_formula)
 
         if not _is_valid_syntax(py_formula) or "dataframe['" not in py_formula:
-            py_formula = "dataframe['close'].pct_change().fillna(0.0)"
+            py_formula = "(dataframe['close'] - dataframe['close'].shift(1)).fillna(0.0)"
 
         calc_lines.append(f"        # Factor {fid} (Peso HRP: {weight:.4f})")
         calc_lines.append(f"        f_val_{fid} = ({py_formula})")

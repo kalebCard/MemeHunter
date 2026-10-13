@@ -187,6 +187,44 @@ class MemeHunterSpot_CapitulationAlpha(IStrategy):
 
         return True, "APPROVED"
 
+    def confirm_trade_entry(
+        self,
+        pair: str,
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        current_time: datetime,
+        entry_tag: Optional[str],
+        side: str,
+        **kwargs
+    ) -> bool:
+        """PB-132: Hook canónico Freqtrade para auditar compuertas antes de emitir la orden."""
+        ok, reason = self.check_pre_trade_filters(
+            pair=pair,
+            current_price=rate,
+            spread_pct=0.0010
+        )
+        if not ok:
+            LOG.warning(f"🚫 [PB-132] Entrada rechazada [{pair}]: {reason}")
+            return False
+        return True
+
+    def confirm_trade_exit(
+        self,
+        pair: str,
+        trade: 'Trade',
+        order_type: str,
+        amount: float,
+        rate: float,
+        time_in_force: str,
+        exit_reason: str,
+        current_time: datetime,
+        **kwargs
+    ) -> bool:
+        """PB-132: Hook canónico Freqtrade para auditar salidas."""
+        return True
+
     # Parámetros optimizados con rigor cuantitativo
     drop_threshold = DecimalParameter(-0.25, -0.12, default=-0.14, space="buy", optimize=True)
     rsi_capitulation = IntParameter(15, 26, default=24, space="buy", optimize=True)
