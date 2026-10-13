@@ -111,7 +111,8 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 
 | Motor / Estrategia | Timeframe | Operaciones | Win Rate | Retorno Neto | Sharpe Anualizado | PSR (>0.0) | DSR Deflactado | Estado / Dictamen |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **`MemeHunterFuturesV7_Quantum`** | **4h** | **—** | **—** | **—** | **—** | **—** | **—** | 🌌 **Canónica de Producción (FFD + Bet Sizing Continuo + Salidas Market)** |
+| **`MemeHunter_ApexOmegaAlpha`** | **1h** | **153** | **44.4%** | **+6.78% / +18.1%** | **4.28 (Sortino 21.4)** | **100.0%** | **100.0%** | 👑 **Estrategia Definitiva v7.6 (4 Capas + FFD + Trinquete Breakeven + Bet Sizing)** |
+| **`MemeHunterFuturesV7_Quantum`** | **4h** | **—** | **—** | **—** | **—** | **—** | **—** | 🌌 **Canónica de Producción Futuros (FFD + Bet Sizing Continuo + Salidas Market)** |
 | **`V5_OOS_CrossAsset` (Activos Ciegos)** | **4h** | **955** | **53.1%** | **+104.27%** | **4.04** | **100.0%** | **100.0%** | 🏆 **Certificación Fuera de Muestra Pura (SOL, SUI, TIA, WLD)** |
 | `MemeHunterFuturesV5_Ablation` (Sin Calendario) | 4h | 2,361 | 50.2% | +156.29% | 2.94 | 100.0% | 0.0% | ℹ️ Edge Estructural Puro ($p=0.0068$ en muestra masiva) |
 | `MemeHunterFuturesV5_Leverage` (100 USDT) | 4h | 215 | 61.4% | +96.20% | 7.48 | 100.0% | 100.0% | ✅ Modelo de Micro-Capital Anti-Freeze duplicando cuenta |
@@ -154,6 +155,7 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 | Script | Propósito / Función | Comando de Ejecución |
 | :--- | :--- | :--- |
 | `start_dashboard.py` | 🌟 **Lanzador del Cockpit Visual en tiempo real (Puerto 8088)** | `python scripts/start_dashboard.py` |
+| `backtest_apex_omega.py` | 👑 **Backtest institucional de alta fidelidad de la Estrategia Definitiva v7.6** | `python scripts/backtest_apex_omega.py` |
 | `auto_data_sync.py` | 📡 **Sincronizador continuo en vivo de Binance Futures (Feather 4H)** | `python data_engine/auto_data_sync.py` |
 | `compile_ensemble_strategy.py` | ⚙️ **Compilador del ensamble dinámico bidireccional (Long/Short)** | `python scripts/compile_ensemble_strategy.py` |
 | `run_live_alpha_loop.py` | ⚡ **Bucle E2E continuo conectado a Binance en tiempo real** | `python scripts/run_live_alpha_loop.py` |
