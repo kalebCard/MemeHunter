@@ -1,5 +1,5 @@
 """
-test_cli.py - Pruebas Unitarias de la Interfaz de Línea de Comandos (meme-hunter v8.0).
+tests/unit/test_cli.py - Pruebas Unitarias de la Interfaz de Línea de Comandos (meme-hunter v8.0).
 """
 
 from typer.testing import CliRunner

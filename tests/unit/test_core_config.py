@@ -1,15 +1,9 @@
 """
-test_core_config.py - Pruebas Unitarias de Configuración Tipada (Pydantic Settings), Tipos y Fail-Fast.
+tests/unit/test_core_config.py - Pruebas Unitarias de Configuración Tipada (Pydantic Settings), Tipos y Fail-Fast.
 """
 
-import sys
-from pathlib import Path
 import pytest
 from pydantic import ValidationError
-
-# Asegurar importación de src/meme_hunter
-REPO_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from meme_hunter.core.config import AppSettings, find_repo_root
 from meme_hunter.core.exceptions import (
@@ -37,23 +31,16 @@ def test_repo_root_detection():
     assert (root / "user_data").exists() or (root / "pyproject.toml").exists()
 
 
-def test_app_settings_test_mode():
+def test_app_settings_test_mode(test_settings):
     """Valida la instanciación de configuración en modo test con rutas canónicas."""
-    settings = AppSettings(
-        ENV="test",
-        BINANCE_API_KEY="test_key",
-        BINANCE_API_SECRET="test_secret",
-        FREQTRADE_API_PASSWORD="test_password",
-        DASHBOARD_SECRET_KEY="test_dash_key",
-    )
-    assert settings.ENV == "test"
-    assert settings.APP_NAME == "Meme Hunter"
-    assert settings.ROOT_DIR.exists()
-    assert settings.MAX_CONCURRENT_POSITIONS == 3
-    assert settings.GLOBAL_KILL_SWITCH_DRAWDOWN == 0.25
+    assert test_settings.ENV == "test"
+    assert test_settings.APP_NAME == "Meme Hunter"
+    assert test_settings.ROOT_DIR.exists()
+    assert test_settings.MAX_CONCURRENT_POSITIONS == 3
+    assert test_settings.GLOBAL_KILL_SWITCH_DRAWDOWN == 0.25
 
     # En modo test no debe fallar la preparación para producción
-    settings.validate_production_readiness()
+    test_settings.validate_production_readiness()
 
 
 def test_app_settings_production_fail_fast_missing_secrets():
@@ -83,7 +70,6 @@ def test_app_settings_production_success_with_secrets():
         FREQTRADE_API_PASSWORD="valid_freq_password",
         DASHBOARD_SECRET_KEY="valid_dashboard_secret",
     )
-    # No debe levantar ninguna excepción
     settings.validate_production_readiness()
     assert settings.get_raw_secret(settings.BINANCE_API_KEY) == "valid_binance_key"
 
@@ -102,11 +88,9 @@ def test_domain_types_and_immutability():
     assert sig.signal_value == 0.85
     assert sig.regime == MarketRegime.BULL_MOMENTUM
 
-    # Intentar mutar debe disparar error por frozen=True
     with pytest.raises(ValidationError):
         sig.signal_value = -0.50  # type: ignore
 
-    # Intentar pasar campos fuera del contrato debe fallar por extra="forbid"
     with pytest.raises(ValidationError):
         AgentSignalDTO(
             symbol="PEPE/USDT:USDT",
@@ -130,7 +114,6 @@ def test_trade_order_dto_validation():
     assert order.side == OrderSide.SHORT
     assert order.leverage == 1.5
 
-    # Cantidad <= 0 debe fallar
     with pytest.raises(ValidationError):
         TradeOrderDTO(
             symbol="SHIB/USDT:USDT",

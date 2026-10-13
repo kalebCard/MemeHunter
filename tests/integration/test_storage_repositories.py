@@ -1,20 +1,13 @@
 """
-test_storage_repositories.py - Pruebas Unitarias del Esquema y Repositorios SQLite WAL.
+tests/integration/test_storage_repositories.py - Pruebas de Integración de Persistencia SQLite WAL.
 """
 
-import sys
-import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import pytest
 
-# Asegurar importación de src/meme_hunter
-REPO_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO_ROOT / "src"))
-
 from meme_hunter.core.types import StrategyStatus
 from meme_hunter.storage.db import get_sqlite_connection
-from meme_hunter.storage.schema import init_database
 from meme_hunter.storage.repositories import (
     StrategyRepository,
     MarketBiasRepository,
@@ -22,24 +15,9 @@ from meme_hunter.storage.repositories import (
 )
 
 
-@pytest.fixture
-def temp_db_path():
-    """Genera un archivo temporal de base de datos para pruebas aisladas."""
-    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
-        path = f.name
-    init_database(path)
-    yield path
-    try:
-        Path(path).unlink(missing_ok=True)
-        Path(path + "-wal").unlink(missing_ok=True)
-        Path(path + "-shm").unlink(missing_ok=True)
-    except Exception:
-        pass
-
-
-def test_schema_initialization(temp_db_path):
+def test_schema_initialization(temp_wal_db):
     """Verifica que las tablas canónicas se hayan creado correctamente en WAL mode."""
-    conn = get_sqlite_connection(temp_db_path, read_only=True)
+    conn = get_sqlite_connection(temp_wal_db, read_only=True)
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = {r[0] for r in cur.fetchall()}
@@ -57,11 +35,10 @@ def test_schema_initialization(temp_db_path):
     assert expected_tables.issubset(tables)
 
 
-def test_strategy_repository_lifecycle(temp_db_path):
+def test_strategy_repository_lifecycle(temp_wal_db):
     """Verifica inserción, actualización, filtrado y registro de asignaciones en StrategyRepository."""
-    repo = StrategyRepository(db_path=temp_db_path)
+    repo = StrategyRepository(db_path=temp_wal_db)
 
-    # 1. Inserción inicial
     strat_data = {
         "strategy_id": "alpha_001",
         "name": "MemeMomentum_V1",
@@ -78,7 +55,6 @@ def test_strategy_repository_lifecycle(temp_db_path):
     assert retrieved["status"] == "SANDBOX"
     assert retrieved["target_capital_weight"] == 0.25
 
-    # 2. Promoción a LIVE
     strat_data["status"] = StrategyStatus.LIVE
     strat_data["target_capital_weight"] = 0.50
     repo.upsert_strategy(strat_data)
@@ -88,15 +64,13 @@ def test_strategy_repository_lifecycle(temp_db_path):
     assert live_strats[0]["strategy_id"] == "alpha_001"
     assert live_strats[0]["target_capital_weight"] == 0.50
 
-    # 3. Registro de asignaciones
     repo.record_allocations({"alpha_001": 0.50}, status_map={"alpha_001": "LIVE"})
 
 
-def test_market_bias_repository(temp_db_path):
+def test_market_bias_repository(temp_wal_db):
     """Verifica guardado de sesgo, comprobación de TTL y consulta activa."""
-    repo = MarketBiasRepository(db_path=temp_db_path)
+    repo = MarketBiasRepository(db_path=temp_wal_db)
 
-    # 1. Sesgo vigente en el futuro (+2 horas)
     valid_until = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
     repo.save_bias(
         symbol="DOGE/USDT:USDT",
@@ -111,7 +85,6 @@ def test_market_bias_repository(temp_db_path):
     assert bias["confidence"] == 0.88
     assert bias["is_expired"] is False
 
-    # 2. Sesgo caducado en el pasado (-1 hora)
     past_until = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
     repo.save_bias(
         symbol="PEPE/USDT:USDT",
@@ -124,16 +97,15 @@ def test_market_bias_repository(temp_db_path):
     assert expired_bias is not None
     assert expired_bias["is_expired"] is True
 
-    # 3. Consulta de solo activos
     active = repo.get_all_active()
     symbols = [a["symbol"] for a in active]
     assert "DOGE/USDT:USDT" in symbols
     assert "PEPE/USDT:USDT" not in symbols
 
 
-def test_autopsy_repository(temp_db_path):
+def test_autopsy_repository(temp_wal_db):
     """Verifica inserción y lectura de autopsias forenses cognitivas."""
-    repo = AutopsyRepository(db_path=temp_db_path)
+    repo = AutopsyRepository(db_path=temp_wal_db)
 
     verdict = {
         "factor_id": "factor_decay_42",
