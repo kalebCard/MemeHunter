@@ -1,3 +1,16 @@
+---
+id: SPRINT-LLM-002
+title: "Plan Scrum Sprint 2: Motor de Investigación Cuantitativa Aumentado por IA (OpenRouter)"
+category: history
+version: 1.0
+status: COMPLETED
+last_updated: 2026-10-12
+author: Quantitative Engineering & Systems Architecture Team
+references:
+  - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/history/INDEX_HISTORICO.md
+---
+
 # Sprint Backlog: Motor de Investigación Cuantitativa Aumentado por IA (OpenRouter)
 **Proyecto:** MemeHunter Quant Platform  
 **Sprint Name:** Sprint 2 — *LLM-Augmented Autonomous Research & Forensics Engine*  

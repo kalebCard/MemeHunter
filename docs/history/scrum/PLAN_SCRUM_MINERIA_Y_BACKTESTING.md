@@ -1,14 +1,14 @@
 ---
-id: STRAT-PLAN-MINING-001
+id: HIST-SCRUM-002
 title: Plan Scrum Cuantitativo - Fábrica de Minería de Alphas y Backtesting Industrial (Sprints 21 a 24)
-category: strategy
+category: history
 version: 6.0
-status: ACTIVE
+status: COMPLETED
 last_updated: 2026-10-11
 author: Quantitative Engineering & Research Core
 references:
-  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
-  - docs/strategy/SCRUM_PLAN.md
+  - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/history/scrum/SCRUM_PLAN.md
   - docs/architecture/DAS.md
 ---
 

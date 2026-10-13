@@ -1,3 +1,16 @@
+---
+id: SPRINT-AUTO-001
+title: "Plan Scrum Sprint 1: Motor Cuantitativo Auto-Evolutivo & Self-Healing"
+category: history
+version: 1.0
+status: COMPLETED
+last_updated: 2026-10-12
+author: Quantitative Engineering & Systems Architecture Team
+references:
+  - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/history/INDEX_HISTORICO.md
+---
+
 # Sprint Backlog: Transformación a Motor Cuantitativo Auto-Evolutivo
 **Proyecto:** MemeHunter Quant Platform  
 **Sprint Name:** Sprint 1 — *Autonomous Alpha Loop & Self-Healing Engine*  

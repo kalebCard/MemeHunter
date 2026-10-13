@@ -11,20 +11,16 @@ La documentación del proyecto se encuentra estructurada en el directorio [`docs
 * **[Manual Estándar de Ingeniería y Desarrollo (v8.0):](docs/MANUAL_ESTANDAR_DEL_PROYECTO.md)** Norma técnica canónica obligatoria para desarrollo, arquitectura modular, SQLite WAL, estándares de código y testing.
 * **[Manual Maestro Unificado del Sistema (v7.4):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa, estratégica y operativa.
 * **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
-* **Sprints 40-43 (Remediación Crítica, Resiliencia de Concurrencia y Arquitectura v8.0):** [docs/sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md](docs/sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md)
-* **Sprints 36-39 (Arquitectura de 4 Capas: Cortafuegos Pydantic, Sesgo Asíncrono, Trigger Determinista y Kill Switch):** [docs/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md](docs/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md)
-* **Sprints 33-35 (Aceleración Polars/VectorBT, Riskfolio-Lib HERC/CVaR y OpenBB):** [docs/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md](docs/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md)
-* **Sprints 30-32 (Arquitectura Multi-Agente, Orquestador DAG y Cockpit HITL):** [docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md](docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md), [docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md](docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md), [docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md](docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md)
-* **Sprint 29 (Ensamble Bidireccional Long/Short, Sync Binance y Fricción):** [docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md](docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md)
-* **Sprints 25-28 (Hardening del Bucle Autónomo, SQLite WAL & OOS Gating):** [docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md](docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md)
-* **Plan Scrum de Remediación & Hardening (v7.1):** [docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md](docs/sprints/SPRINT_PLAN_REMEDIATION_AND_HARDENING.md)
-* **Arquitectura de Software Auto-Evolutiva (v7.3):** [docs/architecture/DAS_AUTONOMOUS_ENGINE.md](docs/architecture/DAS_AUTONOMOUS_ENGINE.md)
-* **Arquitectura Tradicional (v4.0 - v6.0):** [docs/architecture/DAS.md](docs/architecture/DAS.md)
-* **Sprint 1 (Motor Auto-Evolutivo & Self-Healing):** [docs/sprints/SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md](docs/sprints/SPRINT_AUTONOMOUS_SELF_IMPROVING_ENGINE.md)
-* **Sprint 2 (Cognición IA con OpenRouter):** [docs/sprints/SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md](docs/sprints/SPRINT_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md)
-* **Plan de Trabajo y Sprints Históricos (1 a 29):** [docs/strategy/SCRUM_PLAN.md](docs/strategy/SCRUM_PLAN.md)
-* **Hipótesis Teórica del Edge:** [docs/strategy/HYPOTHESIS.md](docs/strategy/HYPOTHESIS.md)
-* **Certificación Institucional (PSR, DSR, CPCV y PBO):** [docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md](docs/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md)
+* **[Libro Maestro de Historia & Genealogía de Sprints:](docs/history/INDEX_HISTORICO.md)** Cronología canónica de las 7 eras del proyecto y trazabilidad de los 43 Sprints.
+* **Sprints 40-43 (Remediación Crítica, Resiliencia de Concurrencia y Arquitectura v8.0):** [docs/history/sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md](docs/history/sprints/SPRINT_PLAN_40_43_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md)
+* **Sprints 36-39 (Arquitectura de 4 Capas: Cortafuegos Pydantic, Sesgo Asíncrono, Trigger Determinista y Kill Switch):** [docs/history/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md](docs/history/sprints/SPRINT_PLAN_36_39_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md)
+* **Sprints 33-35 (Aceleración Polars/VectorBT, Riskfolio-Lib HERC/CVaR y OpenBB):** [docs/history/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md](docs/history/sprints/SPRINT_PLAN_33_35_PERFORMANCE_RISK_AND_OPENBB.md)
+* **Sprints 30-32 (Arquitectura Multi-Agente, Orquestador DAG y Cockpit HITL):** [docs/history/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md](docs/history/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md)
+* **Sprints 25-28 (Hardening del Bucle Autónomo, SQLite WAL & OOS Gating):** [docs/history/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md](docs/history/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md)
+* **Plan de Trabajo y Backlog Scrum Histórico (Sprints 1 a 29):** [docs/history/scrum/SCRUM_PLAN.md](docs/history/scrum/SCRUM_PLAN.md)
+* **Hipótesis Teórica del Edge Asimétrico:** [docs/research/strategy/HYPOTHESIS.md](docs/research/strategy/HYPOTHESIS.md)
+* **Certificación Matemática Institucional (PSR, DSR, CPCV y PBO):** [docs/research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md](docs/research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md)
+* **Compendio Maestro de Estrategia Cuantitativa:** [docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md](docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md)
 
 ---
 

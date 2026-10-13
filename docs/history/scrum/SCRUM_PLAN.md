@@ -1,20 +1,20 @@
 ---
-id: STRAT-ROADMAP-001
-title: Plan de Desarrollo Scrum y Backlog de Sprints (Meme Hunter v7.4)
-category: strategy
+id: HIST-SCRUM-001
+title: Plan Maestro de Desarrollo Scrum y Backlog Histórico (Sprints 1 a 29)
+category: history
 version: 7.4
-status: ACTIVE
+status: COMPLETED
 last_updated: 2026-10-12
 author: Quantitative Engineering & Research Core
 references:
-  - docs/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
+  - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
   - docs/MANUAL_UNIFICADO_DEL_SISTEMA.md
-  - docs/operations/OPERATIONAL_RUNBOOK.md
-  - docs/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md
-  - docs/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md
-  - docs/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
-  - docs/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md
-  - docs/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md
+  - docs/guides/OPERATIONAL_RUNBOOK.md
+  - docs/history/sprints/SPRINT_PLAN_AUTONOMOUS_LOOP_HARDENING.md
+  - docs/history/sprints/SPRINT_PLAN_29_BIDIRECTIONAL_AND_DATA_SYNC.md
+  - docs/history/sprints/SPRINT_PLAN_30_MULTI_AGENT_DAG_ORCHESTRATOR.md
+  - docs/history/sprints/SPRINT_PLAN_31_LLM_SENTIMENT_AND_DEGRADATION.md
+  - docs/history/sprints/SPRINT_PLAN_32_HITL_VISUAL_DAG_COCKPIT.md
 ---
 
 # 📋 Plan de Desarrollo Scrum: meme_hunter (STRAT-ROADMAP-001 v7.4)
