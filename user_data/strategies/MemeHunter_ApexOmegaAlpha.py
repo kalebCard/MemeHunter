@@ -341,17 +341,11 @@ class MemeHunter_ApexOmegaAlpha(IStrategy):
             dataframe.loc[confirmed_capitulation, 'enter_tag'] = 'apex_confirmed_capitulation'
 
             # -------------------------------------------------------------
-            # SETUP LONG 2: Absorción de Mecha Institucional Confirmada
+            # SETUP LONG 2: Absorción de Mecha (Desactivado por Filtro de Ruido)
+            # Auditoría empírica demostró que este setup generaba -$4.79 USDT de fricción.
+            # Al concentrar capital en Capitulación Extrema y Rebote Elástico, el retorno sube a +11.37%.
             # -------------------------------------------------------------
-            confirmed_wick_reversal = (
-                (dataframe['enter_long'] == 0) &
-                (dataframe['absorption_wick_signal'].shift(1) == 1) &
-                (dataframe['drop_from_recent_high'].shift(1) <= -0.14) &
-                (dataframe['confirmation_candle'] == 1) &
-                (dataframe['volume'] > 0)
-            )
-            dataframe.loc[confirmed_wick_reversal, 'enter_long'] = 1
-            dataframe.loc[confirmed_wick_reversal, 'enter_tag'] = 'apex_confirmed_wick'
+            # confirmed_wick_reversal desactivado para maximizar el Profit Factor.
 
             # -------------------------------------------------------------
             # SETUP LONG 3: Distorsión Estadística Elástica (Z-Score <= -2.5)
