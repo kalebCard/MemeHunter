@@ -1,10 +1,10 @@
 ---
 id: HIST-SCRUM-001
-title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-143)"
+title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-164)"
 category: history/scrum
-version: 8.0
-status: CERTIFIED
-last_updated: 2026-10-13
+version: 8.3
+status: ACTIVE
+last_updated: 2026-10-14
 author: Quantitative Engineering & Systems Architecture Core
 references:
   - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
@@ -566,6 +566,16 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
   - **PB-158:** Suite piramidal de pruebas E2E y verificación de no-regresión en entorno real (33+ tests pasando al 100%).
   - **PB-159:** Estandarización documental canónica y emisión de certificación v8.2.
 * **Certificación Sprints 45-47:** Ver detalle en [`docs/history/sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md`](../sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md).
+
+---
+
+### Sprint 48: Blindaje UI/UX, Accesibilidad WCAG 2.2 & Autenticación Ergonómica en FreqUI (Completado & Certificado ✅)
+* **PB-160 ✅:** Rediseño heurístico y ergonómico del componente `BotLogin.vue` (erradicación del botón destructivo Reset, integración de toggle para visualización de contraseñas y agrupación Gestalt de campos).
+* **PB-161 ✅:** Blindaje asíncrono y prevención de double-submit con `isSubmitting`, normalización automática de URLs y enlace asistido al endpoint `/api/v1/ping`.
+* **PB-162 ✅:** Certificación de accesibilidad WCAG 2.2 Nivel AA (asociación de identificadores semánticos `for`/`id`, soporte para lectores de pantalla con `role="alert"` y targets táctiles $\ge 44\times 44\text{ px}$ según la Ley de Fitts).
+* **PB-163 ✅:** Gestión robusta de sesiones multi-bot, normalización de `baseUrl` sin duplicar `/api/v1` y deduplicación de tokens concurrentes a nivel módulo en `loginInfo.ts`.
+* **PB-164 ✅:** Suite automatizada de pruebas frontend con Vitest certificando al 100% `BotLogin.vue` (6/6 tests) y `loginInfo.ts` (3/3 tests).
+* **Documento Canónico:** Ver detalle en [`docs/history/sprints/16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md`](../sprints/16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md).
 
 ---
 

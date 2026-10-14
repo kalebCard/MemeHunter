@@ -30,7 +30,7 @@ timeline
     Era 5 : Organismo Multi-Agente DAG (Sprints 29-35) : Fusión Bayesiana (<20ms), Polars Arrow, VectorBT y Riskfolio HERC
     Era 6 : Blindaje 4 Capas (Sprints 36-39) : Cortafuegos Pydantic v2, Sesgo Asíncrono y Kill Switch Absoluto (25%)
     Era 7 : Arquitectura Modular v8.0 (Sprints 40-43) : Zero-Eval AST, Typer CLI, FastAPI ASGI y Suite Piramidal
-    Era 8 : Unificación FreqUI (Sprints 44-47) : Single Pane of Glass (:8081), FreqUI Vue 3 enriquecido y retiro de Cockpit legacy
+    Era 8 : Unificación FreqUI & UX Hardening (Sprints 44-48) : Single Pane of Glass (:8081), FreqUI Vue 3, retiro Cockpit legacy y blindaje UI/UX WCAG
 ```
 
 ---
@@ -163,7 +163,7 @@ docs/history/
 ├── INDEX_HISTORICO.md               # 🌟 Libro maestro de historia, cronología y genealogía
 ├── scrum/                           # 🛡️ Nivel Estratégico: Scrum Governance & Product Backlog
 │   ├── README.md                    # Marco de trabajo ágil, DoD y ceremonias
-│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-159)
+│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-164)
 │   └── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # Backlog temático de minería de alphas y CPCV
 └── sprints/                         # 🏃 Nivel Táctico: Planes de ejecución técnica de sprints
     ├── README.md                    # Catálogo maestro de ejecución de sprints
@@ -181,5 +181,6 @@ docs/history/
     ├── 12_PLAN_PRODUCTION_HARDENING_2026.md              # Plan Integral Hardening 2026
     ├── 13_PLAN_REMEDIATION_AND_HARDENING_V7.1.md         # Plan Remediación & Hardening v7.1
     ├── 14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md # Sprint 44 (FreqUI Oficial :8081 & CLI)
-    └── 15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md   # Sprints 45-47 (FreqUI Quant Unification)
+    ├── 15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md   # Sprints 45-47 (FreqUI Quant Unification)
+    └── 16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md # Sprint 48 (Blindaje UI/UX & WCAG 2.2)
 ```

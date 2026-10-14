@@ -306,5 +306,16 @@
     "days_in_stage": 0,
     "decay_zscore": 0.0,
     "last_audit_date": "2026-10-14"
+  },
+  "CUSTOM_1791992495": {
+    "strategy_id": "CUSTOM_1791992495",
+    "name": "ts_rank(volume, 10) * returns",
+    "status": "SANDBOX",
+    "target_capital_weight": 0.0,
+    "backtest_sharpe": 2.15,
+    "live_sharpe": 0.0,
+    "days_in_stage": 0,
+    "decay_zscore": 0.0,
+    "last_audit_date": "2026-10-14"
   }
 }
