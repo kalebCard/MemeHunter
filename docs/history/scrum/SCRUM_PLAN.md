@@ -540,6 +540,15 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 
 ---
 
+### Sprint 44: Unificación Operativa — Single Pane of Glass en FreqUI & CLI Cuantitativo (Completado ✅)
+* **PB-144:** Consolidación de FreqUI como Interfaz Web Oficial Única (`http://localhost:8081`) con soporte CORS completo, telemetría de señales y acceso seguro.
+* **PB-145:** Arquitectura de Daemons Silenciosos y desacoplamiento del Cockpit (`:8088`) a modo laboratorio de I+D bajo demanda (`meme_cli.py cockpit --start`), eliminando la fricción y duplicidad.
+* **PB-146:** Blindaje y consolidación del CLI unificado [`scripts/ops/meme_cli.py`](file:///c:/meme_hunter/scripts/ops/meme_cli.py) con resolución canónica de rutas (`BASE_DIR`), comando `frequi` y centinela de salud integral `check_health.py`.
+* **PB-147:** Estandarización de documentación, runbooks y alineación del backlog con la experiencia de usuario de interfaz única.
+* **Certificación Sprint 44:** Ver detalle en [`docs/history/sprints/14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md`](../sprints/14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md).
+
+---
+
 ## 4. Definición de Hecho (DoD)
 1. Código probado con tests unitarios (`pytest tests`).
 2. **Cero sesgo intra-vela:** Ningún backtest con Trailing Stop se considerará válido sin `--timeframe-detail 1m`.

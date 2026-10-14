@@ -34,25 +34,25 @@ TELEGRAM_CHAT_ID=tu_chat_id
 ```
 
 ### 1.2 Inicio del Motor de Futuros y Diagnóstico (Vía CLI Unificado)
-El método estándar recomendado para operar el sistema es a través del CLI:
+El método estándar recomendado para operar el sistema es a través del CLI centralizado:
 
 ```powershell
-# 1. Verificar salud del sistema (2 segundos)
-python scripts/meme_cli.py health
+# 1. Verificar salud integral del sistema (2 segundos)
+python scripts/ops/meme_cli.py health
 
 # 2. Levantar el motor de futuros en Docker (Puerto 8081)
-python scripts/meme_cli.py futures start
+python scripts/ops/meme_cli.py futures start
 
-# 3. Ver logs en tiempo real
-python scripts/meme_cli.py futures logs
+# 3. Consultar datos de acceso a la interfaz web oficial
+python scripts/ops/meme_cli.py frequi
 
-# 4. Iniciar o verificar el Cockpit Visual (Puerto 8088)
-python scripts/meme_cli.py cockpit
+# 4. Ver logs en tiempo real
+python scripts/ops/meme_cli.py futures logs
 ```
 
-* **Cockpit Visual Unificado:** [http://localhost:8088](http://localhost:8088)
-* **Dashboard FreqUI Directo:** [http://localhost:8081](http://localhost:8081)
-* **Credenciales por defecto:** configuradas en `user_data/config_futures.json` (Usuario: `admin`, Clave: `MemeHunter2026!`).
+* **🌐 Interfaz Web Oficial Única (FreqUI):** [http://localhost:8081](http://localhost:8081)
+* **🔑 Credenciales de Acceso:** Usuario: `admin` | Clave: `MemeHunter2026!` (API URL: `http://localhost:8081`).
+* **🔬 Laboratorio de I+D (Opcional / Bajo Demanda):** [http://localhost:8088](http://localhost:8088) vía `python scripts/ops/meme_cli.py cockpit --start`.
 * **Estrategias en Producción:** `MemeHunter_MinedEnsemble` (Ensamble dinámico bidireccional auto-minado) y `MemeHunterFuturesV7_Quantum`.
 
 ---
@@ -97,14 +97,13 @@ python scripts/delta_neutral_vault.py --scan
 
 ---
 
-## 4. 🎛️ Monitoreo Visual con Alpha Cockpit Dashboard
+## 4. 🔬 Laboratorio Cuantitativo de I+D: Alpha Cockpit Dashboard (Bajo Demanda)
+El **Cockpit Dashboard** (puerto 8088) es un entorno analítico complementario para minería de alfas, generación de código con LLMs y pruebas de estrés. No es necesario para el trading diario (que corre 100% en FreqUI :8081).
 
-El **Cockpit Dashboard** opera de manera aislada y multihilo en el puerto **8088** para no colisionar con FreqUI (puerto 8081).
-
-### 4.1 Iniciar el Servidor del Dashboard
+### 4.1 Iniciar el Servidor del Cockpit Bajo Demanda
 ```powershell
-# Iniciar en puerto estándar 8088
-python scripts/start_dashboard.py
+# Iniciar mediante el CLI oficial
+python scripts/ops/meme_cli.py cockpit --start
 ```
 * **Acceso Local:** [http://localhost:8088](http://localhost:8088)
 * **Autenticación:** Las llamadas a mutación (`/api/trigger-loop`, `/api/synthesize-alpha`, `/api/deploy-to-sandbox`) requieren un token Bearer seguro:

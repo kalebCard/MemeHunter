@@ -53,6 +53,10 @@
         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/><path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2z"/></svg>
         🎮 Centro de Mando (Live)
       </button>
+      <button class="nav-tab" data-tab="tab-frequi-live" style="background: linear-gradient(135deg, rgba(0, 242, 254, 0.12), rgba(79, 172, 254, 0.12)); border-color: rgba(0, 242, 254, 0.35);">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.707l-4.146 4.147a.5.5 0 0 1-.708 0L7 6.707l-4.146 4.147a.5.5 0 0 1-.708-.708l4.5-4.5a.5.5 0 0 1 .708 0L9.5 7.793l3.646-3.647H10.5a.5.5 0 0 1-.5-.5z"/></svg>
+        📈 FreqUI & TradingView (Bot en Vivo)
+      </button>
       <button class="nav-tab" data-tab="tab-strategies-rd">
         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 1v3H1v5h2v6h10V9h2V4h-5V1H6zm1 1h2v2H7V2zm-4 3h10v3H3V5zm2 5h6v4H5v-4z"/></svg>
         🧪 Estrategias & Laboratorio I+D
@@ -87,6 +91,10 @@
           <span class="badge-hardening safe">✔ Funding Guardian (-0.05%)</span>
           <span class="badge-hardening">Trailing Stop (12% / 4%)</span>
         </div>
+        <button class="btn-action" onclick="document.querySelector('.nav-tab[data-tab=\'tab-frequi-live\']').click()" style="margin-left: auto; padding: 7px 16px; font-size: 0.85rem; background: linear-gradient(135deg, rgba(0, 242, 254, 0.25), rgba(79, 172, 254, 0.25)); border-color: var(--accent-cyan); color: #fff; cursor: pointer; white-space: nowrap;">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.707l-4.146 4.147a.5.5 0 0 1-.708 0L7 6.707l-4.146 4.147a.5.5 0 0 1-.708-.708l4.5-4.5a.5.5 0 0 1 .708 0L9.5 7.793l3.646-3.647H10.5a.5.5 0 0 1-.5-.5z"/></svg>
+          📈 Abrir Velas FreqUI
+        </button>
       </section>
 
       <!-- KPI Grid Banner -->
@@ -255,7 +263,46 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- TAB 2 UNIFICADA: ESTRATEGIAS, BACKTESTS & LABORATORIO I+D               -->
+    <!-- TAB: FREQUI & TRADINGVIEW (BOT NATIVO DE FREQTRADE EMBEBIDO)              -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane" id="tab-frequi-live">
+      <section class="glass-panel" style="margin-bottom: 16px; padding: 14px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div class="pulse-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #10b981; padding: 6px 14px;">
+              <span class="pulse-dot" style="background: #10b981;"></span>
+              <span style="font-weight: 600; letter-spacing: 0.5px;">FREQTRADE DOCKER (:8081) EN LÍNEA</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.04); padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <span>🔑 <strong>Credenciales FreqUI:</strong></span>
+              <span>Usuario: <code style="color: var(--accent-cyan); font-family: var(--font-mono); font-weight: bold;">admin</code></span>
+              <span style="color: var(--text-muted);">|</span>
+              <span>Contraseña: <code style="color: var(--accent-cyan); font-family: var(--font-mono); font-weight: bold;">MemeHunter2026!</code></span>
+              <span style="color: var(--text-muted);">|</span>
+              <span>API URL: <code style="color: var(--accent-cyan); font-family: var(--font-mono);">http://localhost:8081</code></span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="btn-action" onclick="document.getElementById('frequi-iframe').src = document.getElementById('frequi-iframe').src;" title="Recargar panel FreqUI" style="padding: 7px 16px; font-size: 0.85rem; cursor: pointer;">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/></svg>
+              Recargar Frame
+            </button>
+            <a href="http://localhost:8081" target="_blank" class="btn-action" style="padding: 7px 16px; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 242, 254, 0.15); border-color: rgba(0, 242, 254, 0.4); color: var(--accent-cyan);">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/></svg>
+              Abrir en Ventana Externa
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Iframe FreqUI de Alta Integración -->
+      <div style="width: 100%; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-highlight); box-shadow: var(--shadow-glow-cyan); background: #07090e;">
+        <iframe id="frequi-iframe" src="http://localhost:8081" style="width: 100%; height: calc(100vh - 200px); min-height: 850px; border: none; display: block;" allow="clipboard-read; clipboard-write"></iframe>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: ESTRATEGIAS, BACKTESTS & LABORATORIO I+D                          -->
     <!-- ========================================================================= -->
     <div class="tab-pane" id="tab-strategies-rd">
       <!-- Selector de Sub-vistas (Segmented Control) -->

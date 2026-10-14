@@ -128,29 +128,53 @@ def check_sqlite_integrity(db_relative_path="user_data/tradesv3.futures.sqlite")
     return report
 
 
-def check_cockpit_http(port=8088):
-    """Verifica si el servidor HTTP del Cockpit responde en el puerto esperado."""
-    report = {"name": f"Cockpit HTTP API (:{port})", "status": "UNKNOWN", "details": []}
-    url = f"http://127.0.0.1:{port}/api/status"
+def check_frequi_http(port=8081):
+    """Verifica si la API y FreqUI responden en el puerto 8081."""
+    report = {"name": f"FreqUI Web & Engine API (:{port})", "status": "UNKNOWN", "details": []}
+    url = f"http://127.0.0.1:{port}/api/v1/ping"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "MemeHunter-HealthCheck"})
         with urllib.request.urlopen(req, timeout=3.0) as resp:
+            code = resp.getcode()
+            if code == 200:
+                report["status"] = "OK"
+                report["details"].append(f"HTTP {code} OK | Motor de futuros en línea")
+                report["details"].append("Web UI: http://localhost:8081 (admin / MemeHunter2026!)")
+            else:
+                report["status"] = "WARN"
+                report["details"].append(f"HTTP responde con código {code}")
+    except urllib.error.URLError as e:
+        report["status"] = "FAIL"
+        report["details"].append(f"FreqUI no responde en :{port} ({e.reason})")
+        report["details"].append("Inicia el motor con: python scripts/ops/meme_cli.py futures start")
+    except Exception as e:
+        report["status"] = "FAIL"
+        report["details"].append(f"Error consultando FreqUI: {e}")
+    return report
+
+
+def check_cockpit_http(port=8088):
+    """Verifica si el servidor HTTP del Cockpit de I+D responde en el puerto esperado."""
+    report = {"name": f"Cockpit I+D Lab (:{port})", "status": "INFO", "details": []}
+    url = f"http://127.0.0.1:{port}/api/status"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "MemeHunter-HealthCheck"})
+        with urllib.request.urlopen(req, timeout=4.0) as resp:
             code = resp.getcode()
             if code == 200:
                 data = json.loads(resp.read().decode("utf-8"))
                 version = data.get("version", "desconocida")
                 strategies_count = data.get("total_strategies", 0)
                 report["status"] = "OK"
-                report["details"].append(f"HTTP {code} OK | Versión API: {version} | Estrategias monitoreadas: {strategies_count}")
+                report["details"].append(f"HTTP {code} OK | Versión API: {version} | Estrategias: {strategies_count}")
             else:
-                report["status"] = "WARN"
                 report["details"].append(f"HTTP responde con código inesperado: {code}")
-    except urllib.error.URLError as e:
-        report["status"] = "WARN"
-        report["details"].append(f"Cockpit no responde en :{port} ({e.reason})")
+    except urllib.error.URLError:
+        report["status"] = "INFO"
+        report["details"].append("Standby (Laboratorio de I+D bajo demanda vía 'python scripts/ops/meme_cli.py cockpit --start')")
     except Exception as e:
-        report["status"] = "FAIL"
-        report["details"].append(f"Error consultando endpoint: {e}")
+        report["status"] = "INFO"
+        report["details"].append(f"Standby: {e}")
     return report
 
 
@@ -215,8 +239,9 @@ def run_all_checks():
 
     checks = [
         check_docker_containers(),
-        check_cockpit_http(),
+        check_frequi_http(),
         check_sqlite_integrity("user_data/tradesv3.futures.sqlite"),
+        check_cockpit_http(),
         check_incubator_state(),
         check_environment(),
     ]

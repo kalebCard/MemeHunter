@@ -15,19 +15,19 @@ references:
 
 # 🏃 Catálogo Maestro de Ejecución de Sprints (Meme Hunter)
 
-Este directorio alberga los **13 Planes de Ejecución de Sprints Técnicos** estandarizados y ordenados cronológicamente, cubriendo el ciclo de desarrollo completo desde el motor auto-evolutivo inicial hasta la arquitectura institucional modular v8.0.
+Este directorio alberga los **14 Planes de Ejecución de Sprints Técnicos** estandarizados y ordenados cronológicamente, cubriendo el ciclo de desarrollo completo desde el motor auto-evolutivo inicial hasta la arquitectura institucional modular v8.0 y la unificación operativa en FreqUI.
 
 ---
 
 ## 🧭 1. Relación con el Product Backlog
 
 Los documentos en este directorio constituyen el **Nivel Táctico** de ejecución. Cada plan detalla los criterios de aceptación técnicos, arquitectura interna, suite de tests unitarios/integración y DoD específicos de cada ciclo.
-* Para consultar el **Product Backlog Maestro** con las 12 Grandes Épicas e Historias PB-01 a PB-143, ver [**`docs/history/scrum/SCRUM_PLAN.md`**](../scrum/SCRUM_PLAN.md).
+* Para consultar el **Product Backlog Maestro** con las 12 Grandes Épicas e Historias PB-01 a PB-147, ver [**`docs/history/scrum/SCRUM_PLAN.md`**](../scrum/SCRUM_PLAN.md).
 * Para la genealogía de las 7 Eras Evolutivas, ver [**`docs/history/INDEX_HISTORICO.md`**](../INDEX_HISTORICO.md).
 
 ---
 
-## 📊 2. Matriz Cronológica de Sprints (1 al 43)
+## 📊 2. Matriz Cronológica de Sprints (1 al 44)
 
 | # | Archivo Canónico | Sprints | ID Estándar | Historias Cubiertas | Hito Técnico Principal | Estado |
 | :---: | :--- | :---: | :---: | :---: | :--- | :---: |
@@ -44,6 +44,7 @@ Los documentos en este directorio constituyen el **Nivel Táctico** de ejecució
 | **11** | [`11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md`](11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md) | Sprints 40-43 | `HIST-SPRINT-040-043` | PB-132 a PB-143 | Zero-Eval AST, Concurrencia SQLite WAL, FastAPI y v8.0 | ✅ COMPLETED |
 | **12** | [`12_PLAN_PRODUCTION_HARDENING_2026.md`](12_PLAN_PRODUCTION_HARDENING_2026.md) | Hardening 2026 | `HIST-SPRINT-HARDENING-2026` | Épicas 1 a 7 | Plan Integral de Blindaje en Producción y Microestructura | ✅ COMPLETED |
 | **13** | [`13_PLAN_REMEDIATION_AND_HARDENING_V7.1.md`](13_PLAN_REMEDIATION_AND_HARDENING_V7.1.md) | Hardening v7.1 | `HIST-SPRINT-REMEDIATION-7.1` | Épicas 8 a 11 | Remediación, Hardening y Escalamiento Industrial | ✅ COMPLETED |
+| **14** | [`14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md`](14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md) | Sprint 44 | `HIST-SPRINT-044` | PB-144 a PB-147 | Unificación Operativa, FreqUI (:8081) Oficial & CLI Centralizado | ✅ COMPLETED |
 
 ---
 

@@ -400,13 +400,15 @@ class CockpitAPIHandler(SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 
-        # Cabeceras de seguridad reforzadas
+        # Cabeceras de seguridad reforzadas con soporte para FreqUI embebido (Single Pane of Glass)
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
         self.send_header("X-XSS-Protection", "1; mode=block")
         self.send_header(
             "Content-Security-Policy",
-            "default-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com;"
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; "
+            "frame-src 'self' http://localhost:8081 http://127.0.0.1:8081; "
+            "connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 ws://localhost:8081 ws://127.0.0.1:8081 http://localhost:8088 http://127.0.0.1:8088;"
         )
         self.end_headers()
         self.wfile.write(body)
@@ -955,6 +957,7 @@ def run_server(port: int = 8088):
 
     host = os.getenv("DASHBOARD_HOST", "127.0.0.1")
     server_address = (host, port)
+    ThreadingHTTPServer.allow_reuse_address = False
     httpd = ThreadingHTTPServer(server_address, CockpitAPIHandler)
     print("=" * 80)
     print(" [MEMEHUNTER QUANT COCKPIT] Servidor Visual Seguro Multihilo Iniciado")

@@ -29,7 +29,14 @@ if sys.platform.startswith("win"):
     except Exception:
         pass
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+def get_project_root() -> Path:
+    current = Path(__file__).resolve()
+    for parent in [current] + list(current.parents):
+        if (parent / "docker-compose.futures.yml").exists() or (parent / "pyproject.toml").exists():
+            return parent
+    return Path(__file__).resolve().parent.parent.parent
+
+BASE_DIR = get_project_root()
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
@@ -40,39 +47,63 @@ def cmd_health(args):
     return run_all_checks()
 
 
+def cmd_frequi(args):
+    """Muestra el estado, URL y credenciales de acceso a FreqUI (Interfaz Oficial)."""
+    print("=" * 60)
+    print("🌐 FREQUI - INTERFAZ WEB OFICIAL DE CONTROL (:8081)")
+    print("=" * 60)
+    print("• URL Local        : http://localhost:8081 (o http://127.0.0.1:8081)")
+    print("• Contenedor Docker: meme_hunter_futures")
+    print("• API URL en Login : http://localhost:8081")
+    print("• Usuario          : admin")
+    print("• Contraseña       : MemeHunter2026!")
+    print("\nVerificando conexión con el contenedor...")
+    try:
+        import urllib.request
+        with urllib.request.urlopen("http://127.0.0.1:8081", timeout=3.0) as resp:
+            if resp.getcode() == 200:
+                print("🟢 ESTADO: FreqUI está ACTIVO y sirviendo la interfaz web.")
+                print("💡 Abre http://localhost:8081 en tu navegador para ver tus trades en vivo.")
+                return 0
+    except Exception as e:
+        print(f"⚠️  ESTADO: No se pudo conectar a FreqUI ({e}).")
+        print("💡 Ejecuta 'python scripts/ops/meme_cli.py futures start' para iniciar el contenedor.")
+        return 1
+
+
 def cmd_cockpit(args):
-    """Gestiona e informa sobre el estado del Cockpit Visual."""
+    """Gestiona e informa sobre el estado del Cockpit de I+D (Laboratorio bajo demanda)."""
     print("=" * 60)
-    print("🖥️  MEME HUNTER - COCKPIT VISUAL UNIFICADO (:8088)")
+    print("🔬 MEME HUNTER - COCKPIT DE I+D Y LABORATORIO (:8088)")
     print("=" * 60)
+    print("ℹ️  Nota: Para trading diario, usa FreqUI (:8081). Este Cockpit es para I+D.")
     
     # Verificar si está corriendo
     try:
         import urllib.request
         with urllib.request.urlopen("http://127.0.0.1:8088/api/status", timeout=2.0) as resp:
             if resp.getcode() == 200:
-                print("🟢 ESTADO: El Cockpit está ACTIVO y respondiendo.")
+                print("🟢 ESTADO: El Cockpit de I+D está ACTIVO.")
                 print("🌐 URL: http://localhost:8088")
                 print("🔑 Token de Acceso: Bearer Token configurado en DASHBOARD_API_TOKEN (.env)")
                 print("\nPestañas disponibles:")
-                print("  • 🎮 Centro de Mando (Live Trades & Defensas)")
-                print("  • 📚 Estrategias & Backtests (Catálogo Freqtrade)")
                 print("  • 🧪 Laboratorio Cuantitativo (Strategy Studio)")
                 print("  • 🧠 Incubadora Autónoma (HRP & Autopsias IA)")
+                print("  • 📚 Estrategias & Backtests (Catálogo)")
                 return 0
     except Exception:
         pass
 
-    print("⚠️  ESTADO: El Cockpit no responde en http://localhost:8088.")
+    print("ℹ️  ESTADO: El Cockpit de I+D no está activo en :8088.")
     if args.start:
         print("🚀 Iniciando Cockpit localmente...")
-        subprocess.run([sys.executable, str(BASE_DIR / "scripts" / "start_dashboard.py")])
+        script = BASE_DIR / "scripts" / "ops" / "start_dashboard.py"
+        subprocess.run([sys.executable, str(script)])
         return 0
     else:
-        print("\nPara iniciarlo:")
-        print("  python scripts/meme_cli.py cockpit --start")
-        print("  O vía Docker:")
-        print("  docker start meme_hunter_cockpit")
+        print("\nPara iniciarlo bajo demanda:")
+        print("  python scripts/ops/meme_cli.py cockpit --start")
+        return 0
         return 1
 
 
@@ -106,6 +137,9 @@ def cmd_futures(args):
         res = subprocess.run(
             ["docker", "ps", "--filter", "name=meme_hunter_futures", "--format", "table {{.Names}}\t{{.Status}}\t{{.Ports}}"]
         )
+        print("\n🌐 FreqUI (Interfaz Web Oficial):")
+        print("  • URL         : http://localhost:8081")
+        print("  • Credenciales: admin / MemeHunter2026!")
         return res.returncode
 
 
@@ -134,7 +168,9 @@ def cmd_research(args):
         "sentinel": ("scripts/ops/meme_sentinel.py", "Detector de volumen anómalo y pumps de memecoins"),
         "radar": ("scripts/ops/dex_viral_radar.py", "Radar on-chain DEX (DexScreener API)"),
         "ratchet": ("scripts/ops/profit_ratchet_daemon.py", "Daemon de cosecha y trinquete de utilidades"),
-        "metrics": ("scripts/advanced_metrics.py", "Cálculo de PSR, DSR y PBO institucional")
+        "metrics": ("scripts/research/advanced_metrics.py", "Cálculo de PSR, DSR y PBO institucional"),
+        "telegram": ("scripts/ops/telegram_healthcheck.py", "Verificación y test de alertas Telegram"),
+        "binance": ("scripts/ops/test_binance_connection.py", "Auditoría de conexión API a Binance Futures")
     }
 
     if not args.tool:
@@ -144,7 +180,7 @@ def cmd_research(args):
         for name, (path, desc) in tools.items():
             print(f"  • {name:<12} : {desc}")
         print("\nEjecución:")
-        print("  python scripts/meme_cli.py research <nombre_herramienta>")
+        print("  python scripts/ops/meme_cli.py research <nombre_herramienta>")
         return 0
 
     tool = args.tool.lower()
@@ -157,14 +193,8 @@ def cmd_research(args):
     print(f"🚀 Ejecutando {tool}: {desc}...")
     full_path = str(BASE_DIR / script_path)
     
-    # Ejecutar en contenedor Docker para garantizar dependencias
-    cmd = [
-        "docker", "compose", "run", "--rm",
-        "-e", "PYTHONPATH=/freqtrade",
-        "--entrypoint", "python",
-        "freqtrade", script_path
-    ]
-    return subprocess.run(cmd).returncode
+    # Ejecutar localmente con Python
+    return subprocess.run([sys.executable, full_path]).returncode
 
 
 def main():
@@ -173,11 +203,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Ejemplos comunes:
-  python scripts/meme_cli.py health          # Chequeo rápido de salud en 2s
-  python scripts/meme_cli.py cockpit         # Ver estado del dashboard web (:8088)
-  python scripts/meme_cli.py futures status  # Ver estado de Freqtrade en Docker
-  python scripts/meme_cli.py test            # Correr suite de 117 tests
-  python scripts/meme_cli.py research stress # Correr stress-test en contenedor
+  python scripts/ops/meme_cli.py health          # Chequeo rápido de salud en 2s
+  python scripts/ops/meme_cli.py frequi          # Ver datos de acceso a FreqUI (:8081)
+  python scripts/ops/meme_cli.py futures status  # Ver estado de Freqtrade en Docker
+  python scripts/ops/meme_cli.py test            # Correr suite de 117 tests
+  python scripts/ops/meme_cli.py research stress # Correr stress-test
         """
     )
     subparsers = parser.add_subparsers(dest="command", help="Comando a ejecutar")
@@ -185,8 +215,11 @@ Ejemplos comunes:
     # health
     p_health = subparsers.add_parser("health", help="Auditoría de salud y estado en 2 segundos")
 
+    # frequi
+    p_frequi = subparsers.add_parser("frequi", help="Estado, enlace y credenciales de FreqUI Oficial (:8081)")
+
     # cockpit
-    p_cockpit = subparsers.add_parser("cockpit", help="Gestión del Cockpit Visual (:8088)")
+    p_cockpit = subparsers.add_parser("cockpit", help="Gestión del Cockpit de I+D (:8088)")
     p_cockpit.add_argument("--start", action="store_true", help="Inicia el cockpit si no está activo")
 
     # futures
@@ -210,6 +243,7 @@ Ejemplos comunes:
 
     commands = {
         "health": cmd_health,
+        "frequi": cmd_frequi,
         "cockpit": cmd_cockpit,
         "futures": cmd_futures,
         "test": cmd_test,
