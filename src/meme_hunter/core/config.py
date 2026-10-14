@@ -9,7 +9,12 @@ from pathlib import Path
 from typing import Optional
 
 from pydantic import Field, SecretStr, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+try:
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+except ImportError:
+    from pydantic import BaseModel as BaseSettings
+    def SettingsConfigDict(**kwargs):
+        return kwargs
 
 from meme_hunter.core.exceptions import ConfigurationError
 

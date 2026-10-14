@@ -23,6 +23,28 @@ except ImportError:
     except ImportError:
         ta = None
 
+# Inyección Institucional del API Router Cuantitativo en Freqtrade FastAPI Webserver (Sprint 45-47)
+try:
+    from freqtrade.rpc.api_server.webserver import ApiServer
+    if not getattr(ApiServer, "_quant_router_injected", False):
+        _orig_configure_app = ApiServer.configure_app
+
+        def _quant_patched_configure_app(self, app, config):
+            try:
+                from meme_hunter.api.routers.quant import router as quant_router
+                app.include_router(quant_router)
+                import logging
+                logging.getLogger("FreqtradeBot").info("🛡️ [Meme Hunter] Router Cuantitativo (/api/quant/*) inyectado exitosamente en FreqUI (:8081).")
+            except Exception as ex:
+                import logging
+                logging.getLogger("FreqtradeBot").warning(f"⚠️ [Meme Hunter] No se pudo inyectar router quant: {ex}")
+            _orig_configure_app(self, app, config)
+
+        ApiServer.configure_app = _quant_patched_configure_app
+        ApiServer._quant_router_injected = True
+except Exception:
+    pass
+
 
 class MemeHunter_MinedEnsemble(IStrategy):
     """
