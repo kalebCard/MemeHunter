@@ -58,7 +58,6 @@ _LEGACY_MODULE_MAP = {
     'test_binance_connection': 'scripts.ops.test_binance_connection',
     'daily_performance': 'scripts.ops.daily_performance',
     'migrate_json_to_sqlite': 'scripts.ops.migrate_json_to_sqlite',
-    'start_dashboard': 'scripts.ops.start_dashboard',
     'meme_cli': 'scripts.ops.meme_cli',
 }
 

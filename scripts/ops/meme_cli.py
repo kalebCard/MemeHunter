@@ -72,39 +72,20 @@ def cmd_frequi(args):
 
 
 def cmd_cockpit(args):
-    """Gestiona e informa sobre el estado del Cockpit de I+D (Laboratorio bajo demanda)."""
+    """Informa sobre la unificación de la interfaz en FreqUI Oficial (:8081)."""
     print("=" * 60)
-    print("🔬 MEME HUNTER - COCKPIT DE I+D Y LABORATORIO (:8088)")
+    print("🌐 MEME HUNTER - SINGLE PANE OF GLASS FREQUI (:8081)")
     print("=" * 60)
-    print("ℹ️  Nota: Para trading diario, usa FreqUI (:8081). Este Cockpit es para I+D.")
-    
-    # Verificar si está corriendo
-    try:
-        import urllib.request
-        with urllib.request.urlopen("http://127.0.0.1:8088/api/status", timeout=2.0) as resp:
-            if resp.getcode() == 200:
-                print("🟢 ESTADO: El Cockpit de I+D está ACTIVO.")
-                print("🌐 URL: http://localhost:8088")
-                print("🔑 Token de Acceso: Bearer Token configurado en DASHBOARD_API_TOKEN (.env)")
-                print("\nPestañas disponibles:")
-                print("  • 🧪 Laboratorio Cuantitativo (Strategy Studio)")
-                print("  • 🧠 Incubadora Autónoma (HRP & Autopsias IA)")
-                print("  • 📚 Estrategias & Backtests (Catálogo)")
-                return 0
-    except Exception:
-        pass
-
-    print("ℹ️  ESTADO: El Cockpit de I+D no está activo en :8088.")
-    if args.start:
-        print("🚀 Iniciando Cockpit localmente...")
-        script = BASE_DIR / "scripts" / "ops" / "start_dashboard.py"
-        subprocess.run([sys.executable, str(script)])
-        return 0
-    else:
-        print("\nPara iniciarlo bajo demanda:")
-        print("  python scripts/ops/meme_cli.py cockpit --start")
-        return 0
-        return 1
+    print("ℹ️  AVISO DE ARQUITECTURA v8.2:")
+    print("   El antiguo Cockpit de I+D (:8088) ha sido MIGRADO Y UNIFICADO por completo")
+    print("   dentro de la interfaz oficial FreqUI en http://localhost:8081.")
+    print("\n   Ahora tienes acceso nativo a:")
+    print("   • 📈 Trading en Vivo, Velas TradingView & Órdenes")
+    print("   • 🌐 Orquestación Multi-Agente (DAG) & Controles HITL (/dag)")
+    print("   • 🔄 Motor de Auto-Mejora & Autopsias IA (/incubator)")
+    print("   • 🧪 Laboratorio Cuantitativo Studio & AST (/studio)")
+    print("\n💡 Ejecuta 'python scripts/ops/meme_cli.py frequi' para acceder.")
+    return 0
 
 
 def cmd_futures(args):

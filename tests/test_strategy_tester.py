@@ -1,5 +1,4 @@
-import pytest
-from dashboard.strategy_tester import validate_formula_ast, load_ohlcv_dataset, run_strategy_backtest
+from meme_hunter.alpha.tester import validate_formula_ast, load_ohlcv_dataset, run_strategy_backtest
 
 
 def test_validate_formula_ast_valid():

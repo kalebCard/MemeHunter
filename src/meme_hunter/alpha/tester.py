@@ -1,11 +1,6 @@
 """
-strategy_tester.py - Motor de Validación y Backtesting Rápido de Estrategias para el Cockpit.
-
-Permite:
-1. Validar sintaxis y seguridad AST Zero-Eval de fórmulas simbólicas.
-2. Cargar datos OHLCV reales de futuros de memecoins (Binance Futures) o generar series estocásticas con saltos.
-3. Ejecutar backtesting vectorial de alta velocidad con fricciones reales (fees, slippage, margin).
-4. Calcular métricas cuantitativas completas: Sharpe, Sortino, MaxDD, Win Rate, Profit Factor, DSR y serie de equity.
+meme_hunter.alpha.tester - Motor de Validación y Backtesting Rápido de Estrategias y Factores.
+Estandarizado en src/meme_hunter/alpha/ como módulo cuantitativo institucional del core.
 """
 
 import os
@@ -22,6 +17,7 @@ from mining.formula_parser import FormulaASTParser
 from mining.alpha_grammar import AlphaGrammar
 from data_engine.slippage_engine import MicrostructureSlippageEngine
 from data_engine.paths import get_futures_data_dir
+from portfolio.order_router import SmartExitRouter, ExitUrgency
 
 DATA_DIR = get_futures_data_dir()
 
@@ -65,7 +61,6 @@ def load_ohlcv_dataset(pair: str = "1000PEPE", timeframe: str = "4h") -> pd.Data
     if DATA_DIR.exists():
         matches = list(DATA_DIR.glob(target_pattern))
         if not matches:
-            # Intentar búsqueda más laxa (e.g. PEPE, DOGE)
             base_symbol = clean_pair.split('_')[0]
             matches = list(DATA_DIR.glob(f"*{base_symbol}*{timeframe}*.feather"))
         if matches:
@@ -78,7 +73,6 @@ def load_ohlcv_dataset(pair: str = "1000PEPE", timeframe: str = "4h") -> pd.Data
                 df = df.rename(columns={'date': 'timestamp'})
             elif 'open_time' in df.columns:
                 df = df.rename(columns={'open_time': 'timestamp'})
-            # Estandarizar columnas requeridas
             for col in ['open', 'high', 'low', 'close', 'volume']:
                 if col in df.columns:
                     df[col] = df[col].astype(float)
@@ -88,7 +82,6 @@ def load_ohlcv_dataset(pair: str = "1000PEPE", timeframe: str = "4h") -> pd.Data
         except Exception:
             pass
 
-    # Fallback: Generador Estocástico Realista con Dinámica de Memecoin
     return _generate_synthetic_memecoin_data(n_bars=300)
 
 
@@ -114,9 +107,7 @@ def _generate_synthetic_memecoin_data(n_bars: int = 300) -> pd.DataFrame:
     np.random.seed(42)
     dates = pd.date_range("2026-06-01", periods=n_bars, freq="4h", tz="UTC")
     
-    # Proceso con saltos y deriva bajista secular (Short-bias)
     ret_diff = np.random.normal(-0.0015, 0.022, n_bars)
-    # Saltos tipo Poisson (pumps y dumps violentos)
     jumps = (np.random.rand(n_bars) < 0.05) * np.random.normal(-0.04, 0.06, n_bars)
     returns = ret_diff + jumps
     
@@ -148,10 +139,7 @@ def run_strategy_backtest(
     trailing_stop_pct: float = 0.04,
     initial_wallet: float = 1000.0
 ) -> Dict[str, Any]:
-    """
-    Ejecuta el backtest vectorial de la fórmula y devuelve métricas completas y curva de equity.
-    """
-    # 1. Validar sintaxis
+    """Ejecuta el backtest vectorial de la fórmula y devuelve métricas completas y curva de equity."""
     ast_validation = validate_formula_ast(formula)
     if not ast_validation["valid"]:
         return {
@@ -159,7 +147,6 @@ def run_strategy_backtest(
             "error": ast_validation["message"]
         }
 
-    # 2. Cargar datos
     df = load_ohlcv_dataset(pair, timeframe)
     ast_node = FormulaASTParser.parse(formula)
     
@@ -174,12 +161,10 @@ def run_strategy_backtest(
             "error": f"Error evaluando fórmula en serie temporal: {e}"
         }
 
-    # 3. Normalización rodante z-score del factor
     mean_sig = signal.rolling(30, min_periods=5).mean()
     std_sig = signal.rolling(30, min_periods=5).std().replace(0, 1e-6)
     z_signal = ((signal - mean_sig) / std_sig).fillna(0.0)
 
-    # 4. Simulación bar-by-bar con control de microestructura (Sprint 3: US-3.2 & US-3.3)
     wallet = float(initial_wallet)
     equity_curve = [{"timestamp": str(df['timestamp'].iloc[0]), "equity": round(wallet, 2), "benchmark": 1000.0}]
 
@@ -197,9 +182,8 @@ def run_strategy_backtest(
     total_fees_paid_usd = 0.0
     total_funding_pnl_usd = 0.0
 
-    # Umbrales de señal
     entry_threshold = 0.75
-    mmr = 1.0 / (2.0 * max(1.0, leverage))  # Tasa de margen de mantenimiento Binance Futures
+    mmr = 1.0 / (2.0 * max(1.0, leverage))
     max_adverse_liquidation_pct = (1.0 - mmr) / max(1.0, leverage)
 
     for i in range(30, len(df)):
@@ -211,24 +195,20 @@ def run_strategy_backtest(
         curr_vol = float(rolling_vol.iloc[i])
         curr_rvol = float(rolling_rvol.iloc[i])
 
-        # Gestión de posición activa
         if active_trade:
             pos_type = active_trade["type"]
             entry_p = active_trade["entry_price"]
             peak_p = active_trade["peak_price"]
 
-            # Acumular costo/ingreso de tasa de financiación (Funding Rate cada 8h / 2 barras 4h)
             bars_held = i - active_trade["entry_bar"]
             if bars_held > 0 and bars_held % 2 == 0:
-                funding_rate_8h = 0.0001  # 0.01% por ciclo de 8h típico en memecoins
+                funding_rate_8h = 0.0001
                 funding_step_usdt = active_trade["stake"] * leverage * funding_rate_8h
                 if pos_type == "SHORT":
-                    # Los cortos cobran tasa de financiación positiva en memecoins en expansión
                     active_trade["funding_acc_usdt"] += funding_step_usdt
                 else:
                     active_trade["funding_acc_usdt"] -= funding_step_usdt
 
-            # Actualizar pico
             if pos_type == "SHORT":
                 if close_p < peak_p:
                     active_trade["peak_price"] = close_p
@@ -236,14 +216,13 @@ def run_strategy_backtest(
                 unrealized_pct = (entry_p - close_p) / entry_p
                 drawdown_from_peak = (close_p - peak_p) / entry_p
 
-                # Chequear StopLoss
                 hit_sl = (high_p - entry_p) / entry_p >= stoploss_pct
                 hit_ts = (unrealized_pct >= 0.08) and (drawdown_from_peak >= trailing_stop_pct)
                 hit_tp = unrealized_pct >= 0.25
                 signal_exit = sig > 0.0
                 is_liquidated = unrealized_pct <= -max_adverse_liquidation_pct
 
-            else:  # LONG
+            else:
                 if close_p > peak_p:
                     active_trade["peak_price"] = close_p
                     peak_p = close_p
@@ -318,9 +297,8 @@ def run_strategy_backtest(
                 })
                 active_trade = None
 
-        # Apertura de nueva posición
         if not active_trade and wallet > 50:
-            stake = wallet * 0.25  # 25% por slot (4 slots)
+            stake = wallet * 0.25
             if direction in ["short_only", "both"] and sig > entry_threshold:
                 entry_res = slippage_engine.simulate_order_execution(
                     side="sell",
@@ -362,7 +340,6 @@ def run_strategy_backtest(
                     "funding_acc_usdt": 0.0
                 }
 
-        # Grabar equity periódico (cada 4 barras)
         if i % 4 == 0 or i == len(df) - 1:
             benchmark_eq = 1000.0 * (close_p / float(df['close'].iloc[30]))
             equity_curve.append({
@@ -371,7 +348,6 @@ def run_strategy_backtest(
                 "benchmark": round(benchmark_eq, 2)
             })
 
-    # 5. Cálculo de Métricas Cuantitativas
     total_trades = len(trades)
     if total_trades > 0:
         pnls = np.array([t["pnl_pct"] / 100.0 for t in trades])
@@ -382,8 +358,7 @@ def run_strategy_backtest(
         mean_ret = float(np.mean(pnls))
         std_ret = float(np.std(pnls)) if len(pnls) > 1 else 0.01
 
-        # Anualización (4h = 6 velas/día * 365 = 2190)
-        annual_factor = math.sqrt(2190 / 12)  # Trade holding ~12 barras
+        annual_factor = math.sqrt(2190 / 12)
         sharpe = round(float((mean_ret / max(std_ret, 1e-6)) * annual_factor), 2)
 
         downside_std = float(np.std([p for p in pnls if p < 0])) if len(losses) > 1 else 0.01
@@ -391,13 +366,11 @@ def run_strategy_backtest(
 
         profit_factor = round(abs(sum(wins) / min(sum(losses), -1e-6)), 2) if losses else 9.99
 
-        # Max Drawdown
         eq_series = np.array([p["equity"] for p in equity_curve])
         cum_max = np.maximum.accumulate(eq_series)
         drawdowns = (eq_series - cum_max) / cum_max
         max_dd = round(float(abs(np.min(drawdowns)) * 100), 2)
 
-        # p-value y DSR proxy
         t_stat = (mean_ret / max(std_ret, 1e-6)) * math.sqrt(total_trades)
         p_val = round(float(2 * (1 - ss.t.cdf(abs(t_stat), df=max(1, total_trades - 1)))), 4)
         dsr_score = round(max(0.0, min(100.0, (1.0 - p_val * 2) * 100)), 1)
@@ -448,4 +421,3 @@ def run_strategy_backtest(
         "equity_curve": equity_curve,
         "recent_trades": trades[-10:] if trades else []
     }
-

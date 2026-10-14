@@ -150,7 +150,6 @@ Servicios en segundo plano, supervisores de salud, interfaces de control y herra
 | [`test_binance_connection.py`](ops/test_binance_connection.py) | Verificación de conectividad, latencia y autenticación con la API de Binance Futures. | `python scripts/ops/test_binance_connection.py` |
 | [`daily_performance.py`](ops/daily_performance.py) | Reporte analítico de rendimiento diario con equity, drawdown y ratios clave. | `python scripts/ops/daily_performance.py` |
 | [`migrate_json_to_sqlite.py`](ops/migrate_json_to_sqlite.py) | Herramienta de migración atómica de estado legacy JSON a SQLite WAL transaccional. | `python scripts/ops/migrate_json_to_sqlite.py` |
-| [`start_dashboard.py`](ops/start_dashboard.py) | Lanzador ligero del Cockpit Web multihilo en el puerto 8088. | `python scripts/ops/start_dashboard.py` |
 | [`deploy_vps.sh`](ops/deploy_vps.sh) | Script Bash de aprovisionamiento automatizado en servidores VPS Ubuntu 22.04 LTS. | `bash scripts/ops/deploy_vps.sh` |
 | [`meme_cli.py`](ops/meme_cli.py) | CLI histórico unificado para control rápido de operaciones, salud y pruebas. | `python scripts/ops/meme_cli.py health` |
 
@@ -163,7 +162,7 @@ En la Arquitectura Modular v8.0, muchas tareas operativas pueden ejecutarse tamb
 | Tarea Operativa | Comando con Script | Comando Canónico con CLI `meme-hunter` |
 | :--- | :--- | :--- |
 | Diagnóstico de Salud | `python scripts/ops/check_health.py` | `meme-hunter db check` |
-| Lanzar Cockpit Web | `python scripts/ops/start_dashboard.py` | `meme-hunter serve --port 8088` |
+| Lanzar FreqUI (Single Pane of Glass) | `freqtrade webserver` | `meme-hunter serve --port 8081` |
 | Minería de Alphas | `python scripts/pipelines/run_alpha_factory_pipeline.py` | `meme-hunter mine run --generations 50` |
 | Backtesting Vectorial | `python scripts/backtest/backtest_apex_omega.py` | `meme-hunter backtest run --strategy ApexOmega` |
 | Simulación Monte Carlo | `python scripts/simulation/monte_carlo.py` | `meme-hunter sim run --runs 1000` |

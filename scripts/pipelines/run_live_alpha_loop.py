@@ -140,7 +140,7 @@ def main():
     feed.start()
 
     print(f"📡 Feed en vivo conectado a Binance. Monitoreando: {', '.join(symbols)}")
-    print("🖥️ El Cockpit Dashboard en http://localhost:8080 reflejará las actualizaciones en vivo.")
+    print("🖥️ La interfaz FreqUI en http://localhost:8081 reflejará las actualizaciones en vivo.")
     print("Presiona Ctrl+C para finalizar.\n")
 
     try:

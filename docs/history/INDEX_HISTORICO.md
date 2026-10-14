@@ -18,7 +18,7 @@ Este documento es el **registro histórico integral, canónico y auditable** que
 
 ---
 
-## 🗺️ 1. Cronología de las 7 Eras Evolutivas
+## 🗺️ 1. Cronología de las 8 Eras Evolutivas
 
 ```mermaid
 timeline
@@ -30,6 +30,7 @@ timeline
     Era 5 : Organismo Multi-Agente DAG (Sprints 29-35) : Fusión Bayesiana (<20ms), Polars Arrow, VectorBT y Riskfolio HERC
     Era 6 : Blindaje 4 Capas (Sprints 36-39) : Cortafuegos Pydantic v2, Sesgo Asíncrono y Kill Switch Absoluto (25%)
     Era 7 : Arquitectura Modular v8.0 (Sprints 40-43) : Zero-Eval AST, Typer CLI, FastAPI ASGI y Suite Piramidal
+    Era 8 : Unificación FreqUI (Sprints 44-47) : Single Pane of Glass (:8081), FreqUI Vue 3 enriquecido y retiro de Cockpit legacy
 ```
 
 ---
@@ -138,6 +139,21 @@ timeline
 
 ---
 
+### Era 8: Unificación Operativa y FreqUI Single Pane of Glass (Sprints 44 a 47)
+* **Documentos Canónicos:**
+  * [Sprint 44: Unificación Operativa & FreqUI (:8081)](sprints/14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md)
+  * [Sprints 45-47: Migración Total a FreqUI & Retiro de Cockpit Legacy](sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md)
+* **Historias:** PB-144 a PB-159.
+* **Hitos:**
+  * Consolidación de FreqUI en `:8081` como interfaz web única y desacoplamiento inicial del Cockpit (PB-144 a PB-147).
+  * Repositorio frontend FreqUI (Vue 3 + TypeScript + Vite) con montaje de volumen en contenedor Docker (PB-148).
+  * API Gateway cuantitativo unificado `/api/quant/*` en FastAPI ASGI con WebSockets de baja latencia (PB-149, PB-150).
+  * Vistas nativas cuantitativas en Vue 3 con Pinia: Orquestador DAG & HITL (`DagView.vue`), Incubadora IA (`IncubatorView.vue`) y Quant Studio AST (`StudioView.vue`) (PB-151 a PB-155).
+  * Erradicación completa de `dashboard/`, cierre del puerto 8088 y alineación de `meme_cli.py` (PB-156, PB-157).
+  * Suite de pruebas E2E y certificación institucional de arquitectura v8.2 (PB-158, PB-159).
+
+---
+
 ## 📚 4. Índice Canónico de Archivos Estandarizados
 
 Todos los documentos de planificación Scrum y ejecución de Sprints se encuentran rigurosamente organizados, estandarizados y auditables bajo la arquitectura de dos niveles:
@@ -147,7 +163,7 @@ docs/history/
 ├── INDEX_HISTORICO.md               # 🌟 Libro maestro de historia, cronología y genealogía
 ├── scrum/                           # 🛡️ Nivel Estratégico: Scrum Governance & Product Backlog
 │   ├── README.md                    # Marco de trabajo ágil, DoD y ceremonias
-│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-143)
+│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-159)
 │   └── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # Backlog temático de minería de alphas y CPCV
 └── sprints/                         # 🏃 Nivel Táctico: Planes de ejecución técnica de sprints
     ├── README.md                    # Catálogo maestro de ejecución de sprints
@@ -163,5 +179,7 @@ docs/history/
     ├── 10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md # Sprints 36-39 (Blindaje 4 Capas)
     ├── 11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md # Sprints 40-43 (Release v8.0)
     ├── 12_PLAN_PRODUCTION_HARDENING_2026.md              # Plan Integral Hardening 2026
-    └── 13_PLAN_REMEDIATION_AND_HARDENING_V7.1.md         # Plan Remediación & Hardening v7.1
+    ├── 13_PLAN_REMEDIATION_AND_HARDENING_V7.1.md         # Plan Remediación & Hardening v7.1
+    ├── 14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md # Sprint 44 (FreqUI Oficial :8081 & CLI)
+    └── 15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md   # Sprints 45-47 (FreqUI Quant Unification)
 ```

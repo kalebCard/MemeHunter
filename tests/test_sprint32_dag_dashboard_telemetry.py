@@ -7,13 +7,14 @@ import json
 import os
 import pytest
 
-from dashboard.server import (
+from meme_hunter.api.routers.quant import (
     DAG_TOPOLOGY,
-    global_dag_orchestrator,
-    global_risk_manager,
-    global_degradation_guard,
-    BASE_DIR
+    quant_dag_orchestrator as global_dag_orchestrator,
+    quant_risk_manager as global_risk_manager,
+    quant_degradation_guard as global_degradation_guard
 )
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # =============================================================================
@@ -105,40 +106,42 @@ def test_dag_trigger_cycle_execution():
 
 
 # =============================================================================
-# PRUEBAS DE INTEGRIDAD DEL FRONTEND (PB-111 & PB-112)
+# PRUEBAS DE INTEGRIDAD DEL FRONTEND FREQUI (PB-111 & PB-152)
 # =============================================================================
 
 def test_frontend_markup_integrity():
-    """PB-111: Verifica que index.html contiene el contenedor y los elementos del DAG."""
-    html_path = os.path.join(BASE_DIR, "dashboard", "index.html")
-    assert os.path.exists(html_path)
+    """PB-111 & PB-152: Verifica que FreqUI contiene la vista reactiva y componentes del DAG."""
+    dag_path = os.path.join(BASE_DIR, "web", "frequi", "src", "pages", "dag.vue")
+    dist_path = os.path.join(BASE_DIR, "web", "frequi", "dist", "index.html")
+    assert os.path.exists(dag_path), "Falta el componente FreqUI dag.vue"
+    assert os.path.exists(dist_path), "Falta el bundle compilado de FreqUI dist/index.html"
 
-    with open(html_path, "r", encoding="utf-8") as f:
-        html_content = f.read()
+    with open(dag_path, "r", encoding="utf-8") as f:
+        vue_content = f.read()
 
-    assert 'id="tab-multi-agent-dag"' in html_content
-    assert 'data-tab="tab-multi-agent-dag"' in html_content
-    assert 'dag-pipeline-status-badge' in html_content
-    assert 'dag_orchestrator' in html_content
-    assert 'js/dag_flow.js' in html_content
+    assert "handleTriggerCycle" in vue_content
+    assert "selectNode" in vue_content
+    assert "handleToggleNode" in vue_content
+    assert "useQuantStore" in vue_content
+    assert "quantStore.dagTopology" in vue_content
 
 
 def test_frontend_js_and_css_integrity():
-    """PB-111 & PB-112: Verifica que dag_flow.js y las clases CSS existan y sean consistentes."""
-    js_path = os.path.join(BASE_DIR, "dashboard", "js", "dag_flow.js")
-    css_path = os.path.join(BASE_DIR, "dashboard", "css", "style.css")
+    """PB-111 & PB-152: Verifica los estilos y reactividad de los componentes institucionales."""
+    dag_path = os.path.join(BASE_DIR, "web", "frequi", "src", "pages", "dag.vue")
+    header_path = os.path.join(BASE_DIR, "web", "frequi", "src", "components", "layout", "InstitutionalHeader.vue")
 
-    assert os.path.exists(js_path), "Falta el archivo dag_flow.js"
-    assert os.path.exists(css_path), "Falta el archivo style.css"
+    assert os.path.exists(dag_path)
+    assert os.path.exists(header_path)
 
-    with open(js_path, "r", encoding="utf-8") as f:
-        js_content = f.read()
-    assert "selectNode" in js_content
-    assert "fetchDAGStatus" in js_content
-    assert "hitl-node-toggle-btn" in js_content
+    with open(dag_path, "r", encoding="utf-8") as f:
+        vue_content = f.read()
+    assert "CAPA 1: INGESTA DE DATOS" in vue_content
+    assert "CAPA 2: PROCESAMIENTO & AGENTES" in vue_content
+    assert "CAPA 3: NÚCLEO DE SÍNTESIS & EJECUCIÓN" in vue_content
+    assert "handleSliderChange" in vue_content
 
-    with open(css_path, "r", encoding="utf-8") as f:
-        css_content = f.read()
-    assert ".dag-flow-card" in css_content
-    assert ".dag-node-capsule" in css_content
-    assert ".dag-inspector-card" in css_content
+    with open(header_path, "r", encoding="utf-8") as f:
+        header_content = f.read()
+    assert "institutional-badge-strip" in header_content
+    assert "kill_switch_active" in header_content

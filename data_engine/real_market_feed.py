@@ -16,7 +16,7 @@ from typing import Dict, Any, Tuple, Optional, List
 import numpy as np
 import pandas as pd
 
-from dashboard.strategy_tester import load_ohlcv_dataset, _enrich_features
+from meme_hunter.alpha.tester import load_ohlcv_dataset, _enrich_features
 from data_engine.paths import get_futures_data_dir
 
 DATA_DIR = get_futures_data_dir()

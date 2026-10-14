@@ -18,7 +18,7 @@ services:
       - "./mining:/freqtrade/mining"
       - "./portfolio:/freqtrade/portfolio"
       - "./data_engine:/freqtrade/data_engine"
-      - "./dashboard:/freqtrade/dashboard"
+      - "./web/frequi/dist:/freqtrade/freqtrade/rpc/api_server/ui/installed"
       - "./validation:/freqtrade/validation"
     ports:
       - "127.0.0.1:8080:8080"

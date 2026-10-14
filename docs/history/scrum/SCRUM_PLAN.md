@@ -549,6 +549,26 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 
 ---
 
+### Sprints 45 a 47: Migración Total a FreqUI — Single Pane of Glass Institucional (Completados & Certificados ✅)
+* **Sprint 45 (Infraestructura Frontend & Gateway Unificado - PB-148 a PB-151):**
+  - **PB-148:** Configuración de repositorio FreqUI (Vue 3 + Vite) en `web/frequi/` y montaje de volumen Docker en `/ui/installed`.
+  - **PB-149:** Estructuración de API Gateway Cuantitativo (`/api/quant/*`) en FastAPI ASGI Core.
+  - **PB-150:** Autenticación unificada de sesión y canal WebSocket de telemetría de inferencia ($< 5\text{ ms}$).
+  - **PB-151:** Banner global de salvaguardas institucionales (`InstitutionalHeader.vue`) con badges en tiempo real.
+* **Sprint 46 (Desarrollo de Vistas Cuantitativas en Vue 3 - PB-152 a PB-155):**
+  - **PB-152:** Vista topológica de 8 nodos y controles Human-in-the-Loop (`DagView.vue` + `DagInspector.vue`).
+  - **PB-153:** Vista de incubadora de alfas, autopsias forenses DeepSeek-R1 y MAP-Elites (`IncubatorView.vue`).
+  - **PB-154:** Vista de laboratorio simbólico y validador de fórmulas AST Zero-Eval (`StudioView.vue`).
+  - **PB-155:** Stores reactivos centralizados con Pinia (`useQuantStore`, `useDagStore`) y persistencia SQLite WAL.
+* **Sprint 47 (Desmantelamiento Legacy, E2E Testing & Certificación v8.2 - PB-156 a PB-159):**
+  - **PB-156:** Desmantelamiento y erradicación total del directorio legacy `dashboard/` y cierre permanente del puerto 8088.
+  - **PB-157:** Blindaje de `meme_cli.py` y `check_health.py` hacia el punto de acceso web único (`:8081`).
+  - **PB-158:** Suite piramidal de pruebas E2E y verificación de no-regresión en entorno real (33+ tests pasando al 100%).
+  - **PB-159:** Estandarización documental canónica y emisión de certificación v8.2.
+* **Certificación Sprints 45-47:** Ver detalle en [`docs/history/sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md`](../sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md).
+
+---
+
 ## 4. Definición de Hecho (DoD)
 1. Código probado con tests unitarios (`pytest tests`).
 2. **Cero sesgo intra-vela:** Ningún backtest con Trailing Stop se considerará válido sin `--timeframe-detail 1m`.

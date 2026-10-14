@@ -17,7 +17,7 @@ from portfolio.order_router import (
     OrderExecutionStage,
     SmartExitOrder
 )
-from dashboard.strategy_tester import run_strategy_backtest
+from meme_hunter.alpha.tester import run_strategy_backtest
 
 
 def test_order_router_stage_determination():

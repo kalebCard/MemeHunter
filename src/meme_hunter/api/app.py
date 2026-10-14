@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from meme_hunter.core.config import get_settings
-from meme_hunter.api.routers import system, strategies, dag
+from meme_hunter.api.routers import system, strategies, dag, quant
 
 
 def create_app() -> FastAPI:
@@ -19,7 +19,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Meme Hunter Cockpit API",
         description="API Institucional ASGI para Monitoreo y Orquestación Multi-Agente",
-        version="8.0.0",
+        version="8.2.0",
         docs_url="/api/docs",
         redoc_url="/api/redoc",
     )
@@ -37,6 +37,7 @@ def create_app() -> FastAPI:
     app.include_router(system.router)
     app.include_router(strategies.router)
     app.include_router(dag.router)
+    app.include_router(quant.router)
 
     # WebSocket para Telemetría de Baja Latencia (< 5ms)
     @app.websocket("/ws/telemetry")

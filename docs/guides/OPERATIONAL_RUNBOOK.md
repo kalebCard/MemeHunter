@@ -52,7 +52,10 @@ python scripts/ops/meme_cli.py futures logs
 
 * **🌐 Interfaz Web Oficial Única (FreqUI):** [http://localhost:8081](http://localhost:8081)
 * **🔑 Credenciales de Acceso:** Usuario: `admin` | Clave: `MemeHunter2026!` (API URL: `http://localhost:8081`).
-* **🔬 Laboratorio de I+D (Opcional / Bajo Demanda):** [http://localhost:8088](http://localhost:8088) vía `python scripts/ops/meme_cli.py cockpit --start`.
+* **🔬 Módulos Cuantitativos Unificados en FreqUI:**
+  - 🌐 `/dag`: Orquestación Multi-Agente & Controles HITL
+  - 🔄 `/incubator`: Motor de Auto-Mejora, Autopsias DeepSeek-R1 & MAP-Elites
+  - 🧪 `/studio`: Laboratorio Cuantitativo & Validador AST Zero-Eval
 * **Estrategias en Producción:** `MemeHunter_MinedEnsemble` (Ensamble dinámico bidireccional auto-minado) y `MemeHunterFuturesV7_Quantum`.
 
 ---
@@ -97,25 +100,26 @@ python scripts/delta_neutral_vault.py --scan
 
 ---
 
-## 4. 🔬 Laboratorio Cuantitativo de I+D: Alpha Cockpit Dashboard (Bajo Demanda)
-El **Cockpit Dashboard** (puerto 8088) es un entorno analítico complementario para minería de alfas, generación de código con LLMs y pruebas de estrés. No es necesario para el trading diario (que corre 100% en FreqUI :8081).
+## 4. 🔬 Módulos Cuantitativos y Laboratorio de I+D en FreqUI (:8081)
+El antiguo Cockpit Dashboard secundario (puerto 8088) ha sido **completamente integrado dentro de FreqUI** (`http://localhost:8081`), eliminando la necesidad de múltiples puertos y procesos paralelos.
 
-### 4.1 Iniciar el Servidor del Cockpit Bajo Demanda
+### 4.1 Acceso Directo a los Módulos Cuantitativos
+1. **Centro de Control & Trading en Vivo:** [http://localhost:8081/trade](http://localhost:8081/trade)
+2. **Orquestador Multi-Agente & HITL:** [http://localhost:8081/dag](http://localhost:8081/dag)
+3. **Incubadora Autónoma & Autopsias IA:** [http://localhost:8081/incubator](http://localhost:8081/incubator)
+4. **Quant Studio AST Zero-Eval:** [http://localhost:8081/studio](http://localhost:8081/studio)
+
+### 4.2 Verificación de Salud Unificada y Acceso Remoto
 ```powershell
-# Iniciar mediante el CLI oficial
-python scripts/ops/meme_cli.py cockpit --start
+# Verificar la salud de FreqUI y el sistema completo
+python scripts/ops/meme_cli.py health
 ```
-* **Acceso Local:** [http://localhost:8088](http://localhost:8088)
-* **Autenticación:** Las llamadas a mutación (`/api/trigger-loop`, `/api/synthesize-alpha`, `/api/deploy-to-sandbox`) requieren un token Bearer seguro:
-  - Token por defecto para desarrollo: `meme_hunter_dev_token_2026`
-  - Variable de entorno de producción: `DASHBOARD_API_TOKEN`
 
-### 4.2 Acceso Seguro en Servidores Remotos / VPS
-Nunca expongas el puerto 8088 a internet directamente. Utiliza un túnel cifrado SSH:
+Para acceder de forma segura a FreqUI desde tu máquina local a un VPS remoto:
 ```bash
-ssh -L 8088:127.0.0.1:8088 usuario@<IP_DEL_VPS>
+ssh -L 8081:127.0.0.1:8081 usuario@<IP_DEL_VPS>
 ```
-Luego navega localmente a `http://localhost:8088`.
+Luego navega localmente a `http://localhost:8081`.
 
 ---
 

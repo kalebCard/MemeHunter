@@ -17,7 +17,7 @@ from unittest.mock import patch, MagicMock
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
-from dashboard.server import (
+from meme_hunter.api.security import (
     resolve_and_validate_token,
     TokenBucketRateLimiter,
     CockpitAPIHandler,

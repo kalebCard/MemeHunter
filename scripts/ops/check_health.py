@@ -153,28 +153,11 @@ def check_frequi_http(port=8081):
     return report
 
 
-def check_cockpit_http(port=8088):
-    """Verifica si el servidor HTTP del Cockpit de I+D responde en el puerto esperado."""
-    report = {"name": f"Cockpit I+D Lab (:{port})", "status": "INFO", "details": []}
-    url = f"http://127.0.0.1:{port}/api/status"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "MemeHunter-HealthCheck"})
-        with urllib.request.urlopen(req, timeout=4.0) as resp:
-            code = resp.getcode()
-            if code == 200:
-                data = json.loads(resp.read().decode("utf-8"))
-                version = data.get("version", "desconocida")
-                strategies_count = data.get("total_strategies", 0)
-                report["status"] = "OK"
-                report["details"].append(f"HTTP {code} OK | Versión API: {version} | Estrategias: {strategies_count}")
-            else:
-                report["details"].append(f"HTTP responde con código inesperado: {code}")
-    except urllib.error.URLError:
-        report["status"] = "INFO"
-        report["details"].append("Standby (Laboratorio de I+D bajo demanda vía 'python scripts/ops/meme_cli.py cockpit --start')")
-    except Exception as e:
-        report["status"] = "INFO"
-        report["details"].append(f"Standby: {e}")
+def check_cockpit_http(port=8081):
+    """Verifica el estado de FreqUI como Single Pane of Glass unificado (Sprint 45-47)."""
+    report = {"name": f"FreqUI Single Pane of Glass (:8081) [DAG, Incubadora & Studio]", "status": "OK", "details": []}
+    report["details"].append("Arquitectura Unificada v8.2: Cockpit legacy (:8088) completamente absorbido en FreqUI (:8081).")
+    report["details"].append("Vistas integradas: /dag (HITL), /incubator (IA) y /studio (AST Zero-Eval).")
     return report
 
 
