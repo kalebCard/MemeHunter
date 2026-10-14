@@ -7,7 +7,7 @@ import os
 import sys
 
 # Agregar path raíz
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, BASE_DIR)
 
 from dashboard.server import run_server
