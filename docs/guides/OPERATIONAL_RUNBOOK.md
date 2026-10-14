@@ -1,14 +1,14 @@
 ---
 id: OPS-001
-title: Manual Operativo y Runbook de Producción
+title: Manual Operativo y Runbook de Producción (Meme Hunter v8.5)
 category: operations
-version: 7.3
+version: 8.5
 status: ACTIVE
-last_updated: 2026-10-12
+last_updated: 2026-10-14
 author: Quantitative DevOps & Production Engineering Team
 ---
 
-# 🛠️ Manual Operativo y Runbook de Producción (Ops Runbook v7.3)
+# 🛠️ Manual Operativo y Runbook de Producción (Ops Runbook v8.5)
 
 Este documento centraliza los procedimientos de despliegue, monitoreo en vivo, gestión de emergencias, sincronización continua de datos, compilación de estrategias de ensamble y orquestación de la Arquitectura Híbrida Barbell.
 
@@ -217,5 +217,56 @@ docker compose run --rm -e PYTHONPATH=/freqtrade --entrypoint pytest freqtrade t
 ```
 
 **Criterio de aceptación obligatorio:** **151+ tests pasando al 100% (0 errores)**.
+
+---
+
+## 8. 📱 Operación y Control Remoto Vía Telegram AI Copilot (@Atutaskbot) (Sprints 50 y 51)
+
+Meme Hunter v8.5 incorpora el servicio de **Copilot de Inteligencia Artificial en Telegram** ([`client/telegram_ai_copilot.py`](file:///c:/meme_hunter/client/telegram_ai_copilot.py) y [`client/ai_copilot_engine.py`](file:///c:/meme_hunter/client/ai_copilot_engine.py)), permitiendo al operador supervisar y controlar el sistema mediante lenguaje natural y comandos deterministas desde dispositivos móviles.
+
+### 8.1 Arquitectura y Reglas Críticas de Despliegue
+> [!WARNING]
+> **Conflicto 409 de Long-Polling en Telegram:**
+> La API de Telegram prohíbe terminantemente múltiples instancias escuchando el mismo token de bot simultáneamente.
+> * En [`docker-compose.futures.yml`](file:///c:/meme_hunter/docker-compose.futures.yml), la variable `FREQTRADE__TELEGRAM__ENABLED=false` deshabilita el polling nativo de Freqtrade.
+> * El contenedor Freqtrade se dedica exclusivamente a ejecutar las estrategias y servir la API REST en el puerto `:8081`.
+> * El servicio `TelegramAiCopilotService` opera como el **único consumidor autorizado** del bot `@Atutaskbot`.
+
+### 8.2 Despliegue y Ejecución del Daemon
+```powershell
+# 1. Auditoría rápida de conectividad (Telegram API + Freqtrade REST API)
+python scripts/ops/run_telegram_copilot.py --test
+
+# 2. Iniciar el Daemon de Polling Continuo en segundo plano
+python scripts/ops/run_telegram_copilot.py --poll
+
+# Alternativa mediante CLI Canónico
+python scripts/ops/meme_cli.py telegram-ai --poll
+```
+
+### 8.3 Firewall de Seguridad por Chat ID
+El servicio implementa un filtro estricto por lista blanca:
+* Variable obligatoria en `.env`: `TELEGRAM_CHAT_ID=6730240181`.
+* Cualquier mensaje originado desde un Chat ID no autorizado es rechazado inmediatamente con registro en log de seguridad.
+
+### 8.4 Comandos Deterministas Disponibles
+| Comando | Descripción |
+| :--- | :--- |
+| `/status` | Estado de salud, modo (Dry-Run / Live), versión y trades abiertos. |
+| `/balance` | Resumen de balance USDT, saldo libre, bloqueado y equidad total. |
+| `/daily` | Rendimiento del día actual y comparación vs benchmarks. |
+| `/profit` | Resumen histórico de PnL acumulado, winrate y factor de beneficio. |
+| `/whitelist` | Pares activos autorizados en el motor de futuros. |
+| `/forcebuy <par>` | Orden forzada de entrada (ej: `/forcebuy SOL/USDT`). |
+| `/reload` | Recarga en caliente de configuraciones y estrategias sin reiniciar contenedor. |
+| `/help` | Menú interactivo de ayuda y lista de comandos. |
+
+### 8.5 Control Semántico en Lenguaje Natural (HITL)
+El motor `QuantAiCopilotEngine` procesa mensajes coloquiales y consulta telemetría viva para sintetizar respuestas enriquecidas:
+* *"¿Cómo vamos hoy?"* $\rightarrow$ Consulta `/daily` y resume el PnL y trades.
+* *"¿Cuánto saldo libre nos queda?"* $\rightarrow$ Consulta `/balance` e informa USDT disponible.
+* *"Comprar 1 SOL"* / *"Entra en doge"* $\rightarrow$ Detecta intención semántica, extrae el par y ejecuta `forcebuy` previa confirmación.
+* *"¿Hay algún riesgo activo?"* $\rightarrow$ Verifica estado del Kill-Switch (-25%), drawdown flotante y alarmas de volatilidad.
+
 
 

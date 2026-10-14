@@ -1,26 +1,40 @@
 ---
 id: REF-API-001
-title: Referencia de API ASGI & WebSockets (Cockpit v8.0)
+title: Referencia de API REST & WebSockets (Meme Hunter v8.5)
 category: reference
-version: 8.0
+version: 8.5
 status: ACTIVE
-last_updated: 2026-10-13
+last_updated: 2026-10-14
 author: Quantitative Architecture & Systems Engineering Core
 ---
 
-# 🌐 Referencia de API ASGI & WebSockets (Cockpit v8.0)
+# 🌐 Referencia de API REST & WebSockets (Meme Hunter v8.5)
 
-La API del Cockpit se construye sobre **FastAPI** y se ejecuta con **Uvicorn**, exponiendo endpoints REST tipados y un canal bidireccional WebSocket para telemetría en tiempo real (< 5 ms).
-
----
-
-## 📌 Documentación Interactiva OpenAPI
-* **Swagger UI:** `http://127.0.0.1:8088/api/docs`
-* **ReDoc:** `http://127.0.0.1:8088/api/redoc`
+El sistema opera con dos capas de APIs coordinadas:
+1. **API de Freqtrade Engine (`http://127.0.0.1:8081/api/v1`)**: Motor oficial de ejecución, trades, telemetría y UI.
+2. **API del Cockpit I+D ASGI (`http://127.0.0.1:8088/api`)**: Microservicios de DAG, laboratorio de alfas y persistencia SQLite WAL.
 
 ---
 
-## 🚀 Endpoints REST
+## ⚡ 1. API Oficial Freqtrade Engine (:8081)
+
+Utilizada tanto por **FreqUI** como por el **Telegram AI Copilot** ([`client/telegram_ai_copilot.py`](file:///c:/meme_hunter/client/telegram_ai_copilot.py)):
+
+| Endpoint | Método | Autenticación | Descripción |
+| :--- | :---: | :---: | :--- |
+| `/api/v1/ping` | GET | Ninguna | Heartbeat del servidor (retorna `{"status": "pong"}`). |
+| `/api/v1/status` | GET | HTTP Basic | Estado de trades abiertos, órdenes vivas y ratios de beneficio. |
+| `/api/v1/balance` | GET | HTTP Basic | Balance de cuenta USDT, saldo libre, bloqueado y total. |
+| `/api/v1/daily?days=7` | GET | HTTP Basic | PnL realizado desglosado por día calendario. |
+| `/api/v1/profit` | GET | HTTP Basic | Métricas históricas acumuladas, winrate y factor de beneficio. |
+| `/api/v1/whitelist` | GET | HTTP Basic | Lista de pares autorizados actualmente en el par de futuros. |
+| `/api/v1/forcebuy` | POST | HTTP Basic | Disparo de orden forzada de entrada (`{"pair": "SOL/USDT"}`). |
+| `/api/v1/forcesell` | POST | HTTP Basic | Cierre forzado de posición por Trade ID. |
+| `/api/v1/reload_config`| POST | HTTP Basic | Recarga en caliente de configuraciones sin reiniciar contenedor. |
+
+---
+
+## 🔬 2. API ASGI Cockpit I+D (:8088)
 
 ### 1. Sistema & Salud (`/api/system`)
 

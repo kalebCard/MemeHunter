@@ -1,14 +1,14 @@
 ---
 id: DOC-INDEX-001
-title: Centro Canónico de Documentación y Convenciones (Meme Hunter v8.0)
+title: Centro Canónico de Documentación y Convenciones (Meme Hunter v8.5)
 category: index
-version: 8.0
+version: 8.5
 status: ACTIVE
-last_updated: 2026-10-13
+last_updated: 2026-10-14
 author: Quantitative Architecture & Systems Engineering Core
 ---
 
-# 📚 Centro Canónico de Documentación (Meme Hunter v8.0)
+# 📚 Centro Canónico de Documentación (Meme Hunter v8.5)
 
 Bienvenido al centro oficial de documentación del ecosistema **Meme Hunter**. Toda la información técnica, cuantitativa, histórica y operativa se encuentra organizada bajo las convenciones de **DocOps** y el marco pedagógico internacional **Diátaxis**.
 
@@ -22,14 +22,17 @@ Bienvenido al centro oficial de documentación del ecosistema **Meme Hunter**. T
 > ### 🌌 [📖 Manual Maestro Unificado del Sistema (DOC-MASTER-001)](MANUAL_UNIFICADO_DEL_SISTEMA.md)
 > *El compendio cuantitativo integral que consolida: visión económica, arquitectura Híbrida Barbell, evolución de estrategias (V1 a V7 Quantum), auditoría forense (DSR / PBO), microestructura y motor auto-evolutivo.*
 
+> ### 📘 [📖 Manual de Usuario: Quant Cockpit & FreqUI (GUIDE-USER-001)](guides/MANUAL_DE_USUARIO_FREQUI_COCKPIT.md)
+> *Guía operativa de usuario para la interfaz web institucional FreqUI (`http://localhost:8081`), control del orquestador DAG, incubadora de alfas, laboratorio AST y control remoto con el Copilot de IA en Telegram.*
+
 ---
 
 ## 🗺️ Mapa de Navegación Estructurado (Marco Diátaxis)
 
 ```text
 docs/
-├── MANUAL_ESTANDAR_DEL_PROYECTO.md  # 🛡️ Norma técnica obligatoria de desarrollo (v8.0)
-├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌌 Compendio canónico cuantitativo y estratégico (v7.4)
+├── MANUAL_ESTANDAR_DEL_PROYECTO.md  # 🛡️ Norma técnica obligatoria de desarrollo (v8.5)
+├── MANUAL_UNIFICADO_DEL_SISTEMA.md  # 🌌 Compendio canónico cuantitativo y estratégico (v8.5)
 │
 ├── architecture/                    # 🏛️ EXPLICACIÓN: Arquitectura y Decisiones
 │   ├── DAS.md                       # Documento de Arquitectura de Software base (v6.0)
@@ -37,21 +40,22 @@ docs/
 │   └── decisions/                   # Architecture Decision Records (ADRs 001 a 004.1)
 │
 ├── guides/                          # 🛠️ CÓMO HACER (HOW-TO): Guías Operativas
+│   ├── MANUAL_DE_USUARIO_FREQUI_COCKPIT.md # 📘 Manual de usuario Cockpit FreqUI & Telegram Copilot (v8.5)
 │   └── OPERATIONAL_RUNBOOK.md       # Procedimientos de despliegue, Docker, VPS y contingencias
 │
 ├── reference/                       # 📖 REFERENCIA: Especificaciones Técnicas
-│   ├── CLI_REFERENCE.md             # Catálogo exhaustivo de comandos del CLI 'meme-hunter'
+│   ├── CLI_REFERENCE.md             # Catálogo exhaustivo de comandos del CLI 'meme-hunter' y 'meme_cli.py'
 │   ├── DATABASE_SCHEMA.md           # Esquema relacional SQLite WAL, pragmas y repositorios
-│   └── API_REFERENCE.md             # Especificación OpenAPI ASGI FastAPI y WebSockets (<5ms)
+│   └── API_REFERENCE.md             # Especificación OpenAPI ASGI FastAPI, Freqtrade REST API (:8081) y WebSockets
 │
 ├── research/                        # 🔬 INVESTIGACIÓN: Teoría Cuantitativa e Informes
 │   ├── strategy/                    # Estrategia Maestra, Hipótesis causal, Modelo Barbell y Escalado
 │   └── reports/                     # Certificación DSR 100%, PBO 6.67%, Auditoría Forense y Futuros
 │
 └── history/                         # 📜 HISTORIA: Genealogía, Backlog y Sprints
-    ├── INDEX_HISTORICO.md           # Memoria técnica y lecciones aprendidas de cada era
-    ├── scrum/                       # 🛡️ Scrum Governance y Product Backlog (Épicas 1-12, PB-01 a PB-143)
-    └── sprints/                     # 🏃 Catálogo y planes cronológicos de sprints (Sprints 1 al 43)
+    ├── INDEX_HISTORICO.md           # Memoria técnica y lecciones aprendidas de las 9 eras
+    ├── scrum/                       # 🛡️ Scrum Governance y Product Backlog (Épicas 1-15, PB-01 a PB-179)
+    └── sprints/                     # 🏃 Catálogo y planes cronológicos de sprints (Sprints 1 al 51)
 ```
 
 ---
@@ -67,6 +71,7 @@ docs/
 * **[ADR-004: Airbag Técnico y Órdenes Market](architecture/decisions/ADR-004_airbag_technical_exit_market_orders.md):** Cierres técnicos dinámicos y protección anti no-fill.
 
 ### 🛠️ 2. Guías Operativas (`docs/guides/`)
+* **[MANUAL_DE_USUARIO_FREQUI_COCKPIT.md](guides/MANUAL_DE_USUARIO_FREQUI_COCKPIT.md):** Manual integral del Cockpit oficial (:8081), Centro de Ayuda interactivo, controles HITL y Copilot IA en Telegram.
 * **[OPERATIONAL_RUNBOOK.md](guides/OPERATIONAL_RUNBOOK.md):** Procedimientos de despliegue Docker, variables `.env`, protocolos del Kill-Switch de 25%, sincronización de Binance y mantenimiento SQLite WAL.
 
 ### 📖 3. Referencia Técnica (`docs/reference/`)
@@ -83,10 +88,10 @@ docs/
 * **[PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md](research/strategy/PLAN_IMPLEMENTACION_HIBRIDO_BARBELL.md):** Especificación del traspaso mecánico del 60% hacia la Bóveda Cash & Carry.
 
 ### 📜 5. Historia y Evolución de Sprints (`docs/history/`)
-* **[INDEX_HISTORICO.md](history/INDEX_HISTORICO.md):** Registro evolutivo de las 7 eras del proyecto y lecciones aprendidas.
-* **[scrum/SCRUM_PLAN.md](history/scrum/SCRUM_PLAN.md):** Product Backlog Maestro unificado (Épicas 1 a 12, Historias PB-01 a PB-143 y DoD).
+* **[INDEX_HISTORICO.md](history/INDEX_HISTORICO.md):** Registro evolutivo de las 9 eras del proyecto y lecciones aprendidas.
+* **[scrum/SCRUM_PLAN.md](history/scrum/SCRUM_PLAN.md):** Product Backlog Maestro unificado (Épicas 1 a 15, Historias PB-01 a PB-179 y DoD).
 * **[scrum/README.md](history/scrum/README.md):** Marco ágil, roles, ceremonias y gobernanza Scrum.
-* **[sprints/README.md](history/sprints/README.md):** Catálogo maestro de ejecución de los 13 planes de sprint cronológicos (Sprints 1 al 43).
+* **[sprints/README.md](history/sprints/README.md):** Catálogo maestro de ejecución de los 18 planes de sprint cronológicos (Sprints 1 al 51).
 
 ---
 
@@ -96,5 +101,5 @@ docs/
 | :--- | :--- |
 | **Ingeniero de Software** | [`MANUAL_ESTANDAR_DEL_PROYECTO.md`](MANUAL_ESTANDAR_DEL_PROYECTO.md) ➔ [`reference/CLI_REFERENCE.md`](reference/CLI_REFERENCE.md) ➔ [`reference/DATABASE_SCHEMA.md`](reference/DATABASE_SCHEMA.md) ➔ [`guides/OPERATIONAL_RUNBOOK.md`](guides/OPERATIONAL_RUNBOOK.md) |
 | **Investigador Cuantitativo** | [`MANUAL_UNIFICADO_DEL_SISTEMA.md`](MANUAL_UNIFICADO_DEL_SISTEMA.md) ➔ [`research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md`](research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md) ➔ [`research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) |
-| **Operador de Producción** | [`guides/OPERATIONAL_RUNBOOK.md`](guides/OPERATIONAL_RUNBOOK.md) ➔ [`reference/CLI_REFERENCE.md`](reference/CLI_REFERENCE.md) ➔ Cockpit Web ([http://localhost:8088](http://localhost:8088)) |
+| **Operador de Producción** | [`guides/MANUAL_DE_USUARIO_FREQUI_COCKPIT.md`](guides/MANUAL_DE_USUARIO_FREQUI_COCKPIT.md) ➔ [`guides/OPERATIONAL_RUNBOOK.md`](guides/OPERATIONAL_RUNBOOK.md) ➔ FreqUI Web ([http://localhost:8081](http://localhost:8081)) ➔ Telegram Copilot ([@Atutaskbot](https://t.me/Atutaskbot)) |
 | **Inversor / Auditor** | [`MANUAL_UNIFICADO_DEL_SISTEMA.md`](MANUAL_UNIFICADO_DEL_SISTEMA.md) ➔ [`research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md`](research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md) ➔ [`history/INDEX_HISTORICO.md`](history/INDEX_HISTORICO.md) |

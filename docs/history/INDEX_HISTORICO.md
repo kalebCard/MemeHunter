@@ -1,8 +1,8 @@
 ---
 id: HIST-MASTER-001
-title: Libro Maestro de Historia, Genealogía y Sprints (Meme Hunter v1.0 a v8.0)
+title: Libro Maestro de Historia, Genealogía y Sprints (Meme Hunter v1.0 a v8.5)
 category: history
-version: 8.0
+version: 8.5
 status: CERTIFIED
 last_updated: 2026-10-13
 author: Quantitative Architecture & Systems Engineering Core
@@ -30,7 +30,8 @@ timeline
     Era 5 : Organismo Multi-Agente DAG (Sprints 29-35) : Fusión Bayesiana (<20ms), Polars Arrow, VectorBT y Riskfolio HERC
     Era 6 : Blindaje 4 Capas (Sprints 36-39) : Cortafuegos Pydantic v2, Sesgo Asíncrono y Kill Switch Absoluto (25%)
     Era 7 : Arquitectura Modular v8.0 (Sprints 40-43) : Zero-Eval AST, Typer CLI, FastAPI ASGI y Suite Piramidal
-    Era 8 : Unificación FreqUI & UX Hardening (Sprints 44-48) : Single Pane of Glass (:8081), FreqUI Vue 3, retiro Cockpit legacy y blindaje UI/UX WCAG
+    Era 8 : Unificación FreqUI, UX Hardening & Composables (Sprints 44-49) : Single Pane of Glass (:8081), FreqUI Vue 3, retiro Cockpit legacy, blindaje UI/UX WCAG y arquitectura modular composables
+    Era 9 : Agente IA Telegram & Control Remoto (Sprints 50-51) : Copilot cuantitativo con OpenRouter, control bidireccional Freqtrade y salvaguarda HITL
 ```
 
 ---
@@ -139,11 +140,13 @@ timeline
 
 ---
 
-### Era 8: Unificación Operativa y FreqUI Single Pane of Glass (Sprints 44 a 47)
+### Era 8: Unificación Operativa, FreqUI Single Pane of Glass & Arquitectura Frontend (Sprints 44 a 49)
 * **Documentos Canónicos:**
   * [Sprint 44: Unificación Operativa & FreqUI (:8081)](sprints/14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md)
   * [Sprints 45-47: Migración Total a FreqUI & Retiro de Cockpit Legacy](sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md)
-* **Historias:** PB-144 a PB-159.
+  * [Sprint 48: Blindaje UI/UX & Accesibilidad WCAG 2.2](sprints/16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md)
+  * [Sprint 49: Arquitectura Modular, Composables y Rediseño Cockpit Login](sprints/17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md)
+* **Historias:** PB-144 a PB-169.
 * **Hitos:**
   * Consolidación de FreqUI en `:8081` como interfaz web única y desacoplamiento inicial del Cockpit (PB-144 a PB-147).
   * Repositorio frontend FreqUI (Vue 3 + TypeScript + Vite) con montaje de volumen en contenedor Docker (PB-148).
@@ -151,6 +154,20 @@ timeline
   * Vistas nativas cuantitativas en Vue 3 con Pinia: Orquestador DAG & HITL (`DagView.vue`), Incubadora IA (`IncubatorView.vue`) y Quant Studio AST (`StudioView.vue`) (PB-151 a PB-155).
   * Erradicación completa de `dashboard/`, cierre del puerto 8088 y alineación de `meme_cli.py` (PB-156, PB-157).
   * Suite de pruebas E2E y certificación institucional de arquitectura v8.2 (PB-158, PB-159).
+  * Blindaje heurístico de `BotLogin.vue`, erradicación del botón Reset, anti-double submit y certificación WCAG 2.2 AA (PB-160 a PB-164).
+  * Desacoplamiento de lógica en composable `useBotLoginForm.ts`, modularización con `defineModel`, rediseño visual glassmorphic de `pages/login.vue` y test de ping activo (PB-165 a PB-169).
+
+---
+
+### Era 9: Agente IA Autónomo en Telegram, Copilot Cuantitativo y Control Remoto HITL (Sprints 50 y 51)
+* **Documento Canónico:** [`docs/history/sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md`](sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md)
+* **Historias:** PB-170 a PB-179 (Total: 10 User Stories).
+* **Hitos:**
+  * Daemon asíncrono de Telegram con firewall de ciberseguridad por `ALLOWED_CHAT_ID` (`TelegramBotClient`).
+  * Expansión del cliente REST RPC de Freqtrade (`client/freqtrade_client.py`) con control total de órdenes, balance y telemetría.
+  * Motor cognitivo de IA institucional (`QuantAiCopilotEngine`) con inyección de telemetría viva y fallback heurístico tolerante a fallos.
+  * Parser dual con comandos rápidos de baja latencia (`/status`, `/profit`, `/balance`, `/stopbuy`, `/killswitch`) e interpretación de lenguaje natural.
+  * Integración unificada en CLI (`scripts/ops/meme_cli.py telegram-ai`) y suite de pruebas certificada (`test_telegram_ai_copilot.py`).
 
 ---
 
@@ -163,7 +180,7 @@ docs/history/
 ├── INDEX_HISTORICO.md               # 🌟 Libro maestro de historia, cronología y genealogía
 ├── scrum/                           # 🛡️ Nivel Estratégico: Scrum Governance & Product Backlog
 │   ├── README.md                    # Marco de trabajo ágil, DoD y ceremonias
-│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-164)
+│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-169)
 │   └── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # Backlog temático de minería de alphas y CPCV
 └── sprints/                         # 🏃 Nivel Táctico: Planes de ejecución técnica de sprints
     ├── README.md                    # Catálogo maestro de ejecución de sprints
@@ -182,5 +199,7 @@ docs/history/
     ├── 13_PLAN_REMEDIATION_AND_HARDENING_V7.1.md         # Plan Remediación & Hardening v7.1
     ├── 14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md # Sprint 44 (FreqUI Oficial :8081 & CLI)
     ├── 15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md   # Sprints 45-47 (FreqUI Quant Unification)
-    └── 16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md # Sprint 48 (Blindaje UI/UX & WCAG 2.2)
+    ├── 16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md # Sprint 48 (Blindaje UI/UX & WCAG 2.2)
+    ├── 17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md # Sprint 49 (Arquitectura Modular & Composables)
+    └── 18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md # Sprints 50-51 (Copilot IA Telegram & Control Remoto)
 ```

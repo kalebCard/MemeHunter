@@ -15,19 +15,19 @@ references:
 
 # 🏃 Catálogo Maestro de Ejecución de Sprints (Meme Hunter)
 
-Este directorio alberga los **16 Planes de Ejecución de Sprints Técnicos** estandarizados y ordenados cronológicamente, cubriendo el ciclo de desarrollo completo desde el motor auto-evolutivo inicial hasta la arquitectura institucional modular v8.0, la unificación operativa en FreqUI y el blindaje UI/UX.
+Este directorio alberga los **18 Planes de Ejecución de Sprints Técnicos** estandarizados y ordenados cronológicamente, cubriendo el ciclo de desarrollo completo desde el motor auto-evolutivo inicial hasta la arquitectura institucional modular v8.0, la unificación operativa en FreqUI, el blindaje UI/UX, la modularización con composables y el Copilot de IA en Telegram.
 
 ---
 
 ## 🧭 1. Relación con el Product Backlog
 
 Los documentos en este directorio constituyen el **Nivel Táctico** de ejecución. Cada plan detalla los criterios de aceptación técnicos, arquitectura interna, suite de tests unitarios/integración y DoD específicos de cada ciclo.
-* Para consultar el **Product Backlog Maestro** con las 12 Grandes Épicas e Historias PB-01 a PB-164, ver [**`docs/history/scrum/SCRUM_PLAN.md`**](../scrum/SCRUM_PLAN.md).
-* Para la genealogía de las 8 Eras Evolutivas, ver [**`docs/history/INDEX_HISTORICO.md`**](../INDEX_HISTORICO.md).
+* Para consultar el **Product Backlog Maestro** con las 12 Grandes Épicas e Historias PB-01 a PB-179, ver [**`docs/history/scrum/SCRUM_PLAN.md`**](../scrum/SCRUM_PLAN.md).
+* Para la genealogía de las 9 Eras Evolutivas, ver [**`docs/history/INDEX_HISTORICO.md`**](../INDEX_HISTORICO.md).
 
 ---
 
-## 📊 2. Matriz Cronológica de Sprints (1 al 48)
+## 📊 2. Matriz Cronológica de Sprints (1 al 51)
 
 | # | Archivo Canónico | Sprints | ID Estándar | Historias Cubiertas | Hito Técnico Principal | Estado |
 | :---: | :--- | :---: | :---: | :---: | :--- | :---: |
@@ -47,6 +47,8 @@ Los documentos en este directorio constituyen el **Nivel Táctico** de ejecució
 | **14** | [`14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md`](14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md) | Sprint 44 | `HIST-SPRINT-044` | PB-144 a PB-147 | Unificación Operativa, FreqUI (:8081) Oficial & CLI Centralizado | ✅ COMPLETED |
 | **15** | [`15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md`](15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md) | Sprints 45-47 | `HIST-SPRINT-045-047` | PB-148 a PB-159 | Migración Total a FreqUI — Single Pane of Glass Institucional | ✅ CERTIFIED |
 | **16** | [`16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md`](16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md) | Sprint 48 | `HIST-SPRINT-048` | PB-160 a PB-164 | Blindaje UI/UX, Accesibilidad WCAG 2.2 & Autenticación Ergonómica | ✅ CERTIFIED |
+| **17** | [`17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md`](17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md) | Sprint 49 | `HIST-SPRINT-049` | PB-165 a PB-169 | Arquitectura Modular, Composables y Rediseño Cockpit Login | ✅ CERTIFIED |
+| **18** | [`18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md`](18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md) | Sprints 50-51 | `HIST-SPRINT-050-051` | PB-170 a PB-179 | Agente IA Autónomo en Telegram, Control Remoto Bidireccional y Copilot Cuantitativo | ✅ CERTIFIED |
 
 
 ---

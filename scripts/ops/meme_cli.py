@@ -178,6 +178,19 @@ def cmd_research(args):
     return subprocess.run([sys.executable, full_path]).returncode
 
 
+def cmd_telegram_ai(args):
+    """Gestión y control del Copilot de IA en Telegram."""
+    runner = str(BASE_DIR / "scripts" / "ops" / "run_telegram_copilot.py")
+    cmd = [sys.executable, runner]
+    if args.poll:
+        cmd.append("--poll")
+    elif args.query:
+        cmd.extend(["--query", args.query])
+    else:
+        cmd.append("--test")
+    return subprocess.run(cmd).returncode
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Meme Hunter v7.2 - CLI Centralizado de Control y Operaciones",
@@ -216,6 +229,12 @@ Ejemplos comunes:
     p_research = subparsers.add_parser("research", help="Ejecutar herramientas de investigación de I+D")
     p_research.add_argument("tool", nargs="?", help="Nombre de la herramienta (stress, monte-carlo, vault, sentinel, etc.)")
 
+    # telegram-ai
+    p_tg = subparsers.add_parser("telegram-ai", help="Gestión del Copilot de IA en Telegram (Sprint 50 & 51)")
+    p_tg.add_argument("--poll", action="store_true", help="Inicia el servicio en polling continuo")
+    p_tg.add_argument("--test", action="store_true", help="Audita conectividad con Telegram y Freqtrade")
+    p_tg.add_argument("--query", type=str, default="", help="Ejecuta una consulta al AI Copilot con telemetría viva")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -228,7 +247,8 @@ Ejemplos comunes:
         "cockpit": cmd_cockpit,
         "futures": cmd_futures,
         "test": cmd_test,
-        "research": cmd_research
+        "research": cmd_research,
+        "telegram-ai": cmd_telegram_ai
     }
 
     handler = commands.get(args.command)

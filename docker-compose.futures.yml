@@ -19,6 +19,7 @@ services:
       - "127.0.0.1:8081:8081"
     environment:
       - PYTHONPATH=/freqtrade
+      - FREQTRADE__TELEGRAM__ENABLED=false
     env_file:
       - path: .env
         required: false

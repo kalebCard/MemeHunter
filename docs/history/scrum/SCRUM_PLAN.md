@@ -1,8 +1,8 @@
 ---
 id: HIST-SCRUM-001
-title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-164)"
+title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-179)"
 category: history/scrum
-version: 8.3
+version: 8.5
 status: ACTIVE
 last_updated: 2026-10-14
 author: Quantitative Engineering & Systems Architecture Core
@@ -35,7 +35,7 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 | H4 | PB-25: `_current_drawdown()` dependía de atributo no estándar en Trade. | 🟠 Alta | ✅ **Resuelto (PB-33):** Cálculo dinámico con `trade.calc_profit(rate)` usando último precio. |
 | H5 | PB-24: `_is_adverse_funding()` fallaba silenciosamente en llamada a exchange. | 🟠 Alta | ✅ **Resuelto (PB-34):** Consulta nativa a `exchange.fetch_funding_rate()` con logs y advertencias. |
 | H6 | Dry-Run detenido: no hay contenedores Docker en ejecución. | 🟠 Alta | 🟢 **Activo:** Contenedor Docker en ejecución procesando validación intensiva con `--timeframe-detail 1m`. |
-| H7 | Telegram sin configurar (`.env` completamente comentado). | 🟡 Media | ⏳ **Pendiente (PB-13):** Credenciales pendientes de introducir por el usuario. |
+| H7 | Telegram sin configurar. | 🟡 Media | ✅ **Resuelto (PB-13 / PB-170):** Credenciales de Telegram configuradas en `.env` y Copilot IA activo y certificado en Sprints 50-51. |
 | H8 | Cifras contradictorias entre commits y documentos. | 🟡 Media | ✅ **Resuelto (PB-38):** Sincronizado `INFORME_FUTUROS_100_USDT.md` con las métricas oficiales. |
 | H9 | Tests de estrategia requerían entorno Freqtrade. | 🟡 Media | ✅ **Resuelto (PB-38):** Verificados los 59 tests pasando al 100% dentro del contenedor Docker. |
 | H10 | Riesgos estructurales en V3 (Short-Sniper, fórmula errónea de stop dinámico). | 🔴 Crítica | ✅ **Resuelto (PB-44 / PB-50):** Superado con `MemeHunterFuturesV4`. |
@@ -86,7 +86,7 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 | PB-10 | Motor de Futuros USDT-M `MemeHunterFuturesV1` (Long/Short 1x). | 2 | 5 | ✅ Completado |
 | PB-11 | Batería de estrés hostil, Monte Carlo (7,500 sims) y Kill-Switch 25%. | 2 | 5 | ✅ Completado |
 | PB-12 | Despliegue Dry-Run en contenedor Docker (`meme_hunter_futures`). | 3 | 5 | ✅ Completado |
-| PB-13 | Integrar notificaciones por Telegram con alertas de Kill-Switch. | 3 | 2 | ⏳ Pendiente (`.env` sin configurar) |
+| PB-13 | Integrar notificaciones por Telegram con alertas de Kill-Switch. | 3 | 2 | ✅ Completado |
 | PB-14 | Monitoreo y evaluación estadística de Dry-Run continuo (8 semanas). | 3 | 8 | ⛔ Detenido (contenedor apagado) |
 | **PB-15** | **Módulo Meme Sentinel: Detección de volumen inusual y picos de volatilidad temprana.** | 4 | 8 | ✅ Completado |
 | **PB-16** | **Integración de Sentimiento y Radar Viral Web3 con DexScreener API.** | 4 | 13 | ✅ Completado |
@@ -149,7 +149,7 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 ### Sprint 4: Estabilización Operativa y Dry-Run Dual (Interrumpido ⛔)
 **Objetivo:** Monitorear la microestructura real de Binance en modo simulado y auditar la ejecución de órdenes.
 * **PB-12 ✅:** Contenedor `meme_hunter_futures` desplegado en Docker con interfaz FreqUI (puerto 8081).
-* **PB-13 ⏳:** Configuración de credenciales de Telegram en `.env` para monitoreo remoto y alertas en tiempo real (pendiente).
+* **PB-13 ✅:** Configuración de credenciales de Telegram en `.env` para monitoreo remoto y alertas en tiempo real (Completado y expandido con Copilot IA en Sprints 50-51).
 * **PB-14 ⛔:** Auditoría continua con `scripts/dryrun_monitor.py`.
   * **Resultados en vivo registrados (antes de la parada):** 1 trade cerrado en `MAGIC/USDT:USDT` con **+9.31% de beneficio** (+9.22 USDT) por trailing stop, 7 posiciones abiertas bajo gestión.
   * **Estado al 11-oct-2026:** sin contenedores en ejecución. Muestra estadística insuficiente (1 trade) — no extrapolable.
@@ -576,6 +576,33 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 * **PB-163 ✅:** Gestión robusta de sesiones multi-bot, normalización de `baseUrl` sin duplicar `/api/v1` y deduplicación de tokens concurrentes a nivel módulo en `loginInfo.ts`.
 * **PB-164 ✅:** Suite automatizada de pruebas frontend con Vitest certificando al 100% `BotLogin.vue` (6/6 tests) y `loginInfo.ts` (3/3 tests).
 * **Documento Canónico:** Ver detalle en [`docs/history/sprints/16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md`](../sprints/16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md).
+
+---
+
+### Sprint 49: Arquitectura Modular Frontend, Desacoplamiento de Lógica vía Composables y Rediseño de Cockpit Login en FreqUI (Completado & Certificado ✅)
+* **PB-165 ✅:** Desacoplamiento de estado reactivo y lógica de negocio hacia el composable puro `useBotLoginForm.ts` (validación de URLs, detección de bots duplicados, submit asíncrono y orquestación con `botStore`).
+* **PB-166 ✅:** Componentización atómica del formulario con reactividad unidireccional y estándar `defineModel` (`BotLoginEndpointSection.vue`, `BotLoginCredentialsSection.vue`, `BotLoginAlerts.vue`), eliminando mutaciones de props (`vue/no-mutating-props`).
+* **PB-167 ✅:** Rediseño visual institucional del Cockpit en `pages/login.vue`, erradicando el contenedor obsoleto `DraggableContainer` y sustituyéndolo por una tarjeta glassmorphic con ambient glow, badges de seguridad e identidad gráfica oficial (`AppIcon`, `AppText`).
+* **PB-168 ✅:** Integración de verificación preventiva de conectividad con botón de prueba de ping en vivo (`/api/v1/ping`) y desglose diagnóstico asistido ante restricciones CORS.
+* **PB-169 ✅:** Automatización de pruebas de arquitectura con Vitest (`tests/unit/useBotLoginForm.spec.ts`) manteniendo compatibilidad retroactiva total (15/15 tests aprobados en 3 suites concurrentes con 0 errores de ESLint).
+* **Documento Canónico:** Ver detalle en [`docs/history/sprints/17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md`](../sprints/17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md).
+
+---
+
+### Sprints 50 y 51: Agente Autónomo Copilot IA en Telegram, Control Remoto Bidireccional y Protocolo de Salvaguarda Cuantitativa (Completados & Certificados ✅)
+* **Sprint 50 (Arquitectura del Agente Copilot IA y Gateway Bidireccional Telegram - PB-170 a PB-174):**
+  - **PB-170 ✅:** Daemon Asíncrono de Telegram con Polling Seguro y Firewall por `ALLOWED_CHAT_ID` (`TelegramBotClient` autónomo en `client/telegram_ai_copilot.py`).
+  - **PB-171 ✅:** Expansión del Cliente REST RPC Bidireccional de Freqtrade (`client/freqtrade_client.py`) con soporte completo para `profit`, `balance`, `daily`, `count`, `stopbuy`, `stop`, `start`, `forcesell` y `locks`.
+  - **PB-172 ✅:** Motor Cognitivo Cuantitativo (`client/ai_copilot_engine.py`) integrando `OpenRouterClient` (DeepSeek-V3 / DeepSeek-R1) con telemetría viva de posiciones, balance y modo fallback heurístico resiliente.
+  - **PB-173 ✅:** Parser de Comandos Dual: Vía rápida determinista (`/status`, `/profit`, `/balance`, `/stopbuy`, `/stopbot`, `/startbot`, `/forcesell`, `/reload`, `/killswitch`) y vía cognitiva en lenguaje natural.
+  - **PB-174 ✅:** Suite Hermética de Pruebas Unitarias (`tests/unit/test_telegram_ai_copilot.py`) certificando al 100% la seguridad, extracción de intenciones y simulación de llamadas RPC (9/9 tests aprobados).
+* **Sprint 51 (Control Operativo Total, HITL, Diagnóstico Causal y CLI - PB-175 a PB-179):**
+  - **PB-175 ✅:** Protocolo de Control Human-in-the-Loop (HITL) y Confirmación de Acciones Críticas con sintaxis asistida antes de ejecutar órdenes destructivas.
+  - **PB-176 ✅:** Telemetría Proactiva y Diagnóstico Forense Causal Post-Trade con desglose de márgenes, PnL flotante y duración de trades.
+  - **PB-177 ✅:** Puente con la Fábrica de Alfas y Laboratorio Simbólico para recarga en caliente de estrategias compiladas (`/reload`).
+  - **PB-178 ✅:** Comando de Gestión Unificado en CLI (`scripts/ops/meme_cli.py telegram-ai --test/--poll/--query`) y runner `scripts/ops/run_telegram_copilot.py`.
+  - **PB-179 ✅:** Manual de Operaciones, Certificación de Seguridad (Token Redaction, Rate Limiting) y Cierre Canónico de Sprints.
+* **Documento Canónico:** Ver detalle en [`docs/history/sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md`](../sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md).
 
 ---
 

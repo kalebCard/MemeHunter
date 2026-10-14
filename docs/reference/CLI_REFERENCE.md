@@ -1,20 +1,22 @@
 ---
 id: REF-CLI-001
-title: Referencia Canónica del CLI (meme-hunter v8.0)
+title: Referencia Canónica del CLI (meme-hunter v8.5)
 category: reference
-version: 8.0
+version: 8.5
 status: ACTIVE
-last_updated: 2026-10-13
+last_updated: 2026-10-14
 author: Quantitative Architecture & Systems Engineering Core
 ---
 
-# 💻 Referencia Canónica del CLI (`meme-hunter`)
+# 💻 Referencia Canónica del CLI (`meme-hunter` & `meme_cli.py`)
 
-El comando `meme-hunter` consolida las 47 herramientas y scripts individuales del repositorio bajo una interfaz institucional construida con **Typer** y **Rich**.
+El proyecto dispone de dos niveles estandarizados de interfaces de línea de comandos:
+1. **`meme-hunter`**: CLI institucional empaquetado (**Typer** y **Rich**) para orquestación de bajo nivel, bases de datos y compilación de alfas.
+2. **`python scripts/ops/meme_cli.py`**: CLI de operaciones diarias y control de infraestructura en producción (Docker, FreqUI, Centinela de Salud y Telegram Copilot).
 
 ---
 
-## 📋 Resumen de Comandos y Grupos
+## 📋 Resumen de Comandos y Grupos (`meme-hunter`)
 
 ```bash
 meme-hunter [OPTIONS] COMMAND [ARGS]...
@@ -94,3 +96,33 @@ Ejecuta la simulación de colas pesadas (Fat-Tail Monte Carlo) bajo distribucion
 meme-hunter serve --host 127.0.0.1 --port 8088
 ```
 Inicia la factoría FastAPI ASGI con documentación Swagger OpenAPI (`/api/docs`) y WebSockets de telemetría reactiva en `/ws/telemetry`.
+
+---
+
+## 7. 🛠️ CLI Operativo de Producción (`python scripts/ops/meme_cli.py`)
+
+Para el día a día operativo en VPS o entorno local sin lidiar con comandos complejos de Docker o scripts individuales:
+
+```powershell
+# 1. Auditoría de Salud Integral (2 segundos)
+python scripts/ops/meme_cli.py health
+
+# 2. Acceso y Credenciales a la Interfaz Web Oficial FreqUI (:8081)
+python scripts/ops/meme_cli.py frequi
+
+# 3. Control del Contenedor de Futuros Docker
+python scripts/ops/meme_cli.py futures start     # Iniciar contenedor
+python scripts/ops/meme_cli.py futures stop      # Detener contenedor
+python scripts/ops/meme_cli.py futures logs      # Logs en tiempo real
+python scripts/ops/meme_cli.py futures status    # Inspección de estado
+
+# 4. Copilot de IA en Telegram (Sprint 50 & 51)
+python scripts/ops/meme_cli.py telegram-ai --poll    # Iniciar daemon de escucha
+python scripts/ops/meme_cli.py telegram-ai --test    # Auditar conectividad y APIs
+python scripts/ops/meme_cli.py telegram-ai --query "¿Cómo vamos hoy?"  # Prueba ad-hoc
+
+# 5. Ejecución Rápida de Pruebas Automatizadas
+python scripts/ops/meme_cli.py test             # Suite completa
+python scripts/ops/meme_cli.py test --fast      # Modo silencioso (-q)
+```
+

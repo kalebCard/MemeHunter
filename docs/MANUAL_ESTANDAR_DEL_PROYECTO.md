@@ -1,14 +1,14 @@
 ---
 id: MANUAL-STD-001
-title: Manual Estándar de Ingeniería y Desarrollo (Meme Hunter v8.0)
+title: Manual Estándar de Ingeniería y Desarrollo (Meme Hunter v8.5)
 category: standards
-version: 8.0
+version: 8.5
 status: ACTIVE
-last_updated: 2026-10-13
+last_updated: 2026-10-14
 author: Quantitative Architecture & Systems Engineering Core
 ---
 
-# 🛡️ Manual Estándar de Ingeniería y Desarrollo (Meme Hunter v8.0)
+# 🛡️ Manual Estándar de Ingeniería y Desarrollo (Meme Hunter v8.5)
 
 Este manual constituye la **norma técnica canónica y guía obligatoria de desarrollo** para todos los ingenieros de software, analistas cuantitativos e investigadores que contribuyan al proyecto **Meme Hunter**. Todo código, base de datos, interfaz o pipeline integrado en el repositorio debe apegarse estrictamente a los estándares definidos en este documento.
 
@@ -272,7 +272,7 @@ El ciclo de vida operativo del sistema se compone de 5 pipelines interconectados
 
 ## 7. Consolidación de Herramientas y CLI Canónico
 
-Se reemplaza la ejecución de los 47 scripts dispersos por una interfaz CLI única y estandarizada:
+Se reemplaza la ejecución de scripts dispersos por interfaces CLI estructuradas:
 
 ```bash
 # Bucle de trading y orquestación autónoma
@@ -295,8 +295,11 @@ meme-hunter db init
 meme-hunter db migrate
 meme-hunter db inspect
 
-# Servidor Cockpit Web
-meme-hunter serve --host 127.0.0.1 --port 8088
+# CLI Operativo Diario (Docker, FreqUI :8081, Telegram Copilot)
+python scripts/ops/meme_cli.py health          # Centinela de salud en 2s
+python scripts/ops/meme_cli.py frequi          # Acceso a FreqUI oficial (:8081)
+python scripts/ops/meme_cli.py futures start   # Iniciar motor de futuros
+python scripts/ops/meme_cli.py telegram-ai --poll  # Iniciar Copilot Telegram
 ```
 
 ---

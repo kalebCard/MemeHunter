@@ -1,24 +1,27 @@
-# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit Unificado (v7.6)
+# 🏹 Meme Hunter - Sistema Cuantitativo, Auto-Evolutivo & Cockpit Unificado (v8.5)
 
-Plataforma cuantitativa institucional que combina **arquitectura Multi-Agente en Grafo Acíclico Dirigido (DAG)** con **fusión bayesiana y telemetría < 20ms**, **arquitectura blindada de 4 capas (Cortafuegos Pydantic v2, Desacoplamiento Asíncrono, Ejecución Determinista y Kill Switch Absoluto)**, **minería genética de factores (NSGA-II)**, **fábrica de alphas transaccional en SQLite WAL**, **compuertas rigurosas fuera de muestra (OOS Gating: PBO < 15%, DSR >= 95%)**, **ensamble dinámico bidireccional Long/Short para Freqtrade**, **percepción semántica cualitativa vía OpenRouter (FinLLM con fallback offline 0ms)**, **protocolo de degradación elegante ante cisnes negros**, **sincronización continua de datos de Binance Futures**, y un **Centro de Control Unificado (Cockpit v7.4 con Visor Visual DAG y controles Human-in-the-Loop)**.
+Plataforma cuantitativa institucional que combina **arquitectura Multi-Agente en Grafo Acíclico Dirigido (DAG)** con **fusión bayesiana y telemetría < 20ms**, **arquitectura blindada de 4 capas (Cortafuegos Pydantic v2, Desacoplamiento Asíncrono, Ejecución Determinista y Kill Switch Absoluto al 25%)**, **minería genética de factores (NSGA-II)**, **fábrica de alphas transaccional en SQLite WAL**, **compuertas rigurosas fuera de muestra (OOS Gating: PBO < 15%, DSR >= 95%)**, **ensamble dinámico bidireccional Long/Short para Freqtrade**, **percepción semántica cualitativa vía OpenRouter (FinLLM con fallback offline 0ms)**, **protocolo de degradación elegante ante cisnes negros**, **sincronización continua de datos de Binance Futures**, **consola web oficial FreqUI (:8081) con vistas cuantitativas integradas (DAG, Incubator, Studio)** y **Copilot de IA en Telegram (@Atutaskbot) con control bidireccional y telemetría en tiempo real**.
 
 ---
 
 ## 🏛️ Centro de Documentación (`docs/`)
 
-La documentación del proyecto se encuentra estructurada en el directorio [`docs/`](docs/README.md):
+La documentación del proyecto se encuentra estructurada bajo el estándar DocOps y marco Diátaxis en [`docs/`](docs/README.md):
 
-* **[Manual Estándar de Ingeniería y Desarrollo (v8.0):](docs/MANUAL_ESTANDAR_DEL_PROYECTO.md)** Norma técnica canónica obligatoria para desarrollo, arquitectura modular, SQLite WAL, estándares de código y testing.
-* **[Manual Maestro Unificado del Sistema (v7.4):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa, estratégica y operativa.
-* **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil.
-* **[Libro Maestro de Historia & Genealogía de Sprints:](docs/history/INDEX_HISTORICO.md)** Cronología canónica de las 7 eras del proyecto y trazabilidad de los 43 Sprints.
-* **[Catálogo Maestro de Ejecución de Sprints:](docs/history/sprints/README.md)** Índice y especificaciones de los 13 ciclos de desarrollo (Sprints 1 al 43).
-* **[Product Backlog Maestro Scrum (v8.0):](docs/history/scrum/SCRUM_PLAN.md)** Backlog unificado con 12 Grandes Épicas e Historias PB-01 a PB-143.
+* **[Manual de Usuario: Quant Cockpit & FreqUI (v8.5):](docs/guides/MANUAL_DE_USUARIO_FREQUI_COCKPIT.md)** Guía interactiva de operación de la consola web (:8081), Centro de Ayuda, atajos de teclado y Copilot de IA en Telegram.
+* **[Manual Estándar de Ingeniería y Desarrollo (v8.5):](docs/MANUAL_ESTANDAR_DEL_PROYECTO.md)** Norma técnica canónica obligatoria para desarrollo, arquitectura modular, SQLite WAL, estándares de código y testing.
+* **[Manual Maestro Unificado del Sistema (v8.5):](docs/MANUAL_UNIFICADO_DEL_SISTEMA.md)** Referencia canónica integral técnica, cuantitativa, estratégica y operativa.
+* **[Índice General de Documentación:](docs/README.md)** Guía integral y rutas de lectura según perfil profesional.
+* **[Libro Maestro de Historia & Genealogía de Sprints:](docs/history/INDEX_HISTORICO.md)** Cronología canónica de las 9 eras del proyecto y trazabilidad de los 51 Sprints.
+* **[Catálogo Maestro de Ejecución de Sprints:](docs/history/sprints/README.md)** Índice y especificaciones de los 18 planes de sprint cronológicos (Sprints 1 al 51).
+* **[Product Backlog Maestro Scrum (v8.5):](docs/history/scrum/SCRUM_PLAN.md)** Backlog unificado con 15 Grandes Épicas e Historias PB-01 a PB-179.
+* **Sprints 50-51 (Agente Copilot IA en Telegram & Control Remoto):** [docs/history/sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md](docs/history/sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md)
+* **Sprint 49 (Arquitectura Modular Frontend, Composables & Cockpit Login):** [docs/history/sprints/17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md](docs/history/sprints/17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md)
+* **Sprint 48 (Blindaje UI/UX, Accesibilidad WCAG 2.2 & Auth Hardening):** [docs/history/sprints/16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md](docs/history/sprints/16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md)
+* **Sprints 45-47 (FreqUI Quant Unification & Single Pane of Glass Oficial):** [docs/history/sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md](docs/history/sprints/15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md)
+* **Sprint 44 (Unificación Operativa, FreqUI :8081 & CLI):** [docs/history/sprints/14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md](docs/history/sprints/14_SPRINT_044_SINGLE_PANE_OF_GLASS_FREQUI_AND_CLI.md)
 * **Sprints 40-43 (Remediación Crítica, Concurrencia y Arquitectura v8.0):** [docs/history/sprints/11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md](docs/history/sprints/11_SPRINTS_040_043_REMEDIATION_CONCURRENCY_AND_ARCHITECTURE_V8.md)
 * **Sprints 36-39 (Blindaje 4 Capas, Cortafuegos Pydantic v2 y Kill Switch):** [docs/history/sprints/10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md](docs/history/sprints/10_SPRINTS_036_039_ASYNC_DETERMINISTIC_FIREWALL_KILLSWITCH.md)
-* **Sprints 33-35 (Aceleración Polars, VectorBT, Riskfolio HERC y OpenBB):** [docs/history/sprints/09_SPRINTS_033_035_PERFORMANCE_RISK_AND_OPENBB.md](docs/history/sprints/09_SPRINTS_033_035_PERFORMANCE_RISK_AND_OPENBB.md)
-* **Sprints 30-32 (Arquitectura Multi-Agente, Orquestador DAG y Cockpit HITL):** [docs/history/sprints/06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md](docs/history/sprints/06_SPRINT_030_MULTI_AGENT_DAG_ORCHESTRATOR.md)
-* **Sprints 25-28 (Hardening del Bucle Autónomo, SQLite WAL & OOS Gating):** [docs/history/sprints/04_SPRINTS_025_028_AUTONOMOUS_LOOP_HARDENING.md](docs/history/sprints/04_SPRINTS_025_028_AUTONOMOUS_LOOP_HARDENING.md)
 * **Hipótesis Teórica del Edge Asimétrico:** [docs/research/strategy/HYPOTHESIS.md](docs/research/strategy/HYPOTHESIS.md)
 * **Certificación Matemática Institucional (PSR, DSR, CPCV y PBO):** [docs/research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md](docs/research/reports/INFORME_METRICAS_AVANZADAS_DSR_PBO.md)
 * **Compendio Maestro de Estrategia Cuantitativa:** [docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md](docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md)

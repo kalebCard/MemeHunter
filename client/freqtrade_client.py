@@ -107,3 +107,62 @@ class FreqtradeRestClient:
     def get_status(self) -> Dict[str, Any]:
         """Consulta el estado del bot y las operaciones abiertas."""
         return self._request("/api/v1/status", method="GET")
+
+    def get_profit(self) -> Dict[str, Any]:
+        """Consulta métricas consolidadas de rendimiento y PnL acumulado."""
+        return self._request("/api/v1/profit", method="GET")
+
+    def get_balance(self) -> Dict[str, Any]:
+        """Consulta balances de billetera, capital disponible y márgenes aislados."""
+        return self._request("/api/v1/balance", method="GET")
+
+    def get_daily(self, days: int = 7) -> Dict[str, Any]:
+        """Consulta desglose de PnL por días recientes."""
+        return self._request(f"/api/v1/daily?timescale={days}", method="GET")
+
+    def get_count(self) -> Dict[str, Any]:
+        """Consulta el número de trades abiertos y límite máximo."""
+        return self._request("/api/v1/count", method="GET")
+
+    def start_bot(self) -> Dict[str, Any]:
+        """Reanuda la ejecución operativa del bot."""
+        return self._request("/api/v1/start", method="POST")
+
+    def stop_bot(self) -> Dict[str, Any]:
+        """Detiene la ejecución operativa del bot de forma ordenada."""
+        return self._request("/api/v1/stop", method="POST")
+
+    def stopbuy_bot(self) -> Dict[str, Any]:
+        """Inhibe la apertura de nuevas posiciones manteniendo el trailing de las abiertas."""
+        return self._request("/api/v1/stopbuy", method="POST")
+
+    def forcesell(self, trade_id: str) -> Dict[str, Any]:
+        """Fuerza la salida y liquidación inmediata de un trade específico."""
+        return self._request("/api/v1/forcesell", method="POST", data={"tradeid": str(trade_id)})
+
+    def forcebuy(self, pair: str, price: Optional[float] = None) -> Dict[str, Any]:
+        """Fuerza la apertura de una posición específica."""
+        payload: Dict[str, Any] = {"pair": pair}
+        if price is not None:
+            payload["price"] = price
+        return self._request("/api/v1/forcebuy", method="POST", data=payload)
+
+    def get_locks(self) -> Dict[str, Any]:
+        """Consulta bloqueos temporales activos sobre pares."""
+        return self._request("/api/v1/locks", method="GET")
+
+    def delete_lock(self, lock_id: int) -> Dict[str, Any]:
+        """Libera un bloqueo temporal sobre un par."""
+        return self._request("/api/v1/delete_lock", method="POST", data={"lockid": lock_id})
+
+    def get_whitelist(self) -> Dict[str, Any]:
+        """Consulta lista blanca actual de pares en vigilancia."""
+        return self._request("/api/v1/whitelist", method="GET")
+
+    def get_blacklist(self) -> Dict[str, Any]:
+        """Consulta lista negra actual de pares bloqueados."""
+        return self._request("/api/v1/blacklist", method="GET")
+
+    def get_version(self) -> Dict[str, Any]:
+        """Consulta la versión del motor Freqtrade."""
+        return self._request("/api/v1/version", method="GET")

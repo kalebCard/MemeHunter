@@ -2,15 +2,15 @@
 id: DOC-MASTER-001
 title: Manual Maestro Unificado del Sistema Meme Hunter
 category: master
-version: 7.4
+version: 8.5
 status: CERTIFIED
-last_updated: 2026-10-12
+last_updated: 2026-10-14
 author: Quantitative Engineering & Research Core
 ---
 
-# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 7.4)
+# 📖 Manual Maestro Unificado del Sistema Meme Hunter (Versión 8.5)
 
-Este documento consolida la totalidad del conocimiento teórico, arquitectónico, cuantitativo y operativo del proyecto **meme_hunter**, unificando los planes estratégicos, informes forenses, especificaciones técnicas del motor autónomo auto-evolutivo y gobernanza de costes en una única referencia canónica.
+Este documento consolida la totalidad del conocimiento teórico, arquitectónico, cuantitativo y operativo del proyecto **meme_hunter**, unificando los planes estratégicos, informes forenses, especificaciones técnicas del motor autónomo auto-evolutivo, interfaz FreqUI institucional y gobernanza de costes en una única referencia canónica.
 
 ---
 
@@ -30,6 +30,8 @@ Este documento consolida la totalidad del conocimiento teórico, arquitectónico
 12. [Arquitectura de Estabilización y Blindaje Operativo](#12-arquitectura-de-estabilización-y-blindaje-operativo)
 13. [Fábrica de Alphas SQLite WAL, Gating OOS y Enlace Bidireccional](#13-fábrica-de-alphas-sqlite-wal-gating-oos-y-enlace-bidireccional-sprints-25-a-29)
 14. [Arquitectura Multi-Agente, Orquestador DAG y Cockpit Human-in-the-Loop](#14-arquitectura-multi-agente-orquestador-dag-y-cockpit-human-in-the-loop-sprints-30-a-32)
+15. [Single Pane of Glass FreqUI (:8081) y Modernización del Cockpit Web](#15-single-pane-of-glass-frequi-8081-y-modernización-del-cockpit-web-sprints-44-a-49)
+16. [Agente Inteligente Telegram Copilot & Control Remoto HITL](#16-agente-inteligente-telegram-copilot--control-remoto-hitl-sprints-50-y-51)
 
 ---
 
@@ -477,6 +479,64 @@ graph TD
 * **Endpoints REST de Telemetría ([`dashboard/server.py`](file:///c:/meme_hunter/dashboard/server.py)):**
   - `/api/dag/topology`, `/api/dag/status`, `/api/dag/toggle-node`, `/api/dag/set-threshold`, `/api/dag/trigger-cycle`.
 * **Certificación Oficial:** **24/24 pruebas automatizadas pasando al 100%** en `tests/test_sprint30*`, `tests/test_sprint31*` y `tests/test_sprint32*`.
+
+---
+
+## 15. Single Pane of Glass FreqUI (:8081) y Modernización del Cockpit Web (Sprints 44 a 49)
+
+Para resolver la fricción cognitiva de gestionar múltiples interfaces (el antiguo Cockpit secundario en `:8088` y FreqUI en `:8081`), el sistema unifica toda la experiencia operativa en **FreqUI Institucional** ([`web/frequi/`](file:///c:/meme_hunter/web/frequi/)) servido por el contenedor Docker de futuros en el puerto `:8081`.
+
+### 15.1 Arquitectura Single Pane of Glass
+* **Puerto Único `:8081`:** Freqtrade sirve tanto la API REST segura como la Single Page Application (SPA) construida en Vue 3 y Vite.
+* **Módulos Cuantitativos Nativos Integrados:**
+  - 🌐 **`/dag` (Multi-Agent DAG Cockpit):** Grafo interactivo con nodos SVG/Canvas, inspección de agentes en vivo, alternancia en caliente y ajuste de consenso bayesiano.
+  - 🔄 **`/incubator` (Incubadora Genética y Autopsias IA):** Tablero con estrategias en `LIVE`, `SANDBOX` y `ALPHA_DECAY`, matriz de alfas MAP-Elites y visor de autopsias DeepSeek-R1.
+  - 🧪 **`/studio` (Quant Studio AST Zero-Eval):** Editor interactivo para diseñar, validar y compilar expresiones matemáticas mediante AST determinista antes de enviarlas al motor de ejecución.
+  - ❓ **`/help` (Manual de Usuario y Base de Conocimientos):** Guía interactiva paso a paso con documentación de cada módulo y del Copilot de Telegram.
+
+### 15.2 Accesibilidad, Diseño Visual y Composables Modulares (Sprints 48 y 49)
+* **Tokens de Color de Alto Contraste (WCAG 2.1 AA):** Paleta oscura profesional con variables CSS semánticas (`--bg-primary`, `--accent-primary`, `--success`, `--danger`, `--warning`).
+* **Sistema de Notificaciones Toast Reactivo:** Notificaciones no invasivas en esquina superior derecha con auto-descarte y categorización por severidad.
+* **Arquitectura de Composables Vue 3:** Lógica de negocio encapsulada y desacoplada de la vista (`useAuth`, `useTelemetry`, `useDagGraph`, `useAlphaFactory`).
+* **Compilación y Despliegue:** Construcción optimizada con `npm run build` hacia `web/frequi/dist`, montado como volumen en el contenedor Docker.
+
+---
+
+## 16. Agente Inteligente Telegram Copilot & Control Remoto HITL (Sprints 50 y 51)
+
+Para habilitar la supervisión y ejecución fuera de la estación de trabajo, Meme Hunter v8.5 implementa un **Copilot de Inteligencia Artificial para Telegram** acoplado al motor cuantitativo en vivo:
+
+```mermaid
+graph LR
+    subgraph Telegram_Client [Operador Humano]
+        USER["Telegram App (@Atutaskbot)<br/>Chat ID: 6730240181"]
+    end
+
+    subgraph Copilot_Service [Servicio Local: run_telegram_copilot.py]
+        TG_SVC["TelegramAiCopilotService<br/>(scripts/ops/run_telegram_copilot.py)"]
+        AI_ENG["QuantAiCopilotEngine<br/>(client/ai_copilot_engine.py)"]
+        FALLBACK["Heuristic Engine (0ms, $0)<br/>& OpenRouter DeepSeek-R1"]
+    end
+
+    subgraph Freqtrade_Docker [Motor de Futuros: Puerto 8081]
+        FT_API["Freqtrade REST API<br/>(/api/v1/status, /balance, /forcebuy)"]
+        ENGINE["MemeHunterFuturesV7_Quantum<br/>(user_data/config_futures.json)"]
+    end
+
+    USER <-->|Long-Polling HTTPS| TG_SVC
+    TG_SVC <-->|Parseo Semántico & Telemetría| AI_ENG
+    AI_ENG <-->|Fallback Determinista| FALLBACK
+    TG_SVC <-->|REST Client (Basic Auth)| FT_API
+    FT_API <-->|Control Motor| ENGINE
+```
+
+### 16.1 Características del Copilot
+1. **Firewall por Chat ID:** Validación criptográfica de identidad (`TELEGRAM_CHAT_ID=6730240181`), ignorando cualquier interacción no autorizada.
+2. **Desacoplamiento de Polling:** Desactivación de `FREQTRADE__TELEGRAM__ENABLED` dentro del contenedor Docker para evitar errores 409 por conflicto de tokens.
+3. **Comandos Estructurados:** `/status`, `/balance`, `/daily`, `/profit`, `/whitelist`, `/forcebuy <par>`, `/reload`, `/help`.
+4. **Procesamiento de Lenguaje Natural:** Consultas libres (*"¿Cómo va el día?"*, *"¿Qué saldo tenemos?"*, *"Compra 1 SOL"*) interpretadas semánticamente y mapeadas a acciones seguras previa confirmación HITL.
+5. **Fallback Cognitivo a Coste $0.00:** Inmunidad ante fallos o límites de cuota de LLM externo mediante el generador heurístico determinista de `QuantAiCopilotEngine`.
+
 
 
 
