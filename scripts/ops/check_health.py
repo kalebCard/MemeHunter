@@ -31,7 +31,13 @@ if sys.platform.startswith("win"):
     except Exception:
         pass
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent if Path(__file__).resolve().parent.name == "ops" else Path(__file__).resolve().parent.parent
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / ".env")
+except ImportError:
+    pass
 
 
 def check_docker_containers():
@@ -186,7 +192,7 @@ def check_environment():
         report["details"].append("Archivo '.env' presente.")
 
     has_openrouter = bool(os.getenv("OPENROUTER_API_KEY"))
-    has_binance_key = bool(os.getenv("BINANCE_API_KEY"))
+    has_binance_key = bool(os.getenv("BINANCE_API_KEY") or os.getenv("FREQTRADE__EXCHANGE__KEY"))
 
     if has_openrouter:
         report["details"].append("OpenRouter API Key: Configurada")
