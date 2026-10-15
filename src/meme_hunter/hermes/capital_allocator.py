@@ -9,7 +9,11 @@ Gestiona la gobernanza de capital entre los bots en vivo:
 
 import logging
 from typing import Dict, Any, Optional
-from client.multi_bot_orchestrator import MultiBotOrchestratorClient
+
+try:
+    from meme_hunter.execution.multi_bot_orchestrator import MultiBotOrchestratorClient
+except (ImportError, ModuleNotFoundError):
+    from client.multi_bot_orchestrator import MultiBotOrchestratorClient
 
 logger = logging.getLogger("HermesCapitalAllocator")
 

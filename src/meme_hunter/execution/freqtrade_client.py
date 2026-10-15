@@ -52,8 +52,8 @@ class FreqtradeRestClient:
                 pass
 
         self.base_url = (base_url or os.getenv("FREQTRADE_API_URL") or cfg_url).rstrip("/")
-        self.username = username or os.getenv("FREQTRADE_API_USER") or cfg_user
-        self.password = password or os.getenv("FREQTRADE_API_PASSWORD") or cfg_pass
+        self.username = username if username is not None else (os.getenv("FREQTRADE_API_USER") or cfg_user)
+        self.password = password if password is not None else (os.getenv("FREQTRADE_API_PASSWORD") or cfg_pass)
         self.api_token = api_token or os.getenv("FREQTRADE_API_TOKEN")
         self.timeout_sec = float(timeout_sec)
 

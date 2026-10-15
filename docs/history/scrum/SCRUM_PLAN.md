@@ -606,17 +606,17 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 
 ---
 
-### Sprint 52: Arquitectura del Agente Autónomo Hermes como Alter Ego Operativo, Detección de Régimen y Gestión Integral de Cartera (En Preparación / Ready 🟡)
-* **PB-180 🟡:** Arquitectura Base del Servicio Hermes Agent & Contenedor Docker (`src/meme_hunter/hermes/`, microservicio `hermes_operator` en `docker-compose.yml`).
-* **PB-181 🟡:** Repositorio de Habilidades Persistentes (*Skills*) de Hermes para Trading (`src/meme_hunter/hermes/skills/`).
-* **PB-182 🟡:** Conector Unificado de Telemetría Multi-Bot REST RPC (`client/multi_bot_orchestrator.py` para puertos `:8081`, `:8082` y `:8083`).
-* **PB-183 🟡:** Motor Cuantitativo de Inferencia de Régimen de Mercado (`src/meme_hunter/hermes/regime_detector.py` con 4 regímenes deterministas).
-* **PB-184 🟡:** Gobernanza y Reasignación Dinámica de Capital (*Dynamic Allocator* entre bots según el régimen).
-* **PB-185 🟡:** Guardián de Riesgo Autónomo y Trinquete de Ganancias (*Profit Ratchet* y Kill-Switch preventivo).
-* **PB-186 🟡:** Bucle de Auto-Evolución y Minería Periódica de Alfas (*Self-Improving Alpha Loop*).
-* **PB-187 🟡:** Canal de Comunicación Explicable en Telegram (`@Atutaskbot`).
-* **PB-188 🟡:** Integración en Consola Centralizada CLI (`meme_cli.py hermes --status/--rebalance/--audit`).
-* **PB-189 🟡:** Suite de Pruebas Unitarias, Sandbox de Simulación y Certificación DoD (`tests/unit/test_hermes_operator.py`).
+### Sprint 52: Arquitectura del Agente Autónomo Hermes como Alter Ego Operativo, Detección de Régimen y Gestión Integral de Cartera (Completado & Certificado ✅)
+* **PB-180 ✅:** Arquitectura Base del Servicio Hermes Agent & Contenedor Docker (`src/meme_hunter/hermes/`, microservicio `hermes_operator` en `docker-compose.yml`).
+* **PB-181 ✅:** Repositorio de Habilidades Persistentes (*Skills*) de Hermes para Trading (`storage/hermes_memory.json` y atomic serialization).
+* **PB-182 ✅:** Conector Unificado de Telemetría Multi-Bot REST RPC (`src/meme_hunter/execution/multi_bot_orchestrator.py` para puertos `:8081`, `:8082` y `:8083`).
+* **PB-183 ✅:** Motor Cuantitativo de Inferencia de Régimen de Mercado (`src/meme_hunter/hermes/regime_detector.py` con 4 regímenes deterministas).
+* **PB-184 ✅:** Gobernanza y Reasignación Dinámica de Capital (*Dynamic Allocator* entre bots según el régimen).
+* **PB-185 ✅:** Guardián de Riesgo Autónomo y Trinquete de Ganancias (*Profit Ratchet* y Kill-Switch preventivo).
+* **PB-186 ✅:** Bucle de Auto-Evolución y Minería Periódica de Alfas (*Self-Improving Alpha Loop*).
+* **PB-187 ✅:** Canal de Comunicación Explicable en Telegram (`@Atutaskbot` vía `HermesTelegramMessenger`).
+* **PB-188 ✅:** Integración en Consola Centralizada CLI (`meme-hunter hermes status/rebalance/audit` & `meme_cli.py hermes`).
+* **PB-189 ✅:** Suite de Pruebas Unitarias, Sandbox de Simulación y Certificación DoD (`tests/unit/test_hermes_operator.py` 5/5 tests aprobados al 100%).
 * **Documento Canónico:** Ver detalle en [`docs/history/sprints/19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md`](../sprints/19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md).
 
 ---

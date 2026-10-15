@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 try:
     from pydantic_settings import BaseSettings, SettingsConfigDict
 except ImportError:
@@ -53,14 +53,28 @@ class AppSettings(BaseSettings):
     DB_PATH: Path = Field(default_factory=lambda: REPO_ROOT / "storage" / "meme_hunter.db")
 
     # Credenciales de Binance Futures / Spot
-    BINANCE_API_KEY: Optional[SecretStr] = Field(default=None, description="API Key de Binance")
-    BINANCE_API_SECRET: Optional[SecretStr] = Field(default=None, description="Secret de Binance")
+    BINANCE_API_KEY: Optional[SecretStr] = Field(
+        default=None,
+        validation_alias=AliasChoices("BINANCE_API_KEY", "FREQTRADE__EXCHANGE__KEY"),
+        description="API Key de Binance"
+    )
+    BINANCE_API_SECRET: Optional[SecretStr] = Field(
+        default=None,
+        validation_alias=AliasChoices("BINANCE_API_SECRET", "FREQTRADE__EXCHANGE__SECRET"),
+        description="Secret de Binance"
+    )
     BINANCE_TESTNET: bool = Field(default=False)
 
     # Conexión Freqtrade REST API
     FREQTRADE_API_URL: str = Field(default="http://127.0.0.1:8081")
-    FREQTRADE_API_USERNAME: str = Field(default="freqtrader")
-    FREQTRADE_API_PASSWORD: Optional[SecretStr] = Field(default=None)
+    FREQTRADE_API_USERNAME: str = Field(
+        default="admin",
+        validation_alias=AliasChoices("FREQTRADE_API_USERNAME", "FREQTRADE__API_SERVER__USERNAME")
+    )
+    FREQTRADE_API_PASSWORD: Optional[SecretStr] = Field(
+        default=None,
+        validation_alias=AliasChoices("FREQTRADE_API_PASSWORD", "FREQTRADE__API_SERVER__PASSWORD")
+    )
 
     # Cockpit Dashboard & Seguridad ASGI
     DASHBOARD_HOST: str = Field(default="127.0.0.1")
@@ -71,8 +85,14 @@ class AppSettings(BaseSettings):
     OPENROUTER_API_KEY: Optional[SecretStr] = Field(default=None)
 
     # Alertas de Telemetría (Telegram)
-    TELEGRAM_TOKEN: Optional[SecretStr] = Field(default=None)
-    TELEGRAM_CHAT_ID: Optional[str] = Field(default=None)
+    TELEGRAM_TOKEN: Optional[SecretStr] = Field(
+        default=None,
+        validation_alias=AliasChoices("TELEGRAM_TOKEN", "FREQTRADE__TELEGRAM__TOKEN")
+    )
+    TELEGRAM_CHAT_ID: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("TELEGRAM_CHAT_ID", "FREQTRADE__TELEGRAM__CHAT_ID")
+    )
 
     # Parámetros de Riesgo Institucional
     MAX_CONCURRENT_POSITIONS: int = Field(default=3, ge=1, le=10)

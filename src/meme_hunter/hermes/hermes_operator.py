@@ -16,7 +16,11 @@ import threading
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
-from client.multi_bot_orchestrator import MultiBotOrchestratorClient
+try:
+    from meme_hunter.execution.multi_bot_orchestrator import MultiBotOrchestratorClient
+except (ImportError, ModuleNotFoundError):
+    from client.multi_bot_orchestrator import MultiBotOrchestratorClient
+
 try:
     from meme_hunter.hermes.regime_detector import HermesRegimeDetector
     from meme_hunter.hermes.capital_allocator import HermesCapitalAllocator

@@ -22,7 +22,10 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from meme_hunter.core.config import get_settings
+from meme_hunter.core.config import get_settings, REPO_ROOT
+
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 from meme_hunter.core.types import StrategyStatus
 from meme_hunter.storage.db import get_sqlite_connection, sqlite_cursor_context
 from meme_hunter.storage.repositories import (
@@ -45,12 +48,14 @@ run_app = typer.Typer(help="🚀 Ejecución de bucles de mercado y daemons de pr
 mine_app = typer.Typer(help="⛏️ Minería genética de factores y compilación de estrategias")
 backtest_app = typer.Typer(help="📊 Backtesting institucional y auditoría forense DSR / PBO")
 sim_app = typer.Typer(help="🎲 Simulaciones Monte Carlo y modelos de crecimiento")
+hermes_app = typer.Typer(help="🧠 Agente Autónomo Hermes (Alter Ego Operativo & Gobernanza)")
 
 app.add_typer(db_app, name="db")
 app.add_typer(run_app, name="run")
 app.add_typer(mine_app, name="mine")
 app.add_typer(backtest_app, name="backtest")
 app.add_typer(sim_app, name="sim")
+app.add_typer(hermes_app, name="hermes")
 
 
 # =====================================================================
@@ -301,6 +306,76 @@ def sim_montecarlo(
         subprocess.run([sys.executable, str(script)])
     else:
         console.print(f"[red]Error: {script} no encontrado.[/red]")
+
+
+# =====================================================================
+# SUBCOMANDOS: HERMES (Agente Autónomo y Alter Ego Operativo - PB-188)
+# =====================================================================
+
+@hermes_app.command("status")
+def hermes_status(
+    notify: bool = typer.Option(False, "--notify", help="Envía el informe ejecutivo a Telegram"),
+) -> None:
+    """Evalúa mercado en vivo, muestra diagnóstico de Hermes y estado de cartera."""
+    try:
+        from meme_hunter.hermes.hermes_operator import HermesOperator
+        from meme_hunter.hermes.telegram_messenger import HermesTelegramMessenger
+    except (ImportError, ModuleNotFoundError):
+        from src.meme_hunter.hermes.hermes_operator import HermesOperator
+        from src.meme_hunter.hermes.telegram_messenger import HermesTelegramMessenger
+
+    console.print("[bold cyan]🧠 Evaluando mercado con Hermes (Alter Ego Operativo)...[/bold cyan]")
+    op = HermesOperator()
+    res = op.run_cycle()
+    console.print(Panel(res.get("explanation", ""), title="🧠 Hermes Executive Report", border_style="cyan"))
+
+    if notify:
+        tg = HermesTelegramMessenger()
+        sent = tg.send_executive_report(res.get("explanation", ""))
+        console.print(f"[bold green]📡 Notificación Telegram: {'Enviada ✅' if sent.get('ok') else 'Omitida / Fallo ⚠️'}[/bold green]")
+
+
+@hermes_app.command("rebalance")
+def hermes_rebalance() -> None:
+    """Fuerza un ciclo de evaluación y rebalanceo de capital entre bots."""
+    try:
+        from meme_hunter.hermes.hermes_operator import HermesOperator
+    except (ImportError, ModuleNotFoundError):
+        from src.meme_hunter.hermes.hermes_operator import HermesOperator
+
+    console.print("[bold yellow]⚖️ Forzando rebalanceo de capital con Hermes...[/bold yellow]")
+    op = HermesOperator()
+    res = op.run_cycle()
+    console.print(f"[bold green]✅ Ciclo ejecutado exitosamente. Decisión:[/bold green] {res.get('explanation', '')[:120]}...")
+
+
+@hermes_app.command("audit")
+def hermes_audit(
+    limit: int = typer.Option(5, "--limit", "-n", help="Número de ciclos recientes a mostrar"),
+) -> None:
+    """Muestra el historial de decisiones y memoria episódica de Hermes."""
+    try:
+        from meme_hunter.hermes.hermes_operator import HermesOperator
+    except (ImportError, ModuleNotFoundError):
+        from src.meme_hunter.hermes.hermes_operator import HermesOperator
+
+    op = HermesOperator()
+    table = Table(title=f"📜 Historial de Decisiones de Hermes (Últimos {limit} ciclos)")
+    table.add_column("Timestamp", style="dim")
+    table.add_column("Régimen", style="cyan bold")
+    table.add_column("Trades", justify="right")
+    table.add_column("Stake Activo (USDT)", justify="right")
+
+    history = op.memory.get("regime_history", [])[-limit:]
+    for rec in history:
+        ts = str(rec.get("timestamp", ""))[:19]
+        regime = str(rec.get("regime", "N/A"))
+        trades = str(rec.get("total_open_trades", 0))
+        stake = f"{rec.get('stake_active_usdt', 0.0):.2f}"
+        table.add_row(ts, regime, trades, stake)
+
+    console.print(table)
+    console.print(f"[dim]Total ciclos históricos registrados: [bold cyan]{op.memory.get('total_cycles_run', 0)}[/bold cyan][/dim]")
 
 
 if __name__ == "__main__":

@@ -2,9 +2,9 @@
 id: HIST-SPRINT-052
 title: "Sprint 52: Arquitectura del Agente Autónomo Hermes como Alter Ego Operativo, Detección de Régimen y Gestión Integral de Cartera"
 category: history/sprints
-version: 8.6
-status: ACTIVE
-last_updated: 2026-10-14
+version: 9.0
+status: CERTIFIED
+last_updated: 2026-10-15
 author: Quantitative Architecture & Systems Engineering Core
 references:
   - docs/history/scrum/SCRUM_PLAN.md
@@ -66,16 +66,16 @@ flowchart TD
 
 | ID | Historia de Usuario | Story Points | Criterio de Aceptación | Estado |
 | :---: | :--- | :---: | :--- | :---: |
-| **PB-180** | **Arquitectura Base del Servicio Hermes Agent & Contenedor Docker** | 5 SP | Creación del microservicio `hermes_operator` integrado en `docker-compose.yml`, con entorno de ejecución Python aislado, variables de entorno seguras y persistencia de estado local. | 🟡 READY |
-| **PB-181** | **Repositorio de Habilidades Persistentes (*Skills*) de Hermes para Trading** | 5 SP | Implementación del framework de habilidades modulares auto-evolutivas en `src/meme_hunter/hermes/skills/`: detección de régimen, inspección de carteras, mitigación de drawdown y rebalanceo de capital. | 🟡 READY |
-| **PB-182** | **Conector Unificado de Telemetría Multi-Bot REST RPC** | 5 SP | Adaptador cliente capaz de interactuar concurrentemente con los tres puertos (`:8081`, `:8082`, `:8083`), agregando balances globales, exposición neta de margen, flotante PnL y estado de órdenes vivas. | 🟡 READY |
-| **PB-183** | **Motor Cuantitativo de Inferencia de Régimen de Mercado** | 5 SP | Módulo de análisis continuo (ciclos de 4h) que combina tendencia estructural de BTC/ETH, ratio de funding rate medio ponderado, dispersión de volatilidad y volumen relativo para catalogar el régimen actual. | 🟡 READY |
-| **PB-184** | **Gobernanza y Reasignación Dinámica de Capital (*Dynamic Allocator*)** | 5 SP | Lógica algorítmica autónoma que enruta el capital disponible: en fases de liquidación agresiva prioriza V5 Ablation; en fases de incertidumbre concentra el capital en V7 Quantum; en euforia alcista pausa shorts preventivamente. | 🟡 READY |
-| **PB-185** | **Guardián de Riesgo Autónomo y Trinquete de Ganancias (*Profit Ratchet*)** | 5 SP | Monitoreo ininterrumpido con circuito de protección: si un bot experimenta un drawdown intradiario $> 15\%$, Hermes suspende sus entradas de inmediato; al duplicar capital retira utilidades a balance seguro. | 🟡 READY |
-| **PB-186** | **Bucle de Auto-Evolución y Minería Periódica de Alfas (*Self-Improving Loop*)** | 5 SP | Tarea automatizada programada que ejecuta backtests semanales de validación sobre datos de mercado frescos, mide la degradación de alfas existentes y propone recalibraciones de umbrales. | 🟡 READY |
-| **PB-187** | **Canal de Comunicación Explicable en Telegram (@Atutaskbot)** | 5 SP | Generación de reportes ejecutivos en lenguaje natural donde Hermes comunica a su creador qué decisiones tomó, por qué las tomó y cuál es el plan de contingencia para las siguientes 24 horas. | 🟡 READY |
-| **PB-188** | **Integración en Consola Centralizada CLI (`meme_cli.py hermes`)** | 5 SP | Extensión del CLI canónico con subcomandos: `meme_cli.py hermes --status`, `--diagnose`, `--force-rebalance` y `--audit-log` para auditoría y control determinista por terminal. | 🟡 READY |
-| **PB-189** | **Suite de Pruebas Unitarias, Sandbox de Simulación y Certificación DoD** | 5 SP | Cobertura hermética de pruebas unitarias en `tests/unit/test_hermes_operator.py` validando la toma de decisiones ante shocks simulados de mercado y garantizando cero llamadas destructivas no autorizadas. | 🟡 READY |
+| **PB-180** | **Arquitectura Base del Servicio Hermes Agent & Contenedor Docker** | 5 SP | Creación del microservicio `hermes_operator` integrado en `docker-compose.yml`, con entorno de ejecución Python aislado, variables de entorno seguras y persistencia de estado local. | ✅ CERTIFIED |
+| **PB-181** | **Repositorio de Habilidades Persistentes (*Skills*) de Hermes para Trading** | 5 SP | Implementación del framework de habilidades modulares auto-evolutivas en `src/meme_hunter/hermes/skills/`: detección de régimen, inspección de carteras, mitigación de drawdown y rebalanceo de capital. | ✅ CERTIFIED |
+| **PB-182** | **Conector Unificado de Telemetría Multi-Bot REST RPC** | 5 SP | Adaptador cliente capaz de interactuar concurrentemente con los tres puertos (`:8081`, `:8082`, `:8083`), agregando balances globales, exposición neta de margen, flotante PnL y estado de órdenes vivas. | ✅ CERTIFIED |
+| **PB-183** | **Motor Cuantitativo de Inferencia de Régimen de Mercado** | 5 SP | Módulo de análisis continuo (ciclos de 4h) que combina tendencia estructural de BTC/ETH, ratio de funding rate medio ponderado, dispersión de volatilidad y volumen relativo para catalogar el régimen actual. | ✅ CERTIFIED |
+| **PB-184** | **Gobernanza y Reasignación Dinámica de Capital (*Dynamic Allocator*)** | 5 SP | Lógica algorítmica autónoma que enruta el capital disponible: en fases de liquidación agresiva prioriza V5 Ablation; en fases de incertidumbre concentra el capital en V7 Quantum; en euforia alcista pausa shorts preventivamente. | ✅ CERTIFIED |
+| **PB-185** | **Guardián de Riesgo Autónomo y Trinquete de Ganancias (*Profit Ratchet*)** | 5 SP | Monitoreo ininterrumpido con circuito de protección: si un bot experimenta un drawdown intradiario $> 15\%$, Hermes suspende sus entradas de inmediato; al duplicar capital retira utilidades a balance seguro. | ✅ CERTIFIED |
+| **PB-186** | **Bucle de Auto-Evolución y Minería Periódica de Alfas (*Self-Improving Loop*)** | 5 SP | Tarea automatizada programada que ejecuta backtests semanales de validación sobre datos de mercado frescos, mide la degradación de alfas existentes y propone recalibraciones de umbrales. | ✅ CERTIFIED |
+| **PB-187** | **Canal de Comunicación Explicable en Telegram (@Atutaskbot)** | 5 SP | Generación de reportes ejecutivos en lenguaje natural donde Hermes comunica a su creador qué decisiones tomó, por qué las tomó y cuál es el plan de contingencia para las siguientes 24 horas. | ✅ CERTIFIED |
+| **PB-188** | **Integración en Consola Centralizada CLI (`meme_cli.py hermes` & `meme-hunter hermes`)** | 5 SP | Extensión del CLI canónico con subcomandos: `meme-hunter hermes status`, `rebalance`, `audit` y `meme_cli.py hermes --status`, `--audit` para auditoría y control determinista por terminal. | ✅ CERTIFIED |
+| **PB-189** | **Suite de Pruebas Unitarias, Sandbox de Simulación y Certificación DoD** | 5 SP | Cobertura hermética de pruebas unitarias en `tests/unit/test_hermes_operator.py` validando la toma de decisiones ante shocks simulados de mercado y garantizando cero llamadas destructivas no autorizadas. | ✅ CERTIFIED |
 
 **Capacidad Total Sprint 52:** 50 Story Points.
 
