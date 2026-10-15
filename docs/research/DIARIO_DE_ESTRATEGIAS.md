@@ -96,3 +96,147 @@ Cada iteración o experimento cuantitativo de Hermes se documenta bajo el están
   1. Se prohíben fórmulas puramente lineales de precio.
   2. Todo candidato debe incorporar un término de volumen normalizado (`rvol` o `volume / vwap`).
   3. Los cruces deben filtrar con bandas de Bollinger o z-scores temporales (`ts_zscore`) para exigir que la anomalía sea estadísticamente significativa (> 2 desviaciones).
+
+### HERMES_OPT_18 — ⚡ **MEJORA DE SESIÓN EN BOT 3**
+* **Fecha de Registro:** `2026-10-15 16:24:47 UTC` (Ciclo #107)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 8), 12) * ts_rank(rvol, 14) * log(abs(ts_delta(hl_spread, 6)) + 1) / (ts_std(returns, 16) + 1e-6) * ts_decay_linear(rvol, 10) * ts_rank(volume, 12)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+1.81`
+  * **Win Rate:** `51.3%` (356 operaciones)
+  * **Retorno Proyectado:** `+188.87%`
+  * **Drawdown Máximo:** `50.4%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_OPT_19 — ⚡ **MEJORA DE SESIÓN EN BOT 3**
+* **Fecha de Registro:** `2026-10-15 16:24:50 UTC` (Ciclo #107)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 8), 12) * ts_rank(rvol, 14) * log(abs(ts_delta(hl_spread, 6)) + 1) / (ts_std(returns, 16) + 1e-6) * ts_decay_linear(rvol, 10) * ts_rank(volume, 14)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+1.86`
+  * **Win Rate:** `51.4%` (353 operaciones)
+  * **Retorno Proyectado:** `+193.84%`
+  * **Drawdown Máximo:** `50.4%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_OPT_20 — ⚡ **MEJORA DE SESIÓN EN BOT 3**
+* **Fecha de Registro:** `2026-10-15 16:34:41 UTC` (Ciclo #115)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 8), 12) * ts_rank(rvol, 14) * log(abs(ts_delta(hl_spread, 6)) + 1) / (ts_std(returns, 16) + 1e-6) * ts_decay_linear(rvol, 10) * ts_rank(volume, 14) * ts_zscore(hl_spread, 10) * ts_zscore(ts_delta(volume, 10), 20)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+2.21`
+  * **Win Rate:** `57.3%` (175 operaciones)
+  * **Retorno Proyectado:** `+157.16%`
+  * **Drawdown Máximo:** `50.7%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_OPT_21 — ⚡ **MEJORA DE SESIÓN EN BOT 3**
+* **Fecha de Registro:** `2026-10-15 16:34:56 UTC` (Ciclo #115)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 8), 12) * ts_rank(rvol, 14) * log(abs(ts_delta(hl_spread, 6)) + 1) / (ts_std(returns, 16) + 1e-6) * ts_decay_linear(rvol, 10) * ts_rank(volume, 14) * ts_zscore(ts_delta(volume, 10), 20) * ts_zscore(hl_spread, 10) * ts_zscore(ts_delta(volume, 10), 20)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+2.74`
+  * **Win Rate:** `60.7%` (162 operaciones)
+  * **Retorno Proyectado:** `+225.05%`
+  * **Drawdown Máximo:** `43.8%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_OPT_22 — ⚡ **MEJORA DE SESIÓN EN BOT 3**
+* **Fecha de Registro:** `2026-10-15 17:20:55 UTC` (Ciclo #149)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 6), 10) * ts_rank(rvol, 12) * log(abs(ts_delta(hl_spread, 5)) + 1) / (ts_std(returns, 14) + 1e-6) * ts_decay_linear(rvol, 8) * ts_rank(volume, 12) * ts_zscore(hl_spread, 8) * ts_zscore(volume, 10) * ts_zscore(hl_spread, 12)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+2.88`
+  * **Win Rate:** `59.0%` (156 operaciones)
+  * **Retorno Proyectado:** `+244.59%`
+  * **Drawdown Máximo:** `38.8%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_OPT_23 — ⚡ **MEJORA DE SESIÓN EN BOT 3**
+* **Fecha de Registro:** `2026-10-15 17:24:42 UTC` (Ciclo #152)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 6), 10) * ts_rank(rvol, 12) * log(abs(ts_delta(hl_spread, 5)) + 1) / (ts_std(returns, 14) + 1e-6) * ts_decay_linear(rvol, 8) * ts_rank(volume, 12) * ts_zscore(hl_spread, 8) * ts_zscore(volume, 10) * ts_zscore(hl_spread, 12) * ts_zscore(ts_delta(volume, 5), 10)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+3.15`
+  * **Win Rate:** `63.8%` (140 operaciones)
+  * **Retorno Proyectado:** `+275.38%`
+  * **Drawdown Máximo:** `25.1%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_OPT_24 — ⚡ **MEJORA DE SESIÓN EN BOT 3**
+* **Fecha de Registro:** `2026-10-15 17:24:48 UTC` (Ciclo #152)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 6), 10) * ts_rank(rvol, 12) * log(abs(ts_delta(hl_spread, 5)) + 1) / (ts_std(returns, 14) + 1e-6) * ts_decay_linear(rvol, 8) * ts_rank(volume, 12) * ts_zscore(hl_spread, 8) * ts_zscore(volume, 10) * ts_zscore(hl_spread, 12) * ts_zscore(ts_delta(volume, 5), 10) * ts_zscore(ts_delta(hl_spread, 5), 10)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+3.39`
+  * **Win Rate:** `64.2%` (135 operaciones)
+  * **Retorno Proyectado:** `+235.38%`
+  * **Drawdown Máximo:** `38.4%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_ATH_25 — 🏆 **NUEVO RÉCORD GLOBAL (ATH)**
+* **Fecha de Registro:** `2026-10-15 17:25:58 UTC` (Ciclo #153)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 5)) * ts_zscore(ts_delta(vwap, 6), 12) * ts_rank(rvol, 16) * log(abs(ts_delta(hl_spread, 6)) + 1) / (ts_std(returns, 18) + 1e-6) * ts_decay_linear(rvol, 10) * ts_rank(volume, 14) * ts_zscore(hl_spread, 10) * ts_zscore(volume, 12) * ts_zscore(hl_spread, 14) * ts_zscore(ts_delta(volume, 6), 12) * ts_zscore(ts_delta(hl_spread, 6), 12)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+4.55`
+  * **Win Rate:** `61.0%` (140 operaciones)
+  * **Retorno Proyectado:** `+373.03%`
+  * **Drawdown Máximo:** `32.5%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
+
+### HERMES_ATH_26 — 🏆 **NUEVO RÉCORD GLOBAL (ATH)**
+* **Fecha de Registro:** `2026-10-15 19:10:17 UTC` (Ciclo #238)
+* **Régimen Detectado:** `RANGE_CHOP` | **Timeframe:** `15m` | **Apalancamiento:** `10x`
+* **Fórmula Matemática:**
+```python
+sign(ts_delta(close, 4)) * ts_zscore(ts_delta(vwap, 6), 12) * ts_rank(hl_spread, 16) * log(abs(ts_delta(rvol, 5)) + 1) / (ts_std(returns, 20) + 1e-6) * ts_decay_linear(volume, 10) * ts_rank(volume, 12) * ts_zscore(hl_spread, 10) * ts_zscore(volume, 12) * ts_zscore(hl_spread, 14) * ts_zscore(ts_delta(volume, 6), 12) * ts_zscore(ts_delta(hl_spread, 6), 12)
+```
+* **Métricas de Backtest:**
+  * **Sharpe Ratio:** `+4.67`
+  * **Win Rate:** `57.3%` (135 operaciones)
+  * **Retorno Proyectado:** `+357.60%`
+  * **Drawdown Máximo:** `27.1%`
+* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.
+
+---
