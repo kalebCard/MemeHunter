@@ -193,7 +193,9 @@ class QuantAiCopilotEngine:
             symbol = buy_match.group(3).upper()
             return {"action": "forcebuy", "symbol": symbol, "confidence": 0.95, "command": f"/forcebuy {symbol}/USDT:USDT"}
 
-        # Hermes / Régimen / Rebalance
+        # Hermes / Régimen / Rebalance / Minería de Alphas
+        if re.search(r"\b(crea|crear|genera|generar|mina|minar|inventa|inventar|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz)\b", msg):
+            return {"action": "mine_strategy", "confidence": 0.95, "command": "/mine"}
         if re.search(r"\b(hermes|alter\s*ego|orquestador)\b", msg):
             return {"action": "query_hermes", "confidence": 0.95, "command": "/hermes"}
         if re.search(r"\b(regimen|r[eé]gimen|como\s+esta\s+el\s+mercado|tendencia)\b", msg):

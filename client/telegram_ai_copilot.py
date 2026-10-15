@@ -210,6 +210,8 @@ class TelegramAiCopilotService:
             return self._cmd_reload()
         elif cmd in ("/killswitch", "/emergencia"):
             return self._cmd_killswitch()
+        elif cmd in ("/mine", "/nuevaestrategia", "/crearestrategia", "/backtest"):
+            return self._cmd_mine()
         elif cmd.startswith("/ai"):
             prompt = msg[3:].strip()
             return self._cmd_ai_query(prompt)
@@ -224,7 +226,8 @@ class TelegramAiCopilotService:
             "🧠 *Gobierno Autónomo Hermes:*\n"
             "• `/hermes` : Informe ejecutivo causal del Alter Ego en tiempo real.\n"
             "• `/regime` : Clasificación del régimen macro (Binance Futures).\n"
-            "• `/rebalance` : Forzar rebalanceo dinámico de capital entre bots.\n\n"
+            "• `/rebalance` : Forzar rebalanceo dinámico de capital entre bots.\n"
+            "• `/mine` : 🧪 Sintetizar nuevas estrategias con IA, backtestearlas y probarlas en la arena.\n\n"
             "📊 *Comandos de Telemetría:*\n"
             "• `/status` : Posiciones abiertas en la arena (Ablation, Quantum, Ensemble).\n"
             "• `/profit` : Rendimiento consolidado, Win Rate y balance.\n"
@@ -271,6 +274,28 @@ class TelegramAiCopilotService:
             f"• *Acciones de Control:*\n{act_str}\n\n"
             f"📊 *Telemetría:* {res.get('portfolio', {}).get('total_open_trades', 0)} trades vivos | "
             f"`{res.get('portfolio', {}).get('total_stake_active_usdt', 0.0):.2f} USDT` en juego."
+        )
+
+    def _cmd_mine(self) -> str:
+        """Dispara el ciclo autónomo de minería, backtesting y despliegue de alfas."""
+        res = self.hermes_op.mine_and_evaluate_new_alpha()
+        if res.get("status") != "ok":
+            return f"⚠️ *Fábrica de Alphas:* {res.get('message', 'No se pudieron validar candidatos')} (Régimen: `{res.get('regime')}`)."
+
+        f = res["best_factor"]
+        reload_txt = "✅ Desplegado en Bot 3 (:8083) en vivo (cartera simulada)" if res.get("reload_bot3") else "ℹ️ Guardado en biblioteca de factores"
+
+        return (
+            "🧪 *NUEVA ESTRATEGIA / FACTOR GENERADO CON ÉXITO*\n\n"
+            f"• *ID del Factor:* `{f['factor_id']}`\n"
+            f"• *Régimen Objetivo:* `{res['regime']}`\n"
+            f"• *Fórmula Matemática:*\n`{f['formula']}`\n\n"
+            f"📊 *Resultados del Backtesting Rápido (Velas 4h):*\n"
+            f"• *Sharpe Ratio Proxy:* `{f['sharpe_proxy']:+.2f}`\n"
+            f"• *Information Coefficient (IC):* `{f['ic_mean']:+.4f}` (IR: `{f['ic_ir']:+.2f}`)\n"
+            f"• *Rotación (Turnover):* `{f['turnover']:.2f}`\n"
+            f"• *Complejidad AST:* `{f['depth']} niveles`\n\n"
+            f"🚀 *Acción en la Arena:* {reload_txt}."
         )
 
     def _cmd_status(self) -> str:
@@ -455,6 +480,16 @@ class TelegramAiCopilotService:
             real_balance=real_bal,
             arena_balances=arena_bal
         )
+
+        # Si el usuario solicitó crear, minar o backtestear una estrategia, ejecutar la herramienta de minería
+        if suggested_action and suggested_action.get("action") == "mine_strategy":
+            try:
+                mine_res = self._cmd_mine()
+                return f"{reply_md}\n\n---\n{mine_res}"
+            except Exception as e:
+                logger.error(f"Error ejecutando minería desde Copilot: {e}")
+                return f"{reply_md}\n\n⚠️ *Error al ejecutar minería:* `{e}`"
+
         return reply_md
 
     def poll_once(self) -> int:

@@ -137,7 +137,7 @@ class HermesOperator:
         allocation_res: Dict[str, Any]
     ) -> str:
         """
-        Produce un informe ejecutivo en primera persona como Alter Ego del operador.
+        Produce un informe ejecutivo en primera persona.
         """
         regime = regime_info.get("regime", "UNKNOWN")
         snap = regime_info.get("snapshot", {})
@@ -171,3 +171,106 @@ class HermesOperator:
         status_line = f"📊 **Estado de Posiciones:** {trades_count} operaciones vivas | Margen asignado: `{stake_active:.2f} USDT`."
         
         return f"{intro}\n\n{context}\n\n{tactic}\n\n{status_line}"
+
+    def mine_and_evaluate_new_alpha(
+        self,
+        pair: str = "DOGE_USDT_USDT",
+        n_candidates: int = 3
+    ) -> Dict[str, Any]:
+        """
+        Ejecuta el ciclo de investigación cuantitativa autónoma:
+        1. Consulta a OpenRouter para sintetizar fórmulas de alpha adaptadas al régimen actual.
+        2. Carga datos reales del mercado de Binance Futures (4h).
+        3. Evalúa vectorialmente y backtestea las fórmulas candidatas.
+        4. Almacena las mejores fórmulas en factor_library.json y actualiza la memoria.
+        5. Recarga en caliente el Bot 3 (MemeHunter_MinedEnsemble :8083) para prueba en vivo con cartera simulada.
+        """
+        try:
+            from mining.llm_alpha_generator import LLMAlphaSynthesizer
+            from data_engine.real_market_feed import load_real_market_dataframe
+        except (ImportError, ModuleNotFoundError):
+            import sys
+            sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+            from mining.llm_alpha_generator import LLMAlphaSynthesizer
+            from data_engine.real_market_feed import load_real_market_dataframe
+
+        regime_info = self.regime_detector.detect_regime()
+        current_regime = regime_info.get("regime", "RANGE_CHOP")
+
+        logger.info(f"🧠 [Hermes Mining] Sintetizando {n_candidates} alfas para régimen {current_regime}...")
+        synthesizer = LLMAlphaSynthesizer()
+        candidates = synthesizer.synthesize_alphas(market_regime=current_regime, n_candidates=n_candidates)
+
+        if not candidates:
+            return {
+                "status": "error",
+                "message": "No se pudieron generar fórmulas sintácticas válidas con el LLM.",
+                "regime": current_regime
+            }
+
+        logger.info(f"🧠 [Hermes Mining] Backtesteando {len(candidates)} candidatos contra datos reales de {pair}...")
+        df = load_real_market_dataframe(pair, timeframe="4h", n_bars=150)
+        fwd_ret = df["close"].pct_change().shift(-1).fillna(0.0)
+
+        evaluated = synthesizer.evaluate_and_build_factors(candidates, df, fwd_ret)
+        if not evaluated:
+            return {
+                "status": "warning",
+                "message": "Las fórmulas generadas no superaron los filtros de varianza mínima o correlación.",
+                "regime": current_regime,
+                "candidates_count": len(candidates)
+            }
+
+        # Ordenar por Sharpe Proxy descendente
+        evaluated.sort(key=lambda x: x.sharpe_proxy, reverse=True)
+        best_factor = evaluated[0]
+
+        # Guardar en factor_library.json si tiene métricas aceptables
+        library_path = "mining/factor_library.json"
+        existing_factors = []
+        if os.path.exists(library_path):
+            try:
+                with open(library_path, "r", encoding="utf-8") as f:
+                    existing_factors = json.load(f)
+            except Exception:
+                existing_factors = []
+
+        new_entry = {
+            "factor_id": f"HERMES_ALPHA_{len(existing_factors)+1:02d}",
+            "formula": best_factor.formula,
+            "ic_mean": round(float(best_factor.ic_mean), 6),
+            "ic_std": round(float(best_factor.ic_std), 6),
+            "ic_ir": round(float(best_factor.ic_ir), 6),
+            "sharpe_proxy": round(float(best_factor.sharpe_proxy), 4),
+            "turnover": round(float(best_factor.turnover), 4),
+            "depth": best_factor.depth,
+            "correlation_with_existing": 0.0,
+            "discovered_at": datetime.now(timezone.utc).isoformat(),
+            "regime": current_regime
+        }
+        existing_factors.append(new_entry)
+
+        try:
+            with open(library_path, "w", encoding="utf-8") as f:
+                json.dump(existing_factors, f, indent=2)
+        except Exception as e:
+            logger.warning(f"No se pudo guardar factor_library.json: {e}")
+
+        # Recargar configuración en caliente de Bot 3 (:8083) para que empiece a evaluarla
+        reload_ok = False
+        if hasattr(self.orchestrator, "clients") and "bot_mined_ensemble" in self.orchestrator.clients:
+            reload_res = self.orchestrator.clients["bot_mined_ensemble"].reload_config()
+            reload_ok = (reload_res.get("status") == "ok")
+
+        # Registrar en la memoria episódica de Hermes
+        self.memory.setdefault("mined_alphas_history", []).append(new_entry)
+        self._save_memory()
+
+        return {
+            "status": "ok",
+            "regime": current_regime,
+            "best_factor": new_entry,
+            "total_evaluated": len(evaluated),
+            "reload_bot3": reload_ok
+        }
+

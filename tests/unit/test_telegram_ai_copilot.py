@@ -221,6 +221,35 @@ def test_ai_copilot_natural_language_intent():
     intent_profit = engine.extract_intent_heuristic("Dime cuánto pnl llevamos hoy")
     assert intent_profit["action"] == "query_profit"
 
+    intent_mine = engine.extract_intent_heuristic("Hermes crea una nueva estrategia y ponla a minar con backtest")
+    assert intent_mine["action"] == "mine_strategy"
+    assert intent_mine["command"] == "/mine"
+
+
+def test_mine_command(copilot_service):
+    """Verifica que el comando /mine dispare la minería y backtest de alfas."""
+    copilot_service.hermes_op.mine_and_evaluate_new_alpha = MagicMock(return_value={
+        "status": "ok",
+        "regime": "BEAR_CASCADE",
+        "best_factor": {
+            "factor_id": "HERMES_ALPHA_01",
+            "formula": "ts_zscore(hl_spread, 14) * (close - vwap)",
+            "sharpe_proxy": 1.95,
+            "ic_mean": 0.048,
+            "ic_ir": 1.25,
+            "turnover": 0.35,
+            "depth": 3
+        },
+        "reload_bot3": True
+    })
+
+    reply = copilot_service.dispatch_command("/mine", chat_id="99887766")
+    assert "NUEVA ESTRATEGIA / FACTOR GENERADO" in reply
+    assert "HERMES_ALPHA_01" in reply
+    assert "ts_zscore(hl_spread, 14)" in reply
+    assert "+1.95" in reply
+    copilot_service.hermes_op.mine_and_evaluate_new_alpha.assert_called_once()
+
 
 def test_poll_once_security_rejection(copilot_service):
     """Verifica que un mensaje de un usuario no autorizado sea rechazado y advertido."""

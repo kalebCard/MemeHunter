@@ -114,6 +114,10 @@ services:
       - "./scripts:/freqtrade/scripts"
       - "./portfolio:/freqtrade/portfolio"
       - "./mining:/freqtrade/mining"
+      - "./validation:/freqtrade/validation"
+      - "./data_engine:/freqtrade/data_engine"
+      - "./user_data:/freqtrade/user_data"
+      - "${MEME_DATA_DIR:-./data}:/freqtrade/user_data/data"
     environment:
       - PYTHONPATH=/freqtrade
       - FREQTRADE_BASE_HOST=http://host.docker.internal
