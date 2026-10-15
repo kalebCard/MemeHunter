@@ -23,28 +23,6 @@ except ImportError:
     except ImportError:
         ta = None
 
-# Inyección Institucional del API Router Cuantitativo en Freqtrade FastAPI Webserver (Sprint 45-47)
-try:
-    from freqtrade.rpc.api_server.webserver import ApiServer
-    if not getattr(ApiServer, "_quant_router_injected", False):
-        _orig_configure_app = ApiServer.configure_app
-
-        def _quant_patched_configure_app(self, app, config):
-            try:
-                from meme_hunter.api.routers.quant import router as quant_router
-                app.include_router(quant_router)
-                import logging
-                logging.getLogger("FreqtradeBot").info("🛡️ [Meme Hunter] Router Cuantitativo (/api/quant/*) inyectado exitosamente en FreqUI (:8081).")
-            except Exception as ex:
-                import logging
-                logging.getLogger("FreqtradeBot").warning(f"⚠️ [Meme Hunter] No se pudo inyectar router quant: {ex}")
-            _orig_configure_app(self, app, config)
-
-        ApiServer.configure_app = _quant_patched_configure_app
-        ApiServer._quant_router_injected = True
-except Exception:
-    pass
-
 
 class MemeHunter_MinedEnsemble(IStrategy):
     """
@@ -54,10 +32,10 @@ class MemeHunter_MinedEnsemble(IStrategy):
 
     INTERFACE_VERSION = 3
     can_short: bool = True
-    timeframe = "4h"
+    timeframe = "15m"
 
     # Parámetros de Riesgo y Microestructura
-    stoploss = -0.10  # Stop Loss duro al 10%
+    stoploss = -0.045  # Stop Loss configurable
     use_exit_signal = True
     exit_profit_only = False
     ignore_roi_if_entry_signal = True
@@ -73,7 +51,8 @@ class MemeHunter_MinedEnsemble(IStrategy):
         "ALPHA_001": 0.25,
         "ALPHA_002": 0.2499999987543191,
         "ALPHA_004": 0.5000000012456809,
-        "STRAT_A": 1.0,
+        "STRAT_A": 0.187585,
+        "STRAT_B": 0.812415,
         "ALPHA_LIVE_01": 1.0,
         "HEALTHY_01": 1.0
 }
@@ -147,11 +126,17 @@ class MemeHunter_MinedEnsemble(IStrategy):
         f_norm_ALPHA_004 = (f_val_ALPHA_004 - f_val_ALPHA_004.mean()) / f_std_ALPHA_004
         composite_score += f_norm_ALPHA_004.fillna(0.0) * 0.500000
 
-        # Factor STRAT_A (Peso HRP: 1.0000)
+        # Factor STRAT_A (Peso HRP: 0.1876)
         f_val_STRAT_A = (ts_delta(dataframe['close'], 1))
         f_std_STRAT_A = float(f_val_STRAT_A.std()) if float(f_val_STRAT_A.std()) > 1e-8 else 1.0
         f_norm_STRAT_A = (f_val_STRAT_A - f_val_STRAT_A.mean()) / f_std_STRAT_A
-        composite_score += f_norm_STRAT_A.fillna(0.0) * 1.000000
+        composite_score += f_norm_STRAT_A.fillna(0.0) * 0.187585
+
+        # Factor STRAT_B (Peso HRP: 0.8124)
+        f_val_STRAT_B = (ts_delta(dataframe['close'], 1))
+        f_std_STRAT_B = float(f_val_STRAT_B.std()) if float(f_val_STRAT_B.std()) > 1e-8 else 1.0
+        f_norm_STRAT_B = (f_val_STRAT_B - f_val_STRAT_B.mean()) / f_std_STRAT_B
+        composite_score += f_norm_STRAT_B.fillna(0.0) * 0.812415
 
         # Factor ALPHA_LIVE_01 (Peso HRP: 1.0000)
         f_val_ALPHA_LIVE_01 = (ts_rank(dataframe['close'], 14))
@@ -247,4 +232,4 @@ class MemeHunter_MinedEnsemble(IStrategy):
                  proposed_leverage: float, max_leverage: float, entry_tag: Optional[str],
                  side: str, **kwargs) -> float:
         """Apalancamiento dinámico aislado regulado según la convicción del ensamble."""
-        return 1.5
+        return 10.0

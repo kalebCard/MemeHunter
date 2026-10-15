@@ -2,19 +2,17 @@
     "$schema": "https://schema.freqtrade.io/schema.json",
     "bot_name": "MemeHunter_MinedEnsemble",
     "dry_run": true,
-    "dry_run_wallet": 100.0,
+    "dry_run_wallet": 10.0,
     "trading_mode": "futures",
     "margin_mode": "isolated",
-
     "stake_currency": "USDT",
     "stake_amount": "unlimited",
-    "max_open_trades": 5,
+    "max_open_trades": 1,
     "tradable_balance_ratio": 0.99,
     "amend_last_stake_amount": true,
     "fiat_display_currency": "USD",
-
-    "timeframe": "4h",
-    "stoploss": -0.10,
+    "timeframe": "15m",
+    "stoploss": -0.045,
     "order_types": {
         "entry": "limit",
         "exit": "market",
@@ -46,7 +44,6 @@
         "use_order_book": true,
         "order_book_top": 1
     },
-
     "exchange": {
         "name": "binance",
         "key": "",
@@ -61,7 +58,6 @@
             "(BTC|ETH)DOWN/.*"
         ]
     },
-
     "pairlists": [
         {
             "method": "VolumePairList",
@@ -86,7 +82,6 @@
             "max_spread_ratio": 0.003
         }
     ],
-
     "telegram": {
         "enabled": false,
         "notification_settings": {
@@ -97,7 +92,6 @@
             "exit": "on"
         }
     },
-
     "api_server": {
         "enabled": true,
         "listen_ip_address": "0.0.0.0",
@@ -112,7 +106,6 @@
         "username": "admin",
         "password": "MemeHunter2026!"
     },
-
     "initial_state": "running",
     "force_entry_enable": false,
     "internals": {

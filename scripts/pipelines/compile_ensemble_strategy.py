@@ -77,10 +77,10 @@ class MemeHunter_MinedEnsemble(IStrategy):
 
     INTERFACE_VERSION = 3
     can_short: bool = True
-    timeframe = "4h"
+    timeframe = "{timeframe}"
 
     # Parámetros de Riesgo y Microestructura
-    stoploss = -0.10  # Stop Loss duro al 10%
+    stoploss = {stoploss}  # Stop Loss configurable
     use_exit_signal = True
     exit_profit_only = False
     ignore_roi_if_entry_signal = True
@@ -228,7 +228,7 @@ class MemeHunter_MinedEnsemble(IStrategy):
                  proposed_leverage: float, max_leverage: float, entry_tag: Optional[str],
                  side: str, **kwargs) -> float:
         """Apalancamiento dinámico aislado regulado según la convicción del ensamble."""
-        return 1.5
+        return {leverage}
 '''
 
 
@@ -236,7 +236,10 @@ def generate_ensemble_strategy_file(
     factor_library_path: str = "mining/factor_library.json",
     incubator_state_path: str = "portfolio/incubator_state.json",
     db_path: Optional[str] = "portfolio/alpha_factory.db",
-    output_strategy_path: str = "user_data/strategies/MemeHunter_MinedEnsemble.py"
+    output_strategy_path: str = "user_data/strategies/MemeHunter_MinedEnsemble.py",
+    timeframe: str = "4h",
+    leverage: float = 1.5,
+    stoploss: float = -0.10
 ) -> str:
     """
     PB-96: Lee los artefactos de la minería o la base de datos SQLite WAL
@@ -356,6 +359,9 @@ def generate_ensemble_strategy_file(
     active_weights_str = json.dumps(live_factors, indent=8)
 
     rendered_strategy = STRATEGY_TEMPLATE.format(
+        timeframe=timeframe,
+        leverage=leverage,
+        stoploss=stoploss,
         active_weights_json=active_weights_str,
         factor_calculation_code=factor_code_str
     )

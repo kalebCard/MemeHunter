@@ -210,14 +210,14 @@ class TelegramAiCopilotService:
             return self._cmd_reload()
         elif cmd in ("/killswitch", "/emergencia"):
             return self._cmd_killswitch()
-        elif cmd in ("/mine", "/nuevaestrategia", "/crearestrategia", "/backtest"):
-            return self._cmd_mine()
+        elif cmd in ("/mine", "/nuevaestrategia", "/crearestrategia", "/backtest", "/refine", "/bucle"):
+            return self._cmd_mine(chat_id=chat_id)
         elif cmd.startswith("/ai"):
             prompt = msg[3:].strip()
-            return self._cmd_ai_query(prompt)
+            return self._cmd_ai_query(prompt, chat_id=chat_id)
         else:
             # Mensaje en lenguaje natural -> Cognición de IA
-            return self._cmd_ai_query(msg)
+            return self._cmd_ai_query(msg, chat_id=chat_id)
 
     def _cmd_help(self) -> str:
         return (
@@ -276,25 +276,37 @@ class TelegramAiCopilotService:
             f"`{res.get('portfolio', {}).get('total_stake_active_usdt', 0.0):.2f} USDT` en juego."
         )
 
-    def _cmd_mine(self) -> str:
+    def _cmd_mine(self, goal_text: Optional[str] = None, chat_id: Optional[str] = None) -> str:
         """Dispara el ciclo autónomo de minería, backtesting y despliegue de alfas."""
-        res = self.hermes_op.mine_and_evaluate_new_alpha()
+        def _telegram_cb(step_text: str):
+            if self.tg_client and chat_id:
+                try:
+                    self.tg_client.send_message(chat_id=chat_id, text=step_text)
+                except Exception as ex:
+                    logger.debug(f"Error enviando actualización de progreso: {ex}")
+
+        res = self.hermes_op.mine_and_evaluate_new_alpha(
+            goal_text=goal_text or "Estrategia Moonshot alta frecuencia y alto Sharpe",
+            progress_callback=_telegram_cb if chat_id else None
+        )
         if res.get("status") != "ok":
             return f"⚠️ *Fábrica de Alphas:* {res.get('message', 'No se pudieron validar candidatos')} (Régimen: `{res.get('regime')}`)."
 
-        f = res["best_factor"]
+        if res.get("report_md"):
+            return res["report_md"]
+
+        f = res.get("best_factor", {})
         reload_txt = "✅ Desplegado en Bot 3 (:8083) en vivo (cartera simulada)" if res.get("reload_bot3") else "ℹ️ Guardado en biblioteca de factores"
 
         return (
             "🧪 *NUEVA ESTRATEGIA / FACTOR GENERADO CON ÉXITO*\n\n"
-            f"• *ID del Factor:* `{f['factor_id']}`\n"
-            f"• *Régimen Objetivo:* `{res['regime']}`\n"
-            f"• *Fórmula Matemática:*\n`{f['formula']}`\n\n"
-            f"📊 *Resultados del Backtesting Rápido (Velas 4h):*\n"
-            f"• *Sharpe Ratio Proxy:* `{f['sharpe_proxy']:+.2f}`\n"
-            f"• *Information Coefficient (IC):* `{f['ic_mean']:+.4f}` (IR: `{f['ic_ir']:+.2f}`)\n"
-            f"• *Rotación (Turnover):* `{f['turnover']:.2f}`\n"
-            f"• *Complejidad AST:* `{f['depth']} niveles`\n\n"
+            f"• *ID del Factor:* `{f.get('factor_id')}`\n"
+            f"• *Régimen Objetivo:* `{res.get('regime')}`\n"
+            f"• *Fórmula Matemática:*\n`{f.get('formula')}`\n\n"
+            f"📊 *Resultados del Backtesting Rápido (Velas 15m):*\n"
+            f"• *Sharpe Ratio Proxy:* `{f.get('sharpe_proxy', 0.0):+.2f}`\n"
+            f"• *Information Coefficient (IC):* `{f.get('ic_mean', 0.0):+.4f}` (IR: `{f.get('ic_ir', 0.0):+.2f}`)\n"
+            f"• *Rotación (Turnover):* `{f.get('turnover', 0.0):.2f}`\n\n"
             f"🚀 *Acción en la Arena:* {reload_txt}."
         )
 
@@ -459,7 +471,7 @@ class TelegramAiCopilotService:
             "Para reanudar manualmente tras análisis, usa `/startbot`."
         )
 
-    def _cmd_ai_query(self, query: str) -> str:
+    def _cmd_ai_query(self, query: str, chat_id: Optional[str] = None) -> str:
         """Pasa la consulta del operador al motor cognitivo de IA inyectando telemetría viva, saldos y contexto de Hermes."""
         agg = self.orchestrator.get_aggregated_status()
         profit_res = self.ft_client.get_profit().get("data", {})
@@ -484,7 +496,7 @@ class TelegramAiCopilotService:
         # Si el usuario solicitó crear, minar o backtestear una estrategia, ejecutar la herramienta de minería
         if suggested_action and suggested_action.get("action") == "mine_strategy":
             try:
-                mine_res = self._cmd_mine()
+                mine_res = self._cmd_mine(goal_text=query, chat_id=chat_id)
                 return f"{reply_md}\n\n---\n{mine_res}"
             except Exception as e:
                 logger.error(f"Error ejecutando minería desde Copilot: {e}")

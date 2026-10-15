@@ -34,13 +34,15 @@ class LLMAlphaSynthesizer:
         self,
         market_regime: str = "VOLATILE_MEMECOIN_PUMP_DUMP",
         failed_factors: Optional[List[str]] = None,
-        n_candidates: int = 5
+        n_candidates: int = 5,
+        goal_description: Optional[str] = None
     ) -> List[Tuple[str, ASTNode]]:
         """
         Pide a OpenRouter formular candidatos de alpha expresados en la gramática simbólica.
         Retorna únicamente pares (formula_str, ASTNode) que pasaron la validación sintáctica estricta.
         """
-        failed_context = ", ".join(failed_factors) if failed_factors else "Ninguno (inicio nominal)"
+        failed_context = "\n".join([f"  • {f}" for f in failed_factors]) if failed_factors else "Ninguno (primera iteración nominal)"
+        goal_context = f"\n        OBJETIVO ESTRATÉGICO: {goal_description}" if goal_description else ""
 
         system_prompt = (
             "Eres un Senior Quantitative Researcher especializado en microestructura de criptomonedas y memecoins. "
@@ -49,8 +51,16 @@ class LLMAlphaSynthesizer:
         )
 
         user_prompt = f"""
-        Régimen de mercado actual: {market_regime}
-        Factores recientemente degradados o en falla: {failed_context}
+        Régimen de mercado actual: {market_regime}{goal_context}
+        
+        DIAGNÓSTICO DE FACTORES ANTERIORES QUE FALLARON O FUERON RECHAZADOS:
+        {failed_context}
+        
+        INSTRUCCIÓN DE REFINAMIENTO:
+        Analiza las deficiencias de los factores rechazados previamente (e.g. bajo Sharpe, sobrerreacción al ruido, excesivo drawdown) 
+        y diseña fórmulas corregidas con mayor resiliencia matemática, usando combinaciones no lineales de volumen relativo (rvol), 
+        rango verdadero (hl_spread) y normalizaciones ts_zscore.
+        
         Cantidad solicitada: {n_candidates} fórmulas ortogonales.
 
         REGLAS GRAMATICALES OBLIGATORIAS:

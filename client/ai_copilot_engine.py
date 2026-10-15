@@ -40,6 +40,8 @@ REGLAS DE OPERACIÓN INSTITUCIONAL:
      a) SU SALDO REAL EN BINANCE (Billetera Spot y Billetera Futuros USDⓈ-M).
      b) EL SALDO SIMULADO DE LA ARENA MULTI-BOT (Ablation V5, Quantum V7, Mined Ensemble).
    - Si el usuario tiene fondos en Spot (ej. 10 USDT) pero 0 en Futuros, explícale cordialmente que Meme Hunter opera en el mercado de Futuros USDT-M, por lo que para operar en vivo solo debe transferir sus fondos de Spot a Futuros en Binance (sin comisiones).
+8. BUCLE AUTÓNOMO DE INVESTIGACIÓN, REFINAMIENTO Y CUENTA SIMULADA:
+   - Cuando el operador pida crear una nueva estrategia (ej. de 10 a 100 USDT, o bucle con backtesting), Hermes ejecuta un bucle iterativo donde sintetiza fórmulas con OpenRouter, las backtestea contra velas reales de 15m con slippage y comisiones, retroalimenta fallas y compila la estrategia ganadora en Bot 3 (:8083) con billetera simulada de 10 USDT.
 """
 
 
@@ -194,7 +196,7 @@ class QuantAiCopilotEngine:
             return {"action": "forcebuy", "symbol": symbol, "confidence": 0.95, "command": f"/forcebuy {symbol}/USDT:USDT"}
 
         # Hermes / Régimen / Rebalance / Minería de Alphas
-        if re.search(r"\b(crea|crear|genera|generar|mina|minar|inventa|inventar|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz)\b", msg):
+        if re.search(r"\b(crea|crear|creame|genera|generar|mina|minar|inventa|inventar|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz|bucle|refina|refinamiento|cuenta\s+simulada|billetera\s+simulada|plan\s+para\s+pasar)\b", msg):
             return {"action": "mine_strategy", "confidence": 0.95, "command": "/mine"}
         if re.search(r"\b(hermes|alter\s*ego|orquestador)\b", msg):
             return {"action": "query_hermes", "confidence": 0.95, "command": "/hermes"}

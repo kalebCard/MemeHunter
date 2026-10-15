@@ -297,8 +297,8 @@ def run_strategy_backtest(
                 })
                 active_trade = None
 
-        if not active_trade and wallet > 50:
-            stake = wallet * 0.25
+        if not active_trade and wallet >= 2.0:
+            stake = wallet * 0.95 if wallet <= 25.0 else wallet * 0.25
             if direction in ["short_only", "both"] and sig > entry_threshold:
                 entry_res = slippage_engine.simulate_order_execution(
                     side="sell",
