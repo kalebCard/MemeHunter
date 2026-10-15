@@ -1,8 +1,8 @@
 ---
 id: HIST-SCRUM-README
-title: "Gobernanza Scrum y Marco de Trabajo Ágil (Meme Hunter v8.5)"
+title: "Gobernanza Scrum y Marco de Trabajo Ágil (Meme Hunter v8.6)"
 category: history/scrum
-version: 8.5
+version: 8.6
 status: CERTIFIED
 last_updated: 2026-10-14
 author: Quantitative Architecture & Systems Engineering Core
@@ -13,7 +13,7 @@ references:
   - docs/history/INDEX_HISTORICO.md
 ---
 
-# 🛡️ Gobernanza Scrum y Marco de Trabajo Ágil (Meme Hunter v8.5)
+# 🛡️ Gobernanza Scrum y Marco de Trabajo Ágil (Meme Hunter v8.6)
 
 Bienvenido a la sección de **Gobernanza Scrum y Gestión de Producto** del repositorio `meme_hunter`. Este directorio centraliza la planificación estratégica, las épicas macro y las historias de usuario del sistema bajo la metodología ágil cuantitativa.
 
@@ -26,14 +26,14 @@ Para garantizar una separación rigurosa entre **la visión del producto** (el *
 ```mermaid
 graph TD
     subgraph docs/history/scrum/ [Nivel Estratégico: Scrum & Product Backlog]
-        A[SCRUM_PLAN.md: Master Product Backlog v8.5] --> B[Épicas 1 a 15 & PB-01 a PB-179]
+        A[SCRUM_PLAN.md: Master Product Backlog v8.6] --> B[Épicas 1 a 16 & PB-01 a PB-189]
         A --> C[Auditoría de Hallazgos Críticos H1-H17 - 100% Mitigados]
         A --> D[Definición de Hecho Institucional - DoD]
         E[PLAN_SCRUM_MINERIA_Y_BACKTESTING.md] --> B
     end
 
     subgraph docs/history/sprints/ [Nivel Táctico: Ejecución de Sprints]
-        B --> F[01_SPRINT_001_... a 18_SPRINTS_050_051_...]
+        B --> F[01_SPRINT_001_... a 19_SPRINT_052_...]
         F --> G[Tareas Técnicas & Certificación Pytest 100%]
         F --> H[Artefactos Generados & Validaciones OOS]
     end
@@ -45,14 +45,14 @@ graph TD
 
 | Documento | Identificador | Rol en el Proyecto |
 | :--- | :---: | :--- |
-| [**`SCRUM_PLAN.md`**](SCRUM_PLAN.md) | `HIST-SCRUM-001` | **Product Backlog Maestro:** Visión de 15 épicas, historias PB-01 a PB-179, auditoría H1-H17 mitigada, y resúmenes de Sprints 1 a 51. |
+| [**`SCRUM_PLAN.md`**](SCRUM_PLAN.md) | `HIST-SCRUM-001` | **Product Backlog Maestro:** Visión de 16 épicas, historias PB-01 a PB-189, auditoría H1-H17 mitigada, y resúmenes de Sprints 1 a 52. |
 | [**`PLAN_SCRUM_MINERIA_Y_BACKTESTING.md`**](PLAN_SCRUM_MINERIA_Y_BACKTESTING.md) | `HIST-SCRUM-002` | **Backlog Temático de Alphas:** Detalle cuantitativo para la fábrica genética de factores, microestructura L2 y CPCV (Sprints 21-24). |
 
 ---
 
-## 🎯 3. Las 15 Grandes Épicas de Meme Hunter
+## 🎯 3. Las 16 Grandes Épicas de Meme Hunter
 
-Las historias de usuario están rigurosamente enumeradas del **PB-01** al **PB-179** y distribuidas en 15 grandes épicas:
+Las historias de usuario están rigurosamente enumeradas del **PB-01** al **PB-189** y distribuidas en 16 grandes épicas:
 
 1. **Épica 1 (PB-01 a PB-04):** Infraestructura y Datos de Base sin Sesgo de Supervivencia.
 2. **Épica 2 (PB-05 a PB-12):** Motor de Futuros USDT-M y Validación Estadística Base.
@@ -69,6 +69,7 @@ Las historias de usuario están rigurosamente enumeradas del **PB-01** al **PB-1
 13. **Épica 13 (PB-144 a PB-155):** FreqUI & Single Pane of Glass Institucional (Sprints 44 a 47).
 14. **Épica 14 (PB-156 a PB-167):** Modernización Cockpit Web, Composables y Accesibilidad WCAG (Sprints 48 y 49).
 15. **Épica 15 (PB-168 a PB-179):** Agente IA Telegram Copilot & Control Remoto HITL (Sprints 50 y 51).
+16. **Épica 16 (PB-180 a PB-189):** Agente Autónomo Hermes (Alter Ego Operativo) & Multi-Bot Arena (Sprint 52).
 
 ---
 
@@ -88,7 +89,7 @@ Ninguna historia de usuario o sprint se considera terminado (`COMPLETED` / `CERT
 
 ## 🔗 5. Enlaces Canónicos Relacionados
 
-* [**Catálogo Cronológico de Sprints**](../sprints/README.md): Lista completa de los 18 documentos de sprint (Sprints 1 a 51).
-* [**Libro Maestro de Historia y Genealogía**](../INDEX_HISTORICO.md): Cronología de las 9 eras del proyecto.
+* [**Catálogo Cronológico de Sprints**](../sprints/README.md): Lista completa de los 19 documentos de sprint (Sprints 1 a 52).
+* [**Libro Maestro de Historia y Genealogía**](../INDEX_HISTORICO.md): Cronología de las 10 eras del proyecto.
 * [**Manual de Usuario FreqUI Cockpit**](../../guides/MANUAL_DE_USUARIO_FREQUI_COCKPIT.md): Guía operativa del operador institucional.
 * [**Compendio Maestro de Estrategia Cuantitativa**](../../research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md): Base matemática y financiera del sistema.

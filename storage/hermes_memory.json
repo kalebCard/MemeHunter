@@ -1,6 +1,6 @@
 {
   "created_at": "2026-10-15T02:27:14.596200",
-  "total_cycles_run": 13,
+  "total_cycles_run": 24,
   "regime_history": [
     {
       "timestamp": "2026-10-15T02:27:14.596200",
@@ -105,57 +105,145 @@
       "total_open_trades": 11,
       "stake_active_usdt": 314.6686,
       "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:12:54.453142+00:00",
+      "regime": "RANGE_CHOP",
+      "confidence": 0.7,
+      "total_open_trades": 11,
+      "stake_active_usdt": 314.6686,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:17:55.855889+00:00",
+      "regime": "RANGE_CHOP",
+      "confidence": 0.7,
+      "total_open_trades": 0,
+      "stake_active_usdt": 0.0,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:22:24.716225+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 11,
+      "stake_active_usdt": 314.6686,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:23:38.492362+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 7,
+      "stake_active_usdt": 197.909,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:24:39.009611+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 11,
+      "stake_active_usdt": 314.6686,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:26:16.417452+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 0,
+      "stake_active_usdt": 0.0,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:30:12.364612+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 4,
+      "stake_active_usdt": 116.7596,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:31:21.659601+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 11,
+      "stake_active_usdt": 314.6686,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:36:24.053314+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 10,
+      "stake_active_usdt": 286.1134,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:41:25.590193+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 10,
+      "stake_active_usdt": 286.1134,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:46:27.158034+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 10,
+      "stake_active_usdt": 286.1134,
+      "actions_count": 3
     }
   ],
   "actions_history": [],
   "last_decision": {
-    "timestamp": "2026-10-15T03:07:51.524170+00:00",
-    "explanation": "🧠 **Hermes (Tu Alter Ego) | Meta: Extraer Ganancias en Binance Futures**\n\nHe evaluado el mercado en vivo. BTC cotiza en `$81,299.9` con una variación 24h de `-2.86%`. El régimen actual catalogado es **RANGE_CHOP** (Confianza: 70%).\n\n⚖️ **Táctica de Rango:** El mercado oscila sin tendencia dominante. Mantengo la cartera balanceada maximizando el ratio de Sharpe con Quantum V7 (Kelly sizing) para acumular beneficios constantes.\n\n📊 **Estado de Posiciones:** 11 operaciones vivas | Margen asignado: `314.67 USDT`.",
+    "timestamp": "2026-10-15T03:46:27.158034+00:00",
+    "explanation": "🧠 **Hermes (Tu Alter Ego) | Meta: Extraer Ganancias en Binance Futures**\n\nHe evaluado el mercado en vivo. BTC cotiza en `$80,855.2` con una variación 24h de `-3.49%`. El régimen actual catalogado es **BEAR_CASCADE** (Confianza: 85%).\n\n📉 **Táctica de Extracción de PnL:** Detecto debilidad estructural y liquidaciones de largos en memecoins. Canalizo el capital a **Ablation V5** y **Quantum V7** para capturar las extensiones bajistas y ganar en USDT.\n\n📊 **Estado de Posiciones:** 10 operaciones vivas | Margen asignado: `286.11 USDT`.",
     "regime_info": {
-      "regime": "RANGE_CHOP",
-      "confidence": 0.7,
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
       "snapshot": {
-        "btc_price": 81299.9,
-        "btc_change_24h": -2.862,
-        "eth_price": 2374.69,
-        "eth_change_24h": -5.509,
-        "avg_funding_rate": -6.495666666666667e-05,
+        "btc_price": 80855.2,
+        "btc_change_24h": -3.493,
+        "eth_price": 2357.01,
+        "eth_change_24h": -6.374,
+        "avg_funding_rate": -8.088666666666667e-05,
         "status": "ok"
       },
       "recommended_allocations": {
-        "bot_v5_ablation": 0.25,
-        "bot_v7_quantum": 0.45,
-        "bot_mined_ensemble": 0.3
+        "bot_v5_ablation": 0.5,
+        "bot_v7_quantum": 0.4,
+        "bot_mined_ensemble": 0.1
       },
-      "rationale": "Mercado lateral sin tendencia clara. Distribución balanceada con sesgo hacia bajo drawdown."
+      "rationale": "Mercado en desinflado rápido o funding fuertemente negativo. Ideal para Ablation V5 y Quantum V7."
     },
     "allocation_res": {
       "status": "ok",
-      "regime": "RANGE_CHOP",
+      "regime": "BEAR_CASCADE",
       "actions_taken": [
         {
           "bot_id": "bot_v5_ablation",
           "action": "start",
-          "reason": "Régimen RANGE_CHOP activo con peso asignado: 0.25",
+          "reason": "Régimen BEAR_CASCADE activo con peso asignado: 0.50",
           "result": "ok"
         },
         {
           "bot_id": "bot_v7_quantum",
           "action": "start",
-          "reason": "Régimen RANGE_CHOP activo con peso asignado: 0.45",
+          "reason": "Régimen BEAR_CASCADE activo con peso asignado: 0.40",
           "result": "ok"
         },
         {
           "bot_id": "bot_mined_ensemble",
           "action": "start",
-          "reason": "Régimen RANGE_CHOP activo con peso asignado: 0.30",
+          "reason": "Régimen BEAR_CASCADE activo con peso asignado: 0.10",
           "result": "ok"
         }
       ],
       "alerts": [],
       "vault_harvested_usdt": 0.0,
-      "total_open_trades": 11,
-      "total_stake_active_usdt": 314.6686
+      "total_open_trades": 10,
+      "total_stake_active_usdt": 286.1134
     }
   },
   "active_skills": [

@@ -1,8 +1,8 @@
 ---
 id: HIST-SCRUM-001
-title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-179)"
+title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 16 | PB-01 a PB-189)"
 category: history/scrum
-version: 8.5
+version: 8.6
 status: ACTIVE
 last_updated: 2026-10-14
 author: Quantitative Engineering & Systems Architecture Core

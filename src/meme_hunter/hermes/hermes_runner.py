@@ -12,6 +12,7 @@ import os
 import sys
 import time
 import signal
+import threading
 import logging
 from typing import Optional
 
@@ -21,6 +22,11 @@ try:
 except (ImportError, ModuleNotFoundError):
     from src.meme_hunter.hermes.hermes_operator import HermesOperator
     from src.meme_hunter.hermes.telegram_messenger import HermesTelegramMessenger
+
+try:
+    from client.telegram_ai_copilot import TelegramAiCopilotService
+except ImportError:
+    TelegramAiCopilotService = None
 
 # Configurar logging institucional
 logging.basicConfig(
@@ -55,8 +61,30 @@ def run_daemon(interval_sec: Optional[int] = None):
     messenger = HermesTelegramMessenger()
     last_regime = None
 
+    # Iniciar listener interactivo de Telegram en hilo secundario (24/7)
+    if TelegramAiCopilotService:
+        try:
+            copilot = TelegramAiCopilotService()
+            if copilot.is_configured():
+                def _telegram_polling_loop():
+                    logger.info("🤖 Listener interactivo de Telegram Copilot & Hermes (@Atutaskbot) iniciado.")
+                    while running:
+                        try:
+                            copilot.poll_once()
+                        except Exception as poll_err:
+                            logger.warning(f"Excepción en polling de Telegram: {poll_err}")
+                        time.sleep(1.0)
+                    logger.info("Hilo interactivo de Telegram detenido ordenadamente.")
+
+                tg_thread = threading.Thread(target=_telegram_polling_loop, daemon=True, name="TelegramListener")
+                tg_thread.start()
+            else:
+                logger.warning("TelegramAiCopilotService no tiene token configurado.")
+        except Exception as e:
+            logger.error(f"No se pudo iniciar el listener de Telegram: {e}")
+
     # Notificar inicio en Telegram si hay credenciales
-    startup_msg = "🧠 *Hermes Activado:* He iniciado mi servicio de supervisión continua sobre la arena multi-bot de Meme Hunter."
+    startup_msg = "🧠 *Hermes Activado:* He iniciado mi servicio de supervisión continua y chat interactivo sobre la arena multi-bot de Meme Hunter."
     messenger.send_executive_report(startup_msg)
 
     while running:

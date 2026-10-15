@@ -1,10 +1,10 @@
 ---
 id: HIST-MASTER-001
-title: Libro Maestro de Historia, Genealogía y Sprints (Meme Hunter v1.0 a v8.5)
+title: Libro Maestro de Historia, Genealogía y Sprints (Meme Hunter v1.0 a v8.6)
 category: history
-version: 8.5
+version: 8.6
 status: CERTIFIED
-last_updated: 2026-10-13
+last_updated: 2026-10-14
 author: Quantitative Architecture & Systems Engineering Core
 references:
   - docs/MANUAL_ESTANDAR_DEL_PROYECTO.md
@@ -12,13 +12,13 @@ references:
   - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
 ---
 
-# 📜 Libro Maestro de Historia, Genealogía y Sprints (Meme Hunter)
+# 📜 Libro Maestro de Historia, Genealogía y Sprints (Meme Hunter v8.6)
 
-Este documento es el **registro histórico integral, canónico y auditable** que documenta el ciclo de vida completo de ingeniería, investigación cuantitativa y gobernanza de software del proyecto **Meme Hunter**, abarcando desde la concepción del prototipo en Spot (Fase 0) hasta la consolidación institucional de la Arquitectura Modular v8.0.
+Este documento es el **registro histórico integral, canónico y auditable** que documenta el ciclo de vida completo de ingeniería, investigación cuantitativa y gobernanza de software del proyecto **Meme Hunter**, abarcando desde la concepción del prototipo en Spot (Fase 0) hasta la consolidación institucional de Hermes Agent (Alter Ego Operativo v8.6).
 
 ---
 
-## 🗺️ 1. Cronología de las 8 Eras Evolutivas
+## 🗺️ 1. Cronología de las 10 Eras Evolutivas
 
 ```mermaid
 timeline
@@ -171,19 +171,31 @@ timeline
 
 ---
 
+### Era 10: Agente Autónomo Hermes (Alter Ego Operativo), Detección de Régimen y Gestión Integral de Cartera (Sprint 52)
+* **Documento Canónico:** [`docs/history/sprints/19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md`](sprints/19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md)
+* **Historias:** PB-180 a PB-189 (Total: 10 User Stories).
+* **Hitos:**
+  * Integración del framework de agente autónomo **Hermes Agent (Nous Research)** como Alter Ego del operador con memoria episódica en `storage/hermes_memory.json`.
+  * Clasificador estocástico de régimen de mercado (`BEAR_CASCADE`, `BULL_PARABOLIC`, `RANGE_CHOP`, `PANIC_VOLATILITY`).
+  * Asignador dinámico de capital y orquestador multi-bot concurrente (`client/multi_bot_orchestrator.py`) gobernando la arena: Ablation (:8081), Quantum (:8082) y Mined Ensemble (:8083).
+  * Control y explicabilidad causal vía Telegram Copilot con comandos dedicados: `/hermes`, `/regime`, `/rebalance`.
+  * Integración en CLI canónico (`scripts/ops/meme_cli.py hermes --status|--notify|--audit`) y certificación con 29 tests unitarios pasando al 100%.
+
+---
+
 ## 📚 4. Índice Canónico de Archivos Estandarizados
 
 Todos los documentos de planificación Scrum y ejecución de Sprints se encuentran rigurosamente organizados, estandarizados y auditables bajo la arquitectura de dos niveles:
 
 ```text
 docs/history/
-├── INDEX_HISTORICO.md               # 🌟 Libro maestro de historia, cronología y genealogía
+├── INDEX_HISTORICO.md               # 🌟 Libro maestro de historia, cronología y genealogía (v8.6)
 ├── scrum/                           # 🛡️ Nivel Estratégico: Scrum Governance & Product Backlog
-│   ├── README.md                    # Marco de trabajo ágil, DoD y ceremonias
-│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 12 | PB-01 a PB-169)
+│   ├── README.md                    # Marco de trabajo ágil, DoD y ceremonias (v8.6)
+│   ├── SCRUM_PLAN.md                # Product Backlog Maestro (Épicas 1 a 16 | PB-01 a PB-189)
 │   └── PLAN_SCRUM_MINERIA_Y_BACKTESTING.md # Backlog temático de minería de alphas y CPCV
 └── sprints/                         # 🏃 Nivel Táctico: Planes de ejecución técnica de sprints
-    ├── README.md                    # Catálogo maestro de ejecución de sprints
+    ├── README.md                    # Catálogo maestro de ejecución de sprints (19 documentos)
     ├── 01_SPRINT_001_AUTONOMOUS_SELF_IMPROVING_ENGINE.md # Sprint 1 (Motor Auto-Evolutivo)
     ├── 02_SPRINT_002_LLM_AUGMENTED_AUTONOMOUS_ENGINE.md  # Sprint 2 (Cognición OpenRouter)
     ├── 03_SPRINTS_021_024_ALPHA_MINING_AND_BACKTESTING.md # Sprints 21-24 (Alpha Mining & L2)
@@ -201,5 +213,7 @@ docs/history/
     ├── 15_SPRINTS_045_047_FREQUI_QUANT_UNIFICATION.md   # Sprints 45-47 (FreqUI Quant Unification)
     ├── 16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md # Sprint 48 (Blindaje UI/UX & WCAG 2.2)
     ├── 17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md # Sprint 49 (Arquitectura Modular & Composables)
-    └── 18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md # Sprints 50-51 (Copilot IA Telegram & Control Remoto)
+    ├── 18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md # Sprints 50-51 (Copilot IA Telegram & Control Remoto)
+    └── 19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md # Sprint 52 (Hermes Alter Ego & Portfolio Manager)
 ```
+

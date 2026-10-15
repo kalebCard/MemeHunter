@@ -423,7 +423,7 @@ class TelegramAiCopilotService:
         if not self.tg_client:
             return 0
 
-        updates = self.tg_client.get_updates(offset=self.last_update_id + 1, timeout=2)
+        updates = self.tg_client.get_updates(offset=self.last_update_id + 1, timeout=0)
         if not updates.get("ok"):
             return 0
 
@@ -446,7 +446,7 @@ class TelegramAiCopilotService:
                 logger.warning(f"Intento de acceso no autorizado desde chat_id {chat_id}. Mensaje bloqueado.")
                 self.tg_client.send_message(
                     chat_id=chat_id,
-                    text="⛔ *Acceso Denegado:* Este bot está restringido exclusivamente al operador institucional autorizado de Meme Hunter."
+                    text=f"⛔ *Acceso Denegado:* Tu Chat ID `{chat_id}` no está autorizado en Meme Hunter. (Esperado: `{self.allowed_chat_id}`). Actualiza `FREQTRADE__TELEGRAM__CHAT_ID={chat_id}` en `.env` si cambiaste de cuenta."
                 )
                 continue
 
