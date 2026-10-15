@@ -212,5 +212,18 @@
     "goal": "Test Zero Hallucination",
     "discovered_at": "2026-10-15T15:01:10.508183+00:00",
     "regime": "RANGE_CHOP"
+  },
+  {
+    "factor_id": "HERMES_OPT_16",
+    "formula": "sign(ts_delta(vwap, 8)) * ts_zscore(close - open, 12) * ts_rank(rvol, 16) / (ts_std(hl_spread, 20) + 1e-6) * ts_decay_linear(abs(returns), 10) * log(ts_rank(volume, 14) + 1) * ts_zscore(ts_delta(volume, 10), 12) * abs(ts_delta(close, 6))",
+    "sharpe_proxy": 1.93,
+    "win_rate_pct": 54.1,
+    "simulated_roi_pct": 196.42,
+    "max_drawdown_pct": 40.4,
+    "timeframe": "15m",
+    "leverage": 10.0,
+    "goal": "Pasar de 10 a 100 USDT en 1 semana (Moonshot 10x)",
+    "discovered_at": "2026-10-15T15:14:14.804593+00:00",
+    "regime": "RANGE_CHOP"
   }
 ]
