@@ -85,8 +85,40 @@ def _signal_handler(signum, frame):
     restore_windows_sleep()
 
 
-signal.signal(signal.SIGINT, _signal_handler)
-signal.signal(signal.SIGTERM, _signal_handler)
+def append_to_strategy_journal(
+    factor_id: str,
+    formula: str,
+    metrics: Dict[str, Any],
+    regime: str,
+    is_ath: bool,
+    timeframe: str,
+    leverage: float
+):
+    """Registra automáticamente cada nuevo factor o récord en el Diario de Estrategias."""
+    journal_path = os.path.join(ROOT_DIR, "docs", "research", "DIARIO_DE_ESTRATEGIAS.md")
+    try:
+        if not os.path.exists(journal_path):
+            return
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        status_tag = "🏆 **NUEVO RÉCORD GLOBAL (ATH)**" if is_ath else "⚡ **MEJORA DE SESIÓN EN BOT 3**"
+        entry_text = (
+            f"\n### {factor_id} — {status_tag}\n"
+            f"* **Fecha de Registro:** `{now_str}` (Ciclo #{metrics.get('cycle', 0)})\n"
+            f"* **Régimen Detectado:** `{regime}` | **Timeframe:** `{timeframe}` | **Apalancamiento:** `{leverage:.0f}x`\n"
+            f"* **Fórmula Matemática:**\n```python\n{formula}\n```\n"
+            f"* **Métricas de Backtest:**\n"
+            f"  * **Sharpe Ratio:** `{metrics.get('sharpe_ratio'):+.2f}`\n"
+            f"  * **Win Rate:** `{metrics.get('win_rate_pct'):.1f}%` ({metrics.get('total_trades')} operaciones)\n"
+            f"  * **Retorno Proyectado:** `{metrics.get('total_return_pct'):+.2f}%`\n"
+            f"  * **Drawdown Máximo:** `{metrics.get('max_drawdown_pct'):.1f}%`\n"
+            f"* **Acción Cuantitativa:** Compilado e inyectado en vivo a **Bot 3 (:8083)** en simulación con 10.00 USDT.\n"
+            f"\n---\n"
+        )
+        with open(journal_path, "a", encoding="utf-8") as f:
+            f.write(entry_text)
+        logger.info(f"Diario de Estrategias actualizado con entrada {factor_id}.")
+    except Exception as e:
+        logger.warning(f"Error escribiendo en Diario de Estrategias: {e}")
 
 
 def run_marathon(
@@ -145,7 +177,7 @@ def run_marathon(
         "factor_id": "BASE_MOONSHOT"
     }
 
-    last_hourly_report = start_time
+    last_progress_report = start_time
     hours_elapsed = 0
 
     set_windows_keep_awake()
@@ -343,6 +375,15 @@ def run_marathon(
                     "🚀 *Acción en la Arena:* Factor compilado e inyectado en **Bot 3 (:8083)** en vivo con 10.00 USDT virtuales."
                 )
                 messenger.send_executive_report(record_msg)
+                append_to_strategy_journal(
+                    factor_id=factor_id,
+                    formula=cand_score["formula"],
+                    metrics=cand_score,
+                    regime=current_regime,
+                    is_ath=is_new_ath,
+                    timeframe=timeframe,
+                    leverage=leverage
+                )
 
         # Registrar fallas del ciclo para la siguiente retroalimentación
         if cycle_best_in_turn and not cycle_best_in_turn.get("is_qualified"):
@@ -352,23 +393,31 @@ def run_marathon(
                 f"Deficiencia: No alcanzó Sharpe mínimo de {session_best_sharpe}."
             )
 
-        # 5. Reporte Horario a Telegram
-        if (current_now - last_hourly_report).total_seconds() >= 3600.0:
-            hours_elapsed += 1
-            last_hourly_report = current_now
+        # 5. Reporte Periódico de Progreso a Telegram (cada 20 minutos)
+        if (current_now - last_progress_report).total_seconds() >= 1200.0:
+            last_progress_report = current_now
+            elapsed_min = int((current_now - start_time).total_seconds() / 60.0)
             remaining_hrs = max(0.0, (end_time - current_now).total_seconds() / 3600.0)
 
-            hourly_msg = (
-                f"⏱️ *HERMES MARATÓN — INFORME HORA {hours_elapsed}/{duration_hours:.0f}*\n\n"
+            # Consultar saldo actual de Bot 3
+            try:
+                bal_resp = orchestrator.clients["bot_mined_ensemble"].get_balance()
+                b3_total = bal_resp.get("data", {}).get("total", 0.0)
+            except Exception:
+                b3_total = 0.0
+
+            progress_msg = (
+                f"⏱️ *HERMES MARATÓN — INFORME DE AVANCE ({elapsed_min} min transcurridos)*\n\n"
                 f"• *Ciclos Completados:* `{cycles_completed}`\n"
                 f"• *Fórmulas Cuantitativas Evaluadas:* `{total_formulas_tested}`\n"
                 f"• *Mejor Sharpe de Sesión:* `{session_best_sharpe:+.2f}`\n"
                 f"• *Récord Histórico Global:* `{global_record_sharpe:+.2f}`\n"
-                f"• *Bot 3 (:8083):* 🟢 Activo en simulación con 10 USDT\n"
-                f"• *Gasto Acumulado en OpenRouter:* `~${accumulated_cost_usd:.4f} USD`\n"
-                f"• *Tiempo Restante de Investigación:* `{remaining_hrs:.1f} horas`"
+                f"• *Bot 3 (:8083):* `{b3_total:.2f} USDT` (Simulado 10 USDT iniciales)\n"
+                f"• *Gasto en Inferencia OpenRouter:* `~${accumulated_cost_usd:.4f} USD`\n"
+                f"• *Tiempo Restante:* `{remaining_hrs:.1f} horas`\n\n"
+                "📖 Bitácora institucional sincronizada en `docs/research/DIARIO_DE_ESTRATEGIAS.md`."
             )
-            messenger.send_executive_report(hourly_msg)
+            messenger.send_executive_report(progress_msg)
 
         # Pausa entre ciclos
         time.sleep(cycle_interval_sec)
