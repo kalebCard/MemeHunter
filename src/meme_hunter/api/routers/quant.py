@@ -12,6 +12,7 @@ from typing import Dict, Any, List, Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, HTTPException, Query, status
+from fastapi.concurrency import run_in_threadpool
 
 from meme_hunter.core.config import get_settings
 from portfolio.dag_orchestrator import DAGSignalOrchestrator
@@ -423,10 +424,11 @@ def validate_formula_endpoint(req: ValidateFormulaRequest) -> Dict[str, Any]:
 
 
 @router.post("/studio/test-strategy")
-def test_strategy_endpoint(req: TestStrategyRequest) -> Dict[str, Any]:
-    """Ejecuta el backtest vectorial rápido de una fórmula diseñada con fricciones reales."""
+async def test_strategy_endpoint(req: TestStrategyRequest) -> Dict[str, Any]:
+    """PB-215: Ejecuta el backtest vectorial rápido en un hilo de trabajo desacoplado (run_in_threadpool) sin saturar el event loop ASGI."""
     try:
-        res = run_strategy_backtest(
+        res = await run_in_threadpool(
+            run_strategy_backtest,
             formula=req.formula.strip(),
             pair=req.pair,
             timeframe=req.timeframe,

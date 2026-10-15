@@ -11,6 +11,8 @@ Conecta la IA al bot de Telegram y permite controlar el programa en tiempo real:
 
 import os
 import sys
+import time
+import threading
 import json
 import logging
 import urllib.request
@@ -31,31 +33,6 @@ from portfolio.secrets_vault import get_secret
 
 logger = logging.getLogger("TelegramAiCopilot")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-
-
-def _load_env_file():
-    """Carga automáticamente variables de entorno desde .env."""
-    candidates = [
-        Path.cwd() / ".env",
-        Path(__file__).resolve().parent.parent / ".env",
-    ]
-    for env_path in candidates:
-        if env_path.exists():
-            try:
-                for line in env_path.read_text(encoding="utf-8").splitlines():
-                    line = line.strip()
-                    if line and not line.startswith("#") and "=" in line:
-                        k, v = line.split("=", 1)
-                        k = k.strip()
-                        v = v.strip().strip("'\"")
-                        if k and k not in os.environ:
-                            os.environ[k] = v
-                break
-            except Exception as e:
-                logger.debug(f"Error leyendo {env_path}: {e}")
-
-
-_load_env_file()
 
 
 class TelegramBotClient:
@@ -135,8 +112,24 @@ class TelegramAiCopilotService:
         freqtrade_client: Optional[FreqtradeRestClient] = None,
         ai_engine: Optional[QuantAiCopilotEngine] = None
     ):
+        try:
+            from meme_hunter.core.config import get_settings
+            settings = get_settings()
+            cfg_token = settings.get_raw_secret(settings.TELEGRAM_TOKEN) or ""
+            cfg_chat_id = settings.TELEGRAM_CHAT_ID or ""
+            cfg_url = settings.FREQTRADE_API_URL
+            cfg_user = settings.FREQTRADE_API_USERNAME
+            cfg_pass = settings.get_raw_secret(settings.FREQTRADE_API_PASSWORD) or ""
+        except Exception:
+            cfg_token = ""
+            cfg_chat_id = ""
+            cfg_url = "http://127.0.0.1:8081"
+            cfg_user = "admin"
+            cfg_pass = ""
+
         self.token = (
             telegram_token
+            or cfg_token
             or os.environ.get("FREQTRADE__TELEGRAM__TOKEN")
             or os.environ.get("TELEGRAM_BOT_TOKEN")
             or get_secret("TELEGRAM_BOT_TOKEN", "")
@@ -144,16 +137,18 @@ class TelegramAiCopilotService:
         )
         self.allowed_chat_id = str(
             allowed_chat_id
+            or cfg_chat_id
             or os.environ.get("FREQTRADE__TELEGRAM__CHAT_ID")
             or os.environ.get("TELEGRAM_CHAT_ID")
             or get_secret("TELEGRAM_CHAT_ID", "")
             or ""
         )
         self.tg_client = TelegramBotClient(self.token) if self.token else None
-        base_host = os.environ.get("FREQTRADE_BASE_HOST", "http://127.0.0.1").rstrip("/")
-        api_user = os.environ.get("FREQTRADE__API_SERVER__USERNAME", "admin")
+        base_host = os.environ.get("FREQTRADE_BASE_HOST", cfg_url.rsplit(":", 1)[0] if ":" in cfg_url else "http://127.0.0.1").rstrip("/")
+        api_user = os.environ.get("FREQTRADE__API_SERVER__USERNAME", cfg_user)
         api_pass = (
             os.environ.get("FREQTRADE__API_SERVER__PASSWORD")
+            or cfg_pass
             or get_secret("FREQTRADE_API_PASSWORD")
             or os.environ.get("FREQTRADE_API_PASSWORD")
             or ""
@@ -331,38 +326,74 @@ class TelegramAiCopilotService:
             f"`{res.get('portfolio', {}).get('total_stake_active_usdt', 0.0):.2f} USDT` en juego."
         )
 
-    def _cmd_mine(self, goal_text: Optional[str] = None, chat_id: Optional[str] = None) -> str:
-        """Dispara el ciclo autónomo de minería, backtesting y despliegue de alfas."""
-        def _telegram_cb(step_text: str):
-            if self.tg_client and chat_id:
+    def _cmd_mine(
+        self,
+        goal_text: Optional[str] = None,
+        chat_id: Optional[str] = None,
+        async_exec: Optional[bool] = None,
+        sync: Optional[bool] = None
+    ) -> str:
+        """
+        PB-214: Dispara el ciclo autónomo de minería, backtesting y despliegue de alfas.
+        Desacopla la ejecución pesada en un worker thread no bloqueante para mantener
+        el polling reactivo (< 1s), notificando avances y resultado final por Telegram.
+        """
+        if sync is not None:
+            async_mode = not sync
+        elif async_exec is not None:
+            async_mode = async_exec
+        else:
+            async_mode = getattr(self, "async_mining", False)
+
+        def _execute_mining() -> str:
+            def _telegram_cb(step_text: str):
+                if self.tg_client and chat_id:
+                    try:
+                        self.tg_client.send_message(chat_id=chat_id, text=step_text)
+                    except Exception as ex:
+                        logger.debug(f"Error enviando actualización de progreso: {ex}")
+
+            res = self.hermes_op.mine_and_evaluate_new_alpha(
+                goal_text=goal_text or "Estrategia Moonshot alta frecuencia y alto Sharpe",
+                progress_callback=_telegram_cb if chat_id else None
+            )
+            if res.get("status") != "ok":
+                report = f"⚠️ *Fábrica de Alphas:* {res.get('message', 'No se pudieron validar candidatos')} (Régimen: `{res.get('regime')}`)."
+            elif res.get("report_md"):
+                report = res["report_md"]
+            else:
+                f = res.get("best_factor", {})
+                reload_txt = "✅ Desplegado en Bot 3 (:8083) en vivo (cartera simulada)" if res.get("reload_bot3") else "ℹ️ Guardado en biblioteca de factores"
+                report = (
+                    "🧪 *NUEVA ESTRATEGIA / FACTOR GENERADO CON ÉXITO*\n\n"
+                    f"• *ID del Factor:* `{f.get('factor_id')}`\n"
+                    f"• *Régimen Objetivo:* `{res.get('regime')}`\n"
+                    f"• *Fórmula Matemática:*\n`{f.get('formula')}`\n\n"
+                    f"📊 *Resultados del Backtesting Rápido (Velas 15m):*\n"
+                    f"• *Sharpe Ratio Proxy:* `{f.get('sharpe_proxy', 0.0):+.2f}`\n"
+                    f"• *Information Coefficient (IC):* `{f.get('ic_mean', 0.0):+.4f}` (IR: `{f.get('ic_ir', 0.0):+.2f}`)\n"
+                    f"• *Rotación (Turnover):* `{f.get('turnover', 0.0):.2f}`\n\n"
+                    f"🚀 *Acción en la Arena:* {reload_txt}."
+                )
+
+            if self.tg_client and chat_id and async_mode:
                 try:
-                    self.tg_client.send_message(chat_id=chat_id, text=step_text)
+                    self.tg_client.send_message(chat_id=chat_id, text=report)
                 except Exception as ex:
-                    logger.debug(f"Error enviando actualización de progreso: {ex}")
+                    logger.error(f"Error enviando reporte final de minería a chat {chat_id}: {ex}")
+            return report
 
-        res = self.hermes_op.mine_and_evaluate_new_alpha(
-            goal_text=goal_text or "Estrategia Moonshot alta frecuencia y alto Sharpe",
-            progress_callback=_telegram_cb if chat_id else None
-        )
-        if res.get("status") != "ok":
-            return f"⚠️ *Fábrica de Alphas:* {res.get('message', 'No se pudieron validar candidatos')} (Régimen: `{res.get('regime')}`)."
+        if not async_mode or not chat_id:
+            return _execute_mining()
 
-        if res.get("report_md"):
-            return res["report_md"]
-
-        f = res.get("best_factor", {})
-        reload_txt = "✅ Desplegado en Bot 3 (:8083) en vivo (cartera simulada)" if res.get("reload_bot3") else "ℹ️ Guardado en biblioteca de factores"
+        worker_name = f"alpha_miner_{int(time.time())}"
+        worker_thread = threading.Thread(target=_execute_mining, name=worker_name, daemon=True)
+        worker_thread.start()
 
         return (
-            "🧪 *NUEVA ESTRATEGIA / FACTOR GENERADO CON ÉXITO*\n\n"
-            f"• *ID del Factor:* `{f.get('factor_id')}`\n"
-            f"• *Régimen Objetivo:* `{res.get('regime')}`\n"
-            f"• *Fórmula Matemática:*\n`{f.get('formula')}`\n\n"
-            f"📊 *Resultados del Backtesting Rápido (Velas 15m):*\n"
-            f"• *Sharpe Ratio Proxy:* `{f.get('sharpe_proxy', 0.0):+.2f}`\n"
-            f"• *Information Coefficient (IC):* `{f.get('ic_mean', 0.0):+.4f}` (IR: `{f.get('ic_ir', 0.0):+.2f}`)\n"
-            f"• *Rotación (Turnover):* `{f.get('turnover', 0.0):.2f}`\n\n"
-            f"🚀 *Acción en la Arena:* {reload_txt}."
+            "🧪 *Tarea de investigación y minería iniciada en segundo plano...*\n\n"
+            "El agente autónomo está explorando el espacio de factores y evaluando candidatos sin congelar la operativa.\n"
+            "Te notificaré por este chat en cuanto se descubra un alfa viable o concluya la evaluación."
         )
 
     def _cmd_reset_moonshot(self, initial_wallet: float = 10.0, factor_id: str = "HERMES_ATH_26") -> str:

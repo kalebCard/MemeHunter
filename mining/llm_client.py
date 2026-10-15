@@ -63,26 +63,20 @@ class OpenRouterClient:
         timeout: float = 30.0,
         daily_budget_usd: Optional[float] = None
     ):
-        # Auto-descubrir clave mediante bóveda de secretos o entorno
+        # Auto-descubrir clave mediante AppSettings o entorno
         if api_key is None:
             try:
-                from portfolio.secrets_vault import get_secret
-                resolved_key = get_secret("OPENROUTER_API_KEY", "") or ""
+                from meme_hunter.core.config import get_settings
+                settings = get_settings()
+                resolved_key = settings.get_raw_secret(settings.OPENROUTER_API_KEY) or ""
             except Exception:
-                resolved_key = os.getenv("OPENROUTER_API_KEY", "")
-
+                resolved_key = ""
             if not resolved_key:
-                env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
-                if os.path.exists(env_path):
-                    try:
-                        with open(env_path, "r", encoding="utf-8") as f:
-                            for line in f:
-                                line = line.strip()
-                                if line.startswith("OPENROUTER_API_KEY="):
-                                    resolved_key = line.split("=", 1)[1].strip().strip('"').strip("'")
-                                    break
-                    except Exception:
-                        pass
+                try:
+                    from portfolio.secrets_vault import get_secret
+                    resolved_key = get_secret("OPENROUTER_API_KEY", "") or ""
+                except Exception:
+                    resolved_key = os.getenv("OPENROUTER_API_KEY", "")
         else:
             resolved_key = api_key
 

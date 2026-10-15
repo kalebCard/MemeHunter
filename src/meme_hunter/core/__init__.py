@@ -22,6 +22,15 @@ from meme_hunter.core.types import (
     AgentSignalDTO,
     TradeOrderDTO,
 )
+from meme_hunter.core.logging import (
+    generate_correlation_id,
+    get_correlation_id,
+    set_correlation_id,
+    StructuredJsonFormatter,
+    CorrelationIdAdapter,
+    get_logger,
+    configure_structured_logging,
+)
 
 __all__ = [
     "AppSettings",
@@ -41,4 +50,11 @@ __all__ = [
     "SignalAction",
     "AgentSignalDTO",
     "TradeOrderDTO",
+    "generate_correlation_id",
+    "get_correlation_id",
+    "set_correlation_id",
+    "StructuredJsonFormatter",
+    "CorrelationIdAdapter",
+    "get_logger",
+    "configure_structured_logging",
 ]

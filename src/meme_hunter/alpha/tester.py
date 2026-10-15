@@ -13,11 +13,11 @@ import numpy as np
 import pandas as pd
 import scipy.stats as ss
 
-from mining.formula_parser import FormulaASTParser
-from mining.alpha_grammar import AlphaGrammar
-from data_engine.slippage_engine import MicrostructureSlippageEngine
-from data_engine.paths import get_futures_data_dir
-from portfolio.order_router import SmartExitRouter, ExitUrgency
+from meme_hunter.alpha.parser import FormulaASTParser
+from meme_hunter.alpha.grammar import AlphaGrammar
+from meme_hunter.data.slippage_engine import MicrostructureSlippageEngine
+from meme_hunter.data.paths import get_futures_data_dir
+from meme_hunter.portfolio.order_router import SmartExitRouter, ExitUrgency
 
 DATA_DIR = get_futures_data_dir()
 
@@ -186,14 +186,25 @@ def run_strategy_backtest(
     mmr = 1.0 / (2.0 * max(1.0, leverage))
     max_adverse_liquidation_pct = (1.0 - mmr) / max(1.0, leverage)
 
-    for i in range(30, len(df)):
-        current_time = str(df['timestamp'].iloc[i])
-        close_p = float(df['close'].iloc[i])
-        high_p = float(df['high'].iloc[i])
-        low_p = float(df['low'].iloc[i])
-        sig = float(z_signal.iloc[i])
-        curr_vol = float(rolling_vol.iloc[i])
-        curr_rvol = float(rolling_rvol.iloc[i])
+    # PB-217: Vectorización de series temporales con NumPy para alta velocidad (< 500 ms)
+    n_bars = len(df)
+    timestamps_arr = df['timestamp'].astype(str).to_numpy()
+    close_arr = df['close'].to_numpy(dtype=float)
+    high_arr = df['high'].to_numpy(dtype=float)
+    low_arr = df['low'].to_numpy(dtype=float)
+    sig_arr = z_signal.to_numpy(dtype=float)
+    vol_arr = rolling_vol.to_numpy(dtype=float)
+    rvol_arr = rolling_rvol.to_numpy(dtype=float) if hasattr(rolling_rvol, 'to_numpy') else np.ones(n_bars, dtype=float)
+    base_close_30 = float(close_arr[30]) if n_bars > 30 else 1.0
+
+    for i in range(30, n_bars):
+        current_time = timestamps_arr[i]
+        close_p = close_arr[i]
+        high_p = high_arr[i]
+        low_p = low_arr[i]
+        sig = sig_arr[i]
+        curr_vol = vol_arr[i]
+        curr_rvol = rvol_arr[i]
 
         if active_trade:
             pos_type = active_trade["type"]
@@ -340,8 +351,8 @@ def run_strategy_backtest(
                     "funding_acc_usdt": 0.0
                 }
 
-        if i % 4 == 0 or i == len(df) - 1:
-            benchmark_eq = 1000.0 * (close_p / float(df['close'].iloc[30]))
+        if i % 4 == 0 or i == n_bars - 1:
+            benchmark_eq = 1000.0 * (close_p / max(1e-6, base_close_30))
             equity_curve.append({
                 "timestamp": current_time,
                 "equity": round(max(0.0, wallet), 2),

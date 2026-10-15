@@ -19,11 +19,15 @@ from portfolio.db_pool import get_sqlite_connection, sqlite_cursor_context, conf
 
 logger = logging.getLogger("AlphaFactoryDB")
 
-DEFAULT_DB_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "portfolio",
-    "alpha_factory.db"
-)
+try:
+    from meme_hunter.core.config import get_settings
+    DEFAULT_DB_PATH = str(get_settings().DB_PATH)
+except Exception:
+    DEFAULT_DB_PATH = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "storage",
+        "meme_hunter.db"
+    )
 
 
 CREATE_TABLES_SQL = """

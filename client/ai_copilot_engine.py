@@ -322,30 +322,164 @@ class QuantAiCopilotEngine:
         )
         return heuristic_reply, (intent if intent["action"] != "general_copilot_query" else None)
 
-    def _generate_heuristic_reply(
-        self,
-        user_message: str,
-        intent: Dict[str, Any],
-        context_str: str,
-        open_trades: List[Dict[str, Any]],
-        hermes_context: Optional[Dict[str, Any]] = None,
-        profit_data: Optional[Dict[str, Any]] = None,
-        balance_data: Optional[Dict[str, Any]] = None,
-        real_balance: Optional[Dict[str, Any]] = None,
-        arena_balances: Optional[Dict[str, Any]] = None
-    ) -> str:
-        """Genera respuesta dinámica, conversacional y context-aware cuando el LLM está en modo offline."""
-        msg_lower = user_message.lower().strip()
-        action = intent.get("action")
-        hermes_ctx = hermes_context or {}
-        regime = hermes_ctx.get("regime", "RANGE_CHOP")
-        confidence = hermes_ctx.get("confidence", 0.70)
-        snap = hermes_ctx.get("snapshot", {})
-        btc_price = snap.get("btc_price", 0.0)
-        btc_chg = snap.get("btc_change_24h", 0.0)
-        rationale = hermes_ctx.get("rationale", "Mercado en evaluación continua.")
+# =============================================================================
+# PB-216: GENERADORES DE CONTEXTO MODULARES POR INTENCIÓN (DESACOPLAMIENTO SRP)
+# =============================================================================
 
-        # 1. Comandos de control directos
+class GreetingGenerator:
+    """Genera saludos ejecutivos e introduce el estado de la arena y el régimen macro."""
+
+    @staticmethod
+    def generate(
+        open_trades: List[Dict[str, Any]],
+        regime: str,
+        confidence: float,
+        btc_price: float,
+        btc_chg: float
+    ) -> str:
+        trades_count = len(open_trades) if isinstance(open_trades, list) else 0
+        return (
+            f"👋 ¡Hola! Aquí **Hermes**, tu Alter Ego al mando de Meme Hunter.\n\n"
+            f"Estoy monitoreando la arena en Binance Futures 24/7. Actualmente tenemos **{trades_count} posiciones abiertas** "
+            f"bajo un régimen catalogado como **{regime}** (Confianza: {confidence*100:.0f}%).\n\n"
+            f"• BTC cotiza en `${btc_price:,.1f}` (`{btc_chg:+.2f}%`).\n"
+            f"• Mi meta es clara: **hacer crecer la cuenta en USDT y proteger las ganancias**.\n\n"
+            f"¿Qué te gustaría revisar? Puedes preguntarme por una moneda específica (ej. *'cómo va ETH'*, *'cómo va SOL'*), "
+            f"por las ganancias (*'cuánto llevamos'*), o usar comandos como `/hermes`, `/status` o `/regime`."
+        )
+
+
+class CoinStatusGenerator:
+    """Informa sobre el estado de posiciones abiertas o filtros activos para un símbolo."""
+
+    @staticmethod
+    def generate(found_coin: str, open_trades: List[Dict[str, Any]], regime: str) -> str:
+        matching_trades = [t for t in open_trades if found_coin in t.get("pair", "").upper()]
+        if matching_trades:
+            lines = []
+            for t in matching_trades:
+                tid = t.get("trade_id", "?")
+                pair = t.get("pair", "")
+                prof = t.get("profit_pct", 0.0)
+                bot = t.get("origin_bot", "Bot")
+                is_short = t.get("is_short", False)
+                dir_str = "SHORT 📉" if is_short else "LONG 📈"
+                stake = t.get("stake_amount", 0.0)
+                lines.append(f"• Trade `#{tid}` (*{pair}* | {dir_str} en {bot}): `{prof:+.2f}%` (Margen: `{stake:.2f} USDT`)")
+            trades_info = "\n".join(lines)
+            return (
+                f"🔍 **Posición activa en {found_coin} en Binance Futures:**\n\n"
+                f"{trades_info}\n\n"
+                f"⚖️ **Táctica de Hermes:** Operando bajo régimen **{regime}**. Para forzar el cierre inmediato usa `/forcesell <id>`."
+            )
+        else:
+            return (
+                f"ℹ️ **Moneda {found_coin}:** No tenemos ninguna posición abierta actualmente en `{found_coin}/USDT:USDT`.\n\n"
+                f"Los bots están filtrando pares con mayor volumen y asimetría bajo el régimen **{regime}**. "
+                f"Usa `/status` para ver todas las posiciones vivas en la arena."
+            )
+
+
+class BalanceReportGenerator:
+    """Genera el reporte consolidado distinguiendo saldo real Binance vs saldo arena virtual."""
+
+    @staticmethod
+    def generate(
+        profit_data: Optional[Dict[str, Any]],
+        balance_data: Optional[Dict[str, Any]],
+        real_balance: Optional[Dict[str, Any]],
+        arena_balances: Optional[Dict[str, Any]]
+    ) -> str:
+        prof = profit_data or {}
+        closed_pnl = prof.get("profit_closed_coin", 0.0)
+        winrate = prof.get("winrate", 0.0) * 100.0 if prof.get("winrate", 0.0) <= 1.0 else prof.get("winrate", 0.0)
+
+        # 1. Billetera Real de Binance
+        real_info_lines = []
+        if real_balance and real_balance.get("has_keys"):
+            spot_u = real_balance.get("spot_usdt_free", 0.0)
+            fut_u = real_balance.get("futures_usdt_free", 0.0)
+            real_info_lines.append(f"• *Billetera Spot:* `{spot_u:.2f} USDT`")
+            real_info_lines.append(f"• *Billetera Futuros (USDⓈ-M):* `{fut_u:.2f} USDT`")
+            if fut_u == 0.0 and spot_u > 0.0:
+                real_info_lines.append("  _(⚠️ Tus fondos están en Spot. Para operar futuros en vivo, transfiérelos a Futuros en Binance sin comisión)_")
+        else:
+            real_info_lines.append("• *Billetera Binance:* `Sin credenciales directas`")
+
+        real_block = "\n".join(real_info_lines)
+
+        # 2. Arena Multi-Bot Simulación
+        arena_info_lines = []
+        if arena_balances and arena_balances.get("status") == "ok":
+            tot_sim = arena_balances.get("total_wallet", 0.0)
+            fre_sim = arena_balances.get("free_wallet", 0.0)
+            usd_sim = arena_balances.get("used_wallet", 0.0)
+            arena_info_lines.append(f"• *Total Cartera Simulación:* `{tot_sim:.2f} USDT` (Libre: `{fre_sim:.2f}` | Margen: `{usd_sim:.2f}`)")
+            for b_id, b_data in arena_balances.get("bots", {}).items():
+                arena_info_lines.append(f"  - *{b_data['name']}* (:{b_data['port']}): `{b_data['total']:.2f} USDT` (Libre: `{b_data['free']:.2f}`)")
+        else:
+            bal = balance_data or {}
+            arena_info_lines.append(f"• *Bot 1 (Ablation :8081):* `{bal.get('total', 0.0):.2f} USDT` (Libre: `{bal.get('free', 0.0):.2f}`)")
+
+        arena_block = "\n".join(arena_info_lines)
+
+        return (
+            f"💰 **Reporte Oficial de Billeteras y Capital — Hermes Alter Ego**\n\n"
+            f"🏦 **1. TU SALDO REAL EN BINANCE:**\n"
+            f"{real_block}\n\n"
+            f"🎮 **2. SALDO VIRTUAL DE LA ARENA (DRY-RUN PAPER TRADING):**\n"
+            f"{arena_block}\n\n"
+            f"📊 *PnL Realizado Histórico:* `{closed_pnl:+.2f} USDT` (Win Rate: `{winrate:.1f}%`)\n"
+            f"🛡️ *Protección Activa:* Drawdown Kill Switch (25%) y Profit Ratchet vigilando cada trade."
+        )
+
+
+class RegimeReportGenerator:
+    """Genera el diagnóstico causal y macroeconómico de Hermes."""
+
+    @staticmethod
+    def generate(
+        regime: str,
+        confidence: float,
+        btc_price: float,
+        btc_chg: float,
+        snap: Dict[str, Any],
+        rationale: str,
+        hermes_ctx: Dict[str, Any]
+    ) -> str:
+        allocs = hermes_ctx.get("recommended_allocations", {})
+        alloc_lines = [f"  - *{k}*: `{v*100:.0f}%`" for k, v in allocs.items()]
+        alloc_str = "\n".join(alloc_lines) if alloc_lines else "  - Cartera balanceada estándar."
+        return (
+            f"📊 **Análisis Macro del Mercado — Hermes Agent**\n\n"
+            f"• **Régimen Identificado:** `{regime}` (Confianza: {confidence*100:.0f}%)\n"
+            f"• **BTC:** `${btc_price:,.1f}` (`{btc_chg:+.2f}%` en 24h)\n"
+            f"• **Funding Rate Promedio:** `{snap.get('avg_funding_rate', 0):.6f}`\n\n"
+            f"💡 **Diagnóstico:** {rationale}\n\n"
+            f"⚖️ **Asignación de Capital Activa:**\n{alloc_str}"
+        )
+
+
+class BotStrategyGenerator:
+    """Informa el estado y especialización de los 3 campeones cuantitativos en la arena."""
+
+    @staticmethod
+    def generate(regime: str) -> str:
+        return (
+            f"🤖 **Arena Multi-Bot — Estado de Estrategias**\n\n"
+            f"Hermes coordina 3 campeones cuantitativos en simultáneo:\n\n"
+            f"1. 🥇 **Ablation V5.2 (:8081):** Especialista en atrapar cascadas bajistas de memecoins tras pumps eufóricos.\n"
+            f"2. 🥈 **Quantum V7.1 (:8082):** Motor de dimensionamiento fraccional de Kelly con mínima volatilidad de balance.\n"
+            f"3. 🥉 **Mined Ensemble V8.0 (:8083):** Algoritmo de ensamble multi-factor para capturar tendencias continuas.\n\n"
+            f"Régimen actual: **{regime}**. Hermes modula la exposición de cada uno cada 5 minutos."
+        )
+
+
+class DirectActionGenerator:
+    """Responde de forma inmediata confirmando órdenes operativas directas."""
+
+    @staticmethod
+    def generate(action: str, intent: Dict[str, Any]) -> Optional[str]:
         if action == "stopbuy":
             return (
                 "🛡️ **Orden de Salvaguarda: Detener Compras**\n\n"
@@ -389,125 +523,14 @@ class QuantAiCopilotEngine:
                 "Ejecutando reinicio completo: deteniendo bot, archivando base de datos previa, "
                 "reajustando saldo virtual limpio a 10.00 USDT e inyectando la estrategia récord ATH..."
             )
+        return None
 
-        # 2. Detección de Saludos y Conversación Amistosa
-        if re.search(r"\b(hola|buen[oa]s|qu[eé]\s+tal|c[oó]mo\s+est[aá]s|hey|saludos)\b", msg_lower):
-            trades_count = len(open_trades) if isinstance(open_trades, list) else 0
-            return (
-                f"👋 ¡Hola! Aquí **Hermes**, tu Alter Ego al mando de Meme Hunter.\n\n"
-                f"Estoy monitoreando la arena en Binance Futures 24/7. Actualmente tenemos **{trades_count} posiciones abiertas** "
-                f"bajo un régimen catalogado como **{regime}** (Confianza: {confidence*100:.0f}%).\n\n"
-                f"• BTC cotiza en `${btc_price:,.1f}` (`{btc_chg:+.2f}%`).\n"
-                f"• Mi meta es clara: **hacer crecer la cuenta en USDT y proteger las ganancias**.\n\n"
-                f"¿Qué te gustaría revisar? Puedes preguntarme por una moneda específica (ej. *'cómo va ETH'*, *'cómo va SOL'*), "
-                f"por las ganancias (*'cuánto llevamos'*), o usar comandos como `/hermes`, `/status` o `/regime`."
-            )
 
-        # 3. Detección de Búsqueda de Moneda Específica
-        known_coins = ["BTC", "ETH", "SOL", "DOGE", "PEPE", "HYPE", "ZEC", "XAU", "XRP", "NEAR", "SOXL", "SNDK", "WAL", "BTW"]
-        found_coin = None
-        for c in known_coins:
-            if re.search(rf"\b{c}\b", msg_lower, re.IGNORECASE):
-                found_coin = c
-                break
+class FallbackPromptGenerator:
+    """Genera respuestas conversacionales abiertas contextualizadas cuando no coincide una intención puntual."""
 
-        if found_coin:
-            matching_trades = [t for t in open_trades if found_coin in t.get("pair", "").upper()]
-            if matching_trades:
-                lines = []
-                for t in matching_trades:
-                    tid = t.get("trade_id", "?")
-                    pair = t.get("pair", "")
-                    prof = t.get("profit_pct", 0.0)
-                    bot = t.get("origin_bot", "Bot")
-                    is_short = t.get("is_short", False)
-                    dir_str = "SHORT 📉" if is_short else "LONG 📈"
-                    stake = t.get("stake_amount", 0.0)
-                    lines.append(f"• Trade `#{tid}` (*{pair}* | {dir_str} en {bot}): `{prof:+.2f}%` (Margen: `{stake:.2f} USDT`)")
-                trades_info = "\n".join(lines)
-                return (
-                    f"🔍 **Posición activa en {found_coin} en Binance Futures:**\n\n"
-                    f"{trades_info}\n\n"
-                    f"⚖️ **Táctica de Hermes:** Operando bajo régimen **{regime}**. Para forzar el cierre inmediato usa `/forcesell <id>`."
-                )
-            else:
-                return (
-                    f"ℹ️ **Moneda {found_coin}:** No tenemos ninguna posición abierta actualmente en `{found_coin}/USDT:USDT`.\n\n"
-                    f"Los bots están filtrando pares con mayor volumen y asimetría bajo el régimen **{regime}**. "
-                    f"Usa `/status` para ver todas las posiciones vivas en la arena."
-                )
-
-        # 4. Preguntas de Ganancias / Dinero / Balance
-        if re.search(r"\b(ganancia|ganancias|plata|dinero|cu[aá]nto\s+llevamos|pnl|rentabilidad|balance|saldo|capital)\b", msg_lower):
-            prof = profit_data or {}
-            closed_pnl = prof.get("profit_closed_coin", 0.0)
-            winrate = prof.get("winrate", 0.0) * 100.0 if prof.get("winrate", 0.0) <= 1.0 else prof.get("winrate", 0.0)
-
-            # 1. Billetera Real de Binance
-            real_info_lines = []
-            if real_balance and real_balance.get("has_keys"):
-                spot_u = real_balance.get("spot_usdt_free", 0.0)
-                fut_u = real_balance.get("futures_usdt_free", 0.0)
-                real_info_lines.append(f"• *Billetera Spot:* `{spot_u:.2f} USDT`")
-                real_info_lines.append(f"• *Billetera Futuros (USDⓈ-M):* `{fut_u:.2f} USDT`")
-                if fut_u == 0.0 and spot_u > 0.0:
-                    real_info_lines.append("  _(⚠️ Tus fondos están en Spot. Para operar futuros en vivo, transfiérelos a Futuros en Binance sin comisión)_")
-            else:
-                real_info_lines.append("• *Billetera Binance:* `Sin credenciales directas`")
-
-            real_block = "\n".join(real_info_lines)
-
-            # 2. Arena Multi-Bot Simulación
-            arena_info_lines = []
-            if arena_balances and arena_balances.get("status") == "ok":
-                tot_sim = arena_balances.get("total_wallet", 0.0)
-                fre_sim = arena_balances.get("free_wallet", 0.0)
-                usd_sim = arena_balances.get("used_wallet", 0.0)
-                arena_info_lines.append(f"• *Total Cartera Simulación:* `{tot_sim:.2f} USDT` (Libre: `{fre_sim:.2f}` | Margen: `{usd_sim:.2f}`)")
-                for b_id, b_data in arena_balances.get("bots", {}).items():
-                    arena_info_lines.append(f"  - *{b_data['name']}* (:{b_data['port']}): `{b_data['total']:.2f} USDT` (Libre: `{b_data['free']:.2f}`)")
-            else:
-                bal = balance_data or {}
-                arena_info_lines.append(f"• *Bot 1 (Ablation :8081):* `{bal.get('total', 0.0):.2f} USDT` (Libre: `{bal.get('free', 0.0):.2f}`)")
-
-            arena_block = "\n".join(arena_info_lines)
-
-            return (
-                f"💰 **Reporte Oficial de Billeteras y Capital — Hermes Alter Ego**\n\n"
-                f"🏦 **1. TU SALDO REAL EN BINANCE:**\n"
-                f"{real_block}\n\n"
-                f"🎮 **2. SALDO VIRTUAL DE LA ARENA (DRY-RUN PAPER TRADING):**\n"
-                f"{arena_block}\n\n"
-                f"📊 *PnL Realizado Histórico:* `{closed_pnl:+.2f} USDT` (Win Rate: `{winrate:.1f}%`)\n"
-                f"🛡️ *Protección Activa:* Drawdown Kill Switch (25%) y Profit Ratchet vigilando cada trade."
-            )
-
-        # 5. Preguntas sobre Mercado / Tendencia / Bitcoin / Régimen
-        if re.search(r"\b(mercado|tendencia|regimen|r[eé]gimen|bitcoin|btc|cae|sube|qu[eé]\s+pasa)\b", msg_lower):
-            allocs = hermes_ctx.get("recommended_allocations", {})
-            alloc_lines = [f"  - *{k}*: `{v*100:.0f}%`" for k, v in allocs.items()]
-            alloc_str = "\n".join(alloc_lines) if alloc_lines else "  - Cartera balanceada estándar."
-            return (
-                f"📊 **Análisis Macro del Mercado — Hermes Agent**\n\n"
-                f"• **Régimen Identificado:** `{regime}` (Confianza: {confidence*100:.0f}%)\n"
-                f"• **BTC:** `${btc_price:,.1f}` (`{btc_chg:+.2f}%` en 24h)\n"
-                f"• **Funding Rate Promedio:** `{snap.get('avg_funding_rate', 0):.6f}`\n\n"
-                f"💡 **Diagnóstico:** {rationale}\n\n"
-                f"⚖️ **Asignación de Capital Activa:**\n{alloc_str}"
-            )
-
-        # 6. Preguntas sobre los Bots / Estrategias
-        if re.search(r"\b(bots?|estrategias?|ablation|quantum|ensemble|qui[eé]n\s+opera)\b", msg_lower):
-            return (
-                f"🤖 **Arena Multi-Bot — Estado de Estrategias**\n\n"
-                f"Hermes coordina 3 campeones cuantitativos en simultáneo:\n\n"
-                f"1. 🥇 **Ablation V5.2 (:8081):** Especialista en atrapar cascadas bajistas de memecoins tras pumps eufóricos.\n"
-                f"2. 🥈 **Quantum V7.1 (:8082):** Motor de dimensionamiento fraccional de Kelly con mínima volatilidad de balance.\n"
-                f"3. 🥉 **Mined Ensemble V8.0 (:8083):** Algoritmo de ensamble multi-factor para capturar tendencias continuas.\n\n"
-                f"Régimen actual: **{regime}**. Hermes modula la exposición de cada uno cada 5 minutos."
-            )
-
-        # 7. Fallback Contextual Enriquecido (Conversacional, nunca repetitivo)
+    @staticmethod
+    def generate(user_message: str, regime: str, open_trades: List[Dict[str, Any]]) -> str:
         trades_count = len(open_trades) if isinstance(open_trades, list) else 0
         return (
             f"🧠 **Hermes (Tu Alter Ego Operativo)**\n\n"
@@ -520,3 +543,61 @@ class QuantAiCopilotEngine:
             f"• `/rebalance` : Forzar rebalanceo de capital entre los 3 bots.\n"
             f"• O pregúntame por una moneda (ej. *'cómo va ETH'* o *'cuánto llevamos'*)."
         )
+
+
+# =============================================================================
+# QuantAiCopilotEngine: Método de despacho heurístico desacoplado
+# =============================================================================
+
+    def _generate_heuristic_reply(
+        self,
+        user_message: str,
+        intent: Dict[str, Any],
+        context_str: str,
+        open_trades: List[Dict[str, Any]],
+        hermes_context: Optional[Dict[str, Any]] = None,
+        profit_data: Optional[Dict[str, Any]] = None,
+        balance_data: Optional[Dict[str, Any]] = None,
+        real_balance: Optional[Dict[str, Any]] = None,
+        arena_balances: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """PB-216: Despacha la generación de respuesta heurística hacia generadores modulares SRP."""
+        msg_lower = user_message.lower().strip()
+        action = intent.get("action", "")
+        hermes_ctx = hermes_context or {}
+        regime = hermes_ctx.get("regime", "RANGE_CHOP")
+        confidence = hermes_ctx.get("confidence", 0.70)
+        snap = hermes_ctx.get("snapshot", {})
+        btc_price = snap.get("btc_price", 0.0)
+        btc_chg = snap.get("btc_change_24h", 0.0)
+        rationale = hermes_ctx.get("rationale", "Mercado en evaluación continua.")
+
+        # 1. Comandos de control directos
+        action_reply = DirectActionGenerator.generate(action, intent)
+        if action_reply:
+            return action_reply
+
+        # 2. Detección de Saludos y Conversación Amistosa
+        if re.search(r"\b(hola|buen[oa]s|qu[eé]\s+tal|c[oó]mo\s+est[aá]s|hey|saludos)\b", msg_lower):
+            return GreetingGenerator.generate(open_trades, regime, confidence, btc_price, btc_chg)
+
+        # 3. Detección de Búsqueda de Moneda Específica
+        known_coins = ["BTC", "ETH", "SOL", "DOGE", "PEPE", "HYPE", "ZEC", "XAU", "XRP", "NEAR", "SOXL", "SNDK", "WAL", "BTW"]
+        for c in known_coins:
+            if re.search(rf"\b{c}\b", msg_lower, re.IGNORECASE):
+                return CoinStatusGenerator.generate(c, open_trades, regime)
+
+        # 4. Preguntas de Ganancias / Dinero / Balance
+        if re.search(r"\b(ganancia|ganancias|plata|dinero|cu[aá]nto\s+llevamos|pnl|rentabilidad|balance|saldo|capital)\b", msg_lower):
+            return BalanceReportGenerator.generate(profit_data, balance_data, real_balance, arena_balances)
+
+        # 5. Preguntas sobre Mercado / Tendencia / Bitcoin / Régimen
+        if re.search(r"\b(mercado|tendencia|regimen|r[eé]gimen|bitcoin|btc|cae|sube|qu[eé]\s+pasa)\b", msg_lower):
+            return RegimeReportGenerator.generate(regime, confidence, btc_price, btc_chg, snap, rationale, hermes_ctx)
+
+        # 6. Preguntas sobre los Bots / Estrategias
+        if re.search(r"\b(bots?|estrategias?|ablation|quantum|ensemble|qui[eé]n\s+opera)\b", msg_lower):
+            return BotStrategyGenerator.generate(regime)
+
+        # 7. Fallback Contextual Enriquecido
+        return FallbackPromptGenerator.generate(user_message, regime, open_trades)
