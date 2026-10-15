@@ -205,6 +205,9 @@ class TelegramAiCopilotService:
             "/backtest": lambda m, cid: self._cmd_mine(chat_id=cid),
             "/refine": lambda m, cid: self._cmd_mine(chat_id=cid),
             "/bucle": lambda m, cid: self._cmd_mine(chat_id=cid),
+            "/forcesellall": lambda m, cid: self._cmd_forcesell("all"),
+            "/liquidartodo": lambda m, cid: self._cmd_forcesell("all"),
+            "/vendertodo": lambda m, cid: self._cmd_forcesell("all"),
         }
 
     def is_configured(self) -> bool:
@@ -448,59 +451,245 @@ class TelegramAiCopilotService:
         )
 
     def _cmd_stopbuy(self) -> str:
-        res = self.ft_client.stopbuy_bot()
-        if res.get("status") == "ok":
-            return "🛑 *Orden Ejecutada:* Se ha activado `stopbuy`. No se abrirán nuevas posiciones; las existentes seguirán su trailing stop."
-        return f"⚠️ *Error al ejecutar stopbuy:* `{res.get('error', 'Fallo de conexión')}`"
+        # Siempre asegurar que self.ft_client reciba la orden
+        res_main = self.ft_client.stopbuy_bot()
+        results = []
+        clients_to_run = getattr(self.orchestrator, "clients", {})
+        if isinstance(clients_to_run, dict) and clients_to_run:
+            for b_id, client in clients_to_run.items():
+                meta = getattr(self.orchestrator, "DEFAULT_BOTS", {}).get(b_id, {})
+                name = meta.get("name", b_id)
+                port = meta.get("port", "8081")
+                res = client.stopbuy_bot()
+                ok = (res.get("status") == "ok")
+                results.append(f"• *{name}* (:{port}): {'🛑 Detenido ✅' if ok else '⚠️ ' + str(res.get('error', 'Offline'))}")
+        else:
+            ok = (res_main.get("status") == "ok")
+            results.append(f"• *Bot 1 (:8081)*: {'🛑 Detenido ✅' if ok else '⚠️ ' + str(res_main.get('error', 'Fallo de conexión'))}")
+
+        res_str = "\n".join(results)
+        return (
+            "🛑 *ORDEN EJECUTADA: STOPBUY (`stopbuy`) EN TODA LA ARENA*\n\n"
+            "Se ha inhibido la apertura de nuevas posiciones en las instancias de trading (`stopbuy`):\n"
+            f"{res_str}\n\n"
+            "Las posiciones existentes continuarán su gestión y trailing stop."
+        )
 
     def _cmd_stopbot(self) -> str:
-        res = self.ft_client.stop_bot()
-        if res.get("status") == "ok":
-            return "⏸️ *Orden Ejecutada:* El bot de trading ha sido detenido ordenadamente."
-        return f"⚠️ *Error al detener el bot:* `{res.get('error', 'Fallo de conexión')}`"
+        res_main = self.ft_client.stop_bot()
+        results = []
+        clients_to_run = getattr(self.orchestrator, "clients", {})
+        if isinstance(clients_to_run, dict) and clients_to_run:
+            for b_id, client in clients_to_run.items():
+                meta = getattr(self.orchestrator, "DEFAULT_BOTS", {}).get(b_id, {})
+                name = meta.get("name", b_id)
+                port = meta.get("port", "8081")
+                res = client.stop_bot()
+                ok = (res.get("status") == "ok")
+                results.append(f"• *{name}* (:{port}): {'⏸️ Detenido ✅' if ok else '⚠️ ' + str(res.get('error', 'Offline'))}")
+        else:
+            ok = (res_main.get("status") == "ok")
+            results.append(f"• *Bot 1 (:8081)*: {'⏸️ Detenido ✅' if ok else '⚠️ ' + str(res_main.get('error', 'Fallo de conexión'))}")
+
+        res_str = "\n".join(results)
+        return f"⏸️ *ORDEN EJECUTADA: PAUSA GENERAL DE TRADING*\n\n{res_str}"
 
     def _cmd_startbot(self) -> str:
-        res = self.ft_client.start_bot()
-        if res.get("status") == "ok":
-            return "▶️ *Orden Ejecutada:* El bot de trading ha reanudado la operativa con normalidad."
-        return f"⚠️ *Error al reanudar el bot:* `{res.get('error', 'Fallo de conexión')}`"
+        res_main = self.ft_client.start_bot()
+        results = []
+        clients_to_run = getattr(self.orchestrator, "clients", {})
+        if isinstance(clients_to_run, dict) and clients_to_run:
+            for b_id, client in clients_to_run.items():
+                meta = getattr(self.orchestrator, "DEFAULT_BOTS", {}).get(b_id, {})
+                name = meta.get("name", b_id)
+                port = meta.get("port", "8081")
+                res = client.start_bot()
+                ok = (res.get("status") == "ok")
+                results.append(f"• *{name}* (:{port}): {'▶️ Reanudado ✅' if ok else '⚠️ ' + str(res.get('error', 'Offline'))}")
+        else:
+            ok = (res_main.get("status") == "ok")
+            results.append(f"• *Bot 1 (:8081)*: {'▶️ Reanudado ✅' if ok else '⚠️ ' + str(res_main.get('error', 'Fallo de conexión'))}")
 
-    def _cmd_forcesell(self, trade_id: str) -> str:
-        if not trade_id:
-            return "⚠️ Debes especificar el ID del trade a liquidar. Ejemplo: `/forcesell 1`"
-        res = self.ft_client.forcesell(trade_id)
+        res_str = "\n".join(results)
+        return f"▶️ *ORDEN EJECUTADA: OPERATIVA REANUDADA*\n\n{res_str}"
+
+    def _cmd_forcesell(self, trade_id_or_target: str) -> str:
+        target = str(trade_id_or_target).strip()
+        if not target:
+            return "⚠️ Debes especificar el ID del trade o la moneda a liquidar. Ejemplo: `/forcesell 1` o `/forcesell DOGE`"
+
+        # 1. Caso de Liquidación Total (all / todo)
+        if target.lower() in ["all", "todo", "todas"]:
+            agg = self.orchestrator.get_aggregated_status() if hasattr(self.orchestrator, "get_aggregated_status") else {}
+            trades = agg.get("trades", []) if isinstance(agg, dict) else []
+            if not trades:
+                # Fallback al bot principal
+                st = self.ft_client.get_status()
+                trades = st.get("data", []) if isinstance(st, dict) and st.get("status") == "ok" else []
+
+            if not trades:
+                return "ℹ️ *Liquidación General:* No hay órdenes ni posiciones abiertas actualmente en la arena."
+
+            results = []
+            clients_map = getattr(self.orchestrator, "clients", {})
+            for t in trades:
+                tid = str(t.get("trade_id", ""))
+                pair = t.get("pair", "N/A")
+                origin = t.get("origin_bot", "bot_v5_ablation")
+                bot_client = clients_map.get(origin, self.ft_client) if isinstance(clients_map, dict) else self.ft_client
+                res = bot_client.forcesell(tid)
+                ok = (res.get("status") == "ok")
+                results.append(f"  • Trade `#{tid}` (*{pair}* | {origin}): {'⚡ Liquidado ✅' if ok else '⚠️ ' + str(res.get('error', 'Error'))}")
+
+            return "⚡ *LIQUIDACIÓN TOTAL EJECUTADA*\n\n" + "\n".join(results)
+
+        # 2. Caso por Símbolo de Activo (ej. "DOGE", "PEPE", "SOL")
+        if not target.isdigit():
+            sym_clean = target.upper().replace("/USDT", "").replace(":USDT", "").replace("1000", "").strip()
+            agg = self.orchestrator.get_aggregated_status() if hasattr(self.orchestrator, "get_aggregated_status") else {}
+            trades = agg.get("trades", []) if isinstance(agg, dict) else []
+            matching = [t for t in trades if sym_clean in str(t.get("pair", "")).upper()]
+
+            if not matching:
+                return f"ℹ️ *Salida de Posición:* No se encontró ninguna operación abierta para `{target.upper()}` en la arena."
+
+            results = []
+            clients_map = getattr(self.orchestrator, "clients", {})
+            for t in matching:
+                tid = str(t.get("trade_id", ""))
+                pair = t.get("pair", "N/A")
+                origin = t.get("origin_bot", "bot_v5_ablation")
+                bot_client = clients_map.get(origin, self.ft_client) if isinstance(clients_map, dict) else self.ft_client
+                res = bot_client.forcesell(tid)
+                ok = (res.get("status") == "ok")
+                results.append(f"  • Trade `#{tid}` (*{pair}* en {origin}): {'⚡ Liquidado ✅' if ok else '⚠️ ' + str(res.get('error', 'Error'))}")
+
+            return f"⚡ *LIQUIDACIÓN DE {target.upper()} EJECUTADA*\n\n" + "\n".join(results)
+
+        # 3. Caso por ID Numérico (ej. "1", "42")
+        tid = target
+        agg = self.orchestrator.get_aggregated_status() if hasattr(self.orchestrator, "get_aggregated_status") else {}
+        trades = agg.get("trades", []) if isinstance(agg, dict) else []
+        matching = [t for t in trades if str(t.get("trade_id")) == tid]
+
+        bot_client = self.ft_client
+        origin_name = "Bot 1 (:8081)"
+        if matching:
+            origin = matching[0].get("origin_bot", "bot_v5_ablation")
+            clients_map = getattr(self.orchestrator, "clients", {})
+            if isinstance(clients_map, dict) and origin in clients_map:
+                bot_client = clients_map[origin]
+            origin_name = origin
+
+        res = bot_client.forcesell(tid)
         if res.get("status") == "ok":
-            return f"⚡ *Liquidación Forzada Ordenada:* Se emitió orden de salida a mercado para el trade `#{trade_id}`."
-        return f"⚠️ *Error al forzar salida del trade #{trade_id}:* `{res.get('error', 'ID no encontrado o bot offline')}`"
+            return f"⚡ *Liquidación Forzada Ordenada:* Se emitió orden de salida a mercado para el trade `#{tid}` ({origin_name})."
+        return f"⚠️ *Error al forzar salida del trade #{tid}:* `{res.get('error', 'ID no encontrado o bot offline')}`"
 
     def _cmd_forcebuy(self, pair: str) -> str:
         if not pair:
             return "⚠️ Debes especificar el par a comprar. Ejemplo: `/forcebuy BTC/USDT:USDT`"
-        p = pair.upper()
+        p = pair.upper().strip()
+        # Normalización para Binance Futures
         if not p.endswith(":USDT") and not p.endswith("/USDT"):
-            p = f"{p}/USDT:USDT" if "/" not in p else f"{p}:USDT"
+            clean = p.replace("/USDT", "").replace(":USDT", "")
+            if clean in ["PEPE", "FLOKI", "SHIB", "BONK", "SATS", "RATS", "LUNC"] and not clean.startswith("1000"):
+                clean = f"1000{clean}"
+            p = f"{clean}/USDT:USDT"
+        elif "/" in p and not p.endswith(":USDT"):
+            p = f"{p}:USDT"
+
         res = self.ft_client.forcebuy(p)
         if res.get("status") == "ok":
-            return f"⚡ *Orden de Entrada Emitida:* Apertura en `{p}` enviada a Binance Futures."
+            return f"⚡ *Orden de Entrada Emitida:* Apertura en `{p}` enviada a Binance Futures (:8081)."
         return f"⚠️ *Error al ejecutar forcebuy en {p}:* `{res.get('error', 'Fallo de conexión o fondos insuficientes')}`"
 
     def _cmd_reload(self) -> str:
-        res = self.ft_client.reload_config()
-        if res.get("status") == "ok":
-            return "🔄 *Hot-Reload Exitoso:* Configuración, lista de pares y estrategias recargadas en caliente sin reiniciar contenedor."
-        return f"⚠️ *Error en recarga de configuración:* `{res.get('error', 'Bot offline')}`"
+        res_main = self.ft_client.reload_config()
+        results = []
+        clients_to_run = getattr(self.orchestrator, "clients", {})
+        if isinstance(clients_to_run, dict) and clients_to_run:
+            for b_id, client in clients_to_run.items():
+                meta = getattr(self.orchestrator, "DEFAULT_BOTS", {}).get(b_id, {})
+                name = meta.get("name", b_id)
+                port = meta.get("port", "8081")
+                res = client.reload_config()
+                ok = (res.get("status") == "ok")
+                results.append(f"• *{name}* (:{port}): {'🔄 Recargado ✅' if ok else '⚠️ ' + str(res.get('error', 'Offline'))}")
+        else:
+            ok = (res_main.get("status") == "ok")
+            results.append(f"• *Bot 1 (:8081)*: {'🔄 Recargado ✅' if ok else '⚠️ ' + str(res_main.get('error', 'Bot offline'))}")
+
+        res_str = "\n".join(results)
+        return f"🔄 *HOT-RELOAD EJECUTADO EN TODA LA ARENA*\n\n{res_str}"
 
     def _cmd_killswitch(self) -> str:
-        # Detiene compras y el bot de inmediato
+        # 1. Detener compras y motores de trading en toda la arena
         self.ft_client.stopbuy_bot()
-        res = self.ft_client.stop_bot()
+        self.ft_client.stop_bot()
+
+        clients_to_run = getattr(self.orchestrator, "clients", {})
+        if isinstance(clients_to_run, dict):
+            for client in clients_to_run.values():
+                try:
+                    client.stopbuy_bot()
+                    client.stop_bot()
+                except Exception:
+                    pass
+
+        # 2. Liquidación forzada de posiciones abiertas
+        liq_res = self._cmd_forcesell("all")
+
         return (
             "🚨 *KILL-SWITCH DE EMERGENCIA ACTIVADO (25% SAFEGUARD)*\n\n"
-            "1. Nuevas compras completamente bloqueadas.\n"
-            "2. Motor de ejecución detenido preventivamente.\n"
-            "3. Capital remanente asegurado.\n\n"
-            "Para reanudar manualmente tras análisis, usa `/startbot`."
+            "1. Nuevas compras completamente bloqueadas en toda la arena.\n"
+            "2. Motores de ejecución detenidos preventivamente.\n"
+            f"3. {liq_res}\n\n"
+            "Capital remanente blindado. Para reanudar manualmente tras análisis, usa `/startbot`."
         )
+
+    def _execute_operational_action(
+        self,
+        suggested_action: Dict[str, Any],
+        query: str,
+        chat_id: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        PB-210: Despacha y ejecuta la acción operativa solicitada por el usuario en tiempo real.
+        Garantiza Cero Alucinaciones y acción determinista sin fingimientos.
+        """
+        action = suggested_action.get("action")
+        if not action or action in ["general_copilot_query", "query_balance", "query_profit", "query_status", "query_regime", "query_hermes"]:
+            return None
+
+        try:
+            if action == "stopbuy":
+                return self._cmd_stopbuy()
+            elif action == "stop":
+                return self._cmd_stopbot()
+            elif action == "start":
+                return self._cmd_startbot()
+            elif action == "killswitch":
+                return self._cmd_killswitch()
+            elif action == "forcesell_all":
+                return self._cmd_forcesell("all")
+            elif action == "forcesell":
+                target = suggested_action.get("trade_id") or suggested_action.get("symbol", "")
+                return self._cmd_forcesell(str(target))
+            elif action == "forcebuy":
+                target = suggested_action.get("symbol", "")
+                return self._cmd_forcebuy(str(target))
+            elif action == "rebalance":
+                return self._cmd_rebalance()
+            elif action == "reload":
+                return self._cmd_reload()
+            elif action == "mine_strategy":
+                return self._cmd_mine(goal_text=query, chat_id=chat_id)
+        except Exception as e:
+            logger.error(f"Error ejecutando acción operativa '{action}': {e}")
+            return f"⚠️ *Error al ejecutar acción operativa ({action}):* `{e}`"
+
+        return None
 
     def _cmd_ai_query(self, query: str, chat_id: Optional[str] = None) -> str:
         """Pasa la consulta del operador al motor cognitivo de IA inyectando telemetría viva, saldos y contexto de Hermes."""
@@ -524,14 +713,11 @@ class TelegramAiCopilotService:
             arena_balances=arena_bal
         )
 
-        # Si el usuario solicitó crear, minar o backtestear una estrategia, ejecutar la herramienta de minería
-        if suggested_action and suggested_action.get("action") == "mine_strategy":
-            try:
-                mine_res = self._cmd_mine(goal_text=query, chat_id=chat_id)
-                return f"{reply_md}\n\n---\n{mine_res}"
-            except Exception as e:
-                logger.error(f"Error ejecutando minería desde Copilot: {e}")
-                return f"{reply_md}\n\n⚠️ *Error al ejecutar minería:* `{e}`"
+        # PB-210: Despacho y Ejecución Autónoma de Acciones Solicitadas
+        if suggested_action:
+            action_result = self._execute_operational_action(suggested_action, query=query, chat_id=chat_id)
+            if action_result:
+                return f"{reply_md}\n\n---\n{action_result}"
 
         return reply_md
 

@@ -30,7 +30,9 @@ REGLAS DE OPERACIÓN INSTITUCIONAL:
 1. Respuestas concisas, ejecutivas, profesionales y directas (formato Telegram Markdown compatible).
 2. Tienes acceso al cerebro de HERMES AGENT, quien clasifica el régimen del mercado (BEAR_CASCADE, BULL_PARABOLIC, RANGE_CHOP, PANIC_VOLATILITY) y reasigna capital entre Ablation V5 (:8081), Quantum V7 (:8082) y Mined Ensemble (:8083) para maximizar el PnL según el entorno.
 3. Protege las ganancias obtenidas: el Kill Switch de Drawdown está fijado al 25% y Hermes activa el Profit Ratchet para no devolver dinero ganado a Binance.
-4. Si el usuario pide detener compras, parar el bot, vender posiciones, consultar a Hermes o rebalancear, identifica la acción operativa exacta.
+4. CONTROL Y EJECUCIÓN AUTÓNOMA EN VIVO:
+   - Cuentas con herramientas de despacho y ejecución en tiempo real sobre la API de Freqtrade y Binance.
+   - Si el operador pide en lenguaje natural detener compras, parar el bot, reanudarlo, liquidar posiciones (por ID o por moneda como DOGE/PEPE), forzar compras, rebalancear o minar estrategias, confirma la instrucción sabiendo que el sistema ejecutará inmediatamente la orden real y adjuntará el comprobante de ejecución al pie del mensaje.
 5. Explica el contexto de memecoins basándote en la desinflación macro post-pump y el sesgo asimétrico que genera rentabilidad.
 6. Usa viñetas claras y emojis sobrios para facilitar la lectura en teléfonos móviles.
 7. DISTINCIÓN CRÍTICA DE SALDOS (REAL vs SIMULADO):
@@ -169,59 +171,75 @@ class QuantAiCopilotEngine:
         )
 
     def extract_intent_heuristic(self, message: str) -> Dict[str, Any]:
-        """Extrae la intención operativa usando análisis léxico/patrones regex."""
+        """Extrae la intención operativa usando análisis léxico/patrones regex enriquecidos."""
         msg = message.strip().lower()
 
-        # Detener bot o compras
-        if re.search(r"\b(apagar|apaga|deten|detener|parar|para|stop)\s+(las\s+)?compras?\b", msg):
-            return {"action": "stopbuy", "confidence": 0.95, "command": "/stopbuy"}
-        if re.search(r"\b(apagar|apaga|deten|detener|parar|para|stop)\s+(el\s+)?(bot|sistema|programa)\b", msg):
-            return {"action": "stop", "confidence": 0.95, "command": "/stopbot"}
-        if re.search(r"\b(iniciar|inicia|arrancar|arranca|reanudar|reanuda|start)\s+(el\s+)?(bot|sistema|programa|trading)\b", msg):
-            return {"action": "start", "confidence": 0.95, "command": "/startbot"}
-
-        # Kill switch de emergencia
-        if re.search(r"\b(kill\s*switch|emergencia|abortar|abort|liquidar\s+todo)\b", msg):
+        # 1. Kill switch de emergencia o liquidar todo
+        if re.search(r"\b(kill\s*switch|emergencia|abortar|abort|liquidar\s+todo|vender\s+todo|vende\s+todo|cerrar\s+todo|cierra\s+todo|cerrar\s+todas|liquidar\s+todas|p[aá]nico)\b", msg):
             return {"action": "killswitch", "confidence": 0.98, "command": "/killswitch"}
 
-        # Recargar configuración
-        if re.search(r"\b(recargar?|recarga|reload|actualizar?\s+config)\b", msg):
+        # 2. Detener compras (stopbuy)
+        if re.search(r"\b(apagar?|apaga|det[eé]n(er)?|parar?|para|stop|pausar?|pausa|cancelar?|cancela|bloquear?|bloquea|no\s+compres|no\s+comprar)\s+(las\s+|m[aá]s\s+)?compras?\b", msg) or re.search(r"\b(stopbuy|bloquear\s+entradas|pausar\s+entradas)\b", msg):
+            return {"action": "stopbuy", "confidence": 0.95, "command": "/stopbuy"}
+
+        # 3. Detener bot (stopbot)
+        if re.search(r"\b(apagar?|apaga|det[eé]n(er)?|parar?|para|stop|pausar?|pausa)\s+(el\s+)?(bot|sistema|programa|arena|trading)\b", msg):
+            return {"action": "stop", "confidence": 0.95, "command": "/stopbot"}
+
+        # 4. Iniciar / reanudar bot o compras (startbot)
+        if re.search(r"\b(iniciar?|inicia|arrancar?|arranca|reanudar?|reanuda|start|activar?|activa|despausar?)\s+(el\s+)?(bot|sistema|programa|trading|arena|compras?)\b", msg):
+            return {"action": "start", "confidence": 0.95, "command": "/startbot"}
+
+        # 5. Recargar configuración
+        if re.search(r"\b(recargar?|recarga|reload|actualizar?\s+config|hot-reload)\b", msg):
             return {"action": "reload", "confidence": 0.90, "command": "/reload"}
 
-        # Consulta de estado / balance / profit
-        if re.search(r"\b(balance|capital|saldo|fondos|cuanto\s+tengo)\b", msg):
+        # 6. Consulta de estado / balance / profit
+        if re.search(r"\b(balance|capital|saldo|fondos|cu[aá]nto\s+tengo|cu[aá]nto\s+hay|mi\s+dinero)\b", msg):
             return {"action": "query_balance", "confidence": 0.90, "command": "/balance"}
-        if re.search(r"\b(profit|ganancias?|pnl|rendimiento|como\s+va\s+hoy)\b", msg):
+        if re.search(r"\b(profit|ganancias?|pnl|rendimiento|c[oó]mo\s+va\s+hoy|cu[aá]nto\s+ganamos)\b", msg):
             return {"action": "query_profit", "confidence": 0.90, "command": "/profit"}
         if re.search(r"\b(status|estado|posiciones|trades|operaciones)\b", msg):
             return {"action": "query_status", "confidence": 0.90, "command": "/status"}
 
-        # Venta forzada de trade
-        forcesell_match = re.search(
-            r"\b(cerrar|cierra|cerremos|vender|vende|liquidar|liquida|liquidemos|forcesell)\s+(el\s+)?(trade\s+)?#?(\d+)\b",
+        # 7. Venta forzada de trade (por ID numérico o por Símbolo de moneda)
+        forcesell_id_match = re.search(
+            r"\b(cerrar?|cierra|cerremos|vender?|vende|liquidar?|liquida|liquidemos|sal\s+de|salir\s+de|forcesell)\s+(el\s+|la\s+|las\s+|los\s+)?(trade\s+|posici[oó]n\s+|operaci[oó]n\s+)?#?(\d+)\b",
             msg
         )
-        if forcesell_match:
-            trade_id = forcesell_match.group(4)
+        if forcesell_id_match:
+            trade_id = forcesell_id_match.group(4)
             return {"action": "forcesell", "trade_id": trade_id, "confidence": 0.95, "command": f"/forcesell {trade_id}"}
 
-        # Compra forzada / apertura manual
+        forcesell_sym_match = re.search(
+            r"\b(cerrar?|cierra|cerremos|vender?|vende|liquidar?|liquida|liquidemos|sal\s+de|salir\s+de|forcesell)\s+(el\s+|la\s+|las\s+|los\s+)?(trade\s+|posici[oó]n\s+|operaci[oó]n\s+)?(de\s+)?([a-zA-Z0-9]+)\b",
+            msg
+        )
+        if forcesell_sym_match:
+            cand = forcesell_sym_match.group(5).upper()
+            stop_words = {"TODO", "TODAS", "EL", "LA", "LOS", "LAS", "POSICION", "POSICIONES", "TRADE", "TRADES", "COMPRAS", "BOT", "SISTEMA", "UN", "UNA"}
+            if cand not in stop_words and len(cand) >= 2:
+                return {"action": "forcesell", "symbol": cand, "confidence": 0.95, "command": f"/forcesell {cand}"}
+
+        # 8. Compra forzada / apertura manual
         buy_match = re.search(
-            r"\b(compra|comprar|buy|forcebuy|meter\s+long|abrir\s+long)\s+([0-9\.]+\s+)?([a-zA-Z0-9]+)\b",
+            r"\b(comprar?|compra|buy|forcebuy|meter\s+long|abrir\s+long|entra\s+en|entrar\s+en)\s+([0-9\.]+\s+)?([a-zA-Z0-9]+)\b",
             msg
         )
         if buy_match:
             symbol = buy_match.group(3).upper()
-            return {"action": "forcebuy", "symbol": symbol, "confidence": 0.95, "command": f"/forcebuy {symbol}/USDT:USDT"}
+            stop_words = {"UNA", "UNO", "UN", "ESTRATEGIA", "ALGO", "AHORA", "NUEVA", "BOT"}
+            if symbol not in stop_words and len(symbol) >= 2:
+                return {"action": "forcebuy", "symbol": symbol, "confidence": 0.95, "command": f"/forcebuy {symbol}/USDT:USDT"}
 
-        # Hermes / Régimen / Rebalance / Minería de Alphas
-        if re.search(r"\b(crea|crear|creame|genera|generar|mina|minar|inventa|inventar|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz|bucle|refina|refinamiento|cuenta\s+simulada|billetera\s+simulada|plan\s+para\s+pasar)\b", msg):
+        # 9. Hermes / Régimen / Rebalance / Minería de Alphas
+        if re.search(r"\b(crear?|crea|creame|generar?|genera|minar?|mina|inventar?|inventa|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz|bucle|refinar?|refina|refinamiento|cuenta\s+simulada|billetera\s+simulada|plan\s+para\s+pasar)\b", msg):
             return {"action": "mine_strategy", "confidence": 0.95, "command": "/mine"}
-        if re.search(r"\b(hermes|alter\s*ego|orquestador)\b", msg):
+        if msg in ["hermes", "alter ego", "/hermes", "/alterego"] or re.search(r"\b(informe\s+de\s+hermes|qu[eé]\s+dice\s+hermes|diagn[oó]stico\s+de\s+hermes|reporte\s+ejecutivo|alter\s*ego)\b", msg):
             return {"action": "query_hermes", "confidence": 0.95, "command": "/hermes"}
-        if re.search(r"\b(regimen|r[eé]gimen|como\s+esta\s+el\s+mercado|tendencia)\b", msg):
+        if re.search(r"\b(regimen|r[eé]gimen|c[oó]mo\s+esta\s+el\s+mercado|tendencia|macro|funding)\b", msg):
             return {"action": "query_regime", "confidence": 0.95, "command": "/regime"}
-        if re.search(r"\b(rebalancear?|rebalanceo|rebalance|ajustar?\s+capital)\b", msg):
+        if re.search(r"\b(rebalancear?|rebalanceo|rebalance|ajustar?\s+capital|redistribuir|balancear)\b", msg):
             return {"action": "rebalance", "confidence": 0.95, "command": "/rebalance"}
 
         return {"action": "general_copilot_query", "confidence": 0.50, "command": None}
@@ -317,47 +335,35 @@ class QuantAiCopilotEngine:
         if action == "stopbuy":
             return (
                 "🛡️ **Orden de Salvaguarda: Detener Compras**\n\n"
-                "He detectado tu orden para inhibir nuevas entradas en la arena.\n"
-                "Para confirmar y ejecutar en los bots, envía:\n"
-                "`/stopbuy`"
+                "Ejecutando detención inmediata de nuevas compras en toda la arena multi-bot..."
             )
         elif action == "stop":
             return (
                 "🛑 **Orden de Salvaguarda: Detener Bot**\n\n"
-                "Para suspender la ejecución completa del bot de trading de inmediato, envía:\n"
-                "`/stopbot`"
+                "Suspendiendo la ejecución de trading de inmediato..."
             )
         elif action == "start":
             return (
                 "▶️ **Reanudación del Sistema Cuantitativo**\n\n"
-                "Para reanudar la operativa del bot en Binance Futures, envía:\n"
-                "`/startbot`"
+                "Reanudando la operativa del bot de inmediato..."
             )
         elif action == "killswitch":
             return (
                 "🚨 **ACTIVACIÓN DE EMERGENCIA: KILL-SWITCH 25%**\n\n"
-                "Esta acción detendrá el motor y asegurará el capital remanente.\n"
-                "Ejecuta de inmediato:\n"
-                "`/killswitch`"
+                "Ejecutando protocolo de salvaguarda, bloqueo de compras y liquidación de emergencia..."
             )
         elif action == "forcesell":
-            tid = intent.get("trade_id", "?")
-            return (
-                f"⚠️ **Confirmación de Salida Forzada**\n\n"
-                f"¿Deseas liquidar de inmediato la posición #{tid} a mercado en Binance?\n"
-                f"Ejecuta:\n"
-                f"`/forcesell {tid}`"
-            )
+            tid = intent.get("trade_id")
+            sym = intent.get("symbol")
+            if tid:
+                return f"⚡ **Liquidación Forzada Ordenada**\n\nEjecutando orden de salida a mercado para el trade #{tid}..."
+            elif sym:
+                return f"⚡ **Liquidación de {sym} Ordenada**\n\nBuscando y liquidando posiciones abiertas de {sym} en la arena..."
+            return "⚡ **Liquidación Forzada Ordenada**\n\nProcesando orden de salida a mercado..."
         elif action == "forcebuy":
             sym = intent.get("symbol", "BTC")
             pair = f"{sym}/USDT:USDT" if "/" not in sym else sym
-            return (
-                f"⚡ **Solicitud de Apertura / Compra Forzada ({pair})**\n\n"
-                f"El motor cuantitativo opera derivados USDT-M aislados.\n\n"
-                f"Para confirmar la orden de apertura en Binance Futures, ejecuta:\n"
-                f"`/forcebuy {pair}`\n\n"
-                f"💡 Comprueba en `/balance` que dispongas de margen libre para nuevos slots."
-            )
+            return f"⚡ **Apertura / Compra Forzada ({pair})**\n\nEnviando orden de entrada a mercado a Freqtrade..."
 
         # 2. Detección de Saludos y Conversación Amistosa
         if re.search(r"\b(hola|buen[oa]s|qu[eé]\s+tal|c[oó]mo\s+est[aá]s|hey|saludos)\b", msg_lower):

@@ -271,3 +271,50 @@ def test_poll_once_security_rejection(copilot_service):
     copilot_service.tg_client.send_message.assert_called_once()
     args, kwargs = copilot_service.tg_client.send_message.call_args
     assert "Acceso Denegado" in kwargs["text"]
+
+
+def test_natural_language_stopbuy_real_execution(copilot_service, mock_ft_client):
+    """PB-210: Verifica que una orden en lenguaje natural dispare la llamada real a la API sin fingimientos."""
+    copilot_service.ai_engine.process_message.return_value = (
+        "🛡️ Entendido operador, inhibiendo nuevas entradas en la arena.",
+        {"action": "stopbuy", "confidence": 0.95, "command": "/stopbuy"}
+    )
+    reply = copilot_service.dispatch_command("Hermes por favor detén las compras de nuevas monedas", chat_id="99887766")
+    assert "stopbuy" in reply.lower() and "toda la arena" in reply.lower()
+    mock_ft_client.stopbuy_bot.assert_called()
+
+
+def test_natural_language_forcesell_symbol_real_execution(copilot_service, mock_ft_client):
+    """PB-210: Verifica que 'cerrar DOGE' busque el trade y ejecute forcesell real sobre esa posición."""
+    copilot_service.ai_engine.process_message.return_value = (
+        "⚡ Entendido operador, cerrando la posición de DOGE a mercado.",
+        {"action": "forcesell", "symbol": "DOGE", "confidence": 0.95, "command": "/forcesell DOGE"}
+    )
+    reply = copilot_service.dispatch_command("Hermes cierra DOGE de inmediato", chat_id="99887766")
+    assert "LIQUIDACIÓN DE DOGE EJECUTADA" in reply
+    mock_ft_client.forcesell.assert_called()
+
+
+def test_natural_language_rebalance_real_execution(copilot_service):
+    """PB-210: Verifica que 'rebalancear cartera' ejecute el ciclo real de Hermes Operator."""
+    copilot_service.ai_engine.process_message.return_value = (
+        "⚖️ Evaluando el régimen macro y rebalanceando capital.",
+        {"action": "rebalance", "confidence": 0.95, "command": "/rebalance"}
+    )
+    reply = copilot_service.dispatch_command("Hermes rebalancea el capital de la arena", chat_id="99887766")
+    assert "REBALANCEO DE CARTERA EJECUTADO" in reply
+    copilot_service.hermes_op.run_cycle.assert_called()
+
+
+def test_natural_language_killswitch_real_execution(copilot_service, mock_ft_client):
+    """PB-210: Verifica que 'emergencia liquidar todo' active el killswitch y cierre posiciones."""
+    copilot_service.ai_engine.process_message.return_value = (
+        "🚨 Activando salvaguarda de emergencia Kill Switch.",
+        {"action": "killswitch", "confidence": 0.98, "command": "/killswitch"}
+    )
+    reply = copilot_service.dispatch_command("Hermes emergencia activa el kill switch y vende todo", chat_id="99887766")
+    assert "KILL-SWITCH DE EMERGENCIA ACTIVADO" in reply
+    mock_ft_client.stopbuy_bot.assert_called()
+    mock_ft_client.stop_bot.assert_called()
+    mock_ft_client.forcesell.assert_called()
+

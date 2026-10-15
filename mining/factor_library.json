@@ -355,5 +355,53 @@
     "goal": "Pasar de 10 a 100 USDT en 1 semana (Moonshot 10x)",
     "discovered_at": "2026-10-15T19:10:16.584144+00:00",
     "regime": "RANGE_CHOP"
+  },
+  {
+    "factor_id": "HERMES_MOONSHOT_27",
+    "formula": "ts_rank(volume, 10)",
+    "ic_mean": 0.085,
+    "ic_std": 0.042,
+    "ic_ir": 2.02,
+    "sharpe_proxy": 0.0,
+    "win_rate_pct": 0.0,
+    "simulated_roi_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "timeframe": "15m",
+    "leverage": 10.0,
+    "goal": "Test Zero Hallucination",
+    "discovered_at": "2026-10-15T19:58:34.911741+00:00",
+    "regime": "RANGE_CHOP"
+  },
+  {
+    "factor_id": "HERMES_MOONSHOT_28",
+    "formula": "ts_rank(volume, 10)",
+    "ic_mean": 0.085,
+    "ic_std": 0.042,
+    "ic_ir": 2.02,
+    "sharpe_proxy": 0.0,
+    "win_rate_pct": 0.0,
+    "simulated_roi_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "timeframe": "15m",
+    "leverage": 10.0,
+    "goal": "Test Zero Hallucination",
+    "discovered_at": "2026-10-15T20:04:03.373355+00:00",
+    "regime": "RANGE_CHOP"
+  },
+  {
+    "factor_id": "HERMES_MOONSHOT_29",
+    "formula": "ts_rank(volume, 10)",
+    "ic_mean": 0.085,
+    "ic_std": 0.042,
+    "ic_ir": 2.02,
+    "sharpe_proxy": 0.0,
+    "win_rate_pct": 0.0,
+    "simulated_roi_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "timeframe": "15m",
+    "leverage": 10.0,
+    "goal": "Test Zero Hallucination",
+    "discovered_at": "2026-10-15T20:07:27.081910+00:00",
+    "regime": "RANGE_CHOP"
   }
 ]
