@@ -1,10 +1,10 @@
 ---
 id: HIST-SCRUM-001
-title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 16 | PB-01 a PB-189)"
+title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 19 | PB-01 a PB-219)"
 category: history/scrum
-version: 8.6
+version: 9.0
 status: ACTIVE
-last_updated: 2026-10-14
+last_updated: 2026-10-15
 author: Quantitative Engineering & Systems Architecture Core
 references:
   - docs/research/strategy/ESTRATEGIA_MAESTRA_UNIFICADA.md
@@ -618,6 +618,51 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 * **PB-188 🟡:** Integración en Consola Centralizada CLI (`meme_cli.py hermes --status/--rebalance/--audit`).
 * **PB-189 🟡:** Suite de Pruebas Unitarias, Sandbox de Simulación y Certificación DoD (`tests/unit/test_hermes_operator.py`).
 * **Documento Canónico:** Ver detalle en [`docs/history/sprints/19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md`](../sprints/19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md).
+
+---
+
+### Sprint 53: Bucle Autónomo de Refinamiento Cuantitativo de Hermes, Backtesting Iterativo y Maratón Moonshot (Completado & Certificado ✅)
+* **PB-190 ✅:** Motor Central del Bucle de Refinamiento Cuantitativo (`run_autonomous_refinement_loop` en `src/meme_hunter/hermes/hermes_operator.py`).
+* **PB-191 ✅:** Retroalimentación Diagnóstica Causal a OpenRouter (`failed_diagnostics` feed adaptativo en `LLMAlphaSynthesizer`).
+* **PB-192 ✅:** Backtesting Vectorial de Microestructura Rápida (`run_strategy_backtest` en velas 15m con slippage dinámico y fees de funding).
+* **PB-193 ✅:** Despliegue y Hot-Reload Automático en Bot 3 (:8083) vía `POST /api/v1/reload_config`.
+* **PB-194 ✅:** Biblioteca Canónica de Factores Cuantitativos (`mining/factor_library.json`).
+* **PB-195 ✅:** Canal de Telemetría y Callbacks en Telegram Copilot (`progress_callback` en comando `/mine`).
+* **PB-196 ✅:** Runner Autónomo de Investigación Continua y Maratón Moonshot (`scripts/research/run_moonshot_marathon.py`).
+* **PB-197 ✅:** Diario Cuantitativo de Investigación Automatizado (`docs/research/DIARIO_DE_ESTRATEGIAS.md`).
+* **PB-198 ✅:** Modelo de Gestión Monetaria para Micro-Capital (10 a 100 USDT, apalancamiento 10x, SL 4.5%, TS 2.0%).
+* **PB-199 ✅:** Suite Hermética de Pruebas Unitarias y Certificación DoD (`tests/unit/test_autonomous_refinement_loop.py` 2/2 tests aprobados).
+* **Documento Canónico:** Ver detalle en [`docs/history/sprints/20_SPRINT_053_HERMES_AUTONOMOUS_REFINEMENT_LOOP_AND_MOONSHOT_MARATHON.md`](../sprints/20_SPRINT_053_HERMES_AUTONOMOUS_REFINEMENT_LOOP_AND_MOONSHOT_MARATHON.md).
+
+---
+
+### Sprint 54: Blindaje de Seguridad Fail-Closed, Remediación Criptográfica y Erradicación de Deuda Técnica Crítica (En Ejecución / Activo 🟡)
+* **PB-200 🟡:** Firewall de Autorización Fail-Closed en Telegram Copilot (`is_authorized` rechaza conexiones sin `ALLOWED_CHAT_ID`).
+* **PB-201 🟡:** Purga Criptográfica de Contraseñas Hardcodeadas (`MemeHunter2026!`) y Validación Fail-Fast en Arranque.
+* **PB-202 🟡:** Erradicación de Métricas Cuantitativas Alucinadas y Fallbacks Falsos en `HermesOperator`.
+* **PB-203 🟡:** Sincronización Thread-Safe con Mutex de la Memoria Episódica de Hermes (`storage/hermes_memory.json`).
+* **PB-204 🟡:** Corrección de Invocación Rota en `/incubator/trigger-loop` y Supresión de Respuestas Engañosas `mock_success` en `quant.py`.
+* **PB-205 🟡:** Sanitización de Configuración CORS ASGI (Restricción de Orígenes y Eliminación de Wildcard con Credenciales).
+* **PB-206 🟡:** Protección y Autenticación en WebSocket de Telemetría (`/ws/telemetry`).
+* **PB-207 🟡:** Eliminación de Cláusulas `except Exception: pass` en Rutas Críticas y Adopción de Excepciones Tipadas.
+* **PB-208 🟡:** Adopción del Command Pattern para Desacoplar Despacho de Comandos en Telegram Copilot.
+* **PB-209 🟡:** Suite de Pruebas Unitarias de Seguridad y Certificación DoD (`tests/unit/test_security_remediation_sprint54.py`).
+* **Documento Canónico:** Ver detalle en [`docs/history/sprints/21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md`](../sprints/21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md).
+
+---
+
+### Sprint 55: Unificación Arquitectónica Modular v9.0, Consolidación de Persistencia SSOT y Desacoplamiento Asíncrono (Planificado / Ready 📋)
+* **PB-210 📋:** Migración y Consolidación de Paquetes Raíz bajo `src/meme_hunter/` (`client`, `mining`, `portfolio`, `data_engine`).
+* **PB-211 📋:** Estandarización de `pyproject.toml` y Normalización Absoluta de Imports.
+* **PB-212 📋:** Consolidación de Persistencia SSOT en `storage/meme_hunter.db` (Eliminación de `alpha_factory.db`).
+* **PB-213 📋:** Centralización Estricta de Configuración en Pydantic `AppSettings` (Erradicación de 5 parsers ad-hoc de `.env`).
+* **PB-214 📋:** Desacoplamiento Asíncrono de Tareas de Minería en Telegram Copilot (Cola No Bloqueante para `/mine`).
+* **PB-215 📋:** Conversión Asíncrona de Endpoints CPU-Intensivos en FastAPI Cockpit (`async def` con thread offload).
+* **PB-216 📋:** Desacoplamiento de God Method `_generate_heuristic_reply` en Generadores Modulares por Intención.
+* **PB-217 📋:** Optimización y Vectorización del Motor de Backtest con Polars / NumPy ($\ge 70\%$ reducción de latencia).
+* **PB-218 📋:** Estructuración de Trazabilidad y Logging JSON con Correlation IDs.
+* **PB-219 📋:** Suite Piramidal E2E de Arquitectura Modular v9.0 y Certificación Final de Release.
+* **Documento Canónico:** Ver detalle en [`docs/history/sprints/22_SPRINT_055_MODULAR_CORE_UNIFICATION_V9_AND_ASYNC_EVENT_STREAMING.md`](../sprints/22_SPRINT_055_MODULAR_CORE_UNIFICATION_V9_AND_ASYNC_EVENT_STREAMING.md).
 
 ---
 

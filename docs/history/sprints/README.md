@@ -27,7 +27,7 @@ Los documentos en este directorio constituyen el **Nivel Táctico** de ejecució
 
 ---
 
-## 📊 2. Matriz Cronológica de Sprints (1 al 51)
+## 📊 2. Matriz Cronológica de Sprints (1 al 55)
 
 | # | Archivo Canónico | Sprints | ID Estándar | Historias Cubiertas | Hito Técnico Principal | Estado |
 | :---: | :--- | :---: | :---: | :---: | :--- | :---: |
@@ -50,6 +50,9 @@ Los documentos en este directorio constituyen el **Nivel Táctico** de ejecució
 | **17** | [`17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md`](17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md) | Sprint 49 | `HIST-SPRINT-049` | PB-165 a PB-169 | Arquitectura Modular, Composables y Rediseño Cockpit Login | ✅ CERTIFIED |
 | **18** | [`18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md`](18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md) | Sprints 50-51 | `HIST-SPRINT-050-051` | PB-170 a PB-179 | Agente IA Autónomo en Telegram, Control Remoto Bidireccional y Copilot Cuantitativo | ✅ CERTIFIED |
 | **19** | [`19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md`](19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md) | Sprint 52 | `HIST-SPRINT-052` | PB-180 a PB-189 | Agente Autónomo Hermes (Alter Ego): Detección de Régimen, Asignación Dinámica & Riesgo | 🟡 READY |
+| **20** | [`20_SPRINT_053_HERMES_AUTONOMOUS_REFINEMENT_LOOP_AND_MOONSHOT_MARATHON.md`](20_SPRINT_053_HERMES_AUTONOMOUS_REFINEMENT_LOOP_AND_MOONSHOT_MARATHON.md) | Sprint 53 | `HIST-SPRINT-053` | PB-190 a PB-199 | Bucle Autónomo de Refinamiento Cuantitativo, Backtest 15m y Maratón Moonshot | ✅ CERTIFIED |
+| **21** | [`21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md`](21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md) | Sprint 54 | `HIST-SPRINT-054` | PB-200 a PB-209 | Blindaje Fail-Closed Telegram, Purga de Contraseñas y Cero Métricas Falsas | 🟡 ACTIVE |
+| **22** | [`22_SPRINT_055_MODULAR_CORE_UNIFICATION_V9_AND_ASYNC_EVENT_STREAMING.md`](22_SPRINT_055_MODULAR_CORE_UNIFICATION_V9_AND_ASYNC_EVENT_STREAMING.md) | Sprint 55 | `HIST-SPRINT-055` | PB-210 a PB-219 | Unificación Arquitectónica Modular v9.0, Persistencia SSOT y Desacoplamiento Asíncrono | 📋 READY |
 
 
 ---

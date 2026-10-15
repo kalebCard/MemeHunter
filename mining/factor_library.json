@@ -116,5 +116,21 @@
     "goal": "Pasar de 10 a 100 USDT en 1 semana (Moonshot 10x)",
     "discovered_at": "2026-10-15T14:43:20.211830+00:00",
     "regime": "RANGE_CHOP"
+  },
+  {
+    "factor_id": "HERMES_MOONSHOT_10",
+    "formula": "sign(ts_delta(close, 8)) * ts_zscore(log(hl_spread + 1e-6), 12) / (ts_std(returns, 18) + 1e-6)",
+    "ic_mean": 0.085,
+    "ic_std": 0.042,
+    "ic_ir": 2.02,
+    "sharpe_proxy": 0.64,
+    "win_rate_pct": 50.0,
+    "simulated_roi_pct": -87.56,
+    "max_drawdown_pct": 94.14,
+    "timeframe": "15m",
+    "leverage": 10.0,
+    "goal": "C\u00f3mo va el bucle de la estrategia 10 a 100",
+    "discovered_at": "2026-10-15T14:49:14.237258+00:00",
+    "regime": "RANGE_CHOP"
   }
 ]
