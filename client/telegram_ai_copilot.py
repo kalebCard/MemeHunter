@@ -221,6 +221,10 @@ class TelegramAiCopilotService:
             "/stopbucle": lambda m, cid: self._cmd_stop_training(),
             "/detenerbucle": lambda m, cid: self._cmd_stop_training(),
             "/stoprefine": lambda m, cid: self._cmd_stop_training(),
+            "/proactive": lambda m, cid: self._cmd_proactive(m),
+            "/proactivo": lambda m, cid: self._cmd_proactive(m),
+            "/lab": lambda m, cid: self._cmd_proactive_status(),
+            "/rnd": lambda m, cid: self._cmd_proactive_status(),
         }
 
     def is_configured(self) -> bool:
@@ -394,6 +398,66 @@ class TelegramAiCopilotService:
             "🧪 *Tarea de investigación y minería iniciada en segundo plano...*\n\n"
             "El agente autónomo está explorando el espacio de factores y evaluando candidatos sin congelar la operativa.\n"
             "Te notificaré por este chat en cuanto se descubra un alfa viable o concluya la evaluación."
+        )
+
+    def _cmd_proactive(self, msg: str) -> str:
+        """PB-235: Control y activación del motor proactivo de I+D de Hermes."""
+        parts = msg.strip().split()
+        sub = parts[1].lower() if len(parts) > 1 else ""
+
+        hunter = getattr(self.hermes_op, "proactive_hunter", None)
+        if not hunter:
+            return "⚠️ El módulo proactivo de I+D no está disponible en Hermes."
+
+        if sub in ["on", "start", "activar", "iniciar"]:
+            hunter.enabled = True
+            hunter.start_worker()
+            return (
+                "🧪 *HERMES PROACTIVO ACTIVADO*\n\n"
+                "• *Estado:* Activo y evaluando en segundo plano.\n"
+                "• *Cadencia:* Adaptación automática por cambio de régimen y búsqueda periódica cada 2h.\n"
+                "• *Objetivo:* Superar Sharpe >= 1.8 y desplegar dinámicamente en Bot 3 (:8083)."
+            )
+        elif sub in ["off", "stop", "pausar", "detener"]:
+            hunter.enabled = False
+            hunter.stop_worker()
+            return "⏸️ *HERMES PROACTIVO PAUSADO:* El laboratorio de I+D no evaluará ni desplegará estrategias en segundo plano."
+        elif sub in ["run", "trigger", "ejecutar", "ahora"]:
+            threading.Thread(
+                target=hunter.run_proactive_rnd_cycle,
+                kwargs={"trigger_reason": "telegram_manual_trigger"},
+                daemon=True,
+                name="TelegramProactiveManualTrigger"
+            ).start()
+            return "🔬 *CICLO DE I+D PROACTIVO DISPARADO*\nHermes está analizando el mercado actual, sintetizando 3 fórmulas y corriendo backtests vectoriales..."
+        else:
+            return self._cmd_proactive_status()
+
+    def _cmd_proactive_status(self) -> str:
+        """PB-235: Reporte de telemetría del laboratorio de I+D de Hermes."""
+        hunter = getattr(self.hermes_op, "proactive_hunter", None)
+        if not hunter:
+            return "⚠️ El módulo proactivo de I+D no está disponible en Hermes."
+
+        st = hunter.get_status()
+        live_factor = st.get("current_live_factor")
+        status_emoji = "🟢 ACTIVO" if st.get("enabled") and st.get("worker_alive") else "🟡 EN REPOSO" if st.get("enabled") else "🔴 DESACTIVADO"
+
+        factor_desc = "Ninguno"
+        if live_factor:
+            factor_desc = f"`{live_factor.get('formula')}` (Sharpe: {live_factor.get('sharpe_proxy', 0.0):+.2f})"
+
+        return (
+            f"🧪 *LABORATORIO DE I+D PROACTIVO — HERMES*\n\n"
+            f"• *Estado del Worker:* {status_emoji}\n"
+            f"• *Ciclos Ejecutados:* `{st.get('total_cycles_run', 0)}`\n"
+            f"• *Factores Desplegados:* `{st.get('deployed_factors_count', 0)}`\n"
+            f"• *Último Régimen Evaluado:* `{st.get('last_regime') or 'N/A'}`\n"
+            f"• *Factor Activo en Bot 3:* {factor_desc}\n\n"
+            f"💡 *Comandos disponibles:*\n"
+            f"`/proactive on` - Activar búsqueda continua\n"
+            f"`/proactive off` - Pausar laboratorio\n"
+            f"`/proactive run` - Forzar ciclo de investigación inmediata"
         )
 
     def _cmd_reset_moonshot(self, initial_wallet: float = 10.0, factor_id: str = "HERMES_ATH_26") -> str:
@@ -886,6 +950,8 @@ class TelegramAiCopilotService:
                 return self._cmd_mine(goal_text=query, chat_id=chat_id)
             elif action == "reset_moonshot":
                 return self._cmd_reset_moonshot()
+            elif action == "proactive_rnd":
+                return self._cmd_proactive(query)
         except Exception as e:
             logger.error(f"Error ejecutando acción operativa '{action}': {e}")
             return f"⚠️ *Error al ejecutar acción operativa ({action}):* `{e}`"

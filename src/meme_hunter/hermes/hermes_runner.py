@@ -85,8 +85,12 @@ def run_daemon(interval_sec: Optional[int] = None):
         except Exception as e:
             logger.error(f"No se pudo iniciar el listener de Telegram: {e}")
 
+    # Iniciar worker de I+D Proactivo en segundo plano
+    if hasattr(operator, "proactive_hunter") and operator.proactive_hunter:
+        operator.proactive_hunter.start_worker()
+
     # Notificar inicio en Telegram si hay credenciales
-    startup_msg = "🧠 *Hermes Activado:* He iniciado mi servicio de supervisión continua y chat interactivo sobre la arena multi-bot de Meme Hunter."
+    startup_msg = "🧠 *Hermes Activado:* He iniciado mi servicio de supervisión continua, I+D proactivo y chat interactivo sobre la arena multi-bot de Meme Hunter."
     messenger.send_executive_report(startup_msg)
 
     while running:
@@ -123,6 +127,9 @@ def run_daemon(interval_sec: Optional[int] = None):
         while running and sleep_elapsed < interval:
             time.sleep(1)
             sleep_elapsed += 1
+
+    if hasattr(operator, "proactive_hunter") and operator.proactive_hunter:
+        operator.proactive_hunter.stop_worker()
 
     logger.info("Daemon Hermes detenido ordenadamente.")
 

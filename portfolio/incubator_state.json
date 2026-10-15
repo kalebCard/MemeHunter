@@ -1,1 +1,13 @@
-{}
+{
+  "HERMES_PROACTIVE_55": {
+    "strategy_id": "HERMES_PROACTIVE_55",
+    "name": "(ts_rank(close, 5) - ts_rank(close, 15)) * ts_zscore(rvol, 10) * log(hl_spread + 1)",
+    "status": "LIVE",
+    "target_capital_weight": 1.0,
+    "backtest_sharpe": 2.95,
+    "live_sharpe": 0.0,
+    "days_in_stage": 0,
+    "decay_zscore": 0.0,
+    "last_audit_date": "2026-10-15"
+  }
+}

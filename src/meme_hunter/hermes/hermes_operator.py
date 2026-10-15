@@ -24,9 +24,14 @@ except (ImportError, ModuleNotFoundError):
 try:
     from meme_hunter.hermes.regime_detector import HermesRegimeDetector
     from meme_hunter.hermes.capital_allocator import HermesCapitalAllocator
+    from meme_hunter.hermes.proactive_hunter import HermesProactiveHunter
 except (ImportError, ModuleNotFoundError):
     from src.meme_hunter.hermes.regime_detector import HermesRegimeDetector
     from src.meme_hunter.hermes.capital_allocator import HermesCapitalAllocator
+    try:
+        from src.meme_hunter.hermes.proactive_hunter import HermesProactiveHunter
+    except Exception:
+        HermesProactiveHunter = None
 
 logger = logging.getLogger("HermesOperator")
 
@@ -41,13 +46,15 @@ class HermesOperator:
         memory_path: str = "storage/hermes_memory.json",
         orchestrator: Optional[MultiBotOrchestratorClient] = None,
         regime_detector: Optional[HermesRegimeDetector] = None,
-        capital_allocator: Optional[HermesCapitalAllocator] = None
+        capital_allocator: Optional[HermesCapitalAllocator] = None,
+        proactive_hunter: Optional[Any] = None
     ):
         self.memory_path = memory_path
         self._memory_lock = threading.RLock()
         self.orchestrator = orchestrator or MultiBotOrchestratorClient()
         self.regime_detector = regime_detector or HermesRegimeDetector()
         self.capital_allocator = capital_allocator or HermesCapitalAllocator(self.orchestrator)
+        self.proactive_hunter = proactive_hunter or (HermesProactiveHunter(operator=self) if HermesProactiveHunter else None)
         
         with self._memory_lock:
             self.memory = self._load_memory()
@@ -128,6 +135,20 @@ class HermesOperator:
         }
         
         self._save_memory()
+
+        # 6. Adaptabilidad Proactiva por Régimen y Guardián de Decaimiento de Alpha
+        if hasattr(self, "proactive_hunter") and self.proactive_hunter:
+            old_regime = None
+            if len(self.memory["regime_history"]) >= 2:
+                old_regime = self.memory["regime_history"][-2].get("regime")
+            new_regime = regime_info.get("regime")
+            if old_regime and new_regime and old_regime != new_regime:
+                self.proactive_hunter.on_regime_shift(new_regime=new_regime, old_regime=old_regime)
+
+            try:
+                self.proactive_hunter.check_alpha_decay_and_replace()
+            except Exception as decay_err:
+                logger.debug(f"Error en chequeo de decaimiento: {decay_err}")
         
         return {
             "timestamp": timestamp,

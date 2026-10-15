@@ -200,7 +200,15 @@ class QuantAiCopilotEngine:
         if re.search(r"\b(recargar?|recarga|reload|actualizar?\s+config|hot-reload)\b", msg):
             return {"action": "reload", "confidence": 0.90, "command": "/reload"}
 
-        # 6. Consulta de estado / balance / profit
+        # 6. Hermes Proactivo / Laboratorio de I+D / Búsqueda activa de dinero
+        if (
+            msg in ["/proactive", "/proactivo", "/lab", "/rnd", "/investigacion", "/investigación"]
+            or msg.startswith(("/proactive ", "/proactivo "))
+            or re.search(r"\b(proactiv\w*|laboratorio|i\+d|investigaci[oó]n|bus(?:c|qu)\w*\s+(?:\w+\s+)?dinero|gener\w*\s+dinero|gest\w*\s+activ\w*|pruebas?\s+activ\w*)\b", msg)
+        ):
+            return {"action": "proactive_rnd", "confidence": 0.95, "command": "/proactive"}
+
+        # 7. Consulta de estado / balance / profit
         if re.search(r"\b(balance|capital|saldo|fondos|cu[aá]nto\s+tengo|cu[aá]nto\s+hay|mi\s+dinero)\b", msg):
             return {"action": "query_balance", "confidence": 0.90, "command": "/balance"}
         if re.search(r"\b(profit|ganancias?|pnl|rendimiento|c[oó]mo\s+va\s+hoy|cu[aá]nto\s+ganamos)\b", msg):
@@ -208,7 +216,7 @@ class QuantAiCopilotEngine:
         if re.search(r"\b(status|estado|posiciones|trades|operaciones)\b", msg):
             return {"action": "query_status", "confidence": 0.90, "command": "/status"}
 
-        # 7. Venta forzada de trade (por ID numérico o por Símbolo de moneda)
+        # 8. Venta forzada de trade (por ID numérico o por Símbolo de moneda)
         forcesell_id_match = re.search(
             r"\b(cerrar?|cierra|cerremos|vender?|vende|liquidar?|liquida|liquidemos|sal\s+de|salir\s+de|forcesell)\s+(el\s+|la\s+|las\s+|los\s+)?(trade\s+|posici[oó]n\s+|operaci[oó]n\s+)?#?(\d+)\b",
             msg
@@ -227,7 +235,7 @@ class QuantAiCopilotEngine:
             if cand not in stop_words and len(cand) >= 2:
                 return {"action": "forcesell", "symbol": cand, "confidence": 0.95, "command": f"/forcesell {cand}"}
 
-        # 8. Compra forzada / apertura manual
+        # 9. Compra forzada / apertura manual
         buy_match = re.search(
             r"\b(comprar?|compra|buy|forcebuy|meter\s+long|abrir\s+long|entra\s+en|entrar\s+en)\s+([0-9\.]+\s+)?([a-zA-Z0-9]+)\b",
             msg
@@ -238,7 +246,7 @@ class QuantAiCopilotEngine:
             if symbol not in stop_words and len(symbol) >= 2:
                 return {"action": "forcebuy", "symbol": symbol, "confidence": 0.95, "command": f"/forcebuy {symbol}/USDT:USDT"}
 
-        # 9. Reiniciar Bot 3 / Moonshot 10 a 100 USDT (reset_moonshot)
+        # 10. Reiniciar Bot 3 / Moonshot 10 a 100 USDT (reset_moonshot)
         if (
             re.search(r"\b(reinici(?:ar?|a|ame)|reset(?:ea|ear)?|restablec(?:er|e)|limpiar?\s+base|borrar?\s+trades)\b.*\b(bot\s*3|10\s*(?:a|to)\s*100|moonshot|ensamble|ensemble)\b", msg)
             or re.search(r"\b(nuevo\s+intento|empezar?\s+de\s+cero|comenzar?\s+de\s+nuevo|borra\s+los\s+trades|reinicia\s+el\s+saldo)\b", msg)
@@ -246,7 +254,7 @@ class QuantAiCopilotEngine:
         ):
             return {"action": "reset_moonshot", "confidence": 0.98, "command": "/resetbot3"}
 
-        # 10. Hermes / Régimen / Rebalance / Minería de Alphas
+        # 11. Hermes / Régimen / Rebalance / Minería de Alphas
         if (
             msg in ["/mine", "/minar", "/alpha", "/alphas"]
             or msg.startswith(("/mine ", "/minar "))
