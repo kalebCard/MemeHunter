@@ -203,7 +203,15 @@ class QuantAiCopilotEngine:
             logger.warning(f"Fallo en llamada a LLM, usando generador heurístico: {e}")
 
         # Generador de respuesta heurística enriquecida (Modo Offline Resiliente)
-        heuristic_reply = self._generate_heuristic_reply(user_message, intent, context_str, open_trades)
+        heuristic_reply = self._generate_heuristic_reply(
+            user_message=user_message,
+            intent=intent,
+            context_str=context_str,
+            open_trades=open_trades,
+            hermes_context=hermes_context,
+            profit_data=profit_data,
+            balance_data=balance_data
+        )
         return heuristic_reply, (intent if intent["action"] != "general_copilot_query" else None)
 
     def _generate_heuristic_reply(
@@ -211,16 +219,28 @@ class QuantAiCopilotEngine:
         user_message: str,
         intent: Dict[str, Any],
         context_str: str,
-        open_trades: List[Dict[str, Any]]
+        open_trades: List[Dict[str, Any]],
+        hermes_context: Optional[Dict[str, Any]] = None,
+        profit_data: Optional[Dict[str, Any]] = None,
+        balance_data: Optional[Dict[str, Any]] = None
     ) -> str:
-        """Genera respuesta determinista cuando el LLM está en modo offline."""
+        """Genera respuesta dinámica, conversacional y context-aware cuando el LLM está en modo offline."""
+        msg_lower = user_message.lower().strip()
         action = intent.get("action")
+        hermes_ctx = hermes_context or {}
+        regime = hermes_ctx.get("regime", "RANGE_CHOP")
+        confidence = hermes_ctx.get("confidence", 0.70)
+        snap = hermes_ctx.get("snapshot", {})
+        btc_price = snap.get("btc_price", 0.0)
+        btc_chg = snap.get("btc_change_24h", 0.0)
+        rationale = hermes_ctx.get("rationale", "Mercado en evaluación continua.")
 
+        # 1. Comandos de control directos
         if action == "stopbuy":
             return (
                 "🛡️ **Orden de Salvaguarda: Detener Compras**\n\n"
-                "He detectado tu orden para inhibir nuevas entradas.\n"
-                "Para confirmar y ejecutar en el bot, envía:\n"
+                "He detectado tu orden para inhibir nuevas entradas en la arena.\n"
+                "Para confirmar y ejecutar en los bots, envía:\n"
                 "`/stopbuy`"
             )
         elif action == "stop":
@@ -246,7 +266,7 @@ class QuantAiCopilotEngine:
             tid = intent.get("trade_id", "?")
             return (
                 f"⚠️ **Confirmación de Salida Forzada**\n\n"
-                f"¿Deseas liquidar de inmediato la posición #{tid} a mercado?\n"
+                f"¿Deseas liquidar de inmediato la posición #{tid} a mercado en Binance?\n"
                 f"Ejecuta:\n"
                 f"`/forcesell {tid}`"
             )
@@ -255,43 +275,112 @@ class QuantAiCopilotEngine:
             pair = f"{sym}/USDT:USDT" if "/" not in sym else sym
             return (
                 f"⚡ **Solicitud de Apertura / Compra Forzada ({pair})**\n\n"
-                f"El motor cuantitativo Meme Hunter opera derivados USDT-M aislados con sesgo asimétrico.\n\n"
-                f"Para confirmar la orden de apertura a mercado en Freqtrade, ejecuta:\n"
+                f"El motor cuantitativo opera derivados USDT-M aislados.\n\n"
+                f"Para confirmar la orden de apertura en Binance Futures, ejecuta:\n"
                 f"`/forcebuy {pair}`\n\n"
-                f"💡 *Nota:* Comprueba en `/balance` que dispongas de margen libre para nuevos slots."
+                f"💡 Comprueba en `/balance` que dispongas de margen libre para nuevos slots."
             )
-        elif action == "query_hermes":
-            return (
-                f"🧠 **Consulta al Alter Ego Autónomo Hermes**\n\n"
-                f"{context_str}\n"
-                f"💡 Usa `/hermes` para ver la explicación causal detallada o `/rebalance` para forzar rebalanceo."
-            )
-        elif action == "query_regime":
-            return (
-                f"📊 **Consulta de Régimen de Mercado**\n\n"
-                f"{context_str}\n"
-                f"💡 Usa `/regime` para el desglose macro directo de Binance Futures."
-            )
-        elif action == "rebalance":
-            return (
-                f"⚖️ **Rebalanceo de Cartera Solicitado**\n\n"
-                f"Hermes ajusta los pesos de Ablation, Quantum y Ensemble según el régimen activo.\n\n"
-                f"Para ejecutar el rebalanceo ahora, envía:\n"
-                f"`/rebalance`"
-            )
-        elif action in ("query_status", "query_profit", "query_balance"):
-            return (
-                f"📊 **Reporte Cuantitativo en Tiempo Real**\n\n"
-                f"{context_str}\n"
-                f"💡 Puedes usar `/status`, `/profit` o `/balance` para reportes tabulares detallados."
-            )
-        else:
+
+        # 2. Detección de Saludos y Conversación Amistosa
+        if re.search(r"\b(hola|buen[oa]s|qu[eé]\s+tal|c[oó]mo\s+est[aá]s|hey|saludos)\b", msg_lower):
             trades_count = len(open_trades) if isinstance(open_trades, list) else 0
             return (
-                f"🤖 **Meme Hunter AI Copilot**\n\n"
-                f"He recibido tu consulta: *\"{user_message}\"*\n\n"
-                f"**Resumen Operativo:**\n"
-                f"- Posiciones vivas: {trades_count}\n"
-                f"- Comandos rápidos disponibles: `/hermes`, `/regime`, `/status`, `/profit`, `/balance`, `/stopbuy`, `/stopbot`, `/reload`.\n"
-                f"- Para consultar a la IA directamente usa `/ai <tu pregunta>`."
+                f"👋 ¡Hola! Aquí **Hermes**, tu Alter Ego al mando de Meme Hunter.\n\n"
+                f"Estoy monitoreando la arena en Binance Futures 24/7. Actualmente tenemos **{trades_count} posiciones abiertas** "
+                f"bajo un régimen catalogado como **{regime}** (Confianza: {confidence*100:.0f}%).\n\n"
+                f"• BTC cotiza en `${btc_price:,.1f}` (`{btc_chg:+.2f}%`).\n"
+                f"• Mi meta es clara: **hacer crecer la cuenta en USDT y proteger las ganancias**.\n\n"
+                f"¿Qué te gustaría revisar? Puedes preguntarme por una moneda específica (ej. *'cómo va ETH'*, *'cómo va SOL'*), "
+                f"por las ganancias (*'cuánto llevamos'*), o usar comandos como `/hermes`, `/status` o `/regime`."
             )
+
+        # 3. Detección de Búsqueda de Moneda Específica
+        known_coins = ["BTC", "ETH", "SOL", "DOGE", "PEPE", "HYPE", "ZEC", "XAU", "XRP", "NEAR", "SOXL", "SNDK", "WAL", "BTW"]
+        found_coin = None
+        for c in known_coins:
+            if re.search(rf"\b{c}\b", msg_lower, re.IGNORECASE):
+                found_coin = c
+                break
+
+        if found_coin:
+            matching_trades = [t for t in open_trades if found_coin in t.get("pair", "").upper()]
+            if matching_trades:
+                lines = []
+                for t in matching_trades:
+                    tid = t.get("trade_id", "?")
+                    pair = t.get("pair", "")
+                    prof = t.get("profit_pct", 0.0)
+                    bot = t.get("origin_bot", "Bot")
+                    is_short = t.get("is_short", False)
+                    dir_str = "SHORT 📉" if is_short else "LONG 📈"
+                    stake = t.get("stake_amount", 0.0)
+                    lines.append(f"• Trade `#{tid}` (*{pair}* | {dir_str} en {bot}): `{prof:+.2f}%` (Margen: `{stake:.2f} USDT`)")
+                trades_info = "\n".join(lines)
+                return (
+                    f"🔍 **Posición activa en {found_coin} en Binance Futures:**\n\n"
+                    f"{trades_info}\n\n"
+                    f"⚖️ **Táctica de Hermes:** Operando bajo régimen **{regime}**. Para forzar el cierre inmediato usa `/forcesell <id>`."
+                )
+            else:
+                return (
+                    f"ℹ️ **Moneda {found_coin}:** No tenemos ninguna posición abierta actualmente en `{found_coin}/USDT:USDT`.\n\n"
+                    f"Los bots están filtrando pares con mayor volumen y asimetría bajo el régimen **{regime}**. "
+                    f"Usa `/status` para ver todas las posiciones vivas en la arena."
+                )
+
+        # 4. Preguntas de Ganancias / Dinero / Balance
+        if re.search(r"\b(ganancia|ganancias|plata|dinero|cu[aá]nto\s+llevamos|pnl|rentabilidad|balance|saldo|capital)\b", msg_lower):
+            bal = balance_data or {}
+            prof = profit_data or {}
+            total = bal.get("total", 0.0)
+            free = bal.get("free", 0.0)
+            used = bal.get("used", 0.0)
+            closed_pnl = prof.get("profit_closed_coin", 0.0)
+            winrate = prof.get("winrate", 0.0) * 100.0 if prof.get("winrate", 0.0) <= 1.0 else prof.get("winrate", 0.0)
+            return (
+                f"💰 **Reporte de Capital y Ganancias — Hermes Alter Ego**\n\n"
+                f"• *Capital Total en Cartera:* `{total:.2f} USDT`\n"
+                f"• *Capital Disponible (Libre):* `{free:.2f} USDT`\n"
+                f"• *Margen en Operación:* `{used:.2f} USDT` (en {len(open_trades)} órdenes activas)\n"
+                f"• *PnL Realizado Histórico:* `{closed_pnl:+.2f} USDT` (Win Rate: `{winrate:.1f}%`)\n\n"
+                f"🛡️ *Salvaguarda Activa:* Profit Ratchet y Kill Switch listos para blindar beneficios ante cualquier retroceso."
+            )
+
+        # 5. Preguntas sobre Mercado / Tendencia / Bitcoin / Régimen
+        if re.search(r"\b(mercado|tendencia|regimen|r[eé]gimen|bitcoin|btc|cae|sube|qu[eé]\s+pasa)\b", msg_lower):
+            allocs = hermes_ctx.get("recommended_allocations", {})
+            alloc_lines = [f"  - *{k}*: `{v*100:.0f}%`" for k, v in allocs.items()]
+            alloc_str = "\n".join(alloc_lines) if alloc_lines else "  - Cartera balanceada estándar."
+            return (
+                f"📊 **Análisis Macro del Mercado — Hermes Agent**\n\n"
+                f"• **Régimen Identificado:** `{regime}` (Confianza: {confidence*100:.0f}%)\n"
+                f"• **BTC:** `${btc_price:,.1f}` (`{btc_chg:+.2f}%` en 24h)\n"
+                f"• **Funding Rate Promedio:** `{snap.get('avg_funding_rate', 0):.6f}`\n\n"
+                f"💡 **Diagnóstico:** {rationale}\n\n"
+                f"⚖️ **Asignación de Capital Activa:**\n{alloc_str}"
+            )
+
+        # 6. Preguntas sobre los Bots / Estrategias
+        if re.search(r"\b(bots?|estrategias?|ablation|quantum|ensemble|qui[eé]n\s+opera)\b", msg_lower):
+            return (
+                f"🤖 **Arena Multi-Bot — Estado de Estrategias**\n\n"
+                f"Hermes coordina 3 campeones cuantitativos en simultáneo:\n\n"
+                f"1. 🥇 **Ablation V5.2 (:8081):** Especialista en atrapar cascadas bajistas de memecoins tras pumps eufóricos.\n"
+                f"2. 🥈 **Quantum V7.1 (:8082):** Motor de dimensionamiento fraccional de Kelly con mínima volatilidad de balance.\n"
+                f"3. 🥉 **Mined Ensemble V8.0 (:8083):** Algoritmo de ensamble multi-factor para capturar tendencias continuas.\n\n"
+                f"Régimen actual: **{regime}**. Hermes modula la exposición de cada uno cada 5 minutos."
+            )
+
+        # 7. Fallback Contextual Enriquecido (Conversacional, nunca repetitivo)
+        trades_count = len(open_trades) if isinstance(open_trades, list) else 0
+        return (
+            f"🧠 **Hermes (Tu Alter Ego Operativo)**\n\n"
+            f"Entendido: *\"{user_message}\"*\n\n"
+            f"Estoy supervisando activamente la cartera en Binance Futures bajo el régimen **{regime}** con **{trades_count} posiciones abiertas**.\n\n"
+            f"💡 **Comandos directos que puedes usar:**\n"
+            f"• `/hermes` : Informe causal ejecutivo sobre la estrategia actual.\n"
+            f"• `/status` : Lista detallada de trades y bots.\n"
+            f"• `/regime` : Métricas macro de Binance Futures.\n"
+            f"• `/rebalance` : Forzar rebalanceo de capital entre los 3 bots.\n"
+            f"• O pregúntame por una moneda (ej. *'cómo va ETH'* o *'cuánto llevamos'*)."
+        )

@@ -1,6 +1,6 @@
 {
   "created_at": "2026-10-15T02:27:14.596200",
-  "total_cycles_run": 24,
+  "total_cycles_run": 23,
   "regime_history": [
     {
       "timestamp": "2026-10-15T02:27:14.596200",
@@ -163,15 +163,7 @@
       "actions_count": 3
     },
     {
-      "timestamp": "2026-10-15T03:31:21.659601+00:00",
-      "regime": "BEAR_CASCADE",
-      "confidence": 0.85,
-      "total_open_trades": 11,
-      "stake_active_usdt": 314.6686,
-      "actions_count": 3
-    },
-    {
-      "timestamp": "2026-10-15T03:36:24.053314+00:00",
+      "timestamp": "2026-10-15T03:59:06.743253+00:00",
       "regime": "BEAR_CASCADE",
       "confidence": 0.85,
       "total_open_trades": 10,
@@ -179,35 +171,35 @@
       "actions_count": 3
     },
     {
-      "timestamp": "2026-10-15T03:41:25.590193+00:00",
+      "timestamp": "2026-10-15T04:00:28.455064+00:00",
       "regime": "BEAR_CASCADE",
       "confidence": 0.85,
       "total_open_trades": 10,
-      "stake_active_usdt": 286.1134,
+      "stake_active_usdt": 284.6723,
       "actions_count": 3
     },
     {
-      "timestamp": "2026-10-15T03:46:27.158034+00:00",
+      "timestamp": "2026-10-15T04:03:56.273997+00:00",
       "regime": "BEAR_CASCADE",
       "confidence": 0.85,
       "total_open_trades": 10,
-      "stake_active_usdt": 286.1134,
+      "stake_active_usdt": 284.6723,
       "actions_count": 3
     }
   ],
   "actions_history": [],
   "last_decision": {
-    "timestamp": "2026-10-15T03:46:27.158034+00:00",
-    "explanation": "🧠 **Hermes (Tu Alter Ego) | Meta: Extraer Ganancias en Binance Futures**\n\nHe evaluado el mercado en vivo. BTC cotiza en `$80,855.2` con una variación 24h de `-3.49%`. El régimen actual catalogado es **BEAR_CASCADE** (Confianza: 85%).\n\n📉 **Táctica de Extracción de PnL:** Detecto debilidad estructural y liquidaciones de largos en memecoins. Canalizo el capital a **Ablation V5** y **Quantum V7** para capturar las extensiones bajistas y ganar en USDT.\n\n📊 **Estado de Posiciones:** 10 operaciones vivas | Margen asignado: `286.11 USDT`.",
+    "timestamp": "2026-10-15T04:03:56.273997+00:00",
+    "explanation": "🧠 **Hermes (Tu Alter Ego) | Meta: Extraer Ganancias en Binance Futures**\n\nHe evaluado el mercado en vivo. BTC cotiza en `$80,993.5` con una variación 24h de `-3.16%`. El régimen actual catalogado es **BEAR_CASCADE** (Confianza: 85%).\n\n📉 **Táctica de Extracción de PnL:** Detecto debilidad estructural y liquidaciones de largos en memecoins. Canalizo el capital a **Ablation V5** y **Quantum V7** para capturar las extensiones bajistas y ganar en USDT.\n\n📊 **Estado de Posiciones:** 10 operaciones vivas | Margen asignado: `284.67 USDT`.",
     "regime_info": {
       "regime": "BEAR_CASCADE",
       "confidence": 0.85,
       "snapshot": {
-        "btc_price": 80855.2,
-        "btc_change_24h": -3.493,
-        "eth_price": 2357.01,
-        "eth_change_24h": -6.374,
-        "avg_funding_rate": -8.088666666666667e-05,
+        "btc_price": 80993.5,
+        "btc_change_24h": -3.164,
+        "eth_price": 2364.6,
+        "eth_change_24h": -5.844,
+        "avg_funding_rate": -8.340000000000001e-05,
         "status": "ok"
       },
       "recommended_allocations": {
@@ -243,7 +235,7 @@
       "alerts": [],
       "vault_harvested_usdt": 0.0,
       "total_open_trades": 10,
-      "total_stake_active_usdt": 286.1134
+      "total_stake_active_usdt": 284.6723
     }
   },
   "active_skills": [
