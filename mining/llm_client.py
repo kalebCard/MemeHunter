@@ -15,10 +15,14 @@ from dataclasses import dataclass, field
 import os
 import json
 import time
+import socket
 import logging
 from typing import Dict, List, Optional, Any, Union
 import urllib.request
 import urllib.error
+
+# Garantizar timeout de red a nivel socket de sistema operativo (máximo 25s)
+socket.setdefaulttimeout(25.0)
 
 logger = logging.getLogger("OpenRouterClient")
 
