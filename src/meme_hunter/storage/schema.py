@@ -114,6 +114,19 @@ CREATE TABLE IF NOT EXISTS risk_events (
 
 CREATE INDEX IF NOT EXISTS idx_risk_events_type ON risk_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_risk_events_timestamp ON risk_events(timestamp_utc);
+
+CREATE TABLE IF NOT EXISTS onchain_metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    metric_type TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    confidence REAL NOT NULL DEFAULT 1.0,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_onchain_source_entity ON onchain_metrics(source, entity_id);
+CREATE INDEX IF NOT EXISTS idx_onchain_updated ON onchain_metrics(updated_at);
 """
 
 
