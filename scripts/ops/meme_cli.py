@@ -191,66 +191,6 @@ def cmd_telegram_ai(args):
     return subprocess.run(cmd).returncode
 
 
-def cmd_onchain(args):
-    """Diagnóstico, auditoría y telemetría on-chain en tiempo real."""
-    import asyncio
-    from meme_hunter.core.config import get_settings
-    from meme_hunter.storage.repositories import OnChainDataRepository
-    from meme_hunter.data.thegraph import TheGraphConnector
-    from meme_hunter.data.defillama import DeFiLlamaConnector
-    from meme_hunter.data.trueblocks import TrueBlocksConnector
-
-    print("=" * 60)
-    print("🌐 MEME HUNTER - TELEMETRÍA ON-CHAIN INSTITUCIONAL")
-    print("=" * 60)
-
-    settings = get_settings()
-    repo = OnChainDataRepository(settings.DB_PATH)
-
-    if args.audit:
-        print(f"🔍 Auditando dirección con TrueBlocks: {args.audit}")
-        tb = TrueBlocksConnector()
-        res = asyncio.run(tb.audit_contract(args.audit))
-        print(f"  • Origen Indexador : {res.indexer_source}")
-        print(f"  • Puntuación Riesgo: {res.risk_score:.2f} ({'ALTO RIESGO' if res.risk_score > 0.5 else 'SEGURO'})")
-        print(f"  • Transacciones    : {res.total_txs}")
-        print(f"  • Ballenas Activas : {'Sí' if res.recent_whale_activity else 'No'}")
-        return 0
-
-    if args.pool:
-        print(f"📊 Consultando The Graph para pool DEX: {args.pool}")
-        tg = TheGraphConnector()
-        snap = asyncio.run(tg.get_pool_snapshot(args.pool))
-        if snap:
-            print(f"  • Par          : {snap.token0.symbol} / {snap.token1.symbol}")
-            print(f"  • TVL USD      : ${snap.tvl_usd:,.2f}")
-            print(f"  • Volumen 24h  : ${snap.volume_24h_usd:,.2f}")
-            print(f"  • Precio T0/T1 : {snap.token0_price_usd:.6f} / {snap.token1_price_usd:.6f}")
-        else:
-            print("  ❌ No se pudo obtener respuesta del subgraph.")
-        return 0
-
-    if args.sync:
-        print("⚡ Sincronizando Régimen Macro desde DeFiLlama...")
-        dl = DeFiLlamaConnector()
-        macro = asyncio.run(dl.get_macro_regime_metrics())
-        print(f"  • Régimen de Mercado   : {macro.regime}")
-        print(f"  • Delta TVL 24h Promedio: {macro.average_1d_delta:+.2f}%")
-        print(f"  • Multiplicador Riesgo : {macro.risk_multiplier:.2f}x")
-        print(f"  • TVL Total Global     : ${macro.total_tvl_usd:,.0f}")
-        return 0
-
-    # Default: Mostrar resumen de métricas almacenadas
-    print(f"📂 Consultando almacén transaccional: {settings.DB_PATH}")
-    metrics = repo.get_recent_metrics(limit=10)
-    if not metrics:
-        print("  (Sin métricas on-chain registradas. Usa --sync o --audit para ingerir datos).")
-    else:
-        for m in metrics:
-            print(f"  [{m['updated_at'][:19]}] {m['source'].upper():<12} | {m['metric_type']:<24} | ID: {m['entity_id'][:20]}")
-    return 0
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Meme Hunter v7.2 - CLI Centralizado de Control y Operaciones",
@@ -261,8 +201,7 @@ Ejemplos comunes:
   python scripts/ops/meme_cli.py frequi          # Ver datos de acceso a FreqUI (:8081)
   python scripts/ops/meme_cli.py futures status  # Ver estado de Freqtrade en Docker
   python scripts/ops/meme_cli.py test            # Correr suite de 117 tests
-  python scripts/ops/meme_cli.py onchain --sync  # Sincronizar contexto macro de liquidez
-  python scripts/ops/meme_cli.py onchain --audit # Auditar contrato con TrueBlocks
+  python scripts/ops/meme_cli.py research stress # Correr stress-test
         """
     )
     subparsers = parser.add_subparsers(dest="command", help="Comando a ejecutar")
@@ -296,12 +235,6 @@ Ejemplos comunes:
     p_tg.add_argument("--test", action="store_true", help="Audita conectividad con Telegram y Freqtrade")
     p_tg.add_argument("--query", type=str, default="", help="Ejecuta una consulta al AI Copilot con telemetría viva")
 
-    # onchain
-    p_onchain = subparsers.add_parser("onchain", help="Telemetría y auditoría on-chain (Sprint 52 & 53)")
-    p_onchain.add_argument("--sync", action="store_true", help="Sincroniza régimen macro desde DeFiLlama")
-    p_onchain.add_argument("--audit", type=str, default="", help="Audita contrato o billetera con TrueBlocks")
-    p_onchain.add_argument("--pool", type=str, default="", help="Consulta liquidez de pool DEX en The Graph")
-
     args = parser.parse_args()
 
     if not args.command:
@@ -315,8 +248,7 @@ Ejemplos comunes:
         "futures": cmd_futures,
         "test": cmd_test,
         "research": cmd_research,
-        "telegram-ai": cmd_telegram_ai,
-        "onchain": cmd_onchain,
+        "telegram-ai": cmd_telegram_ai
     }
 
     handler = commands.get(args.command)

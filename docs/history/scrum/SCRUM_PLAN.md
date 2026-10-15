@@ -1,8 +1,8 @@
 ---
 id: HIST-SCRUM-001
-title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-189)"
+title: "Plan Maestro Scrum: Product Backlog Unificado (Épicas 1 a 12 | PB-01 a PB-179)"
 category: history/scrum
-version: 8.6
+version: 8.5
 status: ACTIVE
 last_updated: 2026-10-14
 author: Quantitative Engineering & Systems Architecture Core
@@ -603,23 +603,6 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
   - **PB-178 ✅:** Comando de Gestión Unificado en CLI (`scripts/ops/meme_cli.py telegram-ai --test/--poll/--query`) y runner `scripts/ops/run_telegram_copilot.py`.
   - **PB-179 ✅:** Manual de Operaciones, Certificación de Seguridad (Token Redaction, Rate Limiting) y Cierre Canónico de Sprints.
 * **Documento Canónico:** Ver detalle en [`docs/history/sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md`](../sprints/18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md).
-
----
-
-### Sprints 52 y 53: Conectores On-Chain Especializados (The Graph, DeFiLlama, TrueBlocks), Orquestación Visual n8n y Nodos DAG Multi-Agente (Completados & Certificados ✅)
-* **Sprint 52 (Capa de Ingestión Asíncrona On-Chain y Persistencia DAG - PB-180 a PB-184 - Completado & Certificado ✅):**
-  - **PB-180 ✅:** Conector Asíncrono GraphQL para The Graph & Subgraphs DEX (`src/meme_hunter/data/thegraph.py`) con pooling de conexiones `httpx`, reintentos exponenciales y esquemas Pydantic V2 para pools, volumen y tick liquidity.
-  - **PB-181 ✅:** Conector REST y Motor de Cacheo TTL Resiliente para DeFiLlama (`src/meme_hunter/data/defillama.py`) con métricas macro (TVL cross-chain, flujos de stablecoins y dispersión de yields).
-  - **PB-182 ✅:** Adaptador Local TrueBlocks / Driver IPC `chifra` (`src/meme_hunter/data/trueblocks.py`) para indexación local de bloques, auditoría de contratos y rastreo de Smart Money sin fuga de privacidad.
-  - **PB-183 ✅:** Expansión de Nodos de Ingestión en FastAPI DAG (`/api/dag/ingest/*`) con persistencia en `OnChainDataRepository` (SQLite WAL).
-  - **PB-184 ✅:** Suite Hermética de Pruebas Unitarias y Mocks de Ingestión On-Chain (`tests/unit/test_onchain_connectors.py`) con 10/10 tests aprobados al 100%.
-* **Sprint 53 (Agentes Especializados de Inferencia, Orquestación Visual n8n y Telemetría - PB-185 a PB-189 - Completado & Certificado ✅):**
-  - **PB-185 ✅:** Agente de Microestructura DEX (`DexExecutionAgent`) alimentado por The Graph para gatillos intradiarios y cálculo de slippage proyectado.
-  - **PB-186 ✅:** Agente de Riesgo y Régimen Macro (`MacroRegimeRiskAgent`) con modulación dinámica de Position Sizing y freno de apalancamiento vía DeFiLlama.
-  - **PB-187 ✅:** Agente Forense de Billeteras Inteligentes (`WhaleForensicAgent`) con trazas de TrueBlocks para detección de Smart Money y salvaguardas anti-rugpull.
-  - **PB-188 ✅:** Hub de Orquestación Visual e Interfaz n8n con Webhook bidireccional (`/api/dag/n8n/webhook`) y soporte para LLMs locales (Ollama/DeepSeek).
-  - **PB-189 ✅:** Integración en CLI Unificado (`meme_cli.py onchain`), Telemetría WebSocket en FreqUI (`/ws/telemetry`) y Certificación Canónica con 15/15 tests aprobados al 100%.
-* **Documento Canónico:** Ver detalle en [`docs/history/sprints/19_SPRINTS_052_053_ONCHAIN_DATA_ORCHESTRATION_THEGRAPH_DEFILLAMA_TRUEBLOCKS.md`](../sprints/19_SPRINTS_052_053_ONCHAIN_DATA_ORCHESTRATION_THEGRAPH_DEFILLAMA_TRUEBLOCKS.md).
 
 ---
 
