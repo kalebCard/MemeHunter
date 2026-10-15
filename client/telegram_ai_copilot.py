@@ -208,6 +208,10 @@ class TelegramAiCopilotService:
             "/forcesellall": lambda m, cid: self._cmd_forcesell("all"),
             "/liquidartodo": lambda m, cid: self._cmd_forcesell("all"),
             "/vendertodo": lambda m, cid: self._cmd_forcesell("all"),
+            "/resetbot3": lambda m, cid: self._cmd_reset_moonshot(),
+            "/reiniciarbot3": lambda m, cid: self._cmd_reset_moonshot(),
+            "/nuevointento": lambda m, cid: self._cmd_reset_moonshot(),
+            "/resetmoonshot": lambda m, cid: self._cmd_reset_moonshot(),
         }
 
     def is_configured(self) -> bool:
@@ -272,6 +276,7 @@ class TelegramAiCopilotService:
             "• `/startbot` : Reanudar la operativa del bot.\n"
             "• `/forcesell <id>` : Liquidar inmediatamente un trade específico.\n"
             "• `/reload` : Recargar configuración y estrategias en caliente.\n"
+            "• `/resetbot3` : 🔄 Reiniciar Bot 3 (Moonshot 10 a 100 USDT) a 10.00 USDT limpios con ATH-26.\n"
             "• `/killswitch` : 🚨 Activación del Kill Switch de Drawdown (25%).\n\n"
             "💬 *Consultas con IA:* Puedes enviar cualquier pregunta o usar `/ai <consulta>`."
         )
@@ -343,6 +348,11 @@ class TelegramAiCopilotService:
             f"• *Rotación (Turnover):* `{f.get('turnover', 0.0):.2f}`\n\n"
             f"🚀 *Acción en la Arena:* {reload_txt}."
         )
+
+    def _cmd_reset_moonshot(self, initial_wallet: float = 10.0, factor_id: str = "HERMES_ATH_26") -> str:
+        """Reinicia de forma limpia el Bot 3 (:8083) y archiva la base de datos anterior."""
+        res = self.hermes_op.reset_moonshot_bot(initial_wallet=initial_wallet, factor_id=factor_id)
+        return res.get("report_md", "⚠️ Fallo inesperado al reiniciar Bot 3.")
 
     def _cmd_status(self) -> str:
         """Consulta el estado agregado de toda la arena multi-bot."""
@@ -685,6 +695,8 @@ class TelegramAiCopilotService:
                 return self._cmd_reload()
             elif action == "mine_strategy":
                 return self._cmd_mine(goal_text=query, chat_id=chat_id)
+            elif action == "reset_moonshot":
+                return self._cmd_reset_moonshot()
         except Exception as e:
             logger.error(f"Error ejecutando acción operativa '{action}': {e}")
             return f"⚠️ *Error al ejecutar acción operativa ({action}):* `{e}`"

@@ -318,3 +318,54 @@ def test_natural_language_killswitch_real_execution(copilot_service, mock_ft_cli
     mock_ft_client.stop_bot.assert_called()
     mock_ft_client.forcesell.assert_called()
 
+
+def test_cmd_reset_moonshot_direct(copilot_service):
+    """Verifica que /resetbot3 y comandos equivalentes ejecuten el reinicio limpio en HermesOperator."""
+    copilot_service.hermes_op.reset_moonshot_bot.return_value = {
+        "status": "ok",
+        "bot_id": "bot_mined_ensemble",
+        "initial_wallet": 10.0,
+        "factor_id": "HERMES_ATH_26",
+        "report_md": "🔄 *REINICIO DE BOT 3 (:8083) — NUEVO INTENTO MOONSHOT 10 A 100 USDT*"
+    }
+    reply = copilot_service.dispatch_command("/resetbot3", chat_id="99887766")
+    assert "REINICIO DE BOT 3" in reply
+    copilot_service.hermes_op.reset_moonshot_bot.assert_called_once_with(initial_wallet=10.0, factor_id="HERMES_ATH_26")
+
+
+def test_natural_language_reset_moonshot_execution(copilot_service):
+    """Verifica que una petición en lenguaje natural ejecute el reinicio real de Bot 3."""
+    copilot_service.hermes_op.reset_moonshot_bot.return_value = {
+        "status": "ok",
+        "report_md": "🔄 *REINICIO DE BOT 3 (:8083) — NUEVO INTENTO MOONSHOT 10 A 100 USDT*"
+    }
+    copilot_service.ai_engine.process_message.return_value = (
+        "🔄 Entendido operador, reiniciando la cuenta virtual de Bot 3 de cero.",
+        {"action": "reset_moonshot", "confidence": 0.98, "command": "/resetbot3"}
+    )
+    reply = copilot_service.dispatch_command("Hermes reinicia el bot de 10 a 100", chat_id="99887766")
+    assert "REINICIO DE BOT 3" in reply
+    copilot_service.hermes_op.reset_moonshot_bot.assert_called_once()
+
+
+def test_ai_copilot_engine_intent_reset_moonshot():
+    """Verifica que el motor cognitivo identifique variadas frases en lenguaje natural para reiniciar Bot 3."""
+    from client.ai_copilot_engine import QuantAiCopilotEngine
+    engine = QuantAiCopilotEngine()
+
+    phrases = [
+        "Hermes reinicia el bot de 10 a 100",
+        "reinicia bot 3",
+        "haz un nuevo intento",
+        "resetea el bot de 10 a 100",
+        "nuevo intento con 10 usdt",
+        "empezar de cero con 10 usdt",
+        "limpiar base de datos del bot 3",
+        "/resetbot3",
+        "/nuevointento"
+    ]
+    for p in phrases:
+        intent = engine.extract_intent_heuristic(p)
+        assert intent["action"] == "reset_moonshot", f"Fallo al clasificar '{p}': {intent}"
+
+

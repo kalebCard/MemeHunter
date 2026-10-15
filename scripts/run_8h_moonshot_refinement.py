@@ -31,6 +31,10 @@ from mining.llm_alpha_generator import LLMAlphaSynthesizer
 from mining.formula_parser import FormulaASTParser
 from meme_hunter.alpha.tester import run_strategy_backtest
 from scripts.pipelines.compile_ensemble_strategy import generate_ensemble_strategy_file
+try:
+    from meme_hunter.hermes.hermes_operator import HermesOperator
+except (ImportError, ModuleNotFoundError):
+    from src.meme_hunter.hermes.hermes_operator import HermesOperator
 
 # Configurar logging
 os.makedirs(os.path.join(ROOT_DIR, "logs"), exist_ok=True)
@@ -145,6 +149,7 @@ def run_marathon(
     orchestrator = MultiBotOrchestratorClient()
     regime_detector = HermesRegimeDetector()
     synthesizer = LLMAlphaSynthesizer()
+    hermes_op = HermesOperator(orchestrator=orchestrator, regime_detector=regime_detector)
 
     # Enviar mensaje inicial a Telegram
     startup_msg = (
@@ -352,7 +357,8 @@ def run_marathon(
                         output_strategy_path=os.path.join(ROOT_DIR, "user_data", "strategies", "MemeHunter_MinedEnsemble.py"),
                         timeframe=timeframe,
                         leverage=leverage,
-                        stoploss=-0.045
+                        stoploss=-0.045,
+                        specific_factor_id=factor_id
                     )
                     if hasattr(orchestrator, "clients") and "bot_mined_ensemble" in orchestrator.clients:
                         orchestrator.clients["bot_mined_ensemble"].reload_config()
@@ -399,11 +405,27 @@ def run_marathon(
             elapsed_min = int((current_now - start_time).total_seconds() / 60.0)
             remaining_hrs = max(0.0, (end_time - current_now).total_seconds() / 3600.0)
 
-            # Consultar saldo actual de Bot 3
+            # Consultar saldo actual de Bot 3 y verificar Circuit Breaker (< 5.00 USDT)
             try:
                 bal_resp = orchestrator.clients["bot_mined_ensemble"].get_balance()
-                b3_total = bal_resp.get("data", {}).get("total", 0.0)
-            except Exception:
+                b3_total = float(bal_resp.get("data", {}).get("total", 0.0) or 0.0)
+                if 0.0 < b3_total < 5.0:
+                    logger.warning(f"⚠️ Circuit Breaker activado: Saldo Bot 3 ({b3_total:.2f} USDT) cayó por debajo de 5.00 USDT. Reiniciando...")
+                    hermes_op.reset_moonshot_bot(initial_wallet=initial_wallet, factor_id="HERMES_ATH_26")
+                    reset_alert = (
+                        f"🚨 *CIRCUIT BREAKER AUTOMÁTICO DISPARADO (DRAWDOWN CRÍTICO > 50%)*\n\n"
+                        f"• *Saldo Detectado:* `{b3_total:.2f} USDT` (Límite crítico: `5.00 USDT`)\n"
+                        f"• *Acción Ejecutada:* Hermes reinició la cuenta virtual a `{initial_wallet:.2f} USDT` limpios.\n"
+                        f"• *Estrategia Inyectada:* `HERMES_ATH_26`\n"
+                        "• *Base de Datos Previa:* Archivada con éxito en `user_data/archive/`.\n\n"
+                        "🚀 *Nuevo intento Moonshot (10 a 100 USDT) en marcha.*"
+                    )
+                    messenger.send_executive_report(reset_alert)
+                    # Refrescar balance tras reinicio
+                    bal_resp = orchestrator.clients["bot_mined_ensemble"].get_balance()
+                    b3_total = float(bal_resp.get("data", {}).get("total", initial_wallet) or initial_wallet)
+            except Exception as b3_err:
+                logger.debug(f"Aviso al verificar balance de Bot 3: {b3_err}")
                 b3_total = 0.0
 
             progress_msg = (

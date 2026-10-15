@@ -105,6 +105,12 @@ class MemeHunter_MinedEnsemble(IStrategy):
         def ts_delay(s: pd.Series, w: int) -> pd.Series:
             return s.shift(w).fillna(s)
 
+        def ts_std(s: pd.Series, w: int) -> pd.Series:
+            return s.rolling(w, min_periods=1).std().fillna(0.0)
+
+        def ts_corr(s1: pd.Series, s2: pd.Series, w: int) -> pd.Series:
+            return s1.rolling(w, min_periods=1).corr(s2).fillna(0.0)
+
         # 3. Evaluación Dinámica de cada Factor Minado Activo
         composite_score = pd.Series(0.0, index=dataframe.index)
 

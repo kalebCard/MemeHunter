@@ -37,6 +37,7 @@ def compile_ast_formula_to_python(formula_str: str) -> str:
     expr = expr.replace("neg(", "(-")
     expr = expr.replace("sign(", "np.sign(")
     expr = expr.replace("abs(", "np.abs(")
+    expr = expr.replace("log(", "np.log(")
     
     # Manejo de ts_decay_linear(x, w)
     # Se evalúa en el contexto del helper populate_factor_indicators
@@ -142,6 +143,12 @@ class MemeHunter_MinedEnsemble(IStrategy):
         def ts_delay(s: pd.Series, w: int) -> pd.Series:
             return s.shift(w).fillna(s)
 
+        def ts_std(s: pd.Series, w: int) -> pd.Series:
+            return s.rolling(w, min_periods=1).std().fillna(0.0)
+
+        def ts_corr(s1: pd.Series, s2: pd.Series, w: int) -> pd.Series:
+            return s1.rolling(w, min_periods=1).corr(s2).fillna(0.0)
+
         # 3. Evaluación Dinámica de cada Factor Minado Activo
         composite_score = pd.Series(0.0, index=dataframe.index)
 
@@ -239,7 +246,8 @@ def generate_ensemble_strategy_file(
     output_strategy_path: str = "user_data/strategies/MemeHunter_MinedEnsemble.py",
     timeframe: str = "4h",
     leverage: float = 1.5,
-    stoploss: float = -0.10
+    stoploss: float = -0.10,
+    specific_factor_id: Optional[str] = None
 ) -> str:
     """
     PB-96: Lee los artefactos de la minería o la base de datos SQLite WAL
@@ -256,8 +264,13 @@ def generate_ensemble_strategy_file(
     live_factors: Dict[str, float] = {}
     formula_map: Dict[str, str] = {f["factor_id"]: f["formula"] for f in factors_data}
 
-    # 1. Intentar cargar desde SQLite WAL como fuente de verdad
-    if db_path and os.path.exists(db_path):
+    # 0. Si se solicita un factor específico (ej. nuevo récord ATH o selección explícita)
+    if specific_factor_id:
+        clean_id = specific_factor_id.strip()
+        live_factors[clean_id] = 1.0
+
+    # 1. Intentar cargar desde SQLite WAL como fuente de verdad si no hay factor forzado
+    elif db_path and os.path.exists(db_path):
         try:
             from portfolio.db_schema import get_all_strategies_db
             records = get_all_strategies_db(db_path)

@@ -11,6 +11,11 @@ las instancias de trading aisladas en la arena A/B de Meme Hunter:
 import os
 import logging
 from typing import Dict, Any, List, Optional
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 from client.freqtrade_client import FreqtradeRestClient
 from portfolio.secrets_vault import get_secret
 

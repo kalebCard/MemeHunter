@@ -553,18 +553,165 @@ class HermesOperator:
             "report_md": report_md
         }
 
-    def mine_and_evaluate_new_alpha(
+    def reset_moonshot_bot(
         self,
-        pair: str = "1000PEPE",
-        n_candidates: int = 3,
-        goal_text: Optional[str] = None,
-        progress_callback: Optional[Any] = None
+        initial_wallet: float = 10.0,
+        factor_id: str = "HERMES_ATH_26",
+        timeframe: str = "15m",
+        leverage: float = 10.0,
+        stoploss: float = -0.045
     ) -> Dict[str, Any]:
-        """Fachada retrocompatible que delega en el bucle iterativo de refinamiento."""
-        goal = goal_text or "Estrategia de alta frecuencia y alto Sharpe para memecoins"
-        return self.run_autonomous_refinement_loop(
-            goal_text=goal,
-            pair=pair.split("_")[0],
-            progress_callback=progress_callback
+        """
+        Reinicia de forma limpia el Bot 3 (:8083 - Moonshot 10 a 100 USDT):
+        1. Detiene la operativa actual de Bot 3.
+        2. Archiva la base de datos de trades previa (/user_data/archive/tradesv3.ensemble_100u_run_TIMESTAMP.sqlite).
+        3. Configura el saldo virtual inicial a 10.00 USDT en config_ensemble_100u.json.
+        4. Compila la estrategia con el factor récord ATH indicado (por defecto HERMES_ATH_26).
+        5. Reinicia Bot 3 con la base de datos limpia e inicializada a 10.00 USDT.
+        6. Registra el evento en la memoria episódica de Hermes y emite reporte ejecutivo.
+        """
+        import shutil
+        import subprocess
+        import time
+
+        timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        initial_wallet = float(initial_wallet)
+        
+        # 1. Detener Bot 3 vía Orchestrator y vía Docker si aplica
+        if hasattr(self.orchestrator, "clients") and "bot_mined_ensemble" in self.orchestrator.clients:
+            try:
+                self.orchestrator.clients["bot_mined_ensemble"].stop_bot()
+            except Exception as e:
+                logger.warning(f"Aviso deteniendo bot_mined_ensemble vía API: {e}")
+
+        # Si corre en contenedor Docker local, detenerlo para liberar locks de SQLite
+        try:
+            subprocess.run(["docker", "stop", "meme_hunter_ensemble"], capture_output=True, timeout=15)
+        except Exception as e:
+            logger.debug(f"Docker stop no ejecutado o no disponible: {e}")
+
+        # 2. Archivar base de datos previa
+        user_data_dir = "user_data"
+        db_file = os.path.join(user_data_dir, "tradesv3.ensemble_100u.sqlite")
+        archive_dir = os.path.join(user_data_dir, "archive")
+        os.makedirs(archive_dir, exist_ok=True)
+        archived_target = os.path.join(archive_dir, f"tradesv3.ensemble_100u_run_{timestamp_str}.sqlite")
+        
+        db_archived = False
+        if os.path.exists(db_file):
+            try:
+                shutil.move(db_file, archived_target)
+                db_archived = True
+                logger.info(f"Base de datos de Bot 3 archivada en: {archived_target}")
+            except Exception as e:
+                logger.warning(f"Error moviendo DB {db_file}: {e}")
+                try:
+                    shutil.copy2(db_file, archived_target)
+                    os.remove(db_file)
+                    db_archived = True
+                except Exception as e2:
+                    logger.error(f"Fallo crítico al archivar DB {db_file}: {e2}")
+
+        # Limpiar archivos auxiliares WAL / SHM si existiesen
+        for aux in [f"{db_file}-wal", f"{db_file}-shm"]:
+            if os.path.exists(aux):
+                try:
+                    os.remove(aux)
+                except Exception:
+                    pass
+
+        # 3. Configurar user_data/config_ensemble_100u.json
+        config_path = os.path.join(user_data_dir, "config_ensemble_100u.json")
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                cfg["dry_run"] = True
+                cfg["dry_run_wallet"] = initial_wallet
+                cfg["timeframe"] = timeframe
+                cfg["stoploss"] = stoploss
+                cfg["max_open_trades"] = 1
+                with open(config_path, "w", encoding="utf-8") as f:
+                    json.dump(cfg, f, indent=4)
+                logger.info(f"Configuración de Bot 3 actualizada con {initial_wallet:.2f} USDT.")
+            except Exception as e:
+                logger.warning(f"Error actualizando config de Bot 3: {e}")
+
+        # 4. Compilar estrategia con el factor especificado
+        compiled_path = None
+        try:
+            from scripts.pipelines.compile_ensemble_strategy import generate_ensemble_strategy_file
+            compiled_path = generate_ensemble_strategy_file(
+                factor_library_path="mining/factor_library.json",
+                output_strategy_path=os.path.join(user_data_dir, "strategies", "MemeHunter_MinedEnsemble.py"),
+                timeframe=timeframe,
+                leverage=leverage,
+                stoploss=stoploss,
+                specific_factor_id=factor_id
+            )
+            logger.info(f"Estrategia ensamble compilada para Bot 3 con factor {factor_id} en {compiled_path}")
+        except Exception as e:
+            logger.warning(f"Error compilando estrategia ensamble para Bot 3: {e}")
+
+        # 5. Reiniciar Bot 3
+        started_ok = False
+        # Intentar levantar contenedor si docker está activo
+        try:
+            res_dc = subprocess.run(["docker", "start", "meme_hunter_ensemble"], capture_output=True, timeout=15)
+            if res_dc.returncode == 0:
+                started_ok = True
+                time.sleep(3.0)  # Breve espera para inicialización de API
+        except Exception as e:
+            logger.debug(f"Docker start no ejecutado: {e}")
+
+        # Recargar y arrancar vía Orchestrator API
+        if hasattr(self.orchestrator, "clients") and "bot_mined_ensemble" in self.orchestrator.clients:
+            b3 = self.orchestrator.clients["bot_mined_ensemble"]
+            try:
+                b3.reload_config()
+                s_res = b3.start_bot()
+                if s_res.get("status") == "ok":
+                    started_ok = True
+            except Exception as e:
+                logger.warning(f"Aviso recargando bot_mined_ensemble vía API: {e}")
+
+        # 6. Registrar en memoria episódica
+        reset_event = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "action": "reset_moonshot_bot",
+            "bot_id": "bot_mined_ensemble",
+            "initial_wallet": initial_wallet,
+            "factor_id": factor_id,
+            "db_archived": archived_target if db_archived else None,
+            "started_ok": started_ok
+        }
+        self.memory.setdefault("resets_history", []).append(reset_event)
+        self.memory["last_decision"] = {
+            "timestamp": reset_event["timestamp"],
+            "explanation": f"Hermes reinició el bot Moonshot 10->100 (:8083) con balance limpio de {initial_wallet:.2f} USDT y factor '{factor_id}'.",
+            "event": reset_event
+        }
+        self._save_memory()
+
+        # 7. Formatear reporte ejecutivo
+        report_md = (
+            f"🔄 *REINICIO DE BOT 3 (:8083) — NUEVO INTENTO MOONSHOT 10 A 100 USDT*\n\n"
+            f"• *Capital Asignado:* `{initial_wallet:.2f} USDT` (Cuenta Limpia / Dry-Run)\n"
+            f"• *Estrategia Inyectada:* `{factor_id}`\n"
+            f"• *Apalancamiento:* `{leverage:.0f}x` | *Timeframe:* `{timeframe}` | *Stop Loss:* `{stoploss*100:.1f}%`\n"
+            f"• *Base de Datos Anterior:* `{'Archivada en user_data/archive/' if db_archived else 'No encontrada'}`\n"
+            f"• *Estado de Ejecución:* {'🟢 Activo en vivo (Freqtrade OK)' if started_ok else '⚠️ Preparado (Pendiente inicio)'}\n\n"
+            f"🛡️ *Circuit Breaker Automático:* Si el balance desciende de `5.00 USDT`, Hermes ejecutará un auto-reinicio preventivo inmediato."
         )
+
+        return {
+            "status": "ok",
+            "bot_id": "bot_mined_ensemble",
+            "initial_wallet": initial_wallet,
+            "factor_id": factor_id,
+            "db_archived": archived_target if db_archived else None,
+            "started_ok": started_ok,
+            "report_md": report_md
+        }
+
 

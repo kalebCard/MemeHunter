@@ -44,6 +44,8 @@ REGLAS DE OPERACIÓN INSTITUCIONAL:
    - Si el usuario tiene fondos en Spot (ej. 10 USDT) pero 0 en Futuros, explícale cordialmente que Meme Hunter opera en el mercado de Futuros USDT-M, por lo que para operar en vivo solo debe transferir sus fondos de Spot a Futuros en Binance (sin comisiones).
 8. BUCLE AUTÓNOMO DE INVESTIGACIÓN, REFINAMIENTO Y CUENTA SIMULADA:
    - Cuando el operador pida crear una nueva estrategia (ej. de 10 a 100 USDT, o bucle con backtesting), Hermes ejecuta un bucle iterativo donde sintetiza fórmulas con OpenRouter, las backtestea contra velas reales de 15m con slippage y comisiones, retroalimenta fallas y compila la estrategia ganadora en Bot 3 (:8083) con billetera simulada de 10 USDT.
+9. REINICIO LIMPIO DE BOT 3 (MOONSHOT 10 A 100 USDT):
+   - Si el operador pide reiniciar el bot de 10 a 100, comenzar de cero, nuevo intento, o limpiar la base de datos de Bot 3, Hermes detiene Bot 3, archiva la base de datos previa, restablece el balance virtual a 10.00 USDT e inyecta la estrategia récord ATH para un arranque limpio.
 """
 
 
@@ -232,7 +234,15 @@ class QuantAiCopilotEngine:
             if symbol not in stop_words and len(symbol) >= 2:
                 return {"action": "forcebuy", "symbol": symbol, "confidence": 0.95, "command": f"/forcebuy {symbol}/USDT:USDT"}
 
-        # 9. Hermes / Régimen / Rebalance / Minería de Alphas
+        # 9. Reiniciar Bot 3 / Moonshot 10 a 100 USDT (reset_moonshot)
+        if (
+            re.search(r"\b(reinici(?:ar?|a|ame)|reset(?:ea|ear)?|restablec(?:er|e)|limpiar?\s+base|borrar?\s+trades)\b.*\b(bot\s*3|10\s*(?:a|to)\s*100|moonshot|ensamble|ensemble)\b", msg)
+            or re.search(r"\b(nuevo\s+intento|empezar?\s+de\s+cero|comenzar?\s+de\s+nuevo|borra\s+los\s+trades|reinicia\s+el\s+saldo)\b", msg)
+            or msg in ["/resetbot3", "/reiniciarbot3", "/nuevointento", "/resetmoonshot"]
+        ):
+            return {"action": "reset_moonshot", "confidence": 0.98, "command": "/resetbot3"}
+
+        # 10. Hermes / Régimen / Rebalance / Minería de Alphas
         if re.search(r"\b(crear?|crea|creame|generar?|genera|minar?|mina|inventar?|inventa|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz|bucle|refinar?|refina|refinamiento|cuenta\s+simulada|billetera\s+simulada|plan\s+para\s+pasar)\b", msg):
             return {"action": "mine_strategy", "confidence": 0.95, "command": "/mine"}
         if msg in ["hermes", "alter ego", "/hermes", "/alterego"] or re.search(r"\b(informe\s+de\s+hermes|qu[eé]\s+dice\s+hermes|diagn[oó]stico\s+de\s+hermes|reporte\s+ejecutivo|alter\s*ego)\b", msg):
@@ -364,6 +374,12 @@ class QuantAiCopilotEngine:
             sym = intent.get("symbol", "BTC")
             pair = f"{sym}/USDT:USDT" if "/" not in sym else sym
             return f"⚡ **Apertura / Compra Forzada ({pair})**\n\nEnviando orden de entrada a mercado a Freqtrade..."
+        elif action == "reset_moonshot":
+            return (
+                "🔄 **REINICIO DEL BOT 3 (MOONSHOT 10 A 100 USDT)**\n\n"
+                "Ejecutando reinicio completo: deteniendo bot, archivando base de datos previa, "
+                "reajustando saldo virtual limpio a 10.00 USDT e inyectando la estrategia récord ATH..."
+            )
 
         # 2. Detección de Saludos y Conversación Amistosa
         if re.search(r"\b(hola|buen[oa]s|qu[eé]\s+tal|c[oó]mo\s+est[aá]s|hey|saludos)\b", msg_lower):
