@@ -64,8 +64,9 @@ def main():
     chat_id = os.environ.get("FREQTRADE__TELEGRAM__CHAT_ID")
     
     if not token or not chat_id:
-        # Check .env file
-        env_file = Path(__file__).parent.parent / ".env"
+        # Check .env file in project root
+        root_dir = Path(__file__).resolve().parent.parent.parent
+        env_file = root_dir / ".env"
         if env_file.exists():
             for line in env_file.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
