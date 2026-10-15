@@ -24,11 +24,13 @@ dist/
 venv/
 .pytest_cache/
 
-# Local Storage Database
+# Local Storage Database & Runtime Memory
 storage/*.db
 storage/*.db-*
 storage/*.sqlite
 storage/*.sqlite-*
+storage/*.json
+storage/hermes_memory.json
 
 # Editor / SO
 .vscode/
