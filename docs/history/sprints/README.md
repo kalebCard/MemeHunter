@@ -49,6 +49,7 @@ Los documentos en este directorio constituyen el **Nivel Táctico** de ejecució
 | **16** | [`16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md`](16_SPRINT_048_UI_UX_ACCESSIBILITY_AND_AUTH_HARDENING.md) | Sprint 48 | `HIST-SPRINT-048` | PB-160 a PB-164 | Blindaje UI/UX, Accesibilidad WCAG 2.2 & Autenticación Ergonómica | ✅ CERTIFIED |
 | **17** | [`17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md`](17_SPRINT_049_MODULAR_ARCHITECTURE_COMPOSABLES_AND_COCKPIT_LOGIN_REFACTORING.md) | Sprint 49 | `HIST-SPRINT-049` | PB-165 a PB-169 | Arquitectura Modular, Composables y Rediseño Cockpit Login | ✅ CERTIFIED |
 | **18** | [`18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md`](18_SPRINTS_050_051_AI_TELEGRAM_COPILOT_AND_REMOTE_CONTROL.md) | Sprints 50-51 | `HIST-SPRINT-050-051` | PB-170 a PB-179 | Agente IA Autónomo en Telegram, Control Remoto Bidireccional y Copilot Cuantitativo | ✅ CERTIFIED |
+| **19** | [`19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md`](19_SPRINT_052_HERMES_AUTONOMOUS_OPERATOR_AND_PORTFOLIO_MANAGER.md) | Sprint 52 | `HIST-SPRINT-052` | PB-180 a PB-189 | Agente Autónomo Hermes (Alter Ego): Detección de Régimen, Asignación Dinámica & Riesgo | 🟡 READY |
 
 
 ---

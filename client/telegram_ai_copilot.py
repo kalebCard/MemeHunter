@@ -20,7 +20,12 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 
 from client.freqtrade_client import FreqtradeRestClient
+from client.multi_bot_orchestrator import MultiBotOrchestratorClient
 from client.ai_copilot_engine import QuantAiCopilotEngine
+try:
+    from meme_hunter.hermes.hermes_operator import HermesOperator
+except (ImportError, ModuleNotFoundError):
+    from src.meme_hunter.hermes.hermes_operator import HermesOperator
 from portfolio.secrets_vault import get_secret
 
 logger = logging.getLogger("TelegramAiCopilot")
@@ -148,6 +153,8 @@ class TelegramAiCopilotService:
             username="admin",
             password="MemeHunter2026!"
         )
+        self.orchestrator = MultiBotOrchestratorClient()
+        self.hermes_op = HermesOperator(orchestrator=self.orchestrator)
         self.ai_engine = ai_engine or QuantAiCopilotEngine()
         self.last_update_id = 0
 
@@ -168,6 +175,12 @@ class TelegramAiCopilotService:
 
         if cmd in ("/start", "/help", "ayuda"):
             return self._cmd_help()
+        elif cmd in ("/hermes", "/alterego"):
+            return self._cmd_hermes()
+        elif cmd in ("/regime", "/regimen"):
+            return self._cmd_regime()
+        elif cmd in ("/rebalance", "/rebalancear"):
+            return self._cmd_rebalance()
         elif cmd in ("/status", "/estado"):
             return self._cmd_status()
         elif cmd in ("/profit", "/pnl", "/ganancias"):
@@ -201,41 +214,93 @@ class TelegramAiCopilotService:
 
     def _cmd_help(self) -> str:
         return (
-            "🤖 *MEME HUNTER — AI TELEGRAM COPILOT v8.5*\n\n"
-            "Controla y consulta el motor cuantitativo de trading en lenguaje natural o con comandos directos.\n\n"
+            "🤖 *MEME HUNTER — AI TELEGRAM COPILOT & HERMES ALTER EGO v8.6*\n\n"
+            "Controla y consulta el motor cuantitativo y el cerebro de Hermes en lenguaje natural o con comandos:\n\n"
+            "🧠 *Gobierno Autónomo Hermes:*\n"
+            "• `/hermes` : Informe ejecutivo causal del Alter Ego en tiempo real.\n"
+            "• `/regime` : Clasificación del régimen macro (Binance Futures).\n"
+            "• `/rebalance` : Forzar rebalanceo dinámico de capital entre bots.\n\n"
             "📊 *Comandos de Telemetría:*\n"
-            "• `/status` : Posiciones abiertas, PnL y estado del bot.\n"
+            "• `/status` : Posiciones abiertas en la arena (Ablation, Quantum, Ensemble).\n"
             "• `/profit` : Rendimiento consolidado, Win Rate y balance.\n"
             "• `/balance` : Capital total, disponible y márgenes aislados.\n\n"
             "🛡️ *Comandos Operativos de Control:*\n"
-            "• `/stopbuy` : Inhibir nuevas compras (mantener trailing stops).\n"
+            "• `/stopbuy` : Inhibir nuevas compras en toda la arena.\n"
             "• `/stopbot` : Pausar la ejecución del bot de trading.\n"
             "• `/startbot` : Reanudar la operativa del bot.\n"
             "• `/forcesell <id>` : Liquidar inmediatamente un trade específico.\n"
             "• `/reload` : Recargar configuración y estrategias en caliente.\n"
             "• `/killswitch` : 🚨 Activación del Kill Switch de Drawdown (25%).\n\n"
-            "🧠 *Consultas con IA:* Puedes enviar cualquier pregunta o usar `/ai <consulta>`."
+            "💬 *Consultas con IA:* Puedes enviar cualquier pregunta o usar `/ai <consulta>`."
+        )
+
+    def _cmd_hermes(self) -> str:
+        """Invoca el ciclo de Hermes y devuelve su informe causal."""
+        res = self.hermes_op.run_cycle()
+        return res.get("explanation", "⚠️ Error al evaluar ciclo de Hermes.")
+
+    def _cmd_regime(self) -> str:
+        """Devuelve el régimen actual detectado por Hermes en Binance Futures."""
+        reg_info = self.hermes_op.regime_detector.detect_regime()
+        snap = reg_info.get("snapshot", {})
+        alloc = reg_info.get("recommended_allocations", {})
+        alloc_str = "\n".join([f"  • *{k}*: `{v*100:.0f}%`" for k, v in alloc.items()])
+        return (
+            f"📊 *DETECCIÓN DE RÉGIMEN — HERMES AGENT*\n\n"
+            f"• *Régimen Activo:* `{reg_info.get('regime')}` ({reg_info.get('confidence', 0)*100:.0f}%)\n"
+            f"• *BTC:* `${snap.get('btc_price', 0):,.1f}` (`{snap.get('btc_change_24h', 0):+.2f}%`)\n"
+            f"• *Funding Rate Medio:* `{snap.get('avg_funding_rate', 0):.6f}`\n\n"
+            f"⚖️ *Ponderación de Cartera Recomendada:*\n{alloc_str}\n\n"
+            f"💡 *Diagnóstico:* {reg_info.get('rationale')}"
+        )
+
+    def _cmd_rebalance(self) -> str:
+        """Fuerza la ejecución inmediata de la política de rebalanceo de Hermes."""
+        res = self.hermes_op.run_cycle()
+        actions = res.get("allocation_res", {}).get("actions_taken", [])
+        act_lines = [f"• *{a.get('bot_id')}*: `{a.get('action')}` ({a.get('result')})" for a in actions]
+        act_str = "\n".join(act_lines) if act_lines else "• Sin cambios de estado requeridos."
+        return (
+            f"⚖️ *REBALANCEO DE CARTERA EJECUTADO*\n\n"
+            f"• *Régimen:* `{res.get('regime_info', {}).get('regime')}`\n"
+            f"• *Acciones de Control:*\n{act_str}\n\n"
+            f"📊 *Telemetría:* {res.get('portfolio', {}).get('total_open_trades', 0)} trades vivos | "
+            f"`{res.get('portfolio', {}).get('total_stake_active_usdt', 0.0):.2f} USDT` en juego."
         )
 
     def _cmd_status(self) -> str:
-        res = self.ft_client.get_status()
-        if res.get("status") != "ok":
-            return f"⚠️ *Error consultando estado:* `{res.get('error', 'Bot offline o inalcanzable')}`"
+        """Consulta el estado agregado de toda la arena multi-bot."""
+        agg = self.orchestrator.get_aggregated_status()
+        trades = agg.get("trades", [])
+        bots = agg.get("bots", {})
 
-        trades = res.get("data", [])
-        if not trades:
-            return "🟢 *Estado:* Bot en línea. No hay posiciones abiertas actualmente."
+        bot_lines = []
+        for b_id, b_info in bots.items():
+            status_icon = "🟢" if b_info.get("is_online") else "🔴"
+            bot_lines.append(
+                f"• {status_icon} *{b_info.get('name')}* (:{b_info.get('port')}): "
+                f"`{b_info.get('open_trades')} trades` | `{b_info.get('stake_active_usdt')} USDT`"
+            )
 
-        lines = [f"📊 *Posiciones Abiertas ({len(trades)}):*"]
+        trade_lines = []
         for t in trades[:8]:
             tid = t.get("trade_id", "?")
             pair = t.get("pair", "N/A")
             profit = t.get("profit_pct", 0.0)
-            stake = t.get("stake_amount", 0.0)
+            origin = t.get("origin_bot", "bot")
             dir_str = "SHORT" if t.get("is_short", False) else "LONG"
-            lines.append(f"• `#{tid}` *{pair}* ({dir_str}) : `{profit:+.2f}%` | Stake: `{stake:.2f} USDT`")
+            trade_lines.append(f"  - `#{tid}` *{pair}* ({dir_str} | {origin}): `{profit:+.2f}%`")
 
-        return "\n".join(lines)
+        trades_summary = "\n".join(trade_lines) if trade_lines else "  - No hay órdenes vivas actualmente."
+        bots_summary = "\n".join(bot_lines)
+
+        return (
+            f"📊 *ARENA MULTI-BOT — ESTADO DE CARTERA*\n\n"
+            f"• *Total Trades Vivos:* `{agg.get('total_open_trades', 0)}`\n"
+            f"• *Margen Total en Juego:* `{agg.get('total_stake_active_usdt', 0.0):.2f} USDT`\n\n"
+            f"🤖 *Instancias de Trading:*\n{bots_summary}\n\n"
+            f"📈 *Posiciones en Curso:*\n{trades_summary}"
+        )
 
     def _cmd_profit(self) -> str:
         res = self.ft_client.get_profit()
@@ -332,18 +397,21 @@ class TelegramAiCopilotService:
         )
 
     def _cmd_ai_query(self, query: str) -> str:
-        """Pasa la consulta del operador al motor cognitivo de IA inyectando telemetría viva."""
-        status_res = self.ft_client.get_status().get("data", [])
+        """Pasa la consulta del operador al motor cognitivo de IA inyectando telemetría viva y contexto de Hermes."""
+        agg = self.orchestrator.get_aggregated_status()
         profit_res = self.ft_client.get_profit().get("data", {})
         balance_res = self.ft_client.get_balance().get("data", {})
-        count_res = self.ft_client.get_count().get("data", {})
+
+        # Obtener contexto activo de Hermes
+        hermes_ctx = self.hermes_op.regime_detector.detect_regime()
 
         reply_md, suggested_action = self.ai_engine.process_message(
             user_message=query,
-            bot_state={"state": "running" if status_res != "offline" else "offline"},
+            bot_state={"state": "running"},
             profit_data=profit_res if isinstance(profit_res, dict) else {},
             balance_data=balance_res if isinstance(balance_res, dict) else {},
-            open_trades=status_res if isinstance(status_res, list) else []
+            open_trades=agg.get("trades", []),
+            hermes_context=hermes_ctx
         )
         return reply_md
 

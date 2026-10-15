@@ -1,15 +1,17 @@
 ---
-# Meme Hunter - Personal Quant Trading Station & Strategy Lab (v8.6)
-# Despliegue Unificado Oficial (FreqUI en :8081 + Binance Futures)
+# Meme Hunter - Multi-Bot A/B Arena (3 Campeones Cuantitativos con 100 USDT)
+# Cada bot corre de forma aislada con su propia base de datos, puerto y estrategia.
 
 services:
-  meme_hunter:
+  # 🥇 CANDIDATO 1: MemeHunterFuturesV5_Ablation (El Campeón de Sharpe y Asimetría Short)
+  # Notificaciones principales activas por Telegram en @Atutaskbot
+  bot_v5_ablation:
     image: meme_hunter:2026.9
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    container_name: meme_hunter_futures
+    container_name: meme_hunter_ablation
     volumes:
       - "./user_data:/freqtrade/user_data"
       - "${MEME_DATA_DIR:-./data}:/freqtrade/user_data/data"
@@ -24,12 +26,103 @@ services:
       - "127.0.0.1:8081:8081"
     environment:
       - PYTHONPATH=/freqtrade
+      - FREQTRADE__TELEGRAM__ENABLED=true
     env_file:
       - path: .env
         required: false
     command: >
       trade
-      --logfile /freqtrade/user_data/logs/freqtrade_futures.log
-      --db-url sqlite:////freqtrade/user_data/tradesv3.futures.sqlite
-      --config /freqtrade/user_data/config_futures.json
+      --logfile /freqtrade/user_data/logs/freqtrade_ablation.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3.ablation_100u.sqlite
+      --config /freqtrade/user_data/config_ablation_100u.json
+      --strategy MemeHunterFuturesV5_Ablation
+
+  # 🥈 CANDIDATO 2: MemeHunterFuturesV7_Quantum (FFD d=0.40, Bet Sizing Kelly y Menor Drawdown)
+  bot_v7_quantum:
+    image: meme_hunter:2026.9
+    restart: unless-stopped
+    container_name: meme_hunter_quantum
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+      - "${MEME_DATA_DIR:-./data}:/freqtrade/user_data/data"
+      - "./scripts:/freqtrade/scripts"
+      - "./src/meme_hunter:/freqtrade/meme_hunter"
+      - "./portfolio:/freqtrade/portfolio"
+      - "./mining:/freqtrade/mining"
+      - "./storage:/freqtrade/storage"
+      - "./data_engine:/freqtrade/data_engine"
+      - "./web/frequi/dist:/freqtrade/freqtrade/rpc/api_server/ui/installed"
+    ports:
+      - "127.0.0.1:8082:8082"
+    environment:
+      - PYTHONPATH=/freqtrade
+      - FREQTRADE__TELEGRAM__ENABLED=false
+      - FREQTRADE__API_SERVER__LISTEN_PORT=8082
+    env_file:
+      - path: .env
+        required: false
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_quantum.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3.quantum_100u.sqlite
+      --config /freqtrade/user_data/config_quantum_100u.json
+      --strategy MemeHunterFuturesV7_Quantum
+
+  # 🥉 CANDIDATO 3: MemeHunter_MinedEnsemble (Ensamble Multi-Factor HRP Bidireccional)
+  bot_mined_ensemble:
+    image: meme_hunter:2026.9
+    restart: unless-stopped
+    container_name: meme_hunter_ensemble
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+      - "${MEME_DATA_DIR:-./data}:/freqtrade/user_data/data"
+      - "./scripts:/freqtrade/scripts"
+      - "./src/meme_hunter:/freqtrade/meme_hunter"
+      - "./portfolio:/freqtrade/portfolio"
+      - "./mining:/freqtrade/mining"
+      - "./storage:/freqtrade/storage"
+      - "./data_engine:/freqtrade/data_engine"
+      - "./web/frequi/dist:/freqtrade/freqtrade/rpc/api_server/ui/installed"
+    ports:
+      - "127.0.0.1:8083:8083"
+    environment:
+      - PYTHONPATH=/freqtrade
+      - FREQTRADE__TELEGRAM__ENABLED=false
+      - FREQTRADE__API_SERVER__LISTEN_PORT=8083
+    env_file:
+      - path: .env
+        required: false
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade_ensemble.log
+      --db-url sqlite:////freqtrade/user_data/tradesv3.ensemble_100u.sqlite
+      --config /freqtrade/user_data/config_ensemble_100u.json
       --strategy MemeHunter_MinedEnsemble
+
+  # 🧠 ORQUESTADOR AUTÓNOMO: Hermes Agent (Alter Ego Operativo & Gobernanza de Cartera)
+  hermes_operator:
+    image: meme_hunter:2026.9
+    restart: unless-stopped
+    container_name: meme_hunter_hermes
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - "./src:/freqtrade/src"
+      - "./src/meme_hunter:/freqtrade/meme_hunter"
+      - "./client:/freqtrade/client"
+      - "./storage:/freqtrade/storage"
+      - "./scripts:/freqtrade/scripts"
+      - "./portfolio:/freqtrade/portfolio"
+      - "./mining:/freqtrade/mining"
+    environment:
+      - PYTHONPATH=/freqtrade
+      - FREQTRADE_BASE_HOST=http://host.docker.internal
+      - HERMES_INTERVAL_SEC=300
+    env_file:
+      - path: .env
+        required: false
+    entrypoint: ["python", "-m", "meme_hunter.hermes.hermes_runner"]
+    depends_on:
+      - bot_v5_ablation
+      - bot_v7_quantum
+      - bot_mined_ensemble

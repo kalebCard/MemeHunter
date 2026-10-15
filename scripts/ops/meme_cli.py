@@ -178,6 +178,30 @@ def cmd_research(args):
     return subprocess.run([sys.executable, full_path]).returncode
 
 
+def cmd_hermes(args):
+    """Gestión y ejecución del Agente Autónomo Hermes (Sprint 52)."""
+    from src.meme_hunter.hermes.hermes_operator import HermesOperator
+    from src.meme_hunter.hermes.telegram_messenger import HermesTelegramMessenger
+
+    op = HermesOperator()
+    if getattr(args, "audit", False):
+        print("📜 HISTORIAL DE DECISIONES DE HERMES:")
+        print(f"Total ciclos ejecutados: {op.memory.get('total_cycles_run', 0)}")
+        for rec in op.memory.get('regime_history', [])[-5:]:
+            print(f"• [{rec.get('timestamp')[:19]}] Régimen: {rec.get('regime')} | Trades: {rec.get('total_open_trades')} | Stake: {rec.get('stake_active_usdt')} USDT")
+        return 0
+
+    print("🧠 Evaluando mercado con Hermes (Alter Ego Operativo)...")
+    res = op.run_cycle()
+    print("\n" + res["explanation"] + "\n")
+
+    if getattr(args, "notify", False):
+        tg = HermesTelegramMessenger()
+        sent = tg.send_executive_report(res["explanation"])
+        print(f"📡 Notificación Telegram: {'Enviada ✅' if sent.get('ok') else 'Omitida / Fallo ⚠️'}")
+    return 0
+
+
 def cmd_telegram_ai(args):
     """Gestión y control del Copilot de IA en Telegram."""
     runner = str(BASE_DIR / "scripts" / "ops" / "run_telegram_copilot.py")
@@ -202,6 +226,7 @@ Ejemplos comunes:
   python scripts/ops/meme_cli.py futures status  # Ver estado de Freqtrade en Docker
   python scripts/ops/meme_cli.py test            # Correr suite de 117 tests
   python scripts/ops/meme_cli.py research stress # Correr stress-test
+  python scripts/ops/meme_cli.py hermes --status # Ejecutar ciclo autónomo de Hermes
         """
     )
     subparsers = parser.add_subparsers(dest="command", help="Comando a ejecutar")
@@ -235,6 +260,12 @@ Ejemplos comunes:
     p_tg.add_argument("--test", action="store_true", help="Audita conectividad con Telegram y Freqtrade")
     p_tg.add_argument("--query", type=str, default="", help="Ejecuta una consulta al AI Copilot con telemetría viva")
 
+    # hermes
+    p_hermes = subparsers.add_parser("hermes", help="Agente Autónomo Hermes: Orquestación, Régimen y Cartera (Sprint 52)")
+    p_hermes.add_argument("--status", action="store_true", help="Evalúa mercado y muestra diagnóstico del Alter Ego")
+    p_hermes.add_argument("--notify", action="store_true", help="Envía el informe ejecutivo a Telegram (@Atutaskbot)")
+    p_hermes.add_argument("--audit", action="store_true", help="Muestra historial de decisiones de la memoria episódica")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -248,7 +279,8 @@ Ejemplos comunes:
         "futures": cmd_futures,
         "test": cmd_test,
         "research": cmd_research,
-        "telegram-ai": cmd_telegram_ai
+        "telegram-ai": cmd_telegram_ai,
+        "hermes": cmd_hermes
     }
 
     handler = commands.get(args.command)

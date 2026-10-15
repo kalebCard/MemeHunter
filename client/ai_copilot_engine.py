@@ -8,6 +8,7 @@ Orquesta la cognición de IA para Meme Hunter integrando:
 4. Modo Resiliente Offline con análisis heurístico si no hay conectividad a OpenRouter.
 """
 
+import os
 import json
 import logging
 import re
@@ -18,40 +19,47 @@ from mining.llm_client import OpenRouterClient, OpenRouterModel
 logger = logging.getLogger("QuantAiCopilotEngine")
 
 
-COPILOT_SYSTEM_PROMPT = """Eres el Copilot Cuantitativo Oficial de Meme Hunter (Arquitectura Institucional v8.5).
-Tu función es asistir al operador jefe en Telegram con telemetría en tiempo real, análisis de riesgo de futuros (USDT-M 4h) y control del bot de trading.
+COPILOT_SYSTEM_PROMPT = """Eres el Copilot Cuantitativo Oficial de Meme Hunter (Arquitectura Institucional v8.6).
+Tu función es asistir al operador jefe en Telegram con telemetría en tiempo real, análisis de riesgo de futuros (USDT-M 4h) y control del ecosistema gobernado por HERMES AGENT (el Alter Ego autónomo).
 
 REGLAS DE OPERACIÓN INSTITUCIONAL:
 1. Respuestas concisas, ejecutivas, profesionales y directas (formato Telegram Markdown compatible).
-2. Prioriza siempre la preservación de capital: el Kill Switch de Drawdown está fijado al 25%.
-3. Si el usuario pide detener compras, parar el bot, vender posiciones o recargar, identifica la acción operativa exacta.
-4. Explica el contexto de memecoins basándote en la desinflación macro post-pump y el sesgo asimétrico.
-5. Usa viñetas claras y emojis sobrios para facilitar la lectura en teléfonos móviles.
+2. Tienes acceso al cerebro de HERMES AGENT, quien clasifica el régimen del mercado (BEAR_CASCADE, BULL_PARABOLIC, RANGE_CHOP, PANIC_VOLATILITY) y reasigna capital entre Ablation V5 (:8081), Quantum V7 (:8082) y Mined Ensemble (:8083).
+3. Prioriza siempre la preservación de capital: el Kill Switch de Drawdown está fijado al 25% y Hermes vigila caídas > 15%.
+4. Si el usuario pide detener compras, parar el bot, vender posiciones, consultar a Hermes o rebalancear, identifica la acción operativa exacta.
+5. Explica el contexto de memecoins basándote en la desinflación macro post-pump y el sesgo asimétrico.
+6. Usa viñetas claras y emojis sobrios para facilitar la lectura en teléfonos móviles.
 """
 
 
 class QuantAiCopilotEngine:
     """
     Motor Cognitivo que interpreta mensajes en lenguaje natural del operador,
-    fusiona la telemetría en vivo de Freqtrade y genera respuestas y acciones operativas.
+    fusiona la telemetría en vivo de Freqtrade y las decisiones de Hermes Agent.
     """
 
     def __init__(
         self,
         llm_client: Optional[OpenRouterClient] = None,
-        model: str = OpenRouterModel.DEEPSEEK_V3
+        model: Optional[str] = None
     ):
         self.llm_client = llm_client or OpenRouterClient()
-        self.model = model
+        self.model = (
+            model
+            or os.environ.get("HERMES_LLM_MODEL")
+            or os.environ.get("OPENROUTER_MODEL")
+            or OpenRouterModel.NOUS_HERMES_3_70B
+        )
 
     def build_context_summary(
         self,
         bot_state: Dict[str, Any],
         profit_data: Dict[str, Any],
         balance_data: Dict[str, Any],
-        open_trades: List[Dict[str, Any]]
+        open_trades: List[Dict[str, Any]],
+        hermes_context: Optional[Dict[str, Any]] = None
     ) -> str:
-        """Sintetiza la telemetría en un bloque compacto de contexto cuantitativo."""
+        """Sintetiza la telemetría y el diagnóstico de Hermes en un bloque compacto."""
         status_txt = bot_state.get("state", "desconocido") if isinstance(bot_state, dict) else "activo"
         total_pnl = profit_data.get("profit_closed_coin", 0.0) if isinstance(profit_data, dict) else 0.0
         profit_pct = profit_data.get("profit_closed_ratio_pct", 0.0) if isinstance(profit_data, dict) else 0.0
@@ -61,19 +69,35 @@ class QuantAiCopilotEngine:
 
         trades_summary = []
         if isinstance(open_trades, list):
-            for t in open_trades[:5]:
+            for t in open_trades[:6]:
                 pair = t.get("pair", "N/A")
                 pnl = t.get("profit_pct", 0.0)
                 dur = t.get("open_date_hum", "N/A")
                 tid = t.get("trade_id", "?")
-                trades_summary.append(f"  - Trade #{tid} ({pair}): {pnl:+.2f}% | Duración: {dur}")
+                origin = t.get("origin_bot", "bot_v5")
+                trades_summary.append(f"  - Trade #{tid} ({pair} | {origin}): {pnl:+.2f}% | Duración: {dur}")
 
         trades_str = "\n".join(trades_summary) if trades_summary else "  - Ninguna posición abierta actualmente."
 
+        hermes_str = ""
+        if hermes_context:
+            regime = hermes_context.get("regime", "N/A")
+            conf = hermes_context.get("confidence", 0.0) * 100
+            rationale = hermes_context.get("rationale", "")
+            allocations = hermes_context.get("recommended_allocations", {})
+            alloc_str = ", ".join([f"{k}: {v*100:.0f}%" for k, v in allocations.items()])
+            hermes_str = (
+                f"[CEREBRO AUTÓNOMO HERMES (ALTER EGO)]\n"
+                f"- Régimen de Mercado: {regime} (Confianza: {conf:.0f}%)\n"
+                f"- Asignación Activa: {alloc_str}\n"
+                f"- Justificación Táctica: {rationale}\n"
+            )
+
         return (
+            f"{hermes_str}"
             f"[TELEMETRÍA EN VIVO]\n"
-            f"- Estado del Bot: {status_txt.upper()}\n"
-            f"- Balance Total: {total_balance:.2f} USDT (Disponible: {free_balance:.2f} USDT)\n"
+            f"- Estado de la Arena: {status_txt.upper()}\n"
+            f"- Balance Total Cartera: {total_balance:.2f} USDT (Disponible: {free_balance:.2f} USDT)\n"
             f"- PnL Cerrado Histórico: {total_pnl:+.2f} USDT ({profit_pct:+.2f}% | Win Rate: {win_rate:.1f}%)\n"
             f"- Posiciones Abiertas ({len(open_trades) if isinstance(open_trades, list) else 0}):\n"
             f"{trades_str}\n"
@@ -125,6 +149,14 @@ class QuantAiCopilotEngine:
             symbol = buy_match.group(3).upper()
             return {"action": "forcebuy", "symbol": symbol, "confidence": 0.95, "command": f"/forcebuy {symbol}/USDT:USDT"}
 
+        # Hermes / Régimen / Rebalance
+        if re.search(r"\b(hermes|alter\s*ego|orquestador)\b", msg):
+            return {"action": "query_hermes", "confidence": 0.95, "command": "/hermes"}
+        if re.search(r"\b(regimen|r[eé]gimen|como\s+esta\s+el\s+mercado|tendencia)\b", msg):
+            return {"action": "query_regime", "confidence": 0.95, "command": "/regime"}
+        if re.search(r"\b(rebalancear?|rebalanceo|rebalance|ajustar?\s+capital)\b", msg):
+            return {"action": "rebalance", "confidence": 0.95, "command": "/rebalance"}
+
         return {"action": "general_copilot_query", "confidence": 0.50, "command": None}
 
     def process_message(
@@ -133,13 +165,14 @@ class QuantAiCopilotEngine:
         bot_state: Dict[str, Any],
         profit_data: Dict[str, Any],
         balance_data: Dict[str, Any],
-        open_trades: List[Dict[str, Any]]
+        open_trades: List[Dict[str, Any]],
+        hermes_context: Optional[Dict[str, Any]] = None
     ) -> Tuple[str, Optional[Dict[str, Any]]]:
         """
         Procesa el mensaje del operador, consulta a la IA o ejecuta fallback,
         y devuelve una tupla: (Respuesta en Markdown, Acción Sugerida si aplica).
         """
-        context_str = self.build_context_summary(bot_state, profit_data, balance_data, open_trades)
+        context_str = self.build_context_summary(bot_state, profit_data, balance_data, open_trades, hermes_context)
         intent = self.extract_intent_heuristic(user_message)
 
         # Si OpenRouter tiene clave y está operativo, realizamos inferencia cognitiva
@@ -223,6 +256,25 @@ class QuantAiCopilotEngine:
                 f"`/forcebuy {pair}`\n\n"
                 f"💡 *Nota:* Comprueba en `/balance` que dispongas de margen libre para nuevos slots."
             )
+        elif action == "query_hermes":
+            return (
+                f"🧠 **Consulta al Alter Ego Autónomo Hermes**\n\n"
+                f"{context_str}\n"
+                f"💡 Usa `/hermes` para ver la explicación causal detallada o `/rebalance` para forzar rebalanceo."
+            )
+        elif action == "query_regime":
+            return (
+                f"📊 **Consulta de Régimen de Mercado**\n\n"
+                f"{context_str}\n"
+                f"💡 Usa `/regime` para el desglose macro directo de Binance Futures."
+            )
+        elif action == "rebalance":
+            return (
+                f"⚖️ **Rebalanceo de Cartera Solicitado**\n\n"
+                f"Hermes ajusta los pesos de Ablation, Quantum y Ensemble según el régimen activo.\n\n"
+                f"Para ejecutar el rebalanceo ahora, envía:\n"
+                f"`/rebalance`"
+            )
         elif action in ("query_status", "query_profit", "query_balance"):
             return (
                 f"📊 **Reporte Cuantitativo en Tiempo Real**\n\n"
@@ -236,6 +288,6 @@ class QuantAiCopilotEngine:
                 f"He recibido tu consulta: *\"{user_message}\"*\n\n"
                 f"**Resumen Operativo:**\n"
                 f"- Posiciones vivas: {trades_count}\n"
-                f"- Comandos rápidos disponibles: `/status`, `/profit`, `/balance`, `/stopbuy`, `/stopbot`, `/reload`.\n"
+                f"- Comandos rápidos disponibles: `/hermes`, `/regime`, `/status`, `/profit`, `/balance`, `/stopbuy`, `/stopbot`, `/reload`.\n"
                 f"- Para consultar a la IA directamente usa `/ai <tu pregunta>`."
             )

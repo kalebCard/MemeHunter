@@ -1,0 +1,123 @@
+{
+    "$schema": "https://schema.freqtrade.io/schema.json",
+    "bot_name": "MemeHunter_V5_Ablation",
+    "dry_run": true,
+    "dry_run_wallet": 100.0,
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+    "max_open_trades": 5,
+    "tradable_balance_ratio": 0.99,
+    "amend_last_stake_amount": true,
+    "fiat_display_currency": "USD",
+
+    "timeframe": "4h",
+    "stoploss": -0.10,
+    "order_types": {
+        "entry": "limit",
+        "exit": "market",
+        "emergency_exit": "market",
+        "force_entry": "market",
+        "force_exit": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false
+    },
+    "cancel_open_orders_on_exit": true,
+    "unfilledtimeout": {
+        "entry": 10,
+        "exit": 10,
+        "exit_timeout_count": 0,
+        "unit": "minutes"
+    },
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1,
+        "price_last_balance": 0.0,
+        "check_depth_of_market": {
+            "enabled": true,
+            "bids_to_ask_delta": 1
+        }
+    },
+    "exit_pricing": {
+        "price_side": "other",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+
+    "exchange": {
+        "name": "binance",
+        "key": "",
+        "secret": "",
+        "ccxt_config": {},
+        "ccxt_async_config": {},
+        "pair_whitelist": [
+            ".*/USDT:USDT"
+        ],
+        "pair_blacklist": [
+            "(BTC|ETH)UP/.*",
+            "(BTC|ETH)DOWN/.*"
+        ]
+    },
+
+    "pairlists": [
+        {
+            "method": "VolumePairList",
+            "number_assets": 20,
+            "sort_key": "quoteVolume",
+            "min_value": 0,
+            "refresh_period": 1800
+        },
+        {
+            "method": "AgeFilter",
+            "min_days_listed": 30
+        },
+        {
+            "method": "PrecisionFilter"
+        },
+        {
+            "method": "PriceFilter",
+            "low_price_ratio": 0.001
+        },
+        {
+            "method": "SpreadFilter",
+            "max_spread_ratio": 0.003
+        }
+    ],
+
+    "telegram": {
+        "enabled": true,
+        "notification_settings": {
+            "status": "on",
+            "warning": "on",
+            "startup": "on",
+            "entry": "on",
+            "exit": "on"
+        }
+    },
+
+    "api_server": {
+        "enabled": true,
+        "listen_ip_address": "0.0.0.0",
+        "listen_port": 8081,
+        "verbosity": "info",
+        "enable_openapi": false,
+        "jwt_secret_key": "meme_hunter_ablation_jwt_key_2026_super_secure_99",
+        "CORS_origins": [
+            "http://127.0.0.1:8081",
+            "http://localhost:8081"
+        ],
+        "username": "admin",
+        "password": "MemeHunter2026!"
+    },
+
+    "initial_state": "running",
+    "force_entry_enable": false,
+    "internals": {
+        "process_throttle_secs": 5
+    },
+    "dataformat_ohlcv": "feather",
+    "dataformat_trades": "feather"
+}

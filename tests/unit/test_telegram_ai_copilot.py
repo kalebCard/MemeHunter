@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 from client.freqtrade_client import FreqtradeRestClient
 from client.ai_copilot_engine import QuantAiCopilotEngine
 from client.telegram_ai_copilot import TelegramAiCopilotService, TelegramBotClient
+from client.multi_bot_orchestrator import MultiBotOrchestratorClient
 
 
 @pytest.fixture
@@ -75,6 +76,45 @@ def copilot_service(mock_ft_client, mock_ai_engine):
         ai_engine=mock_ai_engine
     )
     service.tg_client = MagicMock(spec=TelegramBotClient)
+    service.orchestrator = MagicMock(spec=MultiBotOrchestratorClient)
+    service.orchestrator.get_aggregated_status.return_value = {
+        "status": "ok",
+        "total_open_trades": 1,
+        "total_stake_active_usdt": 50.0,
+        "bots": {
+            "bot_v5_ablation": {
+                "name": "Bot 1 (Ablation v5.2)",
+                "port": 8081,
+                "is_online": True,
+                "open_trades": 1,
+                "stake_active_usdt": 50.0
+            }
+        },
+        "trades": [
+            {
+                "trade_id": 1,
+                "pair": "DOGE/USDT:USDT",
+                "profit_pct": 2.50,
+                "stake_amount": 50.0,
+                "is_short": True,
+                "origin_bot": "Ablation v5.2"
+            }
+        ]
+    }
+    service.hermes_op = MagicMock()
+    service.hermes_op.run_cycle.return_value = {
+        "explanation": "Hermes en ciclo activo.",
+        "regime_info": {"regime": "RANGE_CHOP", "confidence": 0.85},
+        "allocation_res": {"actions_taken": [{"bot_id": "bot_v5_ablation", "action": "maintain", "result": "ok"}]},
+        "portfolio": {"total_open_trades": 1, "total_stake_active_usdt": 50.0}
+    }
+    service.hermes_op.regime_detector.detect_regime.return_value = {
+        "regime": "RANGE_CHOP",
+        "confidence": 0.85,
+        "rationale": "Mercado lateral sin tendencia clara",
+        "snapshot": {"btc_price": 68000.0, "btc_change_24h": -0.5, "avg_funding_rate": 0.0001},
+        "recommended_allocations": {"bot_v5_ablation": 0.35, "bot_v7_quantum": 0.35, "bot_v8_ensemble": 0.30}
+    }
     return service
 
 
@@ -91,16 +131,33 @@ def test_help_command(copilot_service):
     assert "MEME HUNTER — AI TELEGRAM COPILOT" in reply
     assert "/status" in reply
     assert "/killswitch" in reply
+    assert "/hermes" in reply
 
 
-def test_status_command(copilot_service, mock_ft_client):
-    """Verifica el formateo de posiciones abiertas y telemetría de trades."""
+def test_status_command(copilot_service):
+    """Verifica el formateo de posiciones abiertas y telemetría de la arena multi-bot."""
     reply = copilot_service.dispatch_command("/status", chat_id="99887766")
-    assert "Posiciones Abiertas (1):" in reply
+    assert "ARENA MULTI-BOT" in reply
     assert "DOGE/USDT:USDT" in reply
     assert "SHORT" in reply
     assert "+2.50%" in reply
-    mock_ft_client.get_status.assert_called_once()
+    assert "Total Trades Vivos" in reply
+    copilot_service.orchestrator.get_aggregated_status.assert_called_once()
+
+
+def test_hermes_commands(copilot_service):
+    """Verifica comandos específicos de gobernanza de Hermes: /hermes, /regime, /rebalance."""
+    rep_hermes = copilot_service.dispatch_command("/hermes", chat_id="99887766")
+    assert "Hermes en ciclo activo." in rep_hermes
+    copilot_service.hermes_op.run_cycle.assert_called_once()
+
+    rep_regime = copilot_service.dispatch_command("/regime", chat_id="99887766")
+    assert "DETECCIÓN DE RÉGIMEN — HERMES AGENT" in rep_regime
+    assert "RANGE_CHOP" in rep_regime
+    assert "68,000.0" in rep_regime
+
+    rep_rebal = copilot_service.dispatch_command("/rebalance", chat_id="99887766")
+    assert "REBALANCEO DE CARTERA EJECUTADO" in rep_rebal
 
 
 def test_profit_command(copilot_service, mock_ft_client):

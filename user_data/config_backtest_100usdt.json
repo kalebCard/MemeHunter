@@ -1,0 +1,77 @@
+{
+    "$schema": "https://schema.freqtrade.io/schema.json",
+    "bot_name": "meme_hunter_backtest_100usdt",
+    "dry_run": true,
+    "dry_run_wallet": 100.0,
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+    "max_open_trades": 5,
+    "tradable_balance_ratio": 0.99,
+    "amend_last_stake_amount": true,
+    "fiat_display_currency": "USD",
+
+    "timeframe": "4h",
+    "stoploss": -0.10,
+    "order_types": {
+        "entry": "limit",
+        "exit": "market",
+        "emergency_exit": "market",
+        "force_entry": "market",
+        "force_exit": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false
+    },
+    "cancel_open_orders_on_exit": true,
+
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "exit_pricing": {
+        "price_side": "other",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+
+    "exchange": {
+        "name": "binance",
+        "key": "",
+        "secret": "",
+        "pair_whitelist": [
+            "BTC/USDT:USDT",
+            "ETH/USDT:USDT",
+            "SOL/USDT:USDT",
+            "DOGE/USDT:USDT",
+            "1000PEPE/USDT:USDT",
+            "1000SHIB/USDT:USDT",
+            "1000BONK/USDT:USDT",
+            "1000FLOKI/USDT:USDT",
+            "WIF/USDT:USDT",
+            "SUI/USDT:USDT",
+            "TIA/USDT:USDT",
+            "WLD/USDT:USDT",
+            "BOME/USDT:USDT",
+            "NEIRO/USDT:USDT",
+            "MEW/USDT:USDT",
+            "POPCAT/USDT:USDT"
+        ],
+        "pair_blacklist": []
+    },
+
+    "pairlists": [
+        {
+            "method": "StaticPairList"
+        }
+    ],
+
+    "api_server": {
+        "enabled": false
+    },
+
+    "dataformat_ohlcv": "feather",
+    "dataformat_trades": "feather"
+}

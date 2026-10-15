@@ -28,6 +28,8 @@ class OpenRouterModel:
     DEEPSEEK_R1 = "deepseek/deepseek-r1"
     CLAUDE_35_SONNET = "anthropic/claude-3.5-sonnet"
     QWEN_CODER = "qwen/qwen-2.5-coder-32b-instruct"
+    NOUS_HERMES_3_70B = "nousresearch/hermes-3-llama-3.1-70b"
+    NOUS_HERMES_3_405B = "nousresearch/hermes-3-llama-3.1-405b"
 
 
 # Tabla de tarifas de inferencia 2026 (coste en USD por 1M de tokens)
@@ -36,6 +38,8 @@ MODEL_PRICING_2026_PER_1M = {
     OpenRouterModel.DEEPSEEK_R1: {"prompt": 0.55, "completion": 2.19},
     OpenRouterModel.CLAUDE_35_SONNET: {"prompt": 3.00, "completion": 15.00},
     OpenRouterModel.QWEN_CODER: {"prompt": 0.07, "completion": 0.14},
+    OpenRouterModel.NOUS_HERMES_3_70B: {"prompt": 0.30, "completion": 0.50},
+    OpenRouterModel.NOUS_HERMES_3_405B: {"prompt": 1.50, "completion": 3.00},
 }
 DEFAULT_FALLBACK_PRICING = {"prompt": 0.50, "completion": 1.50}
 
