@@ -184,6 +184,10 @@ class QuantAiCopilotEngine:
         if re.search(r"\b(apagar?|apaga|det[eé]n(er)?|parar?|para|stop|pausar?|pausa|cancelar?|cancela|bloquear?|bloquea|no\s+compres|no\s+comprar)\s+(las\s+|m[aá]s\s+)?compras?\b", msg) or re.search(r"\b(stopbuy|bloquear\s+entradas|pausar\s+entradas)\b", msg):
             return {"action": "stopbuy", "confidence": 0.95, "command": "/stopbuy"}
 
+        # 2.5. Detener entrenamiento / minado / refinamiento / maratón de alfas
+        if re.search(r"\b(apagar?|apaga|det[eé]n(er)?|parar?|para|stop|pausar?|pausa|cancelar?|cancela|terminar?|termina|cortar?|corta)\s+(el\s+|la\s+)?(entrenamiento|minado|miner[ií]a|refinamiento|bucle|marat[oó]n|investigaci[oó]n|f[aá]brica|generaci[oó]n)\b", msg) or re.search(r"\b(stoptraining|stopmine|stopbucle|detenerentrenamiento|detenerminado|pararentrenamiento|pararminado)\b", msg):
+            return {"action": "stop_training", "confidence": 0.98, "command": "/stoptraining"}
+
         # 3. Detener bot (stopbot)
         if re.search(r"\b(apagar?|apaga|det[eé]n(er)?|parar?|para|stop|pausar?|pausa)\s+(el\s+)?(bot|sistema|programa|arena|trading)\b", msg):
             return {"action": "stop", "confidence": 0.95, "command": "/stopbot"}
@@ -347,10 +351,15 @@ class QuantAiCopilotEngine:
                 "🛡️ **Orden de Salvaguarda: Detener Compras**\n\n"
                 "Ejecutando detención inmediata de nuevas compras en toda la arena multi-bot..."
             )
+        elif action == "stop_training":
+            return (
+                "⏹️ **Orden Operativa: Detener Entrenamiento / Minado**\n\n"
+                "Procediendo a finalizar de inmediato los procesos de investigación, minería de alfas y refinamiento en segundo plano..."
+            )
         elif action == "stop":
             return (
                 "🛑 **Orden de Salvaguarda: Detener Bot**\n\n"
-                "Suspendiendo la ejecución de trading de inmediato..."
+                "Suspendiendo la ejecución de trading y cualquier proceso de entrenamiento activo..."
             )
         elif action == "start":
             return (

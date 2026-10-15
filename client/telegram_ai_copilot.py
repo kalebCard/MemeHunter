@@ -108,7 +108,8 @@ class TelegramBotClient:
 
         res = self._api_call("sendMessage", payload)
         # Si falla por error de sintaxis en Markdown, reintenta sin parse_mode como fallback seguro
-        if not res.get("ok") and "can't parse entities" in res.get("description", "").lower():
+        if not res.get("ok") and payload.get("parse_mode"):
+            logger.warning(f"Telegram parse_mode falló ({res.get('description')}). Reintentando en texto plano...")
             payload.pop("parse_mode", None)
             res = self._api_call("sendMessage", payload)
         return res
@@ -212,6 +213,15 @@ class TelegramAiCopilotService:
             "/reiniciarbot3": lambda m, cid: self._cmd_reset_moonshot(),
             "/nuevointento": lambda m, cid: self._cmd_reset_moonshot(),
             "/resetmoonshot": lambda m, cid: self._cmd_reset_moonshot(),
+            "/stoptraining": lambda m, cid: self._cmd_stop_training(),
+            "/detenerentrenamiento": lambda m, cid: self._cmd_stop_training(),
+            "/pararentrenamiento": lambda m, cid: self._cmd_stop_training(),
+            "/stopmine": lambda m, cid: self._cmd_stop_training(),
+            "/detenerminado": lambda m, cid: self._cmd_stop_training(),
+            "/pararminado": lambda m, cid: self._cmd_stop_training(),
+            "/stopbucle": lambda m, cid: self._cmd_stop_training(),
+            "/detenerbucle": lambda m, cid: self._cmd_stop_training(),
+            "/stoprefine": lambda m, cid: self._cmd_stop_training(),
         }
 
     def is_configured(self) -> bool:
@@ -273,6 +283,7 @@ class TelegramAiCopilotService:
             "🛡️ *Comandos Operativos de Control:*\n"
             "• `/stopbuy` : Inhibir nuevas compras en toda la arena.\n"
             "• `/stopbot` : Pausar la ejecución del bot de trading.\n"
+            "• `/stoptraining` : ⏹️ Detener procesos de entrenamiento/minado en segundo plano.\n"
             "• `/startbot` : Reanudar la operativa del bot.\n"
             "• `/forcesell <id>` : Liquidar inmediatamente un trade específico.\n"
             "• `/reload` : Recargar configuración y estrategias en caliente.\n"
@@ -353,6 +364,78 @@ class TelegramAiCopilotService:
         """Reinicia de forma limpia el Bot 3 (:8083) y archiva la base de datos anterior."""
         res = self.hermes_op.reset_moonshot_bot(initial_wallet=initial_wallet, factor_id=factor_id)
         return res.get("report_md", "⚠️ Fallo inesperado al reiniciar Bot 3.")
+
+    def _cmd_stop_training(self) -> str:
+        """Busca y finaliza procesos de entrenamiento, minería o maratón autónomo en segundo plano."""
+        killed = []
+        training_scripts = [
+            "run_8h_moonshot_refinement.py",
+            "autonomous_quant_loop.py",
+            "alpha_daemon.py",
+            "train_meta_model.py"
+        ]
+
+        if sys.platform == "win32":
+            try:
+                import subprocess
+                ps_script = (
+                    "Get-CimInstance Win32_Process -Filter \"name like 'python%'\" | "
+                    "ForEach-Object { \"$($_.ProcessId):::$($_.CommandLine)\" }"
+                )
+                res = subprocess.run(
+                    ["powershell", "-NoProfile", "-Command", ps_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=5.0
+                )
+                for line in res.stdout.splitlines():
+                    if ":::" in line:
+                        pid_str, cmdline = line.split(":::", 1)
+                        pid_str = pid_str.strip()
+                        if any(s in cmdline for s in training_scripts):
+                            try:
+                                subprocess.run(["taskkill", "/F", "/PID", pid_str], capture_output=True, timeout=3.0)
+                                killed.append(f"PID {pid_str} ({cmdline[:60]}...)")
+                            except Exception as ex:
+                                logger.warning(f"Error deteniendo PID {pid_str}: {ex}")
+            except Exception as e:
+                logger.error(f"Fallo consultando procesos en Windows: {e}")
+        else:
+            try:
+                import subprocess
+                for s in training_scripts:
+                    res = subprocess.run(["pgrep", "-f", s], capture_output=True, text=True)
+                    for pid_str in res.stdout.splitlines():
+                        pid_str = pid_str.strip()
+                        if pid_str:
+                            subprocess.run(["kill", "-9", pid_str], capture_output=True)
+                            killed.append(f"PID {pid_str} ({s})")
+            except Exception as e:
+                logger.error(f"Fallo deteniendo procesos en Linux: {e}")
+
+        # Restaurar modo de energía en Windows si aplica
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                ES_CONTINUOUS = 0x80000000
+                ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS)
+            except Exception:
+                pass
+
+        if killed:
+            details = "\n".join([f"  • {k}" for k in killed])
+            return (
+                "⏹️ *ENTRENAMIENTO / MINADO DETENIDO CON ÉXITO*\n\n"
+                f"Se finalizaron {len(killed)} procesos de entrenamiento activos:\n"
+                f"{details}\n\n"
+                "La CPU y los recursos del sistema han sido liberados. Para iniciar una nueva búsqueda cuando desees, usa `/mine` o `/refine`."
+            )
+        else:
+            return (
+                "ℹ️ *SIN ENTRENAMIENTOS ACTIVOS*\n\n"
+                "No se encontraron procesos de minado, entrenamiento o maratón (`run_8h_moonshot_refinement.py`) ejecutándose en segundo plano actualmente.\n"
+                "Los recursos del sistema están libres."
+            )
 
     def _cmd_status(self) -> str:
         """Consulta el estado agregado de toda la arena multi-bot."""
@@ -502,7 +585,9 @@ class TelegramAiCopilotService:
             results.append(f"• *Bot 1 (:8081)*: {'⏸️ Detenido ✅' if ok else '⚠️ ' + str(res_main.get('error', 'Fallo de conexión'))}")
 
         res_str = "\n".join(results)
-        return f"⏸️ *ORDEN EJECUTADA: PAUSA GENERAL DE TRADING*\n\n{res_str}"
+        # Detener también procesos de entrenamiento/minado activo en segundo plano
+        train_res = self._cmd_stop_training()
+        return f"⏸️ *ORDEN EJECUTADA: PAUSA GENERAL DE TRADING Y ENTRENAMIENTO*\n\n{res_str}\n\n{train_res}"
 
     def _cmd_startbot(self) -> str:
         res_main = self.ft_client.start_bot()
@@ -693,6 +778,8 @@ class TelegramAiCopilotService:
                 return self._cmd_rebalance()
             elif action == "reload":
                 return self._cmd_reload()
+            elif action in ["stop_training", "stop_mine"]:
+                return self._cmd_stop_training()
             elif action == "mine_strategy":
                 return self._cmd_mine(goal_text=query, chat_id=chat_id)
             elif action == "reset_moonshot":
@@ -769,8 +856,15 @@ class TelegramAiCopilotService:
                 continue
 
             logger.info(f"Mensaje recibido de {chat_id}: '{text[:50]}'")
-            reply = self.dispatch_command(text, chat_id)
-            self.tg_client.send_message(chat_id=chat_id, text=reply)
+            try:
+                reply = self.dispatch_command(text, chat_id)
+                self.tg_client.send_message(chat_id=chat_id, text=reply)
+            except Exception as e:
+                logger.error(f"Error procesando mensaje '{text}': {e}", exc_info=True)
+                self.tg_client.send_message(
+                    chat_id=chat_id,
+                    text=f"⚠️ *Error al procesar tu solicitud:* `{str(e)[:200]}`"
+                )
             processed += 1
 
         return processed

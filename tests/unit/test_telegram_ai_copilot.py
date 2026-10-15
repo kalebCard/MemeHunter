@@ -369,3 +369,35 @@ def test_ai_copilot_engine_intent_reset_moonshot():
         assert intent["action"] == "reset_moonshot", f"Fallo al clasificar '{p}': {intent}"
 
 
+def test_ai_copilot_engine_intent_stop_training():
+    """Verifica que el motor cognitivo identifique variadas frases en lenguaje natural para detener el entrenamiento/minado."""
+    from client.ai_copilot_engine import QuantAiCopilotEngine
+    engine = QuantAiCopilotEngine()
+
+    phrases = [
+        "detén el entrenamiento",
+        "detener entrenamiento",
+        "para el entrenamiento",
+        "pausa el entrenamiento",
+        "apaga el entrenamiento",
+        "cancela el entrenamiento",
+        "detén el minado",
+        "para la minería",
+        "termina el bucle",
+        "para el maratón",
+        "/stoptraining",
+        "/detenerentrenamiento",
+        "/stopmine"
+    ]
+    for p in phrases:
+        intent = engine.extract_intent_heuristic(p)
+        assert intent["action"] == "stop_training", f"Fallo al clasificar '{p}': {intent}"
+
+
+def test_copilot_stop_training_execution(copilot_service):
+    """Verifica la invocación y ejecución segura de _cmd_stop_training."""
+    reply = copilot_service.dispatch_command("/stoptraining", chat_id="99887766")
+    assert "ENTRENAMIENTO" in reply or "SIN ENTRENAMIENTOS ACTIVOS" in reply
+
+
+

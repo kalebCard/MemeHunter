@@ -33,7 +33,7 @@ class BinanceAccountClient:
         self,
         api_key: Optional[str] = None,
         api_secret: Optional[str] = None,
-        cache_ttl_sec: float = 30.0
+        cache_ttl_sec: float = 120.0
     ):
         try:
             from portfolio.secrets_vault import get_secret
@@ -62,7 +62,7 @@ class BinanceAccountClient:
     def get_real_balances(self, force_refresh: bool = False) -> Dict[str, Any]:
         """
         Obtiene los saldos de Binance Spot y Futuros USDT-M.
-        Usa caché de 30 segundos para evitar saturar rate-limits.
+        Usa caché de 120 segundos para evitar saturar rate-limits o ralentizar respuestas.
         """
         now = time.time()
         if not force_refresh and self._cached_data and (now - self._last_fetch_time < self.cache_ttl_sec):
@@ -81,11 +81,11 @@ class BinanceAccountClient:
 
         try:
             import ccxt
-            # 1. Consultar Spot
+            # 1. Consultar Spot (timeout 3500ms para evitar cuelgues)
             spot_client = ccxt.binance({
                 "apiKey": self.api_key,
                 "secret": self.api_secret,
-                "timeout": 8000,
+                "timeout": 3500,
                 "enableRateLimit": True,
                 "options": {"defaultType": "spot"}
             })
@@ -101,11 +101,11 @@ class BinanceAccountClient:
                     if tot > 0.0001:
                         other_assets[asset] = round(tot, 4)
 
-            # 2. Consultar Futuros USDT-M
+            # 2. Consultar Futuros USDT-M (timeout 3500ms)
             futures_client = ccxt.binance({
                 "apiKey": self.api_key,
                 "secret": self.api_secret,
-                "timeout": 8000,
+                "timeout": 3500,
                 "enableRateLimit": True,
                 "options": {"defaultType": "future"}
             })

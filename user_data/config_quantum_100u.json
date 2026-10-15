@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.freqtrade.io/schema.json",
-    "bot_name": "MemeHunter_V7_Quantum",
+    "bot_name": "MemeHunter_MinedEnsemble_100u",
     "dry_run": true,
     "dry_run_wallet": 100.0,
     "trading_mode": "futures",
@@ -8,13 +8,13 @@
 
     "stake_currency": "USDT",
     "stake_amount": "unlimited",
-    "max_open_trades": 5,
+    "max_open_trades": 1,
     "tradable_balance_ratio": 0.99,
     "amend_last_stake_amount": true,
     "fiat_display_currency": "USD",
 
-    "timeframe": "4h",
-    "stoploss": -0.10,
+    "timeframe": "15m",
+    "stoploss": -0.045,
     "order_types": {
         "entry": "limit",
         "exit": "market",
@@ -106,8 +106,12 @@
         "enable_openapi": false,
         "jwt_secret_key": "meme_hunter_quantum_jwt_key_2026_super_secure_99",
         "CORS_origins": [
+            "http://127.0.0.1:8081",
+            "http://localhost:8081",
             "http://127.0.0.1:8082",
-            "http://localhost:8082"
+            "http://localhost:8082",
+            "http://127.0.0.1:8083",
+            "http://localhost:8083"
         ],
         "username": "admin",
         "password": "MemeHunter2026!"

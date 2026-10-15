@@ -66,7 +66,7 @@ services:
       --logfile /freqtrade/user_data/logs/freqtrade_quantum.log
       --db-url sqlite:////freqtrade/user_data/tradesv3.quantum_100u.sqlite
       --config /freqtrade/user_data/config_quantum_100u.json
-      --strategy MemeHunterFuturesV7_Quantum
+      --strategy MemeHunter_MinedEnsemble
 
   # 🥉 CANDIDATO 3: MemeHunter_MinedEnsemble (Ensamble Multi-Factor HRP Bidireccional)
   bot_mined_ensemble:
@@ -126,6 +126,34 @@ services:
       - path: .env
         required: false
     entrypoint: ["python", "-m", "meme_hunter.hermes.hermes_runner"]
+    depends_on:
+      - bot_v5_ablation
+      - bot_v7_quantum
+      - bot_mined_ensemble
+
+  # 🤖 COPILOT TELEGRAM: Centinela Interactivo y Asistente Autónomo (@Atutaskbot)
+  telegram_copilot:
+    image: meme_hunter:2026.9
+    restart: unless-stopped
+    container_name: meme_hunter_copilot
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - "./src:/freqtrade/src"
+      - "./src/meme_hunter:/freqtrade/meme_hunter"
+      - "./client:/freqtrade/client"
+      - "./storage:/freqtrade/storage"
+      - "./scripts:/freqtrade/scripts"
+      - "./portfolio:/freqtrade/portfolio"
+      - "./mining:/freqtrade/mining"
+      - "./user_data:/freqtrade/user_data"
+    environment:
+      - PYTHONPATH=/freqtrade
+      - FREQTRADE_BASE_HOST=http://host.docker.internal
+    env_file:
+      - path: .env
+        required: false
+    entrypoint: ["python", "scripts/ops/run_telegram_copilot.py", "--poll"]
     depends_on:
       - bot_v5_ablation
       - bot_v7_quantum

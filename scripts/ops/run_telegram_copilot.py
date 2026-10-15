@@ -75,14 +75,14 @@ def main():
             print("Exporta FREQTRADE__TELEGRAM__TOKEN o configúralo en tu archivo .env")
             return 1
 
-        print("🚀 Copilot de IA en Telegram activo y escuchando mensajes...")
-        print("Presiona Ctrl+C para detener.")
+        print("🚀 Copilot de IA en Telegram activo y escuchando mensajes...", flush=True)
+        print("Presiona Ctrl+C para detener.", flush=True)
         try:
             while True:
                 copilot.poll_once()
                 time.sleep(1.0)
         except KeyboardInterrupt:
-            print("\n⏹️ Servicio del Copilot de Telegram detenido.")
+            print("\n⏹️ Servicio del Copilot de Telegram detenido.", flush=True)
             return 0
 
 
