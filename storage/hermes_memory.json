@@ -1,6 +1,6 @@
 {
   "created_at": "2026-10-15T02:27:14.596200",
-  "total_cycles_run": 11,
+  "total_cycles_run": 13,
   "regime_history": [
     {
       "timestamp": "2026-10-15T02:27:14.596200",
@@ -89,21 +89,37 @@
       "total_open_trades": 11,
       "stake_active_usdt": 314.6686,
       "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:02:49.637140+00:00",
+      "regime": "BEAR_CASCADE",
+      "confidence": 0.85,
+      "total_open_trades": 11,
+      "stake_active_usdt": 314.6686,
+      "actions_count": 3
+    },
+    {
+      "timestamp": "2026-10-15T03:07:51.524170+00:00",
+      "regime": "RANGE_CHOP",
+      "confidence": 0.7,
+      "total_open_trades": 11,
+      "stake_active_usdt": 314.6686,
+      "actions_count": 3
     }
   ],
   "actions_history": [],
   "last_decision": {
-    "timestamp": "2026-10-15T02:59:44.415456+00:00",
-    "explanation": "🧠 **Hermes (Tu Alter Ego Operativo) | Reporte de Cartera**\n\nHe evaluado el mercado en vivo. BTC cotiza en `$81,512.0` con una variación 24h de `-2.51%`. El régimen actual catalogado es **RANGE_CHOP** (Confianza: 70%).\n\n⚖️ **Diagnóstico Táctico:** El mercado se encuentra en rango sin tendencia dominante definida. Mantengo la cartera balanceada priorizando a Quantum V7 por su estricto dimensionamiento de Kelly y bajo drawdown.\n\n📊 **Estado de Posiciones:** 11 operaciones vivas | Margen asignado: `314.67 USDT`.",
+    "timestamp": "2026-10-15T03:07:51.524170+00:00",
+    "explanation": "🧠 **Hermes (Tu Alter Ego) | Meta: Extraer Ganancias en Binance Futures**\n\nHe evaluado el mercado en vivo. BTC cotiza en `$81,299.9` con una variación 24h de `-2.86%`. El régimen actual catalogado es **RANGE_CHOP** (Confianza: 70%).\n\n⚖️ **Táctica de Rango:** El mercado oscila sin tendencia dominante. Mantengo la cartera balanceada maximizando el ratio de Sharpe con Quantum V7 (Kelly sizing) para acumular beneficios constantes.\n\n📊 **Estado de Posiciones:** 11 operaciones vivas | Margen asignado: `314.67 USDT`.",
     "regime_info": {
       "regime": "RANGE_CHOP",
       "confidence": 0.7,
       "snapshot": {
-        "btc_price": 81512.0,
-        "btc_change_24h": -2.508,
-        "eth_price": 2379.3,
-        "eth_change_24h": -5.332,
-        "avg_funding_rate": -5.933333333333334e-05,
+        "btc_price": 81299.9,
+        "btc_change_24h": -2.862,
+        "eth_price": 2374.69,
+        "eth_change_24h": -5.509,
+        "avg_funding_rate": -6.495666666666667e-05,
         "status": "ok"
       },
       "recommended_allocations": {

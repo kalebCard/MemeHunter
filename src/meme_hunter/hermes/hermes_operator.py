@@ -146,7 +146,7 @@ class HermesOperator:
         trades_count = portfolio.get("total_open_trades", 0)
         stake_active = portfolio.get("total_stake_active_usdt", 0.0)
         
-        intro = f"🧠 **Hermes (Tu Alter Ego Operativo) | Reporte de Cartera**"
+        intro = f"🧠 **Hermes (Tu Alter Ego) | Meta: Extraer Ganancias en Binance Futures**"
         context = (
             f"He evaluado el mercado en vivo. BTC cotiza en `${btc_price:,.1f}` con una variación 24h de `{btc_chg:+.2f}%`. "
             f"El régimen actual catalogado es **{regime}** (Confianza: {regime_info.get('confidence', 0)*100:.0f}%)."
@@ -154,18 +154,18 @@ class HermesOperator:
         
         if regime == "BEAR_CASCADE":
             tactic = (
-                "📉 **Diagnóstico Táctico:** Observo debilidad estructural y liquidaciones de posiciones largas en memecoins. "
-                "Mantengo activados con máxima cuota a **Ablation V5** y **Quantum V7** para capturar las extensiones bajistas."
+                "📉 **Táctica de Extracción de PnL:** Detecto debilidad estructural y liquidaciones de largos en memecoins. "
+                "Canalizo el capital a **Ablation V5** y **Quantum V7** para capturar las extensiones bajistas y ganar en USDT."
             )
         elif regime == "BULL_PARABOLIC":
             tactic = (
-                "🚀 **Diagnóstico Táctico:** Fuerte aceleración compradora. Para evitar *short squeezes* accidentales, "
-                "he congelado preventivamente las aperturas de nuevos Shorts en Ablation y protegido el capital líquido."
+                "🚀 **Táctica de Protección de Ganancias:** Fuerte aceleración alcista. Para evitar pérdidas por *short squeezes*, "
+                "he congelado preventivamente las aperturas en corto y preservado el capital líquido para la siguiente oportunidad."
             )
         else:
             tactic = (
-                "⚖️ **Diagnóstico Táctico:** El mercado se encuentra en rango sin tendencia dominante definida. "
-                "Mantengo la cartera balanceada priorizando a Quantum V7 por su estricto dimensionamiento de Kelly y bajo drawdown."
+                "⚖️ **Táctica de Rango:** El mercado oscila sin tendencia dominante. "
+                "Mantengo la cartera balanceada maximizando el ratio de Sharpe con Quantum V7 (Kelly sizing) para acumular beneficios constantes."
             )
             
         status_line = f"📊 **Estado de Posiciones:** {trades_count} operaciones vivas | Margen asignado: `{stake_active:.2f} USDT`."
