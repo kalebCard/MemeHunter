@@ -157,3 +157,51 @@ class MultiBotOrchestratorClient:
         for bot_id in ["bot_v5_ablation", "bot_v7_quantum"]:
             res[bot_id] = self.clients[bot_id].start_bot()
         return {"action": "resume_all_shorts", "results": res}
+
+    def get_aggregated_balances(self) -> Dict[str, Any]:
+        """
+        Recopila los saldos de los 3 bots de la arena (Dry-Run / Simulado)
+        y calcula el balance total de la cartera multi-bot.
+        """
+        bots_balance: Dict[str, Any] = {}
+        total_wallet = 0.0
+        free_wallet = 0.0
+        used_wallet = 0.0
+
+        for bot_id, client in self.clients.items():
+            meta = self.DEFAULT_BOTS[bot_id]
+            res = client.get_balance()
+            if res.get("status") == "ok":
+                d = res.get("data", {})
+                b_tot = float(d.get("total", 0.0) or 0.0)
+                b_free = float(d.get("free", 0.0) or 0.0)
+                b_used = float(d.get("used", 0.0) or 0.0)
+                total_wallet += b_tot
+                free_wallet += b_free
+                used_wallet += b_used
+                bots_balance[bot_id] = {
+                    "name": meta["name"],
+                    "port": meta["port"],
+                    "total": round(b_tot, 2),
+                    "free": round(b_free, 2),
+                    "used": round(b_used, 2),
+                    "is_online": True
+                }
+            else:
+                bots_balance[bot_id] = {
+                    "name": meta["name"],
+                    "port": meta["port"],
+                    "total": 0.0,
+                    "free": 0.0,
+                    "used": 0.0,
+                    "is_online": False
+                }
+
+        return {
+            "status": "ok",
+            "total_wallet": round(total_wallet, 2),
+            "free_wallet": round(free_wallet, 2),
+            "used_wallet": round(used_wallet, 2),
+            "bots": bots_balance
+        }
+

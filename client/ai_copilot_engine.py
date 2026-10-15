@@ -33,6 +33,13 @@ REGLAS DE OPERACIÓN INSTITUCIONAL:
 4. Si el usuario pide detener compras, parar el bot, vender posiciones, consultar a Hermes o rebalancear, identifica la acción operativa exacta.
 5. Explica el contexto de memecoins basándote en la desinflación macro post-pump y el sesgo asimétrico que genera rentabilidad.
 6. Usa viñetas claras y emojis sobrios para facilitar la lectura en teléfonos móviles.
+7. DISTINCIÓN CRÍTICA DE SALDOS (REAL vs SIMULADO):
+   - El sistema corre en modo DRY-RUN (simulación sin riesgo de dinero real), donde los bots operan carteras de prueba virtuales (ej. ~100 USDT cada bot).
+   - El usuario tiene sus fondos REALES en su cuenta de Binance (consultados vía API oficial).
+   - Cuando el usuario pregunte por su saldo o dinero, DEBES distinguir con total claridad entre:
+     a) SU SALDO REAL EN BINANCE (Billetera Spot y Billetera Futuros USDⓈ-M).
+     b) EL SALDO SIMULADO DE LA ARENA MULTI-BOT (Ablation V5, Quantum V7, Mined Ensemble).
+   - Si el usuario tiene fondos en Spot (ej. 10 USDT) pero 0 en Futuros, explícale cordialmente que Meme Hunter opera en el mercado de Futuros USDT-M, por lo que para operar en vivo solo debe transferir sus fondos de Spot a Futuros en Binance (sin comisiones).
 """
 
 
@@ -61,7 +68,9 @@ class QuantAiCopilotEngine:
         profit_data: Dict[str, Any],
         balance_data: Dict[str, Any],
         open_trades: List[Dict[str, Any]],
-        hermes_context: Optional[Dict[str, Any]] = None
+        hermes_context: Optional[Dict[str, Any]] = None,
+        real_balance: Optional[Dict[str, Any]] = None,
+        arena_balances: Optional[Dict[str, Any]] = None
     ) -> str:
         """Sintetiza la telemetría y el diagnóstico de Hermes en un bloque compacto."""
         status_txt = bot_state.get("state", "desconocido") if isinstance(bot_state, dict) else "activo"
@@ -97,11 +106,42 @@ class QuantAiCopilotEngine:
                 f"- Justificación Táctica: {rationale}\n"
             )
 
+        real_str = ""
+        if real_balance and real_balance.get("has_keys"):
+            spot_u = real_balance.get("spot_usdt_free", 0.0)
+            fut_u = real_balance.get("futures_usdt_free", 0.0)
+            assets = real_balance.get("other_assets", {})
+            assets_str = ", ".join([f"{k}: {v}" for k, v in assets.items()]) if assets else "ninguno"
+            real_str = (
+                f"[BILLETERA REAL BINANCE DEL USUARIO (DINERO REAL)]\n"
+                f"- Saldo Real Spot: {spot_u:.2f} USDT\n"
+                f"- Saldo Real Futuros USDT-M: {fut_u:.2f} USDT (Transferir de Spot a Futuros para operar en vivo)\n"
+                f"- Otros activos Spot: {assets_str}\n"
+            )
+
+        arena_str = ""
+        if arena_balances and arena_balances.get("status") == "ok":
+            tot = arena_balances.get("total_wallet", 0.0)
+            fre = arena_balances.get("free_wallet", 0.0)
+            usd = arena_balances.get("used_wallet", 0.0)
+            bots_list = []
+            for b_id, b_info in arena_balances.get("bots", {}).items():
+                bots_list.append(f"  * {b_info['name']} (:{b_info['port']}): {b_info['total']:.2f} USDT (Libre: {b_info['free']:.2f})")
+            bots_detail = "\n".join(bots_list)
+            arena_str = (
+                f"[ARENA MULTI-BOT SIMULADA (DRY-RUN PAPER TRADING)]\n"
+                f"- Modo: DRY-RUN (Simulación sin riesgo real)\n"
+                f"- Capital Simulado Total: {tot:.2f} USDT (Libre: {fre:.2f} USDT | Usado: {usd:.2f} USDT)\n"
+                f"- Desglose por bot:\n{bots_detail}\n"
+            )
+
         return (
+            f"{real_str}"
+            f"{arena_str}"
             f"{hermes_str}"
             f"[TELEMETRÍA EN VIVO]\n"
             f"- Estado de la Arena: {status_txt.upper()}\n"
-            f"- Balance Total Cartera: {total_balance:.2f} USDT (Disponible: {free_balance:.2f} USDT)\n"
+            f"- Balance Referencia Bot 1: {total_balance:.2f} USDT (Disponible: {free_balance:.2f} USDT)\n"
             f"- PnL Cerrado Histórico: {total_pnl:+.2f} USDT ({profit_pct:+.2f}% | Win Rate: {win_rate:.1f}%)\n"
             f"- Posiciones Abiertas ({len(open_trades) if isinstance(open_trades, list) else 0}):\n"
             f"{trades_str}\n"
@@ -170,13 +210,23 @@ class QuantAiCopilotEngine:
         profit_data: Dict[str, Any],
         balance_data: Dict[str, Any],
         open_trades: List[Dict[str, Any]],
-        hermes_context: Optional[Dict[str, Any]] = None
+        hermes_context: Optional[Dict[str, Any]] = None,
+        real_balance: Optional[Dict[str, Any]] = None,
+        arena_balances: Optional[Dict[str, Any]] = None
     ) -> Tuple[str, Optional[Dict[str, Any]]]:
         """
         Procesa el mensaje del operador, consulta a la IA o ejecuta fallback,
         y devuelve una tupla: (Respuesta en Markdown, Acción Sugerida si aplica).
         """
-        context_str = self.build_context_summary(bot_state, profit_data, balance_data, open_trades, hermes_context)
+        context_str = self.build_context_summary(
+            bot_state=bot_state,
+            profit_data=profit_data,
+            balance_data=balance_data,
+            open_trades=open_trades,
+            hermes_context=hermes_context,
+            real_balance=real_balance,
+            arena_balances=arena_balances
+        )
         intent = self.extract_intent_heuristic(user_message)
 
         # Si OpenRouter tiene clave y está operativo, realizamos inferencia cognitiva
@@ -185,6 +235,7 @@ class QuantAiCopilotEngine:
             f"[CONSULTA DEL OPERADOR]:\n"
             f"\"{user_message}\"\n\n"
             f"Instrucción: Responde en español como el Copilot de Meme Hunter. "
+            f"Si el usuario pregunta por su saldo o dinero, explica con claridad la diferencia entre sus fondos reales en Binance y el balance virtual de prueba de la arena en Dry-Run. "
             f"Si detectas una acción operativa como parar o cerrar trades, confírmala explícitamente."
         )
 
@@ -210,7 +261,9 @@ class QuantAiCopilotEngine:
             open_trades=open_trades,
             hermes_context=hermes_context,
             profit_data=profit_data,
-            balance_data=balance_data
+            balance_data=balance_data,
+            real_balance=real_balance,
+            arena_balances=arena_balances
         )
         return heuristic_reply, (intent if intent["action"] != "general_copilot_query" else None)
 
@@ -222,7 +275,9 @@ class QuantAiCopilotEngine:
         open_trades: List[Dict[str, Any]],
         hermes_context: Optional[Dict[str, Any]] = None,
         profit_data: Optional[Dict[str, Any]] = None,
-        balance_data: Optional[Dict[str, Any]] = None
+        balance_data: Optional[Dict[str, Any]] = None,
+        real_balance: Optional[Dict[str, Any]] = None,
+        arena_balances: Optional[Dict[str, Any]] = None
     ) -> str:
         """Genera respuesta dinámica, conversacional y context-aware cuando el LLM está en modo offline."""
         msg_lower = user_message.lower().strip()
@@ -330,20 +385,47 @@ class QuantAiCopilotEngine:
 
         # 4. Preguntas de Ganancias / Dinero / Balance
         if re.search(r"\b(ganancia|ganancias|plata|dinero|cu[aá]nto\s+llevamos|pnl|rentabilidad|balance|saldo|capital)\b", msg_lower):
-            bal = balance_data or {}
             prof = profit_data or {}
-            total = bal.get("total", 0.0)
-            free = bal.get("free", 0.0)
-            used = bal.get("used", 0.0)
             closed_pnl = prof.get("profit_closed_coin", 0.0)
             winrate = prof.get("winrate", 0.0) * 100.0 if prof.get("winrate", 0.0) <= 1.0 else prof.get("winrate", 0.0)
+
+            # 1. Billetera Real de Binance
+            real_info_lines = []
+            if real_balance and real_balance.get("has_keys"):
+                spot_u = real_balance.get("spot_usdt_free", 0.0)
+                fut_u = real_balance.get("futures_usdt_free", 0.0)
+                real_info_lines.append(f"• *Billetera Spot:* `{spot_u:.2f} USDT`")
+                real_info_lines.append(f"• *Billetera Futuros (USDⓈ-M):* `{fut_u:.2f} USDT`")
+                if fut_u == 0.0 and spot_u > 0.0:
+                    real_info_lines.append("  _(⚠️ Tus fondos están en Spot. Para operar futuros en vivo, transfiérelos a Futuros en Binance sin comisión)_")
+            else:
+                real_info_lines.append("• *Billetera Binance:* `Sin credenciales directas`")
+
+            real_block = "\n".join(real_info_lines)
+
+            # 2. Arena Multi-Bot Simulación
+            arena_info_lines = []
+            if arena_balances and arena_balances.get("status") == "ok":
+                tot_sim = arena_balances.get("total_wallet", 0.0)
+                fre_sim = arena_balances.get("free_wallet", 0.0)
+                usd_sim = arena_balances.get("used_wallet", 0.0)
+                arena_info_lines.append(f"• *Total Cartera Simulación:* `{tot_sim:.2f} USDT` (Libre: `{fre_sim:.2f}` | Margen: `{usd_sim:.2f}`)")
+                for b_id, b_data in arena_balances.get("bots", {}).items():
+                    arena_info_lines.append(f"  - *{b_data['name']}* (:{b_data['port']}): `{b_data['total']:.2f} USDT` (Libre: `{b_data['free']:.2f}`)")
+            else:
+                bal = balance_data or {}
+                arena_info_lines.append(f"• *Bot 1 (Ablation :8081):* `{bal.get('total', 0.0):.2f} USDT` (Libre: `{bal.get('free', 0.0):.2f}`)")
+
+            arena_block = "\n".join(arena_info_lines)
+
             return (
-                f"💰 **Reporte de Capital y Ganancias — Hermes Alter Ego**\n\n"
-                f"• *Capital Total en Cartera:* `{total:.2f} USDT`\n"
-                f"• *Capital Disponible (Libre):* `{free:.2f} USDT`\n"
-                f"• *Margen en Operación:* `{used:.2f} USDT` (en {len(open_trades)} órdenes activas)\n"
-                f"• *PnL Realizado Histórico:* `{closed_pnl:+.2f} USDT` (Win Rate: `{winrate:.1f}%`)\n\n"
-                f"🛡️ *Salvaguarda Activa:* Profit Ratchet y Kill Switch listos para blindar beneficios ante cualquier retroceso."
+                f"💰 **Reporte Oficial de Billeteras y Capital — Hermes Alter Ego**\n\n"
+                f"🏦 **1. TU SALDO REAL EN BINANCE:**\n"
+                f"{real_block}\n\n"
+                f"🎮 **2. SALDO VIRTUAL DE LA ARENA (DRY-RUN PAPER TRADING):**\n"
+                f"{arena_block}\n\n"
+                f"📊 *PnL Realizado Histórico:* `{closed_pnl:+.2f} USDT` (Win Rate: `{winrate:.1f}%`)\n"
+                f"🛡️ *Protección Activa:* Drawdown Kill Switch (25%) y Profit Ratchet vigilando cada trade."
             )
 
         # 5. Preguntas sobre Mercado / Tendencia / Bitcoin / Régimen

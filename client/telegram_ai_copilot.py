@@ -22,6 +22,7 @@ from typing import Dict, Any, Optional, List, Tuple
 from client.freqtrade_client import FreqtradeRestClient
 from client.multi_bot_orchestrator import MultiBotOrchestratorClient
 from client.ai_copilot_engine import QuantAiCopilotEngine
+from client.binance_account_client import BinanceAccountClient
 try:
     from meme_hunter.hermes.hermes_operator import HermesOperator
 except (ImportError, ModuleNotFoundError):
@@ -148,14 +149,18 @@ class TelegramAiCopilotService:
             or ""
         )
         self.tg_client = TelegramBotClient(self.token) if self.token else None
+        base_host = os.environ.get("FREQTRADE_BASE_HOST", "http://127.0.0.1").rstrip("/")
+        api_user = os.environ.get("FREQTRADE__API_SERVER__USERNAME", "admin")
+        api_pass = os.environ.get("FREQTRADE__API_SERVER__PASSWORD", "MemeHunter2026!")
         self.ft_client = freqtrade_client or FreqtradeRestClient(
-            base_url="http://127.0.0.1:8081",
-            username="admin",
-            password="MemeHunter2026!"
+            base_url=f"{base_host}:8081",
+            username=api_user,
+            password=api_pass
         )
-        self.orchestrator = MultiBotOrchestratorClient()
+        self.orchestrator = MultiBotOrchestratorClient(base_host=base_host)
         self.hermes_op = HermesOperator(orchestrator=self.orchestrator)
         self.ai_engine = ai_engine or QuantAiCopilotEngine()
+        self.binance_client = BinanceAccountClient()
         self.last_update_id = 0
 
     def is_configured(self) -> bool:
@@ -324,21 +329,54 @@ class TelegramAiCopilotService:
         )
 
     def _cmd_balance(self) -> str:
-        res = self.ft_client.get_balance()
-        if res.get("status") != "ok":
-            return f"⚠️ *Error consultando balances:* `{res.get('error', 'Bot offline')}`"
+        # 1. Billetera real en Binance
+        real = self.binance_client.get_real_balances()
+        real_lines = []
+        if real.get("has_keys"):
+            spot_free = real.get("spot_usdt_free", 0.0)
+            fut_free = real.get("futures_usdt_free", 0.0)
+            real_lines.append(f"• *Spot USDT:* `{spot_free:.2f} USDT`")
+            real_lines.append(f"• *Futuros USDⓈ-M:* `{fut_free:.2f} USDT`")
+            assets = real.get("other_assets", {})
+            if assets:
+                assets_str = ", ".join([f"{k}: {v}" for k, v in list(assets.items())[:4]])
+                real_lines.append(f"• *Otros Activos Spot:* `{assets_str}`")
+            if fut_free == 0.0 and spot_free > 0.0:
+                real_lines.append("\n💡 _Nota: Tus fondos están en Spot. Para operar futuros en vivo, transfiere tus USDT a la billetera 'Futuros USDⓈ-M' en Binance._")
+        else:
+            real_lines.append("• *Binance API:* `Sin credenciales configuradas en .env`")
 
-        d = res.get("data", {})
-        total = d.get("total", 0.0)
-        free = d.get("free", 0.0)
-        used = d.get("used", 0.0)
+        real_str = "\n".join(real_lines)
+
+        # 2. Cartera multi-bot de la arena
+        arena = self.orchestrator.get_aggregated_balances() if hasattr(self.orchestrator, "get_aggregated_balances") else {}
+        arena_lines = []
+        if isinstance(arena, dict) and arena.get("status") == "ok":
+            tot = arena.get("total_wallet", 0.0)
+            fre = arena.get("free_wallet", 0.0)
+            usd = arena.get("used_wallet", 0.0)
+            arena_lines.append(f"• *Capital Simulado Total:* `{tot:.2f} USDT` (Libre: `{fre:.2f}` | Margen: `{usd:.2f}`)")
+            for b_id, b_info in arena.get("bots", {}).items():
+                arena_lines.append(f"  - *{b_info['name']}* (:{b_info['port']}): `{b_info['total']:.2f} USDT` (Libre: `{b_info['free']:.2f}`)")
+        else:
+            res = self.ft_client.get_balance()
+            d = res.get("data", {}) if res.get("status") == "ok" else {}
+            tot = float(d.get("total", 0.0) or 0.0)
+            fre = float(d.get("free", 0.0) or 0.0)
+            usd = float(d.get("used", 0.0) or 0.0)
+            arena_lines.append(f"• *Capital Total (Bot 1):* `{tot:.2f} USDT`")
+            arena_lines.append(f"• *Capital Libre:* `{fre:.2f} USDT`")
+            arena_lines.append(f"• *Margen Utilizado:* `{usd:.2f} USDT`")
+
+        arena_str = "\n".join(arena_lines)
 
         return (
-            "💰 *BILLETERA Y MÁRGENES (USDT-M)*\n\n"
-            f"• *Capital Total:* `{total:.2f} USDT`\n"
-            f"• *Capital Libre:* `{free:.2f} USDT`\n"
-            f"• *Margen Utilizado:* `{used:.2f} USDT`\n"
-            f"• *Utilización de Margen:* `{(used / total * 100 if total else 0.0):.1f}%`"
+            "💰 *ESTADO CONSOLIDADO DE BILLETERAS*\n\n"
+            "🏦 **1. TU SALDO REAL EN BINANCE:**\n"
+            f"{real_str}\n\n"
+            "🎮 **2. SALDO VIRTUAL DE LA ARENA (DRY-RUN PAPER TRADING):**\n"
+            f"{arena_str}\n\n"
+            "🛡️ *Modo Actual:* Simulación en tiempo real (Cero riesgo de capital real)."
         )
 
     def _cmd_stopbuy(self) -> str:
@@ -397,10 +435,12 @@ class TelegramAiCopilotService:
         )
 
     def _cmd_ai_query(self, query: str) -> str:
-        """Pasa la consulta del operador al motor cognitivo de IA inyectando telemetría viva y contexto de Hermes."""
+        """Pasa la consulta del operador al motor cognitivo de IA inyectando telemetría viva, saldos y contexto de Hermes."""
         agg = self.orchestrator.get_aggregated_status()
         profit_res = self.ft_client.get_profit().get("data", {})
         balance_res = self.ft_client.get_balance().get("data", {})
+        real_bal = self.binance_client.get_real_balances()
+        arena_bal = self.orchestrator.get_aggregated_balances()
 
         # Obtener contexto activo de Hermes
         hermes_ctx = self.hermes_op.regime_detector.detect_regime()
@@ -411,7 +451,9 @@ class TelegramAiCopilotService:
             profit_data=profit_res if isinstance(profit_res, dict) else {},
             balance_data=balance_res if isinstance(balance_res, dict) else {},
             open_trades=agg.get("trades", []),
-            hermes_context=hermes_ctx
+            hermes_context=hermes_ctx,
+            real_balance=real_bal,
+            arena_balances=arena_bal
         )
         return reply_md
 

@@ -115,6 +115,16 @@ def copilot_service(mock_ft_client, mock_ai_engine):
         "snapshot": {"btc_price": 68000.0, "btc_change_24h": -0.5, "avg_funding_rate": 0.0001},
         "recommended_allocations": {"bot_v5_ablation": 0.35, "bot_v7_quantum": 0.35, "bot_v8_ensemble": 0.30}
     }
+    service.binance_client = MagicMock()
+    service.binance_client.get_real_balances.return_value = {
+        "has_keys": True,
+        "spot_usdt_free": 10.0,
+        "spot_usdt_total": 10.0,
+        "futures_usdt_free": 0.0,
+        "futures_usdt_total": 0.0,
+        "other_assets": {"BNB": 0.0002},
+        "status": "ok"
+    }
     return service
 
 
