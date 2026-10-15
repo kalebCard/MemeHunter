@@ -4,8 +4,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-import funding_arbitrage as fa  # noqa: E402
+from scripts.archive.legacy_satellites import funding_arbitrage as fa  # noqa: E402
 
 
 def test_calculate_annualized_rates_positive():

@@ -176,6 +176,22 @@ class HermesOperator:
         
         return f"{intro}\n\n{context}\n\n{tactic}\n\n{status_line}"
 
+    def mine_and_evaluate_new_alpha(
+        self,
+        goal_text: str = "Estrategia Moonshot alta frecuencia y alto Sharpe",
+        pair: str = "1000PEPE",
+        progress_callback: Optional[Any] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Fachada de alto nivel para minería de alfas que delega al bucle de refinamiento."""
+        clean_pair = pair.split("_")[0].split("/")[0] if pair else "1000PEPE"
+        return self.run_autonomous_refinement_loop(
+            goal_text=goal_text,
+            pair=clean_pair,
+            progress_callback=progress_callback,
+            **kwargs
+        )
+
     def run_autonomous_refinement_loop(
         self,
         goal_text: str = "Pasar de 10 a 100 USDT en 1 semana (Moonshot 10x)",

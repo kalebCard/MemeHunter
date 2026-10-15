@@ -145,9 +145,9 @@ def cmd_research(args):
     tools = {
         "stress": ("scripts/simulation/stress_test.py", "Somete trades a comisiones hostiles y deslizamiento"),
         "monte-carlo": ("scripts/simulation/monte_carlo.py", "Simulación Bootstrap de 7,500 caminos y VaR"),
-        "vault": ("scripts/ops/delta_neutral_vault.py", "Escaneo de oportunidades Cash & Carry delta-neutral"),
+        "vault": ("scripts/archive/legacy_satellites/delta_neutral_vault.py", "[Archivado] Escaneo Cash & Carry delta-neutral"),
         "sentinel": ("scripts/ops/meme_sentinel.py", "Detector de volumen anómalo y pumps de memecoins"),
-        "radar": ("scripts/ops/dex_viral_radar.py", "Radar on-chain DEX (DexScreener API)"),
+        "radar": ("scripts/archive/legacy_satellites/dex_viral_radar.py", "[Archivado] Radar on-chain DEX (DexScreener API)"),
         "ratchet": ("scripts/ops/profit_ratchet_daemon.py", "Daemon de cosecha y trinquete de utilidades"),
         "metrics": ("scripts/research/advanced_metrics.py", "Cálculo de PSR, DSR y PBO institucional"),
         "telegram": ("scripts/ops/telegram_healthcheck.py", "Verificación y test de alertas Telegram"),

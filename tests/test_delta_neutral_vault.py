@@ -8,7 +8,7 @@ Valida:
 
 import pytest
 from pathlib import Path
-from scripts.ops.delta_neutral_vault import DeltaNeutralVault
+from scripts.archive.legacy_satellites.delta_neutral_vault import DeltaNeutralVault
 
 
 def test_vault_deposit_and_allocation(tmp_path):

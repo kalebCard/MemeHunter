@@ -53,7 +53,7 @@ Los documentos en este directorio constituyen el **Nivel Táctico** de ejecució
 | **20** | [`20_SPRINT_053_HERMES_AUTONOMOUS_REFINEMENT_LOOP_AND_MOONSHOT_MARATHON.md`](20_SPRINT_053_HERMES_AUTONOMOUS_REFINEMENT_LOOP_AND_MOONSHOT_MARATHON.md) | Sprint 53 | `HIST-SPRINT-053` | PB-190 a PB-199 | Bucle Autónomo de Refinamiento Cuantitativo, Backtest 15m y Maratón Moonshot | ✅ CERTIFIED |
 | **21** | [`21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md`](21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md) | Sprint 54 | `HIST-SPRINT-054` | PB-200 a PB-209 | Blindaje Fail-Closed Telegram, Purga de Contraseñas y Cero Métricas Falsas | ✅ CERTIFIED |
 | **22** | [`22_SPRINT_055_MODULAR_CORE_UNIFICATION_V9_AND_ASYNC_EVENT_STREAMING.md`](22_SPRINT_055_MODULAR_CORE_UNIFICATION_V9_AND_ASYNC_EVENT_STREAMING.md) | Sprint 55 | `HIST-SPRINT-055` | PB-210 a PB-219 | Unificación Arquitectónica Modular v9.0, Persistencia SSOT y Desacoplamiento Asíncrono | 📋 READY |
-| **23** | [`23_SPRINT_056_RADICAL_PRUNING_LESS_IS_MORE_AND_BUNKER_HARDENING.md`](23_SPRINT_056_RADICAL_PRUNING_LESS_IS_MORE_AND_BUNKER_HARDENING.md) | Sprint 56 | `HIST-SPRINT-056` | PB-220 a PB-229 | Poda Radical "Menos es Más": Arquitectura por Sustracción y Blindaje del Búnker | 📋 PLANNED |
+| **23** | [`23_SPRINT_056_RADICAL_PRUNING_LESS_IS_MORE_AND_BUNKER_HARDENING.md`](23_SPRINT_056_RADICAL_PRUNING_LESS_IS_MORE_AND_BUNKER_HARDENING.md) | Sprint 56 | `HIST-SPRINT-056` | PB-220 a PB-229 | Poda Radical "Menos es Más": Arquitectura por Sustracción y Blindaje del Búnker | ✅ CERTIFIED |
 
 
 ---

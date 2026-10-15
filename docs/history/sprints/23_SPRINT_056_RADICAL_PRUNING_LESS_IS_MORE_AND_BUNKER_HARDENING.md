@@ -3,7 +3,7 @@ id: HIST-SPRINT-056
 title: "Sprint 56: Poda Radical 'Menos es Más' — Arquitectura por Sustracción, Desmantelamiento de Módulos Prescindibles y Blindaje del Búnker"
 category: history/sprints
 version: 9.1
-status: PLANNED
+status: CERTIFIED
 last_updated: 2026-10-15
 author: Quantitative Architecture & Systems Engineering Core
 references:
@@ -56,16 +56,16 @@ flowchart TD
 
 | ID | Historia de Usuario | Story Points | Criterio de Aceptación | Estado |
 | :---: | :--- | :---: | :--- | :---: |
-| **PB-220** | **Archivado Canónico y Desacoplamiento de Módulos Prescindibles** | 5 SP | Traslado ordenado de scripts no esenciales (`delta_neutral_vault.py`, `funding_arbitrage.py`, `dex_viral_radar.py`, `binance_vision.py`, `backtest_spot_capitulation.py`) hacia `scripts/archive/`, eliminándolos de los flujos de producción. | 📋 PLANNED |
-| **PB-221** | **Consolidación de Entrypoints Operativos en un CLI Único (`meme-hunter`)** | 5 SP | Erradicación de invocaciones manuales dispersas; todas las operaciones de salud, arena multi-bot, Hermes y backtest se ejecutan exclusivamente vía `meme-hunter [comando]`. | 📋 PLANNED |
-| **PB-222** | **Poda de Dependencias Muertas y Optimización de Dockerfile Multi-Stage** | 5 SP | Limpieza de `pyproject.toml` suprimiendo paquetes innecesarios en producción; reducción de la imagen Docker en $\ge 40\%$ y aceleración del arranque en $< 2.0\text{ s}$. | 📋 PLANNED |
-| **PB-223** | **Supresión de Shims Legacy, Mocks Huérfanos y Código Muerto** | 3 SP | Eliminación de envoltorios de compatibilidad obsoletos en la raíz y stubs residuales en el dashboard que generan advertencias y deuda técnica. | 📋 PLANNED |
-| **PB-224** | **Telegram Copilot Minimalista: Notificaciones Tipo Semáforo de Alta Densidad** | 5 SP | Rediseño de respuestas en Telegram: erradicación de bloques de texto kilométricos; adopción de resúmenes ejecutivos $\le 10$ líneas con estado Semáforo (🟢/🟡/🔴). | 📋 PLANNED |
-| **PB-225** | **FreqUI Zen Mode: Interfaz Foco Sin Ruido Visual** | 5 SP | Implementación de conmutador "Modo Zen" en Vue 3 que oculta paneles auxiliares y focaliza la atención en: Equity Curve, Posiciones Vivas, Estado del Kill Switch y Señales Hermes. | 📋 PLANNED |
-| **PB-226** | **Logging Basado en Excepciones y Supresión de Telemetría Ruido** | 3 SP | Filtrado de heartbeats rutinarios cada 5 segundos; el sistema solo emite logs estructurados ante eventos de trading significativos o anomalías de riesgo. | 📋 PLANNED |
-| **PB-227** | **Blindaje Hermético del Búnker: Reducción de Puertos y Superficie de Red** | 3 SP | Cierre de puertos secundarios innecesarios en `docker-compose.yml`; aislamiento de los contenedores en redes internas con acceso web expuesto únicamente en `:8081`. | 📋 PLANNED |
-| **PB-228** | **Scorecard Único de Rendimiento (Consolidación de 25 Métricas a 3 Clave)** | 3 SP | Consolidación del monitoreo en las 3 métricas de la verdad: **Net PnL (USDT)**, **Max Drawdown Real (%)** y **Win Rate Post-Fricciones (%)**, descartando métricas abstractas redundantes. | 📋 PLANNED |
-| **PB-229** | **Suite de Pruebas de Regresión y Certificación de Sustracción** | 5 SP | Ejecución de la suite completa de pruebas certificando que la eliminación del código accesorio no rompe el motor de ejecución, la suite de riesgo ni el control por Telegram. | 📋 PLANNED |
+| **PB-220** | **Archivado Canónico y Desacoplamiento de Módulos Prescindibles** | 5 SP | Traslado ordenado de scripts no esenciales (`delta_neutral_vault.py`, `funding_arbitrage.py`, `dex_viral_radar.py`, `binance_vision.py`, `backtest_spot_capitulation.py`) hacia `scripts/archive/`, eliminándolos de los flujos de producción. | ✅ COMPLETED |
+| **PB-221** | **Consolidación de Entrypoints Operativos en un CLI Único (`meme-hunter`)** | 5 SP | Erradicación de invocaciones manuales dispersas; todas las operaciones de salud, arena multi-bot, Hermes y backtest se ejecutan exclusivamente vía `meme-hunter [comando]`. | ✅ COMPLETED |
+| **PB-222** | **Poda de Dependencias Muertas y Optimización de Dockerfile Multi-Stage** | 5 SP | Limpieza de `pyproject.toml` suprimiendo paquetes innecesarios en producción; reducción de la imagen Docker en $\ge 40\%$ y aceleración del arranque en $< 2.0\text{ s}$. | ✅ COMPLETED |
+| **PB-223** | **Supresión de Shims Legacy, Mocks Huérfanos y Código Muerto** | 3 SP | Eliminación de envoltorios de compatibilidad obsoletos en la raíz y stubs residuales en el dashboard que generan advertencias y deuda técnica. | ✅ COMPLETED |
+| **PB-224** | **Telegram Copilot Minimalista: Notificaciones Tipo Semáforo de Alta Densidad** | 5 SP | Rediseño de respuestas en Telegram: erradicación de bloques de texto kilométricos; adopción de resúmenes ejecutivos $\le 10$ líneas con estado Semáforo (🟢/🟡/🔴). | ✅ COMPLETED |
+| **PB-225** | **FreqUI Zen Mode: Interfaz Foco Sin Ruido Visual** | 5 SP | Implementación de conmutador "Modo Zen" en Vue 3 que oculta paneles auxiliares y focaliza la atención en: Equity Curve, Posiciones Vivas, Estado del Kill Switch y Señales Hermes. | ✅ COMPLETED |
+| **PB-226** | **Logging Basado en Excepciones y Supresión de Telemetría Ruido** | 3 SP | Filtrado de heartbeats rutinarios cada 5 segundos; el sistema solo emite logs estructurados ante eventos de trading significativos o anomalías de riesgo. | ✅ COMPLETED |
+| **PB-227** | **Blindaje Hermético del Búnker: Reducción de Puertos y Superficie de Red** | 3 SP | Cierre de puertos secundarios innecesarios en `docker-compose.yml`; aislamiento de los contenedores en redes internas con acceso web expuesto únicamente en `:8081`. | ✅ COMPLETED |
+| **PB-228** | **Scorecard Único de Rendimiento (Consolidación de 25 Métricas a 3 Clave)** | 3 SP | Consolidación del monitoreo en las 3 métricas de la verdad: **Net PnL (USDT)**, **Max Drawdown Real (%)** y **Win Rate Post-Fricciones (%)**, descartando métricas abstractas redundantes. | ✅ COMPLETED |
+| **PB-229** | **Suite de Pruebas de Regresión y Certificación de Sustracción** | 5 SP | Ejecución de la suite completa de pruebas certificando que la eliminación del código accesorio no rompe el motor de ejecución, la suite de riesgo ni el control por Telegram. | ✅ COMPLETED |
 
 **Capacidad Total Sprint 56:** 42 Story Points.
 

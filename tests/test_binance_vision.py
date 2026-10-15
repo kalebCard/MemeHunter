@@ -10,8 +10,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-import binance_vision as bv  # noqa: E402
+from scripts.archive.legacy_satellites import binance_vision as bv  # noqa: E402
 
 ROW_MS = b"1577836800000,7195.24,7255.0,7175.15,7200.85,16792.388165,1577923199999,121214452.116,194010,8946.955535,64597785.212,0\n"
 ROW_US = b"1788220800000000,78581.3,79220.61,76420.0,77439.0,14130.63949,1788307199999999,1101387276.65,3662805,7128.14511,555981558.22,0\n"

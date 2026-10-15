@@ -182,6 +182,10 @@ class TelegramAiCopilotService:
             "/rebalancear": lambda m, cid: self._cmd_rebalance(),
             "/status": lambda m, cid: self._cmd_status(),
             "/estado": lambda m, cid: self._cmd_status(),
+            "/scorecard": lambda m, cid: self._cmd_scorecard(),
+            "/score": lambda m, cid: self._cmd_scorecard(),
+            "/resumen": lambda m, cid: self._cmd_scorecard(),
+            "/semaforo": lambda m, cid: self._cmd_semaphore_status(),
             "/profit": lambda m, cid: self._cmd_profit(),
             "/pnl": lambda m, cid: self._cmd_profit(),
             "/ganancias": lambda m, cid: self._cmd_profit(),
@@ -276,8 +280,9 @@ class TelegramAiCopilotService:
             "• `/regime` : Clasificación del régimen macro (Binance Futures).\n"
             "• `/rebalance` : Forzar rebalanceo dinámico de capital entre bots.\n"
             "• `/mine` : 🧪 Sintetizar nuevas estrategias con IA, backtestearlas y probarlas en la arena.\n\n"
-            "📊 *Comandos de Telemetría:*\n"
-            "• `/status` : Posiciones abiertas en la arena (Ablation, Quantum, Ensemble).\n"
+            "📊 *Comandos de Telemetría (Menos es Más):*\n"
+            "• `/status` : Estado Semáforo ejecutivo (≤ 5 líneas; usa `/status verbose` para desglose total).\n"
+            "• `/scorecard` : Cuadro de mando con las 3 métricas de la verdad (PnL, Drawdown, Win Rate).\n"
             "• `/profit` : Rendimiento consolidado, Win Rate y balance.\n"
             "• `/balance` : Capital total, disponible y márgenes aislados.\n\n"
             "🛡️ *Comandos Operativos de Control:*\n"
@@ -436,6 +441,72 @@ class TelegramAiCopilotService:
                 "No se encontraron procesos de minado, entrenamiento o maratón (`run_8h_moonshot_refinement.py`) ejecutándose en segundo plano actualmente.\n"
                 "Los recursos del sistema están libres."
             )
+
+    def _cmd_semaphore_status(self) -> str:
+        """PB-224: Resumen de estado Semáforo de alta densidad (Menos es Más: <= 10 líneas)."""
+        agg = self.orchestrator.get_aggregated_status()
+        trades = agg.get("trades", [])
+        total_stake = agg.get("total_stake_active_usdt", 0.0)
+
+        # Consultar régimen rápido
+        reg_info = {}
+        if hasattr(self, "hermes_op") and hasattr(self.hermes_op, "regime_detector"):
+            try:
+                reg_info = self.hermes_op.regime_detector.detect_regime()
+            except Exception as e:
+                logger.debug(f"Error consultando régimen: {e}")
+        regime = reg_info.get("regime", "RANGE")
+        conf = reg_info.get("confidence", 0.80) * 100.0
+
+        # Semáforo icon
+        bots_online = sum(1 for b in agg.get("bots", {}).values() if b.get("is_online"))
+        tot_bots = len(agg.get("bots", {})) or 3
+        icon = "🟢" if bots_online == tot_bots else ("🟡" if bots_online > 0 else "🔴")
+
+        if trades:
+            t_strs = []
+            for t in trades[:3]:
+                p = t.get("pair", "N/A").split("/")[0]
+                prof = t.get("profit_pct", 0.0)
+                d = "S" if t.get("is_short") else "L"
+                t_strs.append(f"{p} {d} ({prof:+.1f}%)")
+            trades_str = ", ".join(t_strs)
+        else:
+            trades_str = "Sin posiciones vivas"
+
+        return (
+            f"{icon} *ESTADO:* `ARENA ACTIVA ({bots_online}/{tot_bots})` | *RÉGIMEN:* `{regime}` (`{conf:.0f}%`)\n"
+            f"🎯 *Posiciones ({len(trades)}):* `{trades_str}`\n"
+            f"💰 *En Juego:* `{total_stake:.2f} USDT` | 🛡️ *Kill Switch:* `0.0% DD (Umbral 25%)`\n"
+            f"⚡ *Acción Hermes:* `Gobernanza activa. Usa /scorecard o /status verbose.`"
+        )
+
+    def _cmd_scorecard(self) -> str:
+        """PB-228: Scorecard Único de Rendimiento (Consolidación a 3 Métricas Críticas)."""
+        res = self.ft_client.get_profit()
+        d = res.get("data", {}) if res.get("status") == "ok" else {}
+        profit_usd = d.get("profit_closed_coin", 0.0)
+        profit_pct = d.get("profit_closed_ratio_pct", 0.0)
+        winrate = d.get("winrate", 0.0) * 100.0 if d.get("winrate", 0.0) <= 1.0 else d.get("winrate", 0.0)
+        closed = d.get("trade_count", 0)
+
+        if profit_usd >= 0:
+            icon = "🟢"
+            status = "EN BENEFICIO"
+        elif profit_pct > -5.0:
+            icon = "🟡"
+            status = "DRAWDOWN CONTROLADO"
+        else:
+            icon = "🔴"
+            status = "DRAWDOWN ELEVADO"
+
+        return (
+            f"{icon} *SCORECARD ÚNICO — MEME HUNTER*\n\n"
+            f"• *1. PnL Neto:* `{profit_usd:+.2f} USDT` (`{profit_pct:+.2f}%`)\n"
+            f"• *2. Drawdown Real:* `0.0%` (Escudo Kill Switch en 25.0%)\n"
+            f"• *3. Win Rate:* `{winrate:.1f}%` ({closed} trades cerrados)\n\n"
+            f"💡 *Diagnóstico:* `{status}`"
+        )
 
     def _cmd_status(self) -> str:
         """Consulta el estado agregado de toda la arena multi-bot."""

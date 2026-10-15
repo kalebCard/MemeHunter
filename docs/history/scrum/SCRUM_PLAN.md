@@ -666,17 +666,17 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 
 ---
 
-### Sprint 56: Poda Radical "Menos es Más" — Arquitectura por Sustracción, Desmantelamiento de Módulos Prescindibles y Blindaje del Búnker (Planificado / Ready 📋)
-* **PB-220 📋:** Archivado Canónico y Desacoplamiento de Módulos Prescindibles (`delta_neutral_vault.py`, `funding_arbitrage.py`, `dex_viral_radar.py`, `binance_vision.py`).
-* **PB-221 📋:** Consolidación de Entrypoints Operativos en un CLI Único (`meme-hunter`).
-* **PB-222 📋:** Poda de Dependencias Muertas y Optimización de Dockerfile Multi-Stage ($\ge 40\%$ reducción).
-* **PB-223 📋:** Supresión de Shims Legacy, Mocks Huérfanos y Código Muerto.
-* **PB-224 📋:** Telegram Copilot Minimalista: Notificaciones Tipo Semáforo de Alta Densidad ($\le 10$ líneas).
-* **PB-225 📋:** FreqUI Zen Mode: Interfaz Foco Sin Ruido Visual.
-* **PB-226 📋:** Logging Basado en Excepciones y Supresión de Telemetría Ruido.
-* **PB-227 📋:** Blindaje Hermético del Búnker: Reducción de Puertos y Superficie de Red.
-* **PB-228 📋:** Scorecard Único de Rendimiento (Consolidación de 25 Métricas a 3 Clave: PnL, DD, Win Rate).
-* **PB-229 📋:** Suite de Pruebas de Regresión y Certificación de Sustracción.
+### Sprint 56: Poda Radical "Menos es Más" — Arquitectura por Sustracción, Desmantelamiento de Módulos Prescindibles y Blindaje del Búnker (Completado & Certificado ✅)
+* **PB-220 ✅:** Archivado Canónico y Desacoplamiento de Módulos Prescindibles (`delta_neutral_vault.py`, `funding_arbitrage.py`, `dex_viral_radar.py`, `binance_vision.py`, `backtest_spot_capitulation.py`).
+* **PB-221 ✅:** Consolidación de Entrypoints Operativos en un CLI Único (`meme-hunter`).
+* **PB-222 ✅:** Poda de Dependencias Muertas y Optimización de Dockerfile Multi-Stage ($\ge 40\%$ reducción).
+* **PB-223 ✅:** Supresión de Shims Legacy, Mocks Huérfanos y Código Muerto.
+* **PB-224 ✅:** Telegram Copilot Minimalista: Notificaciones Tipo Semáforo de Alta Densidad ($\le 10$ líneas).
+* **PB-225 ✅:** FreqUI Zen Mode: Interfaz Foco Sin Ruido Visual y Scorecard Integrado en `index.vue`.
+* **PB-226 ✅:** Logging Basado en Excepciones y Supresión de Telemetría Ruido.
+* **PB-227 ✅:** Blindaje Hermético del Búnker: Reducción de Puertos y Superficie de Red.
+* **PB-228 ✅:** Scorecard Único de Rendimiento (Consolidación a 3 Clave: PnL, DD, Win Rate con `/scorecard`).
+* **PB-229 ✅:** Suite de Pruebas de Regresión y Certificación de Sustracción (`tests/unit/test_sprint56_radical_pruning.py` 5/5 tests aprobados).
 * **Documento Canónico:** Ver detalle en [`docs/history/sprints/23_SPRINT_056_RADICAL_PRUNING_LESS_IS_MORE_AND_BUNKER_HARDENING.md`](../sprints/23_SPRINT_056_RADICAL_PRUNING_LESS_IS_MORE_AND_BUNKER_HARDENING.md).
 
 ---

@@ -4,8 +4,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-import dex_viral_radar as dvr  # noqa: E402
+from scripts.archive.legacy_satellites import dex_viral_radar as dvr  # noqa: E402
 
 
 def test_parse_and_filter_dex_pair_valid():

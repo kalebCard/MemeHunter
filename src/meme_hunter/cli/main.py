@@ -237,11 +237,12 @@ def run_ratchet(
 
 @run_app.command("vault")
 def run_vault() -> None:
-    """Ejecuta el gestor de la Bóveda Delta-Neutral Cash & Carry."""
-    console.print("[bold yellow]Iniciando Delta-Neutral Vault Scanner...[/bold yellow]")
+    """Ejecuta el gestor de la Bóveda Delta-Neutral Cash & Carry (Archivado en Sprint 56)."""
     settings = get_settings()
-    script = settings.ROOT_DIR / "scripts" / "delta_neutral_vault.py"
+    script = settings.ROOT_DIR / "scripts" / "archive" / "legacy_satellites" / "delta_neutral_vault.py"
     if script.exists():
+        console.print("[bold yellow]Iniciando Delta-Neutral Vault Scanner...[/bold yellow]")
+        console.print("[dim yellow]ℹ️ Nota: Módulo archivado (Tier 9). Ejecutando desde archive/legacy_satellites...[/dim yellow]")
         import subprocess
         subprocess.run([sys.executable, str(script)])
     else:
