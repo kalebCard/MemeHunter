@@ -137,9 +137,28 @@ class QuantAiCopilotEngine:
                 f"- Desglose por bot:\n{bots_detail}\n"
             )
 
+        # Contexto del Maratón Cuantitativo Moonshot 10x
+        marathon_str = ""
+        try:
+            lib_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mining", "factor_library.json")
+            if os.path.exists(lib_path):
+                with open(lib_path, "r", encoding="utf-8") as f:
+                    factors = json.load(f)
+                hermes_factors = [f for f in factors if "HERMES" in f.get("factor_id", "")]
+                marathon_str = (
+                    f"[MARATÓN Y EXPERIMENTO MOONSHOT 10X (10 A 100 USDT)]\n"
+                    f"- Bucle Autónomo: ACTIVO en segundo plano (refinamiento continuo en 15m, 10x apalancamiento)\n"
+                    f"- Factores Totales Minados: {len(factors)} ({len(hermes_factors)} por Hermes)\n"
+                    f"- Bot 3 (:8083): Recibe inyecciones automáticas de cada factor prometedor (Sharpe > 1.60)\n"
+                    f"- Diario Cuantitativo: docs/research/DIARIO_DE_ESTRATEGIAS.md activo\n"
+                )
+        except Exception:
+            pass
+
         return (
             f"{real_str}"
             f"{arena_str}"
+            f"{marathon_str}"
             f"{hermes_str}"
             f"[TELEMETRÍA EN VIVO]\n"
             f"- Estado de la Arena: {status_txt.upper()}\n"
