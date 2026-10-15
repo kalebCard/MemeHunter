@@ -419,5 +419,21 @@
     "goal": "Test Zero Hallucination",
     "discovered_at": "2026-10-15T20:26:11.267811+00:00",
     "regime": "RANGE_CHOP"
+  },
+  {
+    "factor_id": "HERMES_MOONSHOT_31",
+    "formula": "ts_rank(volume, 10)",
+    "ic_mean": 0.085,
+    "ic_std": 0.042,
+    "ic_ir": 2.02,
+    "sharpe_proxy": 0.0,
+    "win_rate_pct": 0.0,
+    "simulated_roi_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "timeframe": "15m",
+    "leverage": 10.0,
+    "goal": "Test Zero Hallucination",
+    "discovered_at": "2026-10-15T20:29:51.010149+00:00",
+    "regime": "RANGE_CHOP"
   }
 ]
