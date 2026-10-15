@@ -3,7 +3,7 @@ id: HIST-SPRINT-054
 title: "Sprint 54: Blindaje de Seguridad Fail-Closed, Remediación Criptográfica y Erradicación de Deuda Técnica Crítica"
 category: history/sprints
 version: 8.7
-status: ACTIVE
+status: CERTIFIED
 last_updated: 2026-10-15
 author: Quantitative Architecture & Systems Engineering Core
 references:
@@ -54,16 +54,16 @@ flowchart TD
 
 | ID | Historia de Usuario | Story Points | Criterio de Aceptación | Estado |
 | :---: | :--- | :---: | :--- | :---: |
-| **PB-200** | **Firewall de Autorización Fail-Closed en Telegram Copilot** | 5 SP | Modificación de `is_authorized()` en `client/telegram_ai_copilot.py` para rechazar toda petición con código de seguridad si `FREQTRADE__TELEGRAM__CHAT_ID` no está explícitamente configurado. | 🟡 READY |
-| **PB-201** | **Purga de Contraseñas Hardcodeadas y Validación Fail-Fast en Arranque** | 5 SP | Erradicación total de contraseñas por defecto (`MemeHunter2026!`) en `client/telegram_ai_copilot.py` y `client/multi_bot_orchestrator.py`; aborto inmediato si faltan credenciales en producción. | 🟡 READY |
-| **PB-202** | **Erradicación de Métricas Cuantitativas Alucinadas en `HermesOperator`** | 5 SP | Eliminación de asignaciones estáticas de Sharpe (`1.85`, `1.5`) y métricas de fantasía ante fallos de backtest; descalificación determinista de candidatos inválidos. | 🟡 READY |
-| **PB-203** | **Sincronización Thread-Safe de la Memoria Episódica de Hermes** | 5 SP | Implementación de `threading.RLock()` y escritura atómica con reemplazo seguro en `storage/hermes_memory.json`, previniendo colisiones de proceso en Windows (`WinError 32`). | 🟡 READY |
-| **PB-204** | **Corrección de Invocación Rota en `/incubator/trigger-loop` y Supresión de `mock_success`** | 5 SP | Corrección de la llamada a `orchestrator.process_cycle()` en `src/meme_hunter/api/routers/quant.py`, eliminando el `AttributeError` y erradicando respuestas con estados falsificados. | 🟡 READY |
-| **PB-205** | **Sanitización de Configuración CORS y Eliminación de Wildcard con Credenciales** | 3 SP | Reconfiguración de `CORSMiddleware` en `src/meme_hunter/api/app.py` restringiendo orígenes autorizados y eliminando la combinación insegura `allow_origins=["*"]` con `allow_credentials=True`. | 🟡 READY |
-| **PB-206** | **Protección y Autenticación en WebSocket de Telemetría (`/ws/telemetry`)** | 3 SP | Validación obligatoria de token criptográfico o sesión autorizada durante el handshake del WebSocket antes de aceptar conexiones y transmitir telemetría. | 🟡 READY |
-| **PB-207** | **Eliminación de Cláusulas `except Exception: pass` en Rutas Críticas** | 3 SP | Sustitución de capturas ciegas de excepciones por manejo tipado (`FileNotFoundError`, `JSONDecodeError`, `KeyError`) con logging formal en `ai_copilot_engine.py` y `hermes_operator.py`. | 🟡 READY |
-| **PB-208** | **Adopción del Command Pattern en el Despacho de Comandos de Telegram** | 3 SP | Refactorización de `dispatch_command()` mediante diccionario de comandos tipados (`Dict[str, Callable]`), erradicando la cadena monolítica de 20+ `if/elif`. | 🟡 READY |
-| **PB-209** | **Suite de Pruebas Unitarias de Seguridad y Certificación DoD** | 5 SP | Creación y ejecución de `tests/unit/test_security_remediation_sprint54.py` certificando el bloqueo de usuarios no autorizados, la ausencia de métricas fake y la sincronización concurrente. | 🟡 READY |
+| **PB-200** | **Firewall de Autorización Fail-Closed en Telegram Copilot** | 5 SP | Modificación de `is_authorized()` en `client/telegram_ai_copilot.py` para rechazar toda petición con código de seguridad si `FREQTRADE__TELEGRAM__CHAT_ID` no está explícitamente configurado. | ✅ COMPLETED |
+| **PB-201** | **Purga de Contraseñas Hardcodeadas y Validación Fail-Fast en Arranque** | 5 SP | Erradicación total de contraseñas por defecto (`MemeHunter2026!`) en `client/telegram_ai_copilot.py` y `client/multi_bot_orchestrator.py`; aborto inmediato si faltan credenciales en producción. | ✅ COMPLETED |
+| **PB-202** | **Erradicación de Métricas Cuantitativas Alucinadas en `HermesOperator`** | 5 SP | Eliminación de asignaciones estáticas de Sharpe (`1.85`, `1.5`) y métricas de fantasía ante fallos de backtest; descalificación determinista de candidatos inválidos. | ✅ COMPLETED |
+| **PB-203** | **Sincronización Thread-Safe de la Memoria Episódica de Hermes** | 5 SP | Implementación de `threading.RLock()` y escritura atómica con reemplazo seguro en `storage/hermes_memory.json`, previniendo colisiones de proceso en Windows (`WinError 32`). | ✅ COMPLETED |
+| **PB-204** | **Corrección de Invocación Rota en `/incubator/trigger-loop` y Supresión de `mock_success`** | 5 SP | Corrección de la llamada a `orchestrator.process_cycle()` en `src/meme_hunter/api/routers/quant.py`, eliminando el `AttributeError` y erradicando respuestas con estados falsificados. | ✅ COMPLETED |
+| **PB-205** | **Sanitización de Configuración CORS y Eliminación de Wildcard con Credenciales** | 3 SP | Reconfiguración de `CORSMiddleware` en `src/meme_hunter/api/app.py` restringiendo orígenes autorizados y eliminando la combinación insegura `allow_origins=["*"]` con `allow_credentials=True`. | ✅ COMPLETED |
+| **PB-206** | **Protección y Autenticación en WebSocket de Telemetría (`/ws/telemetry`)** | 3 SP | Validación obligatoria de token criptográfico o sesión autorizada durante el handshake del WebSocket antes de aceptar conexiones y transmitir telemetría. | ✅ COMPLETED |
+| **PB-207** | **Eliminación de Cláusulas `except Exception: pass` en Rutas Críticas** | 3 SP | Sustitución de capturas ciegas de excepciones por manejo tipado (`FileNotFoundError`, `JSONDecodeError`, `KeyError`) con logging formal en `ai_copilot_engine.py` y `hermes_operator.py`. | ✅ COMPLETED |
+| **PB-208** | **Adopción del Command Pattern en el Despacho de Comandos de Telegram** | 3 SP | Refactorización de `dispatch_command()` mediante diccionario de comandos tipados (`Dict[str, Callable]`), erradicando la cadena monolítica de 20+ `if/elif`. | ✅ COMPLETED |
+| **PB-209** | **Suite de Pruebas Unitarias de Seguridad y Certificación DoD** | 5 SP | Creación y ejecución de `tests/unit/test_security_remediation_sprint54.py` certificando el bloqueo de usuarios no autorizados, la ausencia de métricas fake y la sincronización concurrente. | ✅ COMPLETED |
 
 **Capacidad Total Sprint 54:** 42 Story Points.
 

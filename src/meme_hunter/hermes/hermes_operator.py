@@ -12,6 +12,7 @@ Gobierna de manera unificada el ecosistema Meme Hunter:
 import os
 import json
 import logging
+import threading
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
@@ -39,11 +40,13 @@ class HermesOperator:
         capital_allocator: Optional[HermesCapitalAllocator] = None
     ):
         self.memory_path = memory_path
+        self._memory_lock = threading.RLock()
         self.orchestrator = orchestrator or MultiBotOrchestratorClient()
         self.regime_detector = regime_detector or HermesRegimeDetector()
         self.capital_allocator = capital_allocator or HermesCapitalAllocator(self.orchestrator)
         
-        self.memory = self._load_memory()
+        with self._memory_lock:
+            self.memory = self._load_memory()
 
     def _load_memory(self) -> Dict[str, Any]:
         """Carga la memoria episódica desde disco o inicializa una nueva."""
@@ -69,15 +72,16 @@ class HermesOperator:
         }
 
     def _save_memory(self) -> None:
-        """Persiste la memoria episódica en disco de forma atómica."""
-        os.makedirs(os.path.dirname(self.memory_path), exist_ok=True)
-        try:
-            temp_path = f"{self.memory_path}.tmp"
-            with open(temp_path, "w", encoding="utf-8") as f:
-                json.dump(self.memory, f, indent=2, ensure_ascii=False)
-            os.replace(temp_path, self.memory_path)
-        except Exception as e:
-            logger.error(f"Error al persistir memoria en {self.memory_path}: {e}")
+        """Persiste la memoria episódica en disco de forma atómica y thread-safe."""
+        with self._memory_lock:
+            os.makedirs(os.path.dirname(self.memory_path), exist_ok=True)
+            try:
+                temp_path = f"{self.memory_path}.tmp"
+                with open(temp_path, "w", encoding="utf-8") as f:
+                    json.dump(self.memory, f, indent=2, ensure_ascii=False)
+                os.replace(temp_path, self.memory_path)
+            except Exception as e:
+                logger.error(f"Error al persistir memoria en {self.memory_path}: {e}")
 
     def run_cycle(self) -> Dict[str, Any]:
         """
@@ -286,9 +290,10 @@ class HermesOperator:
                         pf = float(m.get("profit_factor", 0.0) or 0.0)
                     except Exception as bt_err:
                         logger.warning(f"Error backtesteando {formula_str}: {bt_err}")
-                        sharpe, winrate, roi, max_dd, trades, pf = 0.0, 50.0, 0.0, 0.0, 0, 1.0
+                        sharpe, winrate, roi, max_dd, trades, pf = 0.0, 0.0, 0.0, 0.0, 0, 0.0
                 else:
-                    sharpe, winrate, roi, max_dd, trades, pf = 1.5, 52.0, 15.0, 12.0, 10, 1.4
+                    logger.warning(f"Motor 'run_strategy_backtest' no disponible; candidato '{formula_str}' descartado.")
+                    sharpe, winrate, roi, max_dd, trades, pf = 0.0, 0.0, 0.0, 0.0, 0, 0.0
 
                 cand_data = {
                     "iteration": iter_idx,
@@ -359,18 +364,20 @@ class HermesOperator:
                         except Exception:
                             pass
 
-        # 4. Asegurar selección de mejor candidato global
+        # 4. Comprobar existencia real de un candidato evaluado (Cero Datos Falsos)
         if not best_overall_candidate:
-            best_overall_candidate = {
-                "iteration": 1,
-                "formula": "ts_rank(rvol, 14) * ts_zscore((close - vwap), 10)",
-                "sharpe_ratio": 1.85,
-                "win_rate_pct": 53.5,
-                "total_return_pct": 24.5,
-                "max_drawdown_pct": 14.2,
-                "total_trades": 12,
-                "profit_factor": 1.65,
-                "is_qualified": True
+            logger.warning("Ningún candidato cuantitativo pudo ser evaluado en las iteraciones.")
+            return {
+                "status": "error",
+                "message": "Ninguna hipótesis cuantitativa fue evaluada exitosamente por el motor de backtesting.",
+                "goal": goal_text,
+                "regime": current_regime,
+                "winning_factor": None,
+                "best_candidate": None,
+                "iterations_count": len(iteration_records),
+                "all_candidates": all_evaluated_candidates,
+                "bot3_deployed": False,
+                "report_md": f"⚠️ *Bucle Autónomo Finalizado:* Ninguna hipótesis cuantitativa fue evaluada exitosamente."
             }
 
         winning_formula = best_overall_candidate["formula"]

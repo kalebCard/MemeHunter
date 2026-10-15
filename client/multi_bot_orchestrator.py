@@ -54,7 +54,13 @@ class MultiBotOrchestratorClient:
         default_host = os.getenv("FREQTRADE_BASE_HOST", "http://127.0.0.1")
         self.base_host = (base_host or default_host).rstrip("/")
         self.username = username or get_secret("FREQTRADE_API_USER") or "admin"
-        self.password = password or get_secret("FREQTRADE_API_PASSWORD") or "MemeHunter2026!"
+        self.password = (
+            password
+            or os.environ.get("FREQTRADE__API_SERVER__PASSWORD")
+            or get_secret("FREQTRADE_API_PASSWORD")
+            or os.environ.get("FREQTRADE_API_PASSWORD")
+            or ""
+        )
         self.timeout_sec = float(timeout_sec)
 
         self.clients: Dict[str, FreqtradeRestClient] = {}

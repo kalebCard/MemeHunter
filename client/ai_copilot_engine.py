@@ -152,8 +152,8 @@ class QuantAiCopilotEngine:
                     f"- Bot 3 (:8083): Recibe inyecciones automáticas de cada factor prometedor (Sharpe > 1.60)\n"
                     f"- Diario Cuantitativo: docs/research/DIARIO_DE_ESTRATEGIAS.md activo\n"
                 )
-        except Exception:
-            pass
+        except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+            logger.debug(f"Aviso al cargar factor_library: {e}")
 
         return (
             f"{real_str}"

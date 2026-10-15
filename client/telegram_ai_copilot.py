@@ -151,7 +151,12 @@ class TelegramAiCopilotService:
         self.tg_client = TelegramBotClient(self.token) if self.token else None
         base_host = os.environ.get("FREQTRADE_BASE_HOST", "http://127.0.0.1").rstrip("/")
         api_user = os.environ.get("FREQTRADE__API_SERVER__USERNAME", "admin")
-        api_pass = os.environ.get("FREQTRADE__API_SERVER__PASSWORD", "MemeHunter2026!")
+        api_pass = (
+            os.environ.get("FREQTRADE__API_SERVER__PASSWORD")
+            or get_secret("FREQTRADE_API_PASSWORD")
+            or os.environ.get("FREQTRADE_API_PASSWORD")
+            or ""
+        )
         self.ft_client = freqtrade_client or FreqtradeRestClient(
             base_url=f"{base_host}:8081",
             username=api_user,
@@ -163,42 +168,74 @@ class TelegramAiCopilotService:
         self.binance_client = BinanceAccountClient()
         self.last_update_id = 0
 
+        # PB-208: Registro de Comandos desacoplado (Command Pattern)
+        self._command_registry: Dict[str, Any] = {
+            "/start": lambda m, cid: self._cmd_help(),
+            "/help": lambda m, cid: self._cmd_help(),
+            "ayuda": lambda m, cid: self._cmd_help(),
+            "/hermes": lambda m, cid: self._cmd_hermes(),
+            "/alterego": lambda m, cid: self._cmd_hermes(),
+            "/regime": lambda m, cid: self._cmd_regime(),
+            "/regimen": lambda m, cid: self._cmd_regime(),
+            "/rebalance": lambda m, cid: self._cmd_rebalance(),
+            "/rebalancear": lambda m, cid: self._cmd_rebalance(),
+            "/status": lambda m, cid: self._cmd_status(),
+            "/estado": lambda m, cid: self._cmd_status(),
+            "/profit": lambda m, cid: self._cmd_profit(),
+            "/pnl": lambda m, cid: self._cmd_profit(),
+            "/ganancias": lambda m, cid: self._cmd_profit(),
+            "/balance": lambda m, cid: self._cmd_balance(),
+            "/saldo": lambda m, cid: self._cmd_balance(),
+            "/capital": lambda m, cid: self._cmd_balance(),
+            "/stopbuy": lambda m, cid: self._cmd_stopbuy(),
+            "/detenercompras": lambda m, cid: self._cmd_stopbuy(),
+            "/stopbot": lambda m, cid: self._cmd_stopbot(),
+            "/parar": lambda m, cid: self._cmd_stopbot(),
+            "/detener": lambda m, cid: self._cmd_stopbot(),
+            "/startbot": lambda m, cid: self._cmd_startbot(),
+            "/iniciar": lambda m, cid: self._cmd_startbot(),
+            "/reanudar": lambda m, cid: self._cmd_startbot(),
+            "/reload": lambda m, cid: self._cmd_reload(),
+            "/recargar": lambda m, cid: self._cmd_reload(),
+            "/killswitch": lambda m, cid: self._cmd_killswitch(),
+            "/emergencia": lambda m, cid: self._cmd_killswitch(),
+            "/mine": lambda m, cid: self._cmd_mine(chat_id=cid),
+            "/nuevaestrategia": lambda m, cid: self._cmd_mine(chat_id=cid),
+            "/crearestrategia": lambda m, cid: self._cmd_mine(chat_id=cid),
+            "/backtest": lambda m, cid: self._cmd_mine(chat_id=cid),
+            "/refine": lambda m, cid: self._cmd_mine(chat_id=cid),
+            "/bucle": lambda m, cid: self._cmd_mine(chat_id=cid),
+        }
+
     def is_configured(self) -> bool:
         """Indica si el token de Telegram está presente."""
         return bool(self.token and len(self.token) > 10)
 
     def is_authorized(self, chat_id: Any) -> bool:
-        """Verifica que el chat_id coincida con el operador autorizado."""
-        if not self.allowed_chat_id:
-            return True  # Si no hay restricción explícita de chat_id, permite acceso con advertencia
-        return str(chat_id).strip() == self.allowed_chat_id.strip()
+        """
+        PB-200: Verifica que el chat_id coincida con el operador autorizado.
+        Implementa política Zero-Trust Fail-Closed estricta.
+        """
+        if not self.allowed_chat_id or not str(self.allowed_chat_id).strip():
+            logger.critical(
+                "ACCESO DENEGADO: 'FREQTRADE__TELEGRAM__CHAT_ID' no configurado. "
+                "Telegram Copilot opera en modo seguro Fail-Closed y rechaza todas las solicitudes."
+            )
+            return False
+        return str(chat_id).strip() == str(self.allowed_chat_id).strip()
 
     def dispatch_command(self, text: str, chat_id: str) -> str:
-        """Despacha comandos operativos deterministicos o los deriva al agente de IA."""
+        """PB-208: Despacha comandos operativos determinísticos mediante el Command Registry."""
         msg = text.strip()
         cmd = msg.split()[0].lower() if msg else ""
 
-        if cmd in ("/start", "/help", "ayuda"):
-            return self._cmd_help()
-        elif cmd in ("/hermes", "/alterego"):
-            return self._cmd_hermes()
-        elif cmd in ("/regime", "/regimen"):
-            return self._cmd_regime()
-        elif cmd in ("/rebalance", "/rebalancear"):
-            return self._cmd_rebalance()
-        elif cmd in ("/status", "/estado"):
-            return self._cmd_status()
-        elif cmd in ("/profit", "/pnl", "/ganancias"):
-            return self._cmd_profit()
-        elif cmd in ("/balance", "/saldo", "/capital"):
-            return self._cmd_balance()
-        elif cmd in ("/stopbuy", "/detenercompras"):
-            return self._cmd_stopbuy()
-        elif cmd in ("/stopbot", "/parar", "/detener"):
-            return self._cmd_stopbot()
-        elif cmd in ("/startbot", "/iniciar", "/reanudar"):
-            return self._cmd_startbot()
-        elif cmd.startswith("/forcesell"):
+        # 1. Búsqueda directa en registro
+        handler = self._command_registry.get(cmd)
+        if handler:
+            return handler(msg, chat_id)
+
+        # 2. Comandos parametrizados
+        if cmd.startswith("/forcesell"):
             parts = msg.split()
             tid = parts[1] if len(parts) > 1 else ""
             return self._cmd_forcesell(tid)
@@ -206,18 +243,12 @@ class TelegramAiCopilotService:
             parts = msg.split()
             pair = parts[1] if len(parts) > 1 else ""
             return self._cmd_forcebuy(pair)
-        elif cmd in ("/reload", "/recargar"):
-            return self._cmd_reload()
-        elif cmd in ("/killswitch", "/emergencia"):
-            return self._cmd_killswitch()
-        elif cmd in ("/mine", "/nuevaestrategia", "/crearestrategia", "/backtest", "/refine", "/bucle"):
-            return self._cmd_mine(chat_id=chat_id)
         elif cmd.startswith("/ai"):
             prompt = msg[3:].strip()
             return self._cmd_ai_query(prompt, chat_id=chat_id)
-        else:
-            # Mensaje en lenguaje natural -> Cognición de IA
-            return self._cmd_ai_query(msg, chat_id=chat_id)
+
+        # 3. Lenguaje natural -> Motor Cognitivo de IA
+        return self._cmd_ai_query(msg, chat_id=chat_id)
 
     def _cmd_help(self) -> str:
         return (

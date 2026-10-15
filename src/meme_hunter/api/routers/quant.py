@@ -393,20 +393,23 @@ def trigger_incubator_loop() -> Dict[str, Any]:
         return {
             "status": "success",
             "message": "Ciclo de auto-mejora ejecutado con éxito.",
-            "report": report
+            "report": {
+                "cycle_timestamp": report.cycle_timestamp,
+                "actions_taken": report.actions_taken,
+                "quarantined_strategies": report.quarantined_strategies,
+                "promoted_strategies": report.promoted_strategies,
+                "new_weights": report.new_weights,
+                "mining_triggered": report.mining_triggered,
+                "trigger_reason": report.trigger_reason,
+                "goal_reached": report.goal_reached
+            }
         }
     except Exception as e:
         logger.error(f"Error en ciclo de auto-mejora: {e}", exc_info=True)
-        return {
-            "status": "mock_success",
-            "message": f"Ciclo ejecutado en modo fallback (Simulado): {e}",
-            "report": {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "promoted": ["SANDBOX_LLM_04"],
-                "decayed": ["ALPHA_DECAYED_03"],
-                "live_count": 3
-            }
-        }
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Fallo en ejecución del ciclo de auto-mejora: {e}"
+        )
 
 
 # =============================================================================

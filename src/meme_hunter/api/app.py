@@ -24,12 +24,24 @@ def create_app() -> FastAPI:
         redoc_url="/api/redoc",
     )
 
-    # Middleware CORS
+    # PB-205: Middleware CORS Seguro con Lista Blanca de Orígenes Institucionales
+    allowed_origins = [
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:8082",
+        "http://127.0.0.1:8083",
+        "http://127.0.0.1:8088",
+        "http://localhost:8080",
+        "http://localhost:8081",
+        "http://localhost:8082",
+        "http://localhost:8083",
+        "http://localhost:8088",
+    ]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=allowed_origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
 
@@ -39,9 +51,19 @@ def create_app() -> FastAPI:
     app.include_router(dag.router)
     app.include_router(quant.router)
 
-    # WebSocket para Telemetría de Baja Latencia (< 5ms)
+    # PB-206: WebSocket para Telemetría con Autenticación de Token
     @app.websocket("/ws/telemetry")
     async def websocket_telemetry(websocket: WebSocket) -> None:
+        token = websocket.query_params.get("token")
+        expected_token = (
+            settings.DASHBOARD_SECRET_KEY.get_secret_value()
+            if settings.DASHBOARD_SECRET_KEY
+            else None
+        )
+        if expected_token and token != expected_token:
+            await websocket.close(code=1008)  # Policy Violation / Unauthorized
+            return
+
         await websocket.accept()
         try:
             while True:

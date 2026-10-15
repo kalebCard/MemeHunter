@@ -636,17 +636,17 @@ Una revisión profunda del código, datos, metodología y artefactos de backtest
 
 ---
 
-### Sprint 54: Blindaje de Seguridad Fail-Closed, Remediación Criptográfica y Erradicación de Deuda Técnica Crítica (En Ejecución / Activo 🟡)
-* **PB-200 🟡:** Firewall de Autorización Fail-Closed en Telegram Copilot (`is_authorized` rechaza conexiones sin `ALLOWED_CHAT_ID`).
-* **PB-201 🟡:** Purga Criptográfica de Contraseñas Hardcodeadas (`MemeHunter2026!`) y Validación Fail-Fast en Arranque.
-* **PB-202 🟡:** Erradicación de Métricas Cuantitativas Alucinadas y Fallbacks Falsos en `HermesOperator`.
-* **PB-203 🟡:** Sincronización Thread-Safe con Mutex de la Memoria Episódica de Hermes (`storage/hermes_memory.json`).
-* **PB-204 🟡:** Corrección de Invocación Rota en `/incubator/trigger-loop` y Supresión de Respuestas Engañosas `mock_success` en `quant.py`.
-* **PB-205 🟡:** Sanitización de Configuración CORS ASGI (Restricción de Orígenes y Eliminación de Wildcard con Credenciales).
-* **PB-206 🟡:** Protección y Autenticación en WebSocket de Telemetría (`/ws/telemetry`).
-* **PB-207 🟡:** Eliminación de Cláusulas `except Exception: pass` en Rutas Críticas y Adopción de Excepciones Tipadas.
-* **PB-208 🟡:** Adopción del Command Pattern para Desacoplar Despacho de Comandos en Telegram Copilot.
-* **PB-209 🟡:** Suite de Pruebas Unitarias de Seguridad y Certificación DoD (`tests/unit/test_security_remediation_sprint54.py`).
+### Sprint 54: Blindaje de Seguridad Fail-Closed, Remediación Criptográfica y Erradicación de Deuda Técnica Crítica (Completado & Certificado ✅)
+* **PB-200 ✅:** Firewall de Autorización Fail-Closed en Telegram Copilot (`is_authorized` rechaza conexiones sin `ALLOWED_CHAT_ID`).
+* **PB-201 ✅:** Purga Criptográfica de Contraseñas Hardcodeadas (`MemeHunter2026!`) y Validación Fail-Fast en Arranque.
+* **PB-202 ✅:** Erradicación de Métricas Cuantitativas Alucinadas y Fallbacks Falsos en `HermesOperator`.
+* **PB-203 ✅:** Sincronización Thread-Safe con Mutex de la Memoria Episódica de Hermes (`storage/hermes_memory.json`).
+* **PB-204 ✅:** Corrección de Invocación Rota en `/incubator/trigger-loop` y Supresión de Respuestas Engañosas `mock_success` en `quant.py`.
+* **PB-205 ✅:** Sanitización de Configuración CORS ASGI (Restricción de Orígenes y Eliminación de Wildcard con Credenciales).
+* **PB-206 ✅:** Protección y Autenticación en WebSocket de Telemetría (`/ws/telemetry`).
+* **PB-207 ✅:** Eliminación de Cláusulas `except Exception: pass` en Rutas Críticas y Adopción de Excepciones Tipadas.
+* **PB-208 ✅:** Adopción del Command Pattern para Desacoplar Despacho de Comandos en Telegram Copilot.
+* **PB-209 ✅:** Suite de Pruebas Unitarias de Seguridad y Certificación DoD (`tests/unit/test_security_remediation_sprint54.py` 7/7 tests aprobados).
 * **Documento Canónico:** Ver detalle en [`docs/history/sprints/21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md`](../sprints/21_SPRINT_054_SECURITY_FAILSAFE_AND_CRITICAL_ARCHITECTURAL_REMEDIATION.md).
 
 ---

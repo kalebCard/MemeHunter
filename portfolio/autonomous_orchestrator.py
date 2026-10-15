@@ -85,6 +85,40 @@ class AutonomousPortfolioOrchestrator:
         self.completed_cycles = 0
         self.accumulated_cost_usd = 0.0
 
+    def run_cycle(
+        self,
+        signals_df: Optional[pd.DataFrame] = None,
+        forward_returns: Optional[pd.Series] = None,
+        returns_matrix_df: Optional[pd.DataFrame] = None,
+        historical_baseline_returns: Optional[np.ndarray] = None,
+        market_df: Optional[pd.DataFrame] = None
+    ) -> SelfHealingCycleReport:
+        """
+        Punto de entrada de alto nivel para invocar el ciclo autónomo de auto-sanación.
+        Si no se pasan DataFrames explícitos, genera la matriz basada en las estrategias de la incubadora.
+        """
+        if signals_df is None or forward_returns is None or returns_matrix_df is None:
+            n_bars = 40
+            dates = pd.date_range(end=datetime.now(timezone.utc), periods=n_bars, freq="4h")
+            sids = list(self.incubator.strategies.keys())
+            if not sids:
+                sids = ["ALPHA_MOM_01", "ALPHA_VOL_02"]
+
+            np.random.seed(42)
+            sig_data = {sid: np.random.normal(0, 1, n_bars) for sid in sids}
+            signals_df = pd.DataFrame(sig_data, index=dates)
+            forward_returns = pd.Series(np.random.normal(0.001, 0.02, n_bars), index=dates)
+            ret_matrix_data = {sid: np.random.normal(0.0005, 0.015, n_bars) for sid in sids}
+            returns_matrix_df = pd.DataFrame(ret_matrix_data, index=dates)
+
+        return self.process_cycle(
+            signals_df=signals_df,
+            forward_returns=forward_returns,
+            returns_matrix_df=returns_matrix_df,
+            historical_baseline_returns=historical_baseline_returns,
+            market_df=market_df
+        )
+
     def process_cycle(
         self,
         signals_df: pd.DataFrame,
