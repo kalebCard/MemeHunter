@@ -61,8 +61,10 @@ def run_daemon(interval_sec: Optional[int] = None):
     messenger = HermesTelegramMessenger()
     last_regime = None
 
-    # Iniciar listener interactivo de Telegram en hilo secundario (24/7)
-    if TelegramAiCopilotService:
+    # Iniciar listener interactivo de Telegram solo si está explícitamente habilitado
+    # (Evita conflicto HTTP 409 de getUpdates cuando el servicio 'telegram_copilot' corre en paralelo)
+    enable_tg_listener = os.getenv("HERMES_ENABLE_TELEGRAM_LISTENER", "false").lower() in ("true", "1", "yes")
+    if TelegramAiCopilotService and enable_tg_listener:
         try:
             copilot = TelegramAiCopilotService()
             if copilot.is_configured():

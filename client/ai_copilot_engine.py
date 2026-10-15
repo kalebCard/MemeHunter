@@ -247,7 +247,12 @@ class QuantAiCopilotEngine:
             return {"action": "reset_moonshot", "confidence": 0.98, "command": "/resetbot3"}
 
         # 10. Hermes / Régimen / Rebalance / Minería de Alphas
-        if re.search(r"\b(crear?|crea|creame|generar?|genera|minar?|mina|inventar?|inventa|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz|bucle|refinar?|refina|refinamiento|cuenta\s+simulada|billetera\s+simulada|plan\s+para\s+pasar)\b", msg):
+        if (
+            msg in ["/mine", "/minar", "/alpha", "/alphas"]
+            or msg.startswith(("/mine ", "/minar "))
+            or re.search(r"\b(crear?|crea|creame|generar?|genera|minar?|mina|mine|inventar?|inventa|formular?|formula|formulaci[oó]n|solicita|diseñar?|diseña|desarrollar?|desarrolla|buscar?|busca|nueva\s+estrategia|nuevo\s+alpha|nuevo\s+factor|backtest|backtesting|optimiz|bucle|refinar?|refina|refinamiento|cuenta\s+simulada|billetera\s+simulada|plan\s+para\s+pasar)\b", msg)
+            or re.search(r"\b(estrategia|alpha|factor)\s+(que|para|con|nueva)\b", msg)
+        ):
             return {"action": "mine_strategy", "confidence": 0.95, "command": "/mine"}
         if msg in ["hermes", "alter ego", "/hermes", "/alterego"] or re.search(r"\b(informe\s+de\s+hermes|qu[eé]\s+dice\s+hermes|diagn[oó]stico\s+de\s+hermes|reporte\s+ejecutivo|alter\s*ego)\b", msg):
             return {"action": "query_hermes", "confidence": 0.95, "command": "/hermes"}

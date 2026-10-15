@@ -400,4 +400,27 @@ def test_copilot_stop_training_execution(copilot_service):
     assert "ENTRENAMIENTO" in reply or "SIN ENTRENAMIENTOS ACTIVOS" in reply
 
 
+def test_ai_copilot_engine_intent_mine_strategy_phrases():
+    """Verifica que el motor cognitivo identifique frases naturales de formulación/diseño de estrategias."""
+    from client.ai_copilot_engine import QuantAiCopilotEngine
+    engine = QuantAiCopilotEngine()
+
+    phrases = [
+        "Se solicita la formulación de una estrategia que gane dinero",
+        "formulación de una estrategia",
+        "formula una nueva estrategia para futuros",
+        "diseña un nuevo alpha con alto sharpe",
+        "desarrollar estrategia que funcione en chop",
+        "crear una estrategia para solana",
+        "minar alphas con buen winrate",
+        "estrategia que opere en corto",
+        "/mine",
+        "/minar"
+    ]
+    for p in phrases:
+        intent = engine.extract_intent_heuristic(p)
+        assert intent["action"] == "mine_strategy", f"Fallo al clasificar '{p}': {intent}"
+
+
+
 
